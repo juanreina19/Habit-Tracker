@@ -64,11 +64,12 @@ export default function WeeklyView({ userId }: Props) {
         </div>
       </div>
 
-      {/* Day labels header */}
+      {/* Day labels header — mirrors exact flex structure of HabitWeekRow */}
       {habits.length > 0 && (
-        <div className="flex mb-2 px-1">
+        <div className="flex items-center gap-3 px-4 mb-1">
+          <div className="w-9 flex-shrink-0" />
           <div className="flex-1" />
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 flex-shrink-0">
             {DAY_LABELS.map((label, i) => (
               <div
                 key={i}
@@ -79,7 +80,7 @@ export default function WeeklyView({ userId }: Props) {
               </div>
             ))}
           </div>
-          <div className="w-12" />
+          <div className="w-10 flex-shrink-0" />
         </div>
       )}
 
