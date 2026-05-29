@@ -2,15 +2,14 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/shared/types/database.types";
 
-/**
- * Cliente de Supabase para uso en Server Components y Route Handlers.
- */
+const stripBOM = (s: string) => s.replace(/^﻿/, "");
+
 export async function createServerSupabaseClient() {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    stripBOM(process.env.NEXT_PUBLIC_SUPABASE_URL!),
+    stripBOM(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!),
     {
       cookies: {
         getAll() {

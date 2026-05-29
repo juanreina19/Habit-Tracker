@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const stripBOM = (s: string) => s.replace(/^﻿/, "");
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
@@ -10,8 +12,8 @@ export async function GET(request: NextRequest) {
     const successResponse = NextResponse.redirect(new URL(next, origin));
 
     const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      stripBOM(process.env.NEXT_PUBLIC_SUPABASE_URL!),
+      stripBOM(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!),
       {
         cookies: {
           getAll() {

@@ -1,13 +1,11 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "@/shared/types/database.types";
 
-/**
- * Cliente de Supabase para uso en componentes del lado del cliente (browser).
- * Usar en: componentes React, hooks, stores de Zustand.
- */
+const stripBOM = (s: string) => s.replace(/^﻿/, "");
+
 export function createClient() {
   return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    stripBOM(process.env.NEXT_PUBLIC_SUPABASE_URL!),
+    stripBOM(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
   );
 }
