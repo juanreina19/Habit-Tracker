@@ -56,9 +56,17 @@ export function useSettingsHabits(userId: UUID) {
     [getRepo]
   );
 
+  const reorder = useCallback(
+    async (reorderedHabits: Habit[]): Promise<void> => {
+      setHabits(reorderedHabits);
+      await getRepo().reorder(reorderedHabits.map((h) => h.id));
+    },
+    [getRepo]
+  );
+
   useEffect(() => {
     fetch();
   }, [fetch]);
 
-  return { habits, isLoading, error, refetch: fetch, create, update, deactivate };
+  return { habits, isLoading, error, refetch: fetch, create, update, deactivate, reorder };
 }

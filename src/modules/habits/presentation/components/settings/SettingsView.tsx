@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Reorder, useDragControls } from "framer-motion";
+import { Pencil, Trash2, GripVertical } from "lucide-react";
 import { useSettingsHabits } from "../../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { HabitFormDialog } from "./HabitFormDialog";
@@ -23,25 +24,22 @@ export default function SettingsView({ userId }: Props) {
 
   const {
     habits, isLoading: habitsLoading, create: createHabit,
-    update: updateHabit, deactivate,
+    update: updateHabit, deactivate, reorder: reorderHabits,
   } = useSettingsHabits(userId);
 
   const {
     categories, isLoading: catsLoading, create: createCategory,
-    update: updateCategory, remove: removeCategory,
+    update: updateCategory, remove: removeCategory, reorder: reorderCategories,
   } = useCategories(userId);
 
-  // Habit dialog state
   const [habitDialog, setHabitDialog] = useState<{ open: boolean; habit: Habit | null }>({
     open: false, habit: null,
   });
 
-  // Category dialog state
   const [catDialog, setCatDialog] = useState<{ open: boolean; category: Category | null }>({
     open: false, category: null,
   });
 
-  // Confirm delete state
   const [confirmDelete, setConfirmDelete] = useState<
     { type: "habit"; id: UUID; name: string } | { type: "category"; id: UUID; name: string } | null
   >(null);
@@ -76,14 +74,10 @@ export default function SettingsView({ userId }: Props) {
 
   return (
     <div className="px-5 pt-14 pb-8 max-w-lg mx-auto">
-      {/* Header */}
       <h1 className="text-3xl font-semibold mb-6" style={{ color: "#FFFFFF" }}>Ajustes</h1>
 
       {/* Tabs */}
-      <div
-        className="flex rounded-[14px] p-1 mb-6"
-        style={{ background: "#111111" }}
-      >
+      <div className="flex rounded-[14px] p-1 mb-6" style={{ background: "#111111" }}>
         {(["habits", "categories"] as Tab[]).map((t) => (
           <button
             key={t}
@@ -108,6 +102,7 @@ export default function SettingsView({ userId }: Props) {
           onAdd={() => setHabitDialog({ open: true, habit: null })}
           onEdit={(h) => setHabitDialog({ open: true, habit: h })}
           onDelete={(h) => setConfirmDelete({ type: "habit", id: h.id, name: h.name })}
+          onReorder={reorderHabits}
         />
       ) : (
         <CategoriesTab
@@ -119,10 +114,10 @@ export default function SettingsView({ userId }: Props) {
           onAdd={() => setCatDialog({ open: true, category: null })}
           onEdit={(c) => setCatDialog({ open: true, category: c })}
           onDelete={(c) => setConfirmDelete({ type: "category", id: c.id, name: c.name })}
+          onReorder={reorderCategories}
         />
       )}
 
-      {/* Habit form dialog */}
       <HabitFormDialog
         open={habitDialog.open}
         onClose={() => setHabitDialog({ open: false, habit: null })}
@@ -131,7 +126,6 @@ export default function SettingsView({ userId }: Props) {
         onSave={handleSaveHabit}
       />
 
-      {/* Category form dialog */}
       <CategoryFormDialog
         open={catDialog.open}
         onClose={() => setCatDialog({ open: false, category: null })}
@@ -139,7 +133,6 @@ export default function SettingsView({ userId }: Props) {
         onSave={handleSaveCategory}
       />
 
-      {/* Delete confirmation */}
       {confirmDelete && (
         <DeleteConfirmDialog
           name={confirmDelete.name}
@@ -155,21 +148,33 @@ export default function SettingsView({ userId }: Props) {
 // ─── HabitsTab ────────────────────────────────────────────────────────────────
 
 function HabitsTab({
-  habits, categories, onAdd, onEdit, onDelete,
+  habits, categories, onAdd, onEdit, onDelete, onReorder,
 }: {
   habits: Habit[];
   categories: Category[];
   onAdd: () => void;
   onEdit: (h: Habit) => void;
   onDelete: (h: Habit) => void;
+  onReorder: (items: Habit[]) => void;
 }) {
+  const [localHabits, setLocalHabits] = useState(habits);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const catMap = new Map(categories.map((c) => [c.id, c]));
+
+  // Sync when habits change from outside (create/delete)
+  useEffect(() => { setLocalHabits(habits); }, [habits]);
+
+  const handleReorder = (newOrder: Habit[]) => {
+    setLocalHabits(newOrder);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => onReorder(newOrder), 600);
+  };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm" style={{ color: "#8888AA" }}>
-          {habits.length} {habits.length === 1 ? "hábito" : "hábitos"}
+          {localHabits.length} {localHabits.length === 1 ? "hábito" : "hábitos"}
         </p>
         <button
           onClick={onAdd}
@@ -180,81 +185,130 @@ function HabitsTab({
         </button>
       </div>
 
-      {habits.length === 0 ? (
-        <EmptyState message="Sin hábitos aún" hint='Toca el botón + Nuevo hábito para empezar.' />
+      {localHabits.length === 0 ? (
+        <EmptyState message="Sin hábitos aún" hint="Toca + Nuevo hábito para empezar." />
       ) : (
-        <div className="flex flex-col gap-2">
-          {habits.map((habit) => {
+        <Reorder.Group
+          as="div"
+          axis="y"
+          values={localHabits}
+          onReorder={handleReorder}
+          className="flex flex-col gap-2"
+        >
+          {localHabits.map((habit) => {
             const cat = habit.categoryId ? catMap.get(habit.categoryId) : null;
             const accentColor = habit.color ?? cat?.color ?? "#4CAF82";
             return (
-              <div
+              <HabitReorderItem
                 key={habit.id}
-                className="rounded-[16px] p-4 flex items-center gap-3"
-                style={{ background: "#111111" }}
-              >
-                {/* Color dot + icon */}
-                <div
-                  className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 text-lg"
-                  style={{ background: accentColor + "25" }}
-                >
-                  {habit.icon ?? (cat?.icon ?? "🎯")}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate" style={{ color: "#FFFFFF" }}>{habit.name}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {cat && (
-                      <span className="text-xs" style={{ color: cat.color ?? "#8888AA" }}>
-                        {cat.name}
-                      </span>
-                    )}
-                    <span className="text-xs" style={{ color: "#8888AA" }}>
-                      {habit.activeDays.map((d) => ["L","M","X","J","V","S","D"][d - 1]).join(" ")}
-                    </span>
-                    {habit.estimatedMinutes && (
-                      <span className="text-xs" style={{ color: "#8888AA" }}>
-                        {habit.estimatedMinutes} min
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-1">
-                  <IconButton onClick={() => onEdit(habit)} label="Editar">
-                    <Pencil size={14} color="#8888AA" />
-                  </IconButton>
-                  <IconButton onClick={() => onDelete(habit)} label="Eliminar" danger>
-                    <Trash2 size={14} color="#FF5252" />
-                  </IconButton>
-                </div>
-              </div>
+                habit={habit}
+                accentColor={accentColor}
+                cat={cat ?? null}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
             );
           })}
-        </div>
+        </Reorder.Group>
       )}
     </div>
+  );
+}
+
+function HabitReorderItem({
+  habit, accentColor, cat, onEdit, onDelete,
+}: {
+  habit: Habit;
+  accentColor: string;
+  cat: Category | null;
+  onEdit: (h: Habit) => void;
+  onDelete: (h: Habit) => void;
+}) {
+  const dragControls = useDragControls();
+
+  return (
+    <Reorder.Item
+      as="div"
+      value={habit}
+      dragControls={dragControls}
+      dragListener={false}
+      className="rounded-[16px] p-4 flex items-center gap-3 touch-none"
+      style={{ background: "#111111" }}
+    >
+      {/* Drag handle */}
+      <div
+        onPointerDown={(e) => dragControls.start(e)}
+        className="cursor-grab active:cursor-grabbing flex-shrink-0 touch-none"
+        style={{ color: "#444444" }}
+      >
+        <GripVertical size={18} />
+      </div>
+
+      {/* Icon */}
+      <div
+        className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 text-lg"
+        style={{ background: accentColor + "25" }}
+      >
+        {habit.icon ?? (cat?.icon ?? "🎯")}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="font-medium truncate" style={{ color: "#FFFFFF" }}>{habit.name}</p>
+        <div className="flex items-center gap-2 mt-0.5">
+          {cat && (
+            <span className="text-xs" style={{ color: cat.color ?? "#8888AA" }}>{cat.name}</span>
+          )}
+          <span className="text-xs" style={{ color: "#8888AA" }}>
+            {habit.activeDays.map((d) => ["L","M","X","J","V","S","D"][d - 1]).join(" ")}
+          </span>
+          {habit.estimatedMinutes && (
+            <span className="text-xs" style={{ color: "#8888AA" }}>{habit.estimatedMinutes} min</span>
+          )}
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-1">
+        <IconButton onClick={() => onEdit(habit)} label="Editar">
+          <Pencil size={14} color="#8888AA" />
+        </IconButton>
+        <IconButton onClick={() => onDelete(habit)} label="Eliminar" danger>
+          <Trash2 size={14} color="#FF5252" />
+        </IconButton>
+      </div>
+    </Reorder.Item>
   );
 }
 
 // ─── CategoriesTab ────────────────────────────────────────────────────────────
 
 function CategoriesTab({
-  categories, habitCount, onAdd, onEdit, onDelete,
+  categories, habitCount, onAdd, onEdit, onDelete, onReorder,
 }: {
   categories: Category[];
   habitCount: Record<string, number>;
   onAdd: () => void;
   onEdit: (c: Category) => void;
   onDelete: (c: Category) => void;
+  onReorder: (items: Category[]) => void;
 }) {
+  const [localCats, setLocalCats] = useState(categories);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => { setLocalCats(categories); }, [categories]);
+
+  const handleReorder = (newOrder: Category[]) => {
+    setLocalCats(newOrder);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => onReorder(newOrder), 600);
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm" style={{ color: "#8888AA" }}>
-          {categories.length} {categories.length === 1 ? "categoría" : "categorías"}
+          {localCats.length} {localCats.length === 1 ? "categoría" : "categorías"}
         </p>
         <button
           onClick={onAdd}
@@ -265,55 +319,88 @@ function CategoriesTab({
         </button>
       </div>
 
-      {categories.length === 0 ? (
+      {localCats.length === 0 ? (
         <EmptyState message="Sin categorías aún" hint="Organiza tus hábitos con categorías de colores." />
       ) : (
-        <div className="flex flex-col gap-2">
-          {categories.map((cat) => {
-            const count = habitCount[cat.id] ?? 0;
-            return (
-              <div
-                key={cat.id}
-                className="rounded-[16px] p-4 flex items-center gap-3"
-                style={{ background: "#111111" }}
-              >
-                {/* Color + icon */}
-                <div
-                  className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 text-lg"
-                  style={{ background: (cat.color ?? "#8888AA") + "25" }}
-                >
-                  {cat.icon ?? "📁"}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate" style={{ color: "#FFFFFF" }}>{cat.name}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "#8888AA" }}>
-                    {count} {count === 1 ? "hábito" : "hábitos"}
-                  </p>
-                </div>
-
-                {/* Color swatch */}
-                <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ background: cat.color ?? "#8888AA" }}
-                />
-
-                {/* Actions */}
-                <div className="flex gap-1">
-                  <IconButton onClick={() => onEdit(cat)} label="Editar">
-                    <Pencil size={14} color="#8888AA" />
-                  </IconButton>
-                  <IconButton onClick={() => onDelete(cat)} label="Eliminar" danger>
-                    <Trash2 size={14} color="#FF5252" />
-                  </IconButton>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <Reorder.Group
+          as="div"
+          axis="y"
+          values={localCats}
+          onReorder={handleReorder}
+          className="flex flex-col gap-2"
+        >
+          {localCats.map((cat) => (
+            <CategoryReorderItem
+              key={cat.id}
+              cat={cat}
+              habitCount={habitCount[cat.id] ?? 0}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </Reorder.Group>
       )}
     </div>
+  );
+}
+
+function CategoryReorderItem({
+  cat, habitCount, onEdit, onDelete,
+}: {
+  cat: Category;
+  habitCount: number;
+  onEdit: (c: Category) => void;
+  onDelete: (c: Category) => void;
+}) {
+  const dragControls = useDragControls();
+
+  return (
+    <Reorder.Item
+      as="div"
+      value={cat}
+      dragControls={dragControls}
+      dragListener={false}
+      className="rounded-[16px] p-4 flex items-center gap-3 touch-none"
+      style={{ background: "#111111" }}
+    >
+      {/* Drag handle */}
+      <div
+        onPointerDown={(e) => dragControls.start(e)}
+        className="cursor-grab active:cursor-grabbing flex-shrink-0 touch-none"
+        style={{ color: "#444444" }}
+      >
+        <GripVertical size={18} />
+      </div>
+
+      {/* Icon */}
+      <div
+        className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 text-lg"
+        style={{ background: (cat.color ?? "#8888AA") + "25" }}
+      >
+        {cat.icon ?? "📁"}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="font-medium truncate" style={{ color: "#FFFFFF" }}>{cat.name}</p>
+        <p className="text-xs mt-0.5" style={{ color: "#8888AA" }}>
+          {habitCount} {habitCount === 1 ? "hábito" : "hábitos"}
+        </p>
+      </div>
+
+      {/* Color swatch */}
+      <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: cat.color ?? "#8888AA" }} />
+
+      {/* Actions */}
+      <div className="flex gap-1">
+        <IconButton onClick={() => onEdit(cat)} label="Editar">
+          <Pencil size={14} color="#8888AA" />
+        </IconButton>
+        <IconButton onClick={() => onDelete(cat)} label="Eliminar" danger>
+          <Trash2 size={14} color="#FF5252" />
+        </IconButton>
+      </div>
+    </Reorder.Item>
   );
 }
 
@@ -331,7 +418,7 @@ function IconButton({
     <button
       onClick={onClick}
       aria-label={label}
-      className="w-8 h-8 rounded-[8px] flex items-center justify-center text-sm transition-opacity active:opacity-60"
+      className="w-8 h-8 rounded-[8px] flex items-center justify-center transition-opacity active:opacity-60"
       style={{ background: danger ? "#FF525215" : "#1C1C1C" }}
     >
       {children}
@@ -341,10 +428,7 @@ function IconButton({
 
 function EmptyState({ message, hint }: { message: string; hint: string }) {
   return (
-    <div
-      className="rounded-[20px] p-10 text-center"
-      style={{ background: "#111111" }}
-    >
+    <div className="rounded-[20px] p-10 text-center" style={{ background: "#111111" }}>
       <p className="text-4xl mb-3">✨</p>
       <p className="font-medium" style={{ color: "#FFFFFF" }}>{message}</p>
       <p className="text-sm mt-1" style={{ color: "#8888AA" }}>{hint}</p>
@@ -369,7 +453,10 @@ function DeleteConfirmDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-6"
+      style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
+    >
       <div
         className="w-full max-w-sm rounded-[24px] p-6"
         style={{ background: "#111111", border: "1px solid #2A2A2A" }}

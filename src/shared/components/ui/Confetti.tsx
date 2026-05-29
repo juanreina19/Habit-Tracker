@@ -1,0 +1,103 @@
+"use client";
+
+import { useEffect, useRef, useCallback } from "react";
+
+const COLORS = ["#4CAF82", "#FFFFFF", "#F5A623", "#A3CF8A", "#FFCC44", "#FF8A65"];
+const PARTICLE_COUNT = 90;
+const DURATION_FRAMES = 200; // ~3.3s at 60fps
+const FADE_START = 140;
+
+interface Particle {
+  x: number; y: number;
+  vx: number; vy: number;
+  size: number; color: string;
+  rotation: number; rotationSpeed: number;
+  isRect: boolean;
+}
+
+interface Props {
+  onDone: () => void;
+}
+
+export function Confetti({ onDone }: Props) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+
+    const particles: Particle[] = Array.from({ length: PARTICLE_COUNT }, () => ({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 80,
+      vx: (Math.random() - 0.5) * 5,
+      vy: Math.random() * 2 + 1.5,
+      size: Math.random() * 7 + 4,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      rotation: Math.random() * Math.PI * 2,
+      rotationSpeed: (Math.random() - 0.5) * 0.18,
+      isRect: Math.random() > 0.4,
+    }));
+
+    let frame = 0;
+    let animId: number;
+
+    const tick = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frame++;
+
+      const fadeProgress = frame >= FADE_START
+        ? (frame - FADE_START) / (DURATION_FRAMES - FADE_START)
+        : 0;
+      const globalAlpha = Math.max(0, 1 - fadeProgress);
+
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.06; // gravity
+        p.vx *= 0.99; // air resistance
+        p.rotation += p.rotationSpeed;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.globalAlpha = globalAlpha;
+        ctx.fillStyle = p.color;
+        if (p.isRect) {
+          ctx.fillRect(-p.size / 2, -p.size * 0.3, p.size, p.size * 0.6);
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      if (frame < DURATION_FRAMES) {
+        animId = requestAnimationFrame(tick);
+      } else {
+        onDoneRef.current();
+      }
+    };
+
+    animId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 z-[200] pointer-events-none"
+      aria-hidden="true"
+    />
+  );
+}

@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import { useHabits } from "../hooks/useHabits";
+import { Confetti } from "@/shared/components/ui/Confetti";
 import type { UUID } from "@/shared/types/database.types";
 import { formatFriendly } from "@/shared/lib/utils/dates";
 
@@ -22,6 +24,16 @@ export default function TodayView({ userId }: Props) {
 
   const today = new Date();
 
+  // Confetti on 100% completion
+  const [showConfetti, setShowConfetti] = useState(false);
+  const prevPct = useRef(completionPercentage);
+  useEffect(() => {
+    if (prevPct.current < 100 && completionPercentage === 100 && totalCount > 0) {
+      setShowConfetti(true);
+    }
+    prevPct.current = completionPercentage;
+  }, [completionPercentage, totalCount]);
+
   if (isLoading) {
     return <TodayViewSkeleton />;
   }
@@ -37,6 +49,8 @@ export default function TodayView({ userId }: Props) {
   }
 
   return (
+    <>
+    {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
     <div className="px-5 pt-14 pb-6 max-w-lg mx-auto">
       {/* Header */}
       <div className="mb-8">
@@ -95,6 +109,7 @@ export default function TodayView({ userId }: Props) {
         ))}
       </div>
     </div>
+    </>
   );
 }
 

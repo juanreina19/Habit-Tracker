@@ -56,9 +56,17 @@ export function useCategories(userId: UUID) {
     [getRepo]
   );
 
+  const reorder = useCallback(
+    async (reorderedCategories: Category[]): Promise<void> => {
+      setCategories(reorderedCategories);
+      await getRepo().reorder(reorderedCategories.map((c) => c.id));
+    },
+    [getRepo]
+  );
+
   useEffect(() => {
     fetch();
   }, [fetch]);
 
-  return { categories, isLoading, error, refetch: fetch, create, update, remove };
+  return { categories, isLoading, error, refetch: fetch, create, update, remove, reorder };
 }
