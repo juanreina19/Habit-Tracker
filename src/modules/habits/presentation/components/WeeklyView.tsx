@@ -69,18 +69,17 @@ export default function WeeklyView({ userId }: Props) {
         <div className="flex items-center gap-3 px-4 mb-1">
           <div className="w-9 flex-shrink-0" />
           <div className="flex-1" />
-          <div className="flex gap-1.5 flex-shrink-0">
+          <div className="flex gap-1 flex-shrink-0">
             {DAY_LABELS.map((label, i) => (
               <div
                 key={i}
-                className="w-7 text-center text-[10px] font-semibold"
+                className="w-6 text-center text-[10px] font-semibold"
                 style={{ color: "#8888AA" }}
               >
                 {label}
               </div>
             ))}
           </div>
-          <div className="w-10 flex-shrink-0" />
         </div>
       )}
 
@@ -123,30 +122,34 @@ function HabitWeekRow({ progress }: { progress: WeeklyHabitProgress }) {
         {habit.icon ?? "🎯"}
       </div>
 
-      {/* Name + streak */}
+      {/* Name + % + streak */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate" style={{ color: "#FFFFFF" }}>
-          {habit.name}
-        </p>
-        {streak && streak.currentStreak > 0 && (
-          <p className="text-[11px]" style={{ color: "#8888AA" }}>
-            🔥 {streak.currentStreak}d
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-medium truncate" style={{ color: "#FFFFFF" }}>
+            {habit.name}
           </p>
+          <span
+            className="text-xs font-semibold flex-shrink-0"
+            style={{ color: completionRate === 100 ? accentColor : "#8888AA" }}
+          >
+            {completionRate}%
+          </span>
+        </div>
+        {streak && streak.currentStreak > 0 && (
+          <div className="flex items-center gap-1 mt-0.5">
+            <span className="text-[11px] leading-none">🔥</span>
+            <span className="text-[11px]" style={{ color: "#8888AA" }}>
+              {streak.currentStreak}d
+            </span>
+          </div>
         )}
       </div>
 
       {/* 7-day dot grid */}
-      <div className="flex gap-1.5 flex-shrink-0">
+      <div className="flex gap-1 flex-shrink-0">
         {days.map((day, i) => (
           <DayDot key={i} day={day} accentColor={accentColor} />
         ))}
-      </div>
-
-      {/* Completion % */}
-      <div className="w-10 text-right flex-shrink-0">
-        <span className="text-xs font-semibold" style={{ color: completionRate === 100 ? accentColor : "#8888AA" }}>
-          {completionRate}%
-        </span>
       </div>
     </div>
   );
@@ -154,7 +157,7 @@ function HabitWeekRow({ progress }: { progress: WeeklyHabitProgress }) {
 
 function DayDot({ day, accentColor }: { day: DayStatus; accentColor: string }) {
   if (!day.isScheduled) {
-    return <div className="w-7 h-7 flex items-center justify-center">
+    return <div className="w-6 h-6 flex items-center justify-center">
       <div className="w-1 h-1 rounded-full" style={{ background: "#2A2A2A" }} />
     </div>;
   }
@@ -162,7 +165,7 @@ function DayDot({ day, accentColor }: { day: DayStatus; accentColor: string }) {
   if (day.isFuture) {
     return (
       <div
-        className="w-7 h-7 rounded-full border"
+        className="w-6 h-6 rounded-full border"
         style={{ borderColor: "#2A2A2A", opacity: 0.4 }}
       />
     );
@@ -171,7 +174,7 @@ function DayDot({ day, accentColor }: { day: DayStatus; accentColor: string }) {
   if (day.isCompleted) {
     return (
       <div
-        className="w-7 h-7 rounded-full flex items-center justify-center"
+        className="w-6 h-6 rounded-full flex items-center justify-center"
         style={{ background: accentColor }}
       >
         <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -183,7 +186,7 @@ function DayDot({ day, accentColor }: { day: DayStatus; accentColor: string }) {
 
   return (
     <div
-      className="w-7 h-7 rounded-full border"
+      className="w-6 h-6 rounded-full border"
       style={{ borderColor: "#3A3A3A" }}
     />
   );
