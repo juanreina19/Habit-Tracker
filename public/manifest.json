@@ -4,21 +4,30 @@
   "description": "Seguimiento personal de hábitos con rachas y logros",
   "start_url": "/today",
   "display": "standalone",
-  "background_color": "#0F0F1A",
-  "theme_color": "#0F0F1A",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "portrait",
+  "categories": ["lifestyle", "health"],
   "icons": [
     {
-      "src": "/icons/icon-192.png",
+      "src": "/api/pwa/icon-192",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/api/pwa/icon-512",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Hoy",
+      "short_name": "Hoy",
+      "url": "/today",
+      "description": "Ver hábitos de hoy"
     }
   ]
 }

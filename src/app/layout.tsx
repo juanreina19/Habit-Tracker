@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { PWARegistration } from "@/shared/components/PWARegistration";
 
 export const metadata: Metadata = {
   title: "Habit Tracker",
@@ -27,7 +28,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className="dark">
-      <body>{children}</body>
+      <body>
+        {children}
+        <PWARegistration />
+      </body>
     </html>
   );
 }
