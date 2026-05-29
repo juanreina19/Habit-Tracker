@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import { useSettingsHabits } from "../../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { HabitFormDialog } from "./HabitFormDialog";
@@ -223,10 +224,10 @@ function HabitsTab({
                 {/* Actions */}
                 <div className="flex gap-1">
                   <IconButton onClick={() => onEdit(habit)} label="Editar">
-                    ✏️
+                    <Pencil size={14} color="#8888AA" />
                   </IconButton>
                   <IconButton onClick={() => onDelete(habit)} label="Eliminar" danger>
-                    🗑️
+                    <Trash2 size={14} color="#FF5252" />
                   </IconButton>
                 </div>
               </div>
@@ -301,10 +302,10 @@ function CategoriesTab({
                 {/* Actions */}
                 <div className="flex gap-1">
                   <IconButton onClick={() => onEdit(cat)} label="Editar">
-                    ✏️
+                    <Pencil size={14} color="#8888AA" />
                   </IconButton>
                   <IconButton onClick={() => onDelete(cat)} label="Eliminar" danger>
-                    🗑️
+                    <Trash2 size={14} color="#FF5252" />
                   </IconButton>
                 </div>
               </div>
@@ -368,10 +369,10 @@ function DeleteConfirmDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}>
       <div
-        className="w-full max-w-lg rounded-[24px] p-6"
-        style={{ background: "#111111" }}
+        className="w-full max-w-sm rounded-[24px] p-6"
+        style={{ background: "#111111", border: "1px solid #2A2A2A" }}
       >
         <p className="text-lg font-semibold mb-2" style={{ color: "#FFFFFF" }}>
           ¿Eliminar {type === "habit" ? "hábito" : "categoría"}?
