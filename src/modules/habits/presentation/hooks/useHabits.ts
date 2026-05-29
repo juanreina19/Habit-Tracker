@@ -10,6 +10,7 @@ import { GetTodayHabitsUseCase } from "../../domain/use-cases/GetTodayHabitsUseC
 import { CompleteHabitUseCase } from "../../domain/use-cases/CompleteHabitUseCase";
 import { UncompleteHabitUseCase } from "../../domain/use-cases/UncompleteHabitUseCase";
 import { CalculateStreakUseCase } from "../../domain/use-cases/CalculateStreakUseCase";
+import { UseFreezeUseCase } from "../../domain/use-cases/UseFreezeUseCase";
 import { today } from "@/shared/lib/utils/dates";
 import type { UUID } from "@/shared/types/database.types";
 
@@ -27,8 +28,7 @@ export function useHabits(userId: UUID) {
     setError(null);
     try {
       const repo = getRepository();
-      const useCase = new GetTodayHabitsUseCase(repo);
-      const result = await useCase.execute(userId);
+      const result = await new GetTodayHabitsUseCase(repo).execute(userId);
       setHabits(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al cargar hábitos");
@@ -37,35 +37,66 @@ export function useHabits(userId: UUID) {
     }
   }, [userId, getRepository, setHabits, setLoading, setError]);
 
-  const toggleHabitCompletion = useCallback(
-    async (habitId: UUID, isCurrentlyCompleted: boolean) => {
-      // Optimistic update
+  // Complete a habit (immediate, with achievement check)
+  const completeHabit = useCallback(
+    async (habitId: UUID) => {
       toggleHabit(habitId);
-
       try {
         const repo = getRepository();
         const calculateStreak = new CalculateStreakUseCase(repo);
-
-        if (isCurrentlyCompleted) {
-          const useCase = new UncompleteHabitUseCase(repo, calculateStreak);
-          await useCase.execute(habitId, userId, today());
-        } else {
-          const useCase = new CompleteHabitUseCase(repo, calculateStreak);
-          await useCase.execute(habitId, userId, today());
-          // Haptic feedback en móvil
-          if ("vibrate" in navigator) navigator.vibrate(10);
-          // Check achievements fire-and-forget (no await, no UI block)
-          const client = createClient();
-          const achievementRepo = new AchievementSupabaseRepository(client);
-          void new CheckAndUnlockAchievementsUseCase(repo, achievementRepo).execute(userId).catch(() => {});
-        }
+        await new CompleteHabitUseCase(repo, calculateStreak).execute(habitId, userId, today());
+        if ("vibrate" in navigator) navigator.vibrate(10);
+        const client = createClient();
+        void new CheckAndUnlockAchievementsUseCase(
+          repo,
+          new AchievementSupabaseRepository(client)
+        ).execute(userId).catch(() => {});
       } catch (err) {
-        // Revertir optimistic update en caso de error
         toggleHabit(habitId);
-        setError(err instanceof Error ? err.message : "Error al actualizar hábito");
+        setError(err instanceof Error ? err.message : "Error al completar hábito");
       }
     },
     [userId, getRepository, toggleHabit, setError]
+  );
+
+  // Uncheck a habit with undo support: optimistic update immediately,
+  // API call deferred 3s. Returns a cancel function for undo.
+  const uncheckHabit = useCallback(
+    (habitId: UUID): (() => void) => {
+      toggleHabit(habitId); // optimistic
+
+      let cancelled = false;
+      const timer = setTimeout(async () => {
+        if (cancelled) return;
+        try {
+          const repo = getRepository();
+          const calculateStreak = new CalculateStreakUseCase(repo);
+          await new UncompleteHabitUseCase(repo, calculateStreak).execute(habitId, userId, today());
+        } catch (err) {
+          if (!cancelled) {
+            toggleHabit(habitId); // revert on API error
+            setError(err instanceof Error ? err.message : "Error al desmarcar hábito");
+          }
+        }
+      }, 3000);
+
+      return () => {
+        cancelled = true;
+        clearTimeout(timer);
+        toggleHabit(habitId); // revert optimistic update
+      };
+    },
+    [userId, getRepository, toggleHabit, setError]
+  );
+
+  // Use freeze (grace day) for a habit
+  const freezeHabit = useCallback(
+    async (habitId: UUID): Promise<void> => {
+      const repo = getRepository();
+      await new UseFreezeUseCase(repo).execute(habitId, userId);
+      await fetchHabits(); // refetch to update streak.freezeUsedAt
+    },
+    [userId, getRepository, fetchHabits]
   );
 
   useEffect(() => {
@@ -81,6 +112,8 @@ export function useHabits(userId: UUID) {
     completionPercentage,
     estimatedMinutes,
     refetch: fetchHabits,
-    toggleHabitCompletion,
+    completeHabit,
+    uncheckHabit,
+    freezeHabit,
   };
 }

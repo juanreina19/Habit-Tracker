@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Reorder, useDragControls } from "framer-motion";
-import { Pencil, Trash2, GripVertical } from "lucide-react";
+import { Pencil, Trash2, GripVertical, Bell, BellOff } from "lucide-react";
+import { useBrowserNotifications } from "@/shared/hooks/useBrowserNotifications";
 import { useSettingsHabits } from "../../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { HabitFormDialog } from "./HabitFormDialog";
@@ -132,6 +133,9 @@ export default function SettingsView({ userId }: Props) {
         category={catDialog.category}
         onSave={handleSaveCategory}
       />
+
+      {/* Notifications section */}
+      <NotificationsSection />
 
       {confirmDelete && (
         <DeleteConfirmDialog
@@ -487,6 +491,89 @@ function DeleteConfirmDialog({
             {isDeleting ? "Eliminando…" : "Eliminar"}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function NotificationsSection() {
+  const { permission, isEnabled, reminderTime, enable, disable, setReminderTime } =
+    useBrowserNotifications();
+
+  const handleToggle = async () => {
+    if (isEnabled) {
+      disable();
+    } else {
+      const p = await enable();
+      if (p === "denied") return; // browser denied, no action needed
+    }
+  };
+
+  if (permission === "unsupported") return null;
+
+  return (
+    <div className="mt-8">
+      <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#8888AA" }}>
+        General
+      </p>
+      <div className="rounded-[20px] overflow-hidden" style={{ background: "#111111" }}>
+        {/* Toggle row */}
+        <div className="flex items-center gap-4 p-4">
+          <div
+            className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0"
+            style={{ background: isEnabled ? "rgba(76,207,130,0.15)" : "#1C1C1C" }}
+          >
+            {isEnabled
+              ? <Bell size={18} color="#4CAF82" />
+              : <BellOff size={18} color="#555555" />}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-sm" style={{ color: "#FFFFFF" }}>
+              Recordatorio diario
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: "#8888AA" }}>
+              {permission === "denied"
+                ? "Permiso denegado — actívalo en ajustes del navegador"
+                : isEnabled
+                  ? "Notificación activa ✓"
+                  : "Recibe un aviso para no olvidar tus hábitos"}
+            </p>
+          </div>
+          {/* Toggle switch */}
+          <button
+            onClick={handleToggle}
+            disabled={permission === "denied"}
+            className="flex-shrink-0 w-12 h-7 rounded-full relative transition-colors disabled:opacity-30"
+            style={{ background: isEnabled ? "#4CAF82" : "#2A2A2A" }}
+          >
+            <span
+              className="absolute top-1 w-5 h-5 rounded-full bg-white transition-all"
+              style={{ left: isEnabled ? "calc(100% - 24px)" : "4px" }}
+            />
+          </button>
+        </div>
+
+        {/* Time picker — only shown when enabled */}
+        {isEnabled && permission === "granted" && (
+          <div
+            className="flex items-center justify-between px-4 pb-4 pt-0"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+          >
+            <p className="text-sm" style={{ color: "#8888AA" }}>Hora del recordatorio</p>
+            <input
+              type="time"
+              value={reminderTime}
+              onChange={(e) => setReminderTime(e.target.value)}
+              className="rounded-[10px] px-3 py-1.5 text-sm font-medium outline-none"
+              style={{
+                background: "#1C1C1C",
+                color: "#FFFFFF",
+                border: "1px solid rgba(255,255,255,0.08)",
+                colorScheme: "dark",
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
