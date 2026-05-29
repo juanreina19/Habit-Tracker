@@ -86,7 +86,15 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
             </div>
             <div>
               <p className="text-base font-semibold" style={{ color: "#FF5252" }}>
-                {data.days.filter((d) => !d.isFuture && d.completionRate === 0 && d.scheduled > 0).length}
+                {data.days.filter((d) => {
+                  if (d.isFuture || d.completionRate !== 0 || d.scheduled === 0) return false;
+                  if (userCreatedAt) {
+                    const created = new Date(userCreatedAt); created.setHours(0,0,0,0);
+                    const dayMid = new Date(d.date); dayMid.setHours(0,0,0,0);
+                    if (dayMid < created) return false;
+                  }
+                  return true;
+                }).length}
               </p>
               <p className="text-[10px]" style={{ color: "#8888AA" }}>días perdidos</p>
             </div>
@@ -101,7 +109,7 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
           <p className="text-sm" style={{ color: "#FF5252" }}>Error: {error}</p>
         </div>
       ) : data ? (
-        <CalendarGrid data={data} />
+        <CalendarGrid data={data} userCreatedAt={userCreatedAt} />
       ) : null}
     </div>
   );
@@ -109,7 +117,7 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
 
 // ─── Calendar grid ─────────────────────────────────────────────────────────────
 
-function CalendarGrid({ data }: { data: { days: DayProgress[]; month: number; year: number } }) {
+function CalendarGrid({ data, userCreatedAt }: { data: { days: DayProgress[]; month: number; year: number }; userCreatedAt?: string }) {
   const firstDay = new Date(data.year, data.month, 1);
   // dayOfWeek: Mon=1...Sun=7, so offset = (dayOfWeek - 1): Mon=0...Sun=6
   const rawDay = firstDay.getDay(); // 0=Sun
@@ -152,7 +160,7 @@ function CalendarGrid({ data }: { data: { days: DayProgress[]; month: number; ye
         {weeks.map((week, wi) => (
           <div key={wi} className="grid grid-cols-7 gap-1.5">
             {week.map((day, di) =>
-              day ? <DayCell key={di} day={day} /> : <div key={di} />
+              day ? <DayCell key={di} day={day} userCreatedAt={userCreatedAt} /> : <div key={di} />
             )}
           </div>
         ))}
@@ -176,12 +184,23 @@ function CalendarGrid({ data }: { data: { days: DayProgress[]; month: number; ye
   );
 }
 
-function DayCell({ day }: { day: DayProgress }) {
+function DayCell({ day, userCreatedAt }: { day: DayProgress; userCreatedAt?: string }) {
   const { completionRate, isFuture, isToday, date } = day;
   const dayNumber = date.getDate();
 
-  const bg = getCellBackground(completionRate, isFuture);
-  const textColor = getTextColor(completionRate, isFuture);
+  // Days before account creation are shown as inactive (no color, no dot)
+  const isBeforeCreation = (() => {
+    if (!userCreatedAt) return false;
+    const created = new Date(userCreatedAt);
+    created.setHours(0, 0, 0, 0);
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d < created;
+  })();
+
+  const inactive = isFuture || isBeforeCreation;
+  const bg = getCellBackground(completionRate, inactive);
+  const textColor = getTextColor(completionRate, inactive);
 
   return (
     <div
@@ -190,19 +209,14 @@ function DayCell({ day }: { day: DayProgress }) {
         background: bg,
         outline: isToday ? "1.5px solid rgba(255,255,255,0.6)" : "none",
         outlineOffset: "-1.5px",
+        opacity: isBeforeCreation ? 0.35 : 1,
       }}
     >
-      <span
-        className="text-[13px] font-medium leading-none"
-        style={{ color: textColor }}
-      >
+      <span className="text-[13px] font-medium leading-none" style={{ color: textColor }}>
         {dayNumber}
       </span>
-      {!isFuture && completionRate >= 0 && (
-        <div
-          className="w-1 h-1 rounded-full mt-0.5"
-          style={{ background: getDotColor(completionRate) }}
-        />
+      {!inactive && completionRate >= 0 && (
+        <div className="w-1 h-1 rounded-full mt-0.5" style={{ background: getDotColor(completionRate) }} />
       )}
     </div>
   );
