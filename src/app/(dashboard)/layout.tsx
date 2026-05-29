@@ -14,7 +14,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#000000" }}>
-      <main className="flex-1 pb-24">
+      <main className="flex-1" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 100px)" }}>
         {children}
       </main>
       <BottomNav />

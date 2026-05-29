@@ -18,15 +18,20 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 safe-bottom z-50"
+      className="fixed z-50"
       style={{
-        background: "rgba(0, 0, 0, 0.88)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderTop: "1px solid rgba(255,255,255,0.06)",
+        left: "16px",
+        right: "16px",
+        bottom: "calc(env(safe-area-inset-bottom) + 16px)",
+        background: "rgba(16, 16, 16, 0.94)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        borderRadius: "26px",
+        border: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
       }}
     >
-      <div className="flex items-center justify-around px-2 py-2">
+      <div className="flex items-center justify-around px-2 py-2.5">
         {navItems.map(({ href, label, Icon }) => {
           const isActive = pathname === href;
           return (
@@ -34,7 +39,7 @@ export default function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-2 rounded-[12px] transition-all min-w-[56px]",
+                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-[16px] transition-all min-w-[52px]",
                 isActive ? "opacity-100" : "opacity-35 active:opacity-60"
               )}
             >
