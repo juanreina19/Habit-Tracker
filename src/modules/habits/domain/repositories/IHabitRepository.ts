@@ -56,10 +56,16 @@ export interface IHabitRepository {
   /** Obtiene todos los logs de un hábito */
   findLogs(habitId: UUID, from?: ISODate, to?: ISODate): Promise<HabitLog[]>;
 
+  /** Obtiene todos los logs de un usuario en un rango de fechas */
+  findAllLogsForUserInRange(userId: UUID, from: ISODate, to: ISODate): Promise<HabitLog[]>;
+
   // ─── Streaks ─────────────────────────────────────────────────────────────
 
   /** Obtiene la racha de un hábito */
   findStreak(habitId: UUID): Promise<Streak | null>;
+
+  /** Obtiene todas las rachas de un usuario */
+  findAllStreaksForUser(userId: UUID): Promise<Streak[]>;
 
   /** Actualiza la racha de un hábito */
   updateStreak(habitId: UUID, userId: UUID, streak: Partial<Omit<Streak, "id" | "habitId" | "userId">>): Promise<Streak>;

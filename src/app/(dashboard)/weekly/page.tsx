@@ -1,8 +1,12 @@
-export default function WeeklyPage() {
-  return (
-    <div className="p-6 pt-14">
-      <h1 className="text-2xl font-semibold" style={{ color: "#FFFFFF" }}>Semanal</h1>
-      <p className="mt-2 text-sm" style={{ color: "#8888AA" }}>Próximamente — Fase 2</p>
-    </div>
-  );
+import { createServerSupabaseClient } from "@/shared/lib/supabase/server";
+import { redirect } from "next/navigation";
+import WeeklyView from "@/modules/habits/presentation/components/WeeklyView";
+
+export default async function WeeklyPage() {
+  const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  return <WeeklyView userId={user.id} />;
 }

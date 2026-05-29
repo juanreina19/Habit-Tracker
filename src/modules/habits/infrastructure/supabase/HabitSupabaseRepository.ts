@@ -166,6 +166,34 @@ export class HabitSupabaseRepository implements IHabitRepository {
     if (error) throw error;
   }
 
+  async findAllLogsForUserInRange(userId: UUID, from: ISODate, to: ISODate): Promise<HabitLog[]> {
+    const { data, error } = await this.client
+      .from("habit_logs")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("completed_at", from)
+      .lte("completed_at", to);
+
+    if (error) throw error;
+    return data.map((d) => ({
+      id: d.id,
+      habitId: d.habit_id,
+      userId: d.user_id,
+      completedAt: d.completed_at,
+      createdAt: d.created_at,
+    }));
+  }
+
+  async findAllStreaksForUser(userId: UUID): Promise<Streak[]> {
+    const { data, error } = await this.client
+      .from("streaks")
+      .select("*")
+      .eq("user_id", userId);
+
+    if (error) throw error;
+    return data.map(mapDbToStreak);
+  }
+
   async findLogs(habitId: UUID, from?: ISODate, to?: ISODate): Promise<HabitLog[]> {
     let query = this.client.from("habit_logs").select("*").eq("habit_id", habitId).order("completed_at", { ascending: false });
     if (from) query = query.gte("completed_at", from);
