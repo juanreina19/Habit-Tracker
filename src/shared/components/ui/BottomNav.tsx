@@ -23,12 +23,16 @@ export default function BottomNav() {
         left: "16px",
         right: "16px",
         bottom: "calc(env(safe-area-inset-bottom) + 16px)",
-        background: "rgba(16, 16, 16, 0.94)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
+        background: "rgba(20, 20, 22, 0.45)",
+        backdropFilter: "blur(48px) saturate(200%) brightness(1.1)",
+        WebkitBackdropFilter: "blur(48px) saturate(200%) brightness(1.1)",
         borderRadius: "26px",
-        border: "1px solid rgba(255,255,255,0.07)",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
+        border: "1px solid rgba(255,255,255,0.13)",
+        boxShadow:
+          "0 8px 40px rgba(0,0,0,0.45), " +
+          "0 2px 8px rgba(0,0,0,0.25), " +
+          "inset 0 1px 0 rgba(255,255,255,0.12), " +
+          "inset 0 -1px 0 rgba(0,0,0,0.2)",
       }}
     >
       <div className="flex items-center justify-around px-2 py-2.5">
