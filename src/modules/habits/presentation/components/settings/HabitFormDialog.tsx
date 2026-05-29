@@ -97,7 +97,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
         />
         <Dialog.Content
           className="fixed z-50 left-1/2 bottom-0 w-full max-w-lg -translate-x-1/2 rounded-t-[24px] outline-none overflow-y-auto"
-          style={{ background: "#1A1A2E", maxHeight: "92dvh" }}
+          style={{ background: "#111111", maxHeight: "92dvh" }}
         >
           <div className="p-6">
             <Dialog.Title className="text-lg font-semibold mb-5" style={{ color: "#FFFFFF" }}>
@@ -119,7 +119,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   maxLength={60}
                   className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
                   style={{
-                    background: "#252540",
+                    background: "#1C1C1C",
                     color: "#FFFFFF",
                     border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
                   }}
@@ -144,8 +144,8 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                         onClick={() => toggleDay(day)}
                         className="flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all active:scale-95"
                         style={{
-                          background: isOn ? "#FFFFFF" : "#252540",
-                          color: isOn ? "#0F0F1A" : "#8888AA",
+                          background: isOn ? "#FFFFFF" : "#1C1C1C",
+                          color: isOn ? "#000000" : "#8888AA",
                         }}
                       >
                         {DAY_LABELS[day]}
@@ -170,9 +170,9 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                       onClick={() => setCategoryId(null)}
                       className="px-3 py-2 rounded-[10px] text-xs font-medium transition-all active:scale-95"
                       style={{
-                        background: categoryId === null ? "#252540" : "transparent",
+                        background: categoryId === null ? "#1C1C1C" : "transparent",
                         color: categoryId === null ? "#FFFFFF" : "#8888AA",
-                        border: `1.5px solid ${categoryId === null ? "#FFFFFF30" : "#252540"}`,
+                        border: `1.5px solid ${categoryId === null ? "#FFFFFF30" : "#1C1C1C"}`,
                       }}
                     >
                       Sin categoría
@@ -184,9 +184,9 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                         onClick={() => setCategoryId(cat.id)}
                         className="px-3 py-2 rounded-[10px] text-xs font-medium flex items-center gap-1.5 transition-all active:scale-95"
                         style={{
-                          background: categoryId === cat.id ? (cat.color ?? "#252540") + "25" : "transparent",
+                          background: categoryId === cat.id ? (cat.color ?? "#1C1C1C") + "25" : "transparent",
                           color: categoryId === cat.id ? (cat.color ?? "#FFFFFF") : "#8888AA",
-                          border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "#FFFFFF") + "60" : "#252540"}`,
+                          border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "#FFFFFF") + "60" : "#1C1C1C"}`,
                         }}
                       >
                         {cat.icon && <span>{cat.icon}</span>}
@@ -210,7 +210,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   min={1}
                   max={480}
                   className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
-                  style={{ background: "#252540", color: "#FFFFFF", border: "1.5px solid transparent" }}
+                  style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent" }}
                 />
               </div>
 
@@ -236,7 +236,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   type="button"
                   onClick={onClose}
                   className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
-                  style={{ background: "#252540", color: "#8888AA" }}
+                  style={{ background: "#1C1C1C", color: "#8888AA" }}
                 >
                   Cancelar
                 </button>
@@ -244,7 +244,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   type="submit"
                   disabled={isSaving}
                   className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
-                  style={{ background: "#FFFFFF", color: "#0F0F1A" }}
+                  style={{ background: "#FFFFFF", color: "#000000" }}
                 >
                   {isSaving ? "Guardando…" : "Guardar"}
                 </button>

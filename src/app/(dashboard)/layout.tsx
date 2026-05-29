@@ -13,7 +13,7 @@ export default async function DashboardLayout({
   if (!user) redirect("/login");
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#0F0F1A" }}>
+    <div className="min-h-screen flex flex-col" style={{ background: "#000000" }}>
       <main className="flex-1 pb-24">
         {children}
       </main>

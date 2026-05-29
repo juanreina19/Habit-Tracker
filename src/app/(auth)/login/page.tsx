@@ -19,13 +19,12 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6"
-      style={{ background: "#0F0F1A" }}>
-      
+      style={{ background: "#000000" }}>
+
       <div className="w-full max-w-sm flex flex-col items-center gap-10">
-        {/* Logo / Icon */}
         <div className="flex flex-col items-center gap-4">
           <div className="w-20 h-20 rounded-[24px] flex items-center justify-center text-4xl"
-            style={{ background: "#1A1A2E", border: "1px solid #252540" }}>
+            style={{ background: "#111111", border: "1px solid #2A2A2A" }}>
             🔥
           </div>
           <div className="text-center">
@@ -38,15 +37,14 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Login card */}
         <div className="w-full rounded-[20px] p-6 flex flex-col gap-4"
-          style={{ background: "#1A1A2E" }}>
-          
+          style={{ background: "#111111" }}>
+
           <button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
             className="w-full py-4 rounded-[14px] flex items-center justify-center gap-3 font-medium text-sm transition-opacity active:opacity-70 disabled:opacity-50"
-            style={{ background: "#FFFFFF", color: "#0F0F1A" }}
+            style={{ background: "#FFFFFF", color: "#000000" }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>

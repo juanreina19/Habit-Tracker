@@ -52,7 +52,7 @@ export default function TodayView({ userId }: Props) {
       {totalCount > 0 && (
         <div
           className="rounded-[20px] p-5 mb-6 flex items-center gap-5"
-          style={{ background: "#1A1A2E" }}
+          style={{ background: "#111111" }}
         >
           <ProgressRing percentage={completionPercentage} size={72} />
           <div>
@@ -76,7 +76,7 @@ export default function TodayView({ userId }: Props) {
         {totalCount === 0 && (
           <div
             className="rounded-[20px] p-8 text-center"
-            style={{ background: "#1A1A2E" }}
+            style={{ background: "#111111" }}
           >
             <p className="text-4xl mb-3">✨</p>
             <p className="font-medium" style={{ color: "#FFFFFF" }}>Sin hábitos para hoy</p>
@@ -118,7 +118,7 @@ function HabitRow({
       style={{
         background: habit.isCompletedToday
           ? `${accentColor}18`
-          : "#1A1A2E",
+          : "#111111",
         border: `1px solid ${habit.isCompletedToday ? `${accentColor}40` : "transparent"}`,
       }}
     >
@@ -127,7 +127,7 @@ function HabitRow({
         className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
         style={{
           background: habit.isCompletedToday ? accentColor : "transparent",
-          border: `2px solid ${habit.isCompletedToday ? accentColor : "#252540"}`,
+          border: `2px solid ${habit.isCompletedToday ? accentColor : "#2A2A2A"}`,
         }}
       >
         {habit.isCompletedToday && (
@@ -177,7 +177,7 @@ function ProgressRing({ percentage, size }: { percentage: number; size: number }
 
   return (
     <svg width={size} height={size} className="-rotate-90">
-      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#252540" strokeWidth={4} />
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#2A2A2A" strokeWidth={4} />
       <circle
         cx={size / 2} cy={size / 2} r={radius}
         fill="none"
@@ -209,12 +209,12 @@ function TodayViewSkeleton() {
   return (
     <div className="px-5 pt-14 pb-6 max-w-lg mx-auto animate-pulse">
       <div className="mb-8">
-        <div className="h-4 w-20 rounded-full mb-2" style={{ background: "#1A1A2E" }} />
-        <div className="h-8 w-48 rounded-full" style={{ background: "#1A1A2E" }} />
+        <div className="h-4 w-20 rounded-full mb-2" style={{ background: "#111111" }} />
+        <div className="h-8 w-48 rounded-full" style={{ background: "#111111" }} />
       </div>
-      <div className="rounded-[20px] h-24 mb-6" style={{ background: "#1A1A2E" }} />
+      <div className="rounded-[20px] h-24 mb-6" style={{ background: "#111111" }} />
       {[1, 2, 3].map((i) => (
-        <div key={i} className="rounded-[16px] h-16 mb-3" style={{ background: "#1A1A2E" }} />
+        <div key={i} className="rounded-[16px] h-16 mb-3" style={{ background: "#111111" }} />
       ))}
     </div>
   );

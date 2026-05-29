@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Sun, CalendarDays, Calendar, BarChart2, Settings2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils/cn";
 
 const navItems = [
-  { href: "/today",    label: "Hoy",      icon: "☀️" },
-  { href: "/weekly",   label: "Semana",   icon: "📅" },
-  { href: "/monthly",  label: "Mes",      icon: "🗓" },
-  { href: "/stats",    label: "Stats",    icon: "📊" },
-  { href: "/settings", label: "Ajustes",  icon: "⚙️" },
+  { href: "/today",    label: "Hoy",     Icon: Sun },
+  { href: "/weekly",   label: "Semana",  Icon: CalendarDays },
+  { href: "/monthly",  label: "Mes",     Icon: Calendar },
+  { href: "/stats",    label: "Stats",   Icon: BarChart2 },
+  { href: "/settings", label: "Ajustes", Icon: Settings2 },
 ];
 
 export default function BottomNav() {
@@ -19,30 +20,34 @@ export default function BottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 safe-bottom z-50"
       style={{
-        background: "rgba(26, 26, 46, 0.85)",
+        background: "rgba(0, 0, 0, 0.88)",
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
         borderTop: "1px solid rgba(255,255,255,0.06)",
       }}
     >
       <div className="flex items-center justify-around px-2 py-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
+        {navItems.map(({ href, label, Icon }) => {
+          const isActive = pathname === href;
           return (
             <Link
-              key={item.href}
-              href={item.href}
+              key={href}
+              href={href}
               className={cn(
                 "flex flex-col items-center gap-1 px-3 py-2 rounded-[12px] transition-all min-w-[56px]",
-                isActive ? "opacity-100" : "opacity-40 active:opacity-70"
+                isActive ? "opacity-100" : "opacity-35 active:opacity-60"
               )}
             >
-              <span className="text-xl leading-none">{item.icon}</span>
+              <Icon
+                size={22}
+                strokeWidth={isActive ? 2 : 1.5}
+                color="#FFFFFF"
+              />
               <span
-                className={cn("text-[10px] font-medium tracking-wide")}
+                className="text-[10px] font-medium tracking-wide"
                 style={{ color: isActive ? "#FFFFFF" : "#8888AA" }}
               >
-                {item.label}
+                {label}
               </span>
             </Link>
           );

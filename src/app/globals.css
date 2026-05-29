@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --background: #0F0F1A;
-  --surface: #1A1A2E;
-  --surface-elevated: #252540;
+  --background: #000000;
+  --surface: #111111;
+  --surface-elevated: #1C1C1C;
   --primary: #FFFFFF;
   --text-primary: #FFFFFF;
   --text-secondary: #8888AA;

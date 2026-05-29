@@ -81,7 +81,7 @@ export default function SettingsView({ userId }: Props) {
       {/* Tabs */}
       <div
         className="flex rounded-[14px] p-1 mb-6"
-        style={{ background: "#1A1A2E" }}
+        style={{ background: "#111111" }}
       >
         {(["habits", "categories"] as Tab[]).map((t) => (
           <button
@@ -89,7 +89,7 @@ export default function SettingsView({ userId }: Props) {
             onClick={() => setTab(t)}
             className="flex-1 py-2.5 rounded-[10px] text-sm font-medium transition-all"
             style={{
-              background: tab === t ? "#252540" : "transparent",
+              background: tab === t ? "#1C1C1C" : "transparent",
               color: tab === t ? "#FFFFFF" : "#8888AA",
             }}
           >
@@ -173,7 +173,7 @@ function HabitsTab({
         <button
           onClick={onAdd}
           className="flex items-center gap-1.5 px-4 py-2 rounded-[12px] text-sm font-semibold transition-opacity active:opacity-70"
-          style={{ background: "#FFFFFF", color: "#0F0F1A" }}
+          style={{ background: "#FFFFFF", color: "#000000" }}
         >
           <span className="text-base leading-none">+</span> Nuevo hábito
         </button>
@@ -190,7 +190,7 @@ function HabitsTab({
               <div
                 key={habit.id}
                 className="rounded-[16px] p-4 flex items-center gap-3"
-                style={{ background: "#1A1A2E" }}
+                style={{ background: "#111111" }}
               >
                 {/* Color dot + icon */}
                 <div
@@ -258,7 +258,7 @@ function CategoriesTab({
         <button
           onClick={onAdd}
           className="flex items-center gap-1.5 px-4 py-2 rounded-[12px] text-sm font-semibold transition-opacity active:opacity-70"
-          style={{ background: "#FFFFFF", color: "#0F0F1A" }}
+          style={{ background: "#FFFFFF", color: "#000000" }}
         >
           <span className="text-base leading-none">+</span> Nueva categoría
         </button>
@@ -274,7 +274,7 @@ function CategoriesTab({
               <div
                 key={cat.id}
                 className="rounded-[16px] p-4 flex items-center gap-3"
-                style={{ background: "#1A1A2E" }}
+                style={{ background: "#111111" }}
               >
                 {/* Color + icon */}
                 <div
@@ -331,7 +331,7 @@ function IconButton({
       onClick={onClick}
       aria-label={label}
       className="w-8 h-8 rounded-[8px] flex items-center justify-center text-sm transition-opacity active:opacity-60"
-      style={{ background: danger ? "#FF525215" : "#252540" }}
+      style={{ background: danger ? "#FF525215" : "#1C1C1C" }}
     >
       {children}
     </button>
@@ -342,7 +342,7 @@ function EmptyState({ message, hint }: { message: string; hint: string }) {
   return (
     <div
       className="rounded-[20px] p-10 text-center"
-      style={{ background: "#1A1A2E" }}
+      style={{ background: "#111111" }}
     >
       <p className="text-4xl mb-3">✨</p>
       <p className="font-medium" style={{ color: "#FFFFFF" }}>{message}</p>
@@ -371,7 +371,7 @@ function DeleteConfirmDialog({
     <div className="fixed inset-0 z-50 flex items-end justify-center p-4" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
       <div
         className="w-full max-w-lg rounded-[24px] p-6"
-        style={{ background: "#1A1A2E" }}
+        style={{ background: "#111111" }}
       >
         <p className="text-lg font-semibold mb-2" style={{ color: "#FFFFFF" }}>
           ¿Eliminar {type === "habit" ? "hábito" : "categoría"}?
@@ -386,7 +386,7 @@ function DeleteConfirmDialog({
           <button
             onClick={onCancel}
             className="flex-1 py-3 rounded-[14px] text-sm font-medium"
-            style={{ background: "#252540", color: "#8888AA" }}
+            style={{ background: "#1C1C1C", color: "#8888AA" }}
           >
             Cancelar
           </button>
@@ -408,7 +408,7 @@ function SettingsSkeleton() {
   return (
     <div className="animate-pulse flex flex-col gap-2">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="rounded-[16px] h-16" style={{ background: "#1A1A2E" }} />
+        <div key={i} className="rounded-[16px] h-16" style={{ background: "#111111" }} />
       ))}
     </div>
   );

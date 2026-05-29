@@ -57,7 +57,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
         />
         <Dialog.Content
           className="fixed z-50 left-1/2 bottom-0 w-full max-w-lg -translate-x-1/2 rounded-t-[24px] p-6 outline-none"
-          style={{ background: "#1A1A2E" }}
+          style={{ background: "#111111" }}
         >
           <Dialog.Title className="text-lg font-semibold mb-5" style={{ color: "#FFFFFF" }}>
             {category ? "Editar categoría" : "Nueva categoría"}
@@ -78,7 +78,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                 maxLength={50}
                 className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
                 style={{
-                  background: "#252540",
+                  background: "#1C1C1C",
                   color: "#FFFFFF",
                   border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
                 }}
@@ -110,7 +110,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                 type="button"
                 onClick={onClose}
                 className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
-                style={{ background: "#252540", color: "#8888AA" }}
+                style={{ background: "#1C1C1C", color: "#8888AA" }}
               >
                 Cancelar
               </button>
@@ -118,7 +118,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                 type="submit"
                 disabled={isSaving}
                 className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
-                style={{ background: "#FFFFFF", color: "#0F0F1A" }}
+                style={{ background: "#FFFFFF", color: "#000000" }}
               >
                 {isSaving ? "Guardando…" : "Guardar"}
               </button>
