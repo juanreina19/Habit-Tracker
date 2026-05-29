@@ -1,16 +1,24 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import { useHabits } from "../hooks/useHabits";
 import { Confetti } from "@/shared/components/ui/Confetti";
 import type { UUID } from "@/shared/types/database.types";
-import { formatFriendly } from "@/shared/lib/utils/dates";
+
+function getGreeting(name: string): string {
+  const h = new Date().getHours();
+  const base = h >= 5 && h < 12 ? "Buenos días" : h < 19 ? "Buenas tardes" : "Buenas noches";
+  return name ? `${base}, ${name}!` : `${base}!`;
+}
 
 interface Props {
   userId: UUID;
+  userName?: string;
 }
 
-export default function TodayView({ userId }: Props) {
+export default function TodayView({ userId, userName = "" }: Props) {
   const {
     habits,
     isLoading,
@@ -55,10 +63,12 @@ export default function TodayView({ userId }: Props) {
       {/* Header */}
       <div className="mb-8">
         <p className="text-sm font-medium" style={{ color: "#8888AA" }}>
-          {formatFriendly(today)}
+          {"Hoy, " + format(today, "d MMMM", { locale: es }).replace(
+            /^\w/, (c) => c.toUpperCase()
+          )}
         </p>
         <h1 className="text-3xl font-semibold mt-1" style={{ color: "#FFFFFF" }}>
-          {completionPercentage === 100 ? "¡Día perfecto! 🎉" : "Buenos días"}
+          {completionPercentage === 100 ? "¡Día perfecto! 🎉" : getGreeting(userName)}
         </h1>
       </div>
 

@@ -8,5 +8,10 @@ export default async function TodayPage() {
 
   if (!user) redirect("/login");
 
-  return <TodayView userId={user.id} />;
+  const meta = user.user_metadata ?? {};
+  const rawName: string =
+    meta.given_name ?? meta.full_name ?? meta.name ?? user.email ?? "";
+  const firstName = rawName.split(" ")[0] ?? "";
+
+  return <TodayView userId={user.id} userName={firstName} />;
 }
