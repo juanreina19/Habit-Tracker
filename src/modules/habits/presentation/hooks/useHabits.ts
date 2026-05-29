@@ -4,6 +4,8 @@ import { useEffect, useCallback } from "react";
 import { useHabitStore } from "../store/habitStore";
 import { createClient } from "@/shared/lib/supabase/client";
 import { HabitSupabaseRepository } from "../../infrastructure/supabase/HabitSupabaseRepository";
+import { AchievementSupabaseRepository } from "@/modules/achievements/infrastructure/supabase/AchievementSupabaseRepository";
+import { CheckAndUnlockAchievementsUseCase } from "@/modules/achievements/domain/use-cases/CheckAndUnlockAchievementsUseCase";
 import { GetTodayHabitsUseCase } from "../../domain/use-cases/GetTodayHabitsUseCase";
 import { CompleteHabitUseCase } from "../../domain/use-cases/CompleteHabitUseCase";
 import { UncompleteHabitUseCase } from "../../domain/use-cases/UncompleteHabitUseCase";
@@ -52,6 +54,10 @@ export function useHabits(userId: UUID) {
           await useCase.execute(habitId, userId, today());
           // Haptic feedback en móvil
           if ("vibrate" in navigator) navigator.vibrate(10);
+          // Check achievements fire-and-forget (no await, no UI block)
+          const client = createClient();
+          const achievementRepo = new AchievementSupabaseRepository(client);
+          void new CheckAndUnlockAchievementsUseCase(repo, achievementRepo).execute(userId).catch(() => {});
         }
       } catch (err) {
         // Revertir optimistic update en caso de error
