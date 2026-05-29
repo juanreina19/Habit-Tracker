@@ -8,5 +8,5 @@ export default async function WeeklyPage() {
 
   if (!user) redirect("/login");
 
-  return <WeeklyView userId={user.id} />;
+  return <WeeklyView userId={user.id} userCreatedAt={user.created_at} />;
 }

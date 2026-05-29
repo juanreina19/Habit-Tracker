@@ -7,7 +7,7 @@ import { AchievementSupabaseRepository } from "@/modules/achievements/infrastruc
 import { GetStatsUseCase, type StatsData } from "../../domain/use-cases/GetStatsUseCase";
 import type { UUID } from "@/shared/types/database.types";
 
-export function useStats(userId: UUID) {
+export function useStats(userId: UUID, userCreatedAt?: string) {
   const [data, setData] = useState<StatsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +20,7 @@ export function useStats(userId: UUID) {
         const client = createClient();
         const habitRepo = new HabitSupabaseRepository(client);
         const achievementRepo = new AchievementSupabaseRepository(client);
-        const result = await new GetStatsUseCase(habitRepo, achievementRepo).execute(userId);
+        const result = await new GetStatsUseCase(habitRepo, achievementRepo).execute(userId, userCreatedAt);
         setData(result);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Error cargando estadísticas");
@@ -29,7 +29,7 @@ export function useStats(userId: UUID) {
       }
     };
     load();
-  }, [userId]);
+  }, [userId, userCreatedAt]);
 
   return { data, isLoading, error };
 }

@@ -11,9 +11,10 @@ const WEEK_DAYS = ["L", "M", "X", "J", "V", "S", "D"];
 
 interface Props {
   userId: UUID;
+  userCreatedAt?: string;
 }
 
-export default function MonthlyView({ userId }: Props) {
+export default function MonthlyView({ userId, userCreatedAt }: Props) {
   const {
     data,
     isLoading,
@@ -23,7 +24,8 @@ export default function MonthlyView({ userId }: Props) {
     goToPrevMonth,
     goToNextMonth,
     canGoNext,
-  } = useMonthly(userId);
+    canGoPrev,
+  } = useMonthly(userId, userCreatedAt);
 
   const monthLabel = format(new Date(year, month, 1), "MMMM yyyy", { locale: es });
   // Capitalize first letter
@@ -44,7 +46,8 @@ export default function MonthlyView({ userId }: Props) {
         <div className="flex gap-2">
           <button
             onClick={goToPrevMonth}
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60"
+            disabled={!canGoPrev}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60 disabled:opacity-20"
             style={{ background: "#1C1C1C" }}
           >
             <ChevronLeft size={18} color="#FFFFFF" />

@@ -39,12 +39,18 @@ export class GetStatsUseCase {
     private readonly achievementRepo: IAchievementRepository,
   ) {}
 
-  async execute(userId: UUID): Promise<StatsData> {
+  async execute(userId: UUID, userCreatedAt?: string): Promise<StatsData> {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
 
-    // 56 days = 8 weeks back; also covers the 30-day window
-    const sixtyDaysAgo = toISODate(new Date(Date.now() - 60 * 24 * 60 * 60 * 1000));
+    // Account creation week determines the earliest week to show
+    const createdWeekStart = userCreatedAt
+      ? startOfWeek(new Date(userCreatedAt), { weekStartsOn: 1 })
+      : subWeeks(now, 8);
+
+    // Fetch enough history to cover 8 weeks back or from creation, whichever is earlier
+    const fetchFrom = createdWeekStart < subWeeks(now, 8) ? toISODate(subWeeks(now, 8)) : toISODate(createdWeekStart);
+    const sixtyDaysAgo = fetchFrom;
 
     const [habits, streaks, logs, userAchievements, allAchievements] = await Promise.all([
       this.habitRepo.findAllByUser(userId),
@@ -100,7 +106,7 @@ export class GetStatsUseCase {
       return { habit, completionRate, totalScheduled, totalCompleted };
     }).filter((hs) => hs.totalScheduled > 0);
 
-    // ── Weekly trend (last 8 weeks) ──────────────────────────────────────────
+    // ── Weekly trend (from account creation, max 8 weeks) ───────────────────
     const weekTrends: WeekTrend[] = [];
     for (let w = 7; w >= 0; w--) {
       const weekStart = startOfWeek(subWeeks(now, w), { weekStartsOn: 1 });
@@ -108,6 +114,8 @@ export class GetStatsUseCase {
       const cutoff = weekEnd > now ? now : weekEnd;
 
       if (weekStart > now) continue;
+      // Skip weeks before account creation
+      if (weekStart < createdWeekStart) continue;
 
       const weekDays = eachDayOfInterval({ start: weekStart, end: cutoff });
       let scheduled = 0;

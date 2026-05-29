@@ -8,5 +8,5 @@ export default async function StatsPage() {
 
   if (!user) redirect("/login");
 
-  return <StatsView userId={user.id} />;
+  return <StatsView userId={user.id} userCreatedAt={user.created_at} />;
 }

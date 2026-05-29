@@ -1,7 +1,8 @@
+import { startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
 import type { IHabitRepository } from "../repositories/IHabitRepository";
 import type { Habit, Streak } from "../entities/Habit";
 import type { UUID } from "@/shared/types/database.types";
-import { toISODate, isHabitActiveOnDay, currentWeekDays } from "@/shared/lib/utils/dates";
+import { toISODate, isHabitActiveOnDay } from "@/shared/lib/utils/dates";
 
 export interface DayStatus {
   date: Date;
@@ -28,16 +29,23 @@ export interface WeeklyProgress {
 export class GetWeeklyProgressUseCase {
   constructor(private readonly habitRepo: IHabitRepository) {}
 
-  async execute(userId: UUID): Promise<WeeklyProgress> {
-    const weekDays = currentWeekDays();
-    const now = new Date();
+  /** weekStart defaults to the current week's Monday if not provided */
+  async execute(userId: UUID, weekStart?: Date): Promise<WeeklyProgress> {
+    const start = weekStart ?? startOfWeek(new Date(), { weekStartsOn: 1 });
+    const weekDays = eachDayOfInterval({
+      start,
+      end: endOfWeek(start, { weekStartsOn: 1 }),
+    });
 
-    const weekStart = toISODate(weekDays[0]);
-    const weekEnd = toISODate(weekDays[6]);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const weekStartISO = toISODate(weekDays[0]);
+    const weekEndISO = toISODate(weekDays[6]);
 
     const [habits, allLogs, allStreaks] = await Promise.all([
       this.habitRepo.findAllByUser(userId),
-      this.habitRepo.findAllLogsForUserInRange(userId, weekStart, weekEnd),
+      this.habitRepo.findAllLogsForUserInRange(userId, weekStartISO, weekEndISO),
       this.habitRepo.findAllStreaksForUser(userId),
     ]);
 
@@ -52,10 +60,8 @@ export class GetWeeklyProgressUseCase {
         const days: DayStatus[] = weekDays.map((date) => {
           const dayStart = new Date(date);
           dayStart.setHours(0, 0, 0, 0);
-          const todayStart = new Date(now);
-          todayStart.setHours(0, 0, 0, 0);
 
-          const isFuture = dayStart > todayStart;
+          const isFuture = dayStart > now;
           const isScheduled = isHabitActiveOnDay(habit.activeDays, date);
           const isCompleted = isScheduled && logSet.has(`${habit.id}:${toISODate(date)}`);
           return { date, isScheduled, isCompleted, isFuture };

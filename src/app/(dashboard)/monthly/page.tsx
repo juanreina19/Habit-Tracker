@@ -8,5 +8,5 @@ export default async function MonthlyPage() {
 
   if (!user) redirect("/login");
 
-  return <MonthlyView userId={user.id} />;
+  return <MonthlyView userId={user.id} userCreatedAt={user.created_at} />;
 }

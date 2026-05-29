@@ -88,6 +88,19 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 {toast.actionLabel}
               </RadixToast.Action>
             )}
+
+            {/* X close button — always visible */}
+            <RadixToast.Close
+              onClick={() => dismiss(toast.id)}
+              aria-label="Cerrar"
+              className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-60"
+              style={{ color: "#555555", background: "rgba(255,255,255,0.06)" }}
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path d="M1 1l8 8M9 1L1 9" stroke="currentColor" strokeWidth="1.5"
+                  strokeLinecap="round" />
+              </svg>
+            </RadixToast.Close>
           </RadixToast.Root>
         ))}
 

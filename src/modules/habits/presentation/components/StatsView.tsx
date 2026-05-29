@@ -13,10 +13,11 @@ import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
   userId: UUID;
+  userCreatedAt?: string;
 }
 
-export default function StatsView({ userId }: Props) {
-  const { data, isLoading, error } = useStats(userId);
+export default function StatsView({ userId, userCreatedAt }: Props) {
+  const { data, isLoading, error } = useStats(userId, userCreatedAt);
   // Avoid Recharts SSR hydration mismatch
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
