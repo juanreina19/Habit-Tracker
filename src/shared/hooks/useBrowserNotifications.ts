@@ -62,7 +62,7 @@ export function useBrowserNotifications() {
       if (!("PushManager" in window)) throw new Error("Push no soportado en este navegador");
       console.log("[Push] PushManager disponible");
 
-      // 3. Wait for active service worker
+      // 3. Wait for active service worker (10s timeout)
       console.log("[Push] esperando serviceWorker.ready…");
       const registration = await Promise.race([
         navigator.serviceWorker.ready,
@@ -72,9 +72,9 @@ export function useBrowserNotifications() {
       ]);
       console.log("[Push] SW listo:", registration);
 
-      // 4. Subscribe — strip BOM (U+FEFF) that Vercel env pull injects
+      // 4. Build VAPID key — strip U+FEFF BOM that Vercel env pull injects
       const rawKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
-      const vapidKey = rawKey.replace(/^﻿/, "").trim();
+      const vapidKey = (rawKey.charCodeAt(0) === 0xfeff ? rawKey.slice(1) : rawKey).trim();
       console.log("[Push] VAPID key (primeros 20 chars):", vapidKey.slice(0, 20));
       if (!vapidKey) throw new Error("VAPID key no configurada");
 
