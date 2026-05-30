@@ -76,6 +76,13 @@ export function useBrowserNotifications() {
       const vapidKey = "BGlPes4v0OwD3xkAm4vLcgrvcqx0WRzsYZu8SDKk7S8nE83eVKBCcftWNidIyb_v4xHWAOdEoKrRmBMD1anEchc";
       console.log("[Push] VAPID key:", vapidKey.slice(0, 20));
 
+      // Unsubscribe from any stale subscription first (different VAPID key = push service error)
+      const existing = await registration.pushManager.getSubscription();
+      if (existing) {
+        console.log("[Push] eliminando suscripción previa");
+        await existing.unsubscribe();
+      }
+
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidKey),
