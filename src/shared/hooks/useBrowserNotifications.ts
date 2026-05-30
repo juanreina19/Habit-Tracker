@@ -72,12 +72,9 @@ export function useBrowserNotifications() {
       ]);
       console.log("[Push] SW listo:", registration);
 
-      // 4. Build VAPID key — strip U+FEFF BOM that Vercel env pull injects
-      const rawKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
-      const firstCode = rawKey.charCodeAt(0);
-      const vapidKey = (firstCode === 0xfeff ? rawKey.slice(1) : rawKey).trim();
-      console.log("[Push] VAPID charCode(0):", firstCode, "key:", vapidKey.slice(0, 20));
-      if (!vapidKey) throw new Error("VAPID key no configurada");
+      // 4. Build VAPID key (public key — safe in source, avoids env var encoding issues)
+      const vapidKey = "BGlPes4v0OwD3xkAm4vLcgrvcqx0WRzsYZu8SDKk7S8nE83eVKBCcftWNidIyb_v4xHWAOdEoKrRmBMD1anEchc";
+      console.log("[Push] VAPID key:", vapidKey.slice(0, 20));
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
