@@ -75,6 +75,15 @@ export interface DbUserAchievement {
   unlocked_at: ISOTimestamp;
 }
 
+export interface DbPushSubscription {
+  id: UUID;
+  user_id: UUID;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  created_at: ISOTimestamp;
+}
+
 // ─── Helper para Supabase client tipado ──────────────────────────────────────
 
 export interface Database {
@@ -108,6 +117,11 @@ export interface Database {
       user_achievements: {
         Row: DbUserAchievement;
         Insert: Omit<DbUserAchievement, "id">;
+        Update: never;
+      };
+      push_subscriptions: {
+        Row: DbPushSubscription;
+        Insert: Omit<DbPushSubscription, "id" | "created_at">;
         Update: never;
       };
     };
