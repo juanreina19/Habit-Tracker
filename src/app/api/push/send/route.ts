@@ -2,13 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
 import { createClient } from "@supabase/supabase-js";
 
-const stripBOM = (s: string) => s.replace(/^﻿/, "");
-
-webpush.setVapidDetails(
-  stripBOM(process.env.VAPID_SUBJECT!),
-  stripBOM(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!),
-  stripBOM(process.env.VAPID_PRIVATE_KEY!)
-);
+const stripBOM = (s: string) => (s.charCodeAt(0) === 0xfeff ? s.slice(1) : s);
 
 export async function POST(request: NextRequest) {
   // Vercel cron sends Authorization: Bearer <CRON_SECRET>
@@ -17,10 +11,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Configure VAPID inside the handler so it runs at request time, not build time
+  webpush.setVapidDetails(
+    stripBOM(process.env.VAPID_SUBJECT ?? ""),
+    stripBOM(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ""),
+    stripBOM(process.env.VAPID_PRIVATE_KEY ?? "")
+  );
+
   // Service role client bypasses RLS to read all subscriptions
   const supabase = createClient(
-    stripBOM(process.env.NEXT_PUBLIC_SUPABASE_URL!),
-    stripBOM(process.env.SUPABASE_SERVICE_ROLE_KEY!)
+    stripBOM(process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""),
+    stripBOM(process.env.SUPABASE_SERVICE_ROLE_KEY ?? "")
   );
 
   const { data: subscriptions, error } = await supabase
@@ -43,7 +44,6 @@ export async function POST(request: NextRequest) {
       webpush
         .sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload)
         .catch((err: { statusCode?: number }) => {
-          // 404/410 = subscription expired, remove it
           if (err.statusCode === 404 || err.statusCode === 410) {
             staleEndpoints.push(sub.endpoint);
           }
@@ -52,7 +52,6 @@ export async function POST(request: NextRequest) {
     )
   );
 
-  // Clean up expired subscriptions
   if (staleEndpoints.length > 0) {
     await supabase.from("push_subscriptions").delete().in("endpoint", staleEndpoints);
   }
