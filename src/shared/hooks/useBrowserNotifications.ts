@@ -50,7 +50,7 @@ export function useBrowserNotifications() {
     try {
       // 2. Subscribe via PushManager
       const registration = await navigator.serviceWorker.ready;
-      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.replace(/^﻿/, "");
       if (!vapidKey) throw new Error("VAPID key not configured");
 
       const subscription = await registration.pushManager.subscribe({
@@ -69,6 +69,7 @@ export function useBrowserNotifications() {
       localStorage.setItem(LS_ENABLED, "true");
     } catch (err) {
       console.error("[Push] Error al suscribir:", err);
+      return "denied" as Permission;
     }
 
     return p;
