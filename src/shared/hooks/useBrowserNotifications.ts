@@ -22,6 +22,8 @@ export function useBrowserNotifications() {
   const [permission, setPermission] = useState<Permission>("default");
   const [isEnabled, setIsEnabled] = useState(false);
   const [reminderTime, setReminderTimeState] = useState(DEFAULT_TIME);
+  const [subscribeError, setSubscribeError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -43,15 +45,25 @@ export function useBrowserNotifications() {
   }, []);
 
   const enable = useCallback(async (): Promise<Permission> => {
-    // 1. Request browser permission
-    const p = permission === "default" ? await requestPermission() : permission;
-    if (p !== "granted") return p;
+    setSubscribeError(null);
+    setIsLoading(true);
 
     try {
+      // 1. Request browser permission
+      const p = permission === "default" ? await requestPermission() : permission;
+      if (p !== "granted") {
+        setIsLoading(false);
+        return p;
+      }
+
       // 2. Subscribe via PushManager
+      if (!("PushManager" in window)) throw new Error("Push no soportado en este navegador");
+
       const registration = await navigator.serviceWorker.ready;
-      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.replace(/^﻿/, "");
-      if (!vapidKey) throw new Error("VAPID key not configured");
+
+      // Strip BOM (U+FEFF) that Vercel env pull can inject
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.replace(/^﻿/, "").trim();
+      if (!vapidKey) throw new Error("VAPID key no configurada");
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
@@ -59,25 +71,28 @@ export function useBrowserNotifications() {
       });
 
       // 3. Save subscription to server
-      await fetch("/api/push/subscribe", {
+      const res = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(subscription.toJSON()),
       });
+      if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
 
       setIsEnabled(true);
       localStorage.setItem(LS_ENABLED, "true");
+      setIsLoading(false);
+      return p;
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error("[Push] Error al suscribir:", err);
+      setSubscribeError(msg);
+      setIsLoading(false);
       return "denied" as Permission;
     }
-
-    return p;
   }, [permission, requestPermission]);
 
   const disable = useCallback(async () => {
     try {
-      // Unsubscribe from PushManager + remove from server
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
       if (subscription) {
@@ -93,6 +108,7 @@ export function useBrowserNotifications() {
     }
 
     setIsEnabled(false);
+    setSubscribeError(null);
     localStorage.setItem(LS_ENABLED, "false");
   }, []);
 
@@ -101,5 +117,5 @@ export function useBrowserNotifications() {
     localStorage.setItem(LS_TIME, time);
   }, []);
 
-  return { permission, isEnabled, reminderTime, enable, disable, setReminderTime };
+  return { permission, isEnabled, reminderTime, enable, disable, setReminderTime, subscribeError, isLoading };
 }

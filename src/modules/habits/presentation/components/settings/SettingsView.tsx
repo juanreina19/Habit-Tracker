@@ -497,15 +497,14 @@ function DeleteConfirmDialog({
 }
 
 function NotificationsSection() {
-  const { permission, isEnabled, reminderTime, enable, disable, setReminderTime } =
+  const { permission, isEnabled, reminderTime, enable, disable, setReminderTime, subscribeError, isLoading } =
     useBrowserNotifications();
 
   const handleToggle = async () => {
     if (isEnabled) {
       disable();
     } else {
-      const p = await enable();
-      if (p === "denied") return; // browser denied, no action needed
+      await enable();
     }
   };
 
@@ -531,25 +530,33 @@ function NotificationsSection() {
             <p className="font-medium text-sm" style={{ color: "#FFFFFF" }}>
               Recordatorio diario
             </p>
-            <p className="text-xs mt-0.5" style={{ color: "#8888AA" }}>
-              {permission === "denied"
-                ? "Permiso denegado — actívalo en ajustes del navegador"
-                : isEnabled
-                  ? "Notificación activa ✓"
-                  : "Recibe un aviso para no olvidar tus hábitos"}
+            <p className="text-xs mt-0.5" style={{ color: subscribeError ? "#FF5252" : "#8888AA" }}>
+              {subscribeError
+                ? subscribeError
+                : permission === "denied"
+                  ? "Permiso denegado — actívalo en ajustes del navegador"
+                  : isEnabled
+                    ? "Notificación activa ✓"
+                    : "Recibe un aviso para no olvidar tus hábitos"}
             </p>
           </div>
           {/* Toggle switch */}
           <button
             onClick={handleToggle}
-            disabled={permission === "denied"}
+            disabled={permission === "denied" || isLoading}
             className="flex-shrink-0 w-12 h-7 rounded-full relative transition-colors disabled:opacity-30"
             style={{ background: isEnabled ? "#4CAF82" : "#2A2A2A" }}
           >
-            <span
-              className="absolute top-1 w-5 h-5 rounded-full bg-white transition-all"
-              style={{ left: isEnabled ? "calc(100% - 24px)" : "4px" }}
-            />
+            {isLoading ? (
+              <span className="absolute inset-0 flex items-center justify-center">
+                <span className="w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
+              </span>
+            ) : (
+              <span
+                className="absolute top-1 w-5 h-5 rounded-full bg-white transition-all"
+                style={{ left: isEnabled ? "calc(100% - 24px)" : "4px" }}
+              />
+            )}
           </button>
         </div>
 
