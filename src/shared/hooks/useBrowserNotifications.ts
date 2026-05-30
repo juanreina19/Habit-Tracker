@@ -73,7 +73,7 @@ export function useBrowserNotifications() {
       console.log("[Push] SW listo:", registration);
 
       // 4. Build VAPID key (public key — safe in source, avoids env var encoding issues)
-      const vapidKey = "BGlPes4v0OwD3xkAm4vLcgrvcqx0WRzsYZu8SDKk7S8nE83eVKBCcftWNidIyb_v4xHWAOdEoKrRmBMD1anEchc";
+      const vapidKey = "BKoHSjx2S8H0eihA_50XjrlJC23yEujVemY1TIGsHcWtIxhn5onRFUVAYO4fdZ1E3L_OLG65Pj8yjqRfBDEibbA";
       console.log("[Push] VAPID key:", vapidKey.slice(0, 20));
 
       // Unsubscribe from any stale subscription first (different VAPID key = push service error)
