@@ -47,45 +47,61 @@ export function useBrowserNotifications() {
   const enable = useCallback(async (): Promise<Permission> => {
     setSubscribeError(null);
     setIsLoading(true);
+    console.log("[Push] enable() iniciado");
 
     try {
       // 1. Request browser permission
       const p = permission === "default" ? await requestPermission() : permission;
+      console.log("[Push] permiso:", p);
       if (p !== "granted") {
         setIsLoading(false);
         return p;
       }
 
-      // 2. Subscribe via PushManager
+      // 2. Check PushManager availability
       if (!("PushManager" in window)) throw new Error("Push no soportado en este navegador");
+      console.log("[Push] PushManager disponible");
 
-      const registration = await navigator.serviceWorker.ready;
+      // 3. Wait for active service worker
+      console.log("[Push] esperando serviceWorker.ready…");
+      const registration = await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Service worker no respondió en 10s")), 10000)
+        ),
+      ]);
+      console.log("[Push] SW listo:", registration);
 
-      // Strip BOM (U+FEFF) that Vercel env pull can inject
-      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.replace(/^﻿/, "").trim();
+      // 4. Subscribe — strip BOM (U+FEFF) that Vercel env pull injects
+      const rawKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+      const vapidKey = rawKey.replace(/^﻿/, "").trim();
+      console.log("[Push] VAPID key (primeros 20 chars):", vapidKey.slice(0, 20));
       if (!vapidKey) throw new Error("VAPID key no configurada");
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
+      console.log("[Push] suscripción creada:", subscription.endpoint.slice(0, 40));
 
-      // 3. Save subscription to server
+      // 5. Save to server
       const res = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(subscription.toJSON()),
       });
+      console.log("[Push] respuesta servidor:", res.status);
       if (!res.ok) throw new Error(`Error del servidor: ${res.status}`);
 
       setIsEnabled(true);
       localStorage.setItem(LS_ENABLED, "true");
       setIsLoading(false);
+      console.log("[Push] habilitado correctamente");
       return p;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.error("[Push] Error al suscribir:", err);
-      setSubscribeError(msg);
+      console.error("[Push] error:", err);
+      setSubscribeError(msg || "Error desconocido al activar notificaciones");
       setIsLoading(false);
       return "denied" as Permission;
     }
