@@ -84,7 +84,7 @@ export function useBrowserNotifications() {
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidKey),
+        applicationServerKey: vapidKey,
       });
       console.log("[Push] suscripción creada:", subscription.endpoint.slice(0, 40));
 
