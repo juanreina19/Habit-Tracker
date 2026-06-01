@@ -10,6 +10,7 @@ export interface Habit {
   color: string | null;
   activeDays: number[];       // [1..7] 1=lunes, 7=domingo
   estimatedMinutes: number | null;
+  startTime: string | null;  // "HH:mm"
   order: number;
   isActive: boolean;
   createdAt: ISOTimestamp;

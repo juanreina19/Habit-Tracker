@@ -35,6 +35,7 @@ export interface DbHabit {
   color: string | null;
   active_days: number[];  // [1..7] donde 1=lunes, 7=domingo
   estimated_minutes: number | null;
+  start_time: string | null; // "HH:mm"
   order: number;
   is_active: boolean;
   created_at: ISOTimestamp;

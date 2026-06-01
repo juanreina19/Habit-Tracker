@@ -9,6 +9,7 @@ export interface CreateHabitInput {
   color?: string;
   activeDays: number[];
   estimatedMinutes?: number;
+  startTime?: string | null;
 }
 
 export interface UpdateHabitInput {
@@ -19,6 +20,7 @@ export interface UpdateHabitInput {
   color?: string | null;
   activeDays?: number[];
   estimatedMinutes?: number | null;
+  startTime?: string | null;
   order?: number;
   isActive?: boolean;
 }

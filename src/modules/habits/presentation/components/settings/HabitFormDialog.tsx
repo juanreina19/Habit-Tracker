@@ -8,6 +8,12 @@ import type { Habit } from "../../../domain/entities/Habit";
 import type { CreateHabitInput, UpdateHabitInput } from "../../../domain/repositories/IHabitRepository";
 import type { Category } from "@/modules/categories/domain/entities/Category";
 
+function calcEndTime(start: string, minutes: number): string {
+  const [h, m] = start.split(":").map(Number);
+  const total = h * 60 + m + minutes;
+  return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
 const DAY_LABELS: Record<number, string> = {
   1: "L", 2: "M", 3: "X", 4: "J", 5: "V", 6: "S", 7: "D",
 };
@@ -28,6 +34,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [activeDays, setActiveDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 7]);
   const [estimatedMinutes, setEstimatedMinutes] = useState<string>("");
+  const [startTime, setStartTime] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
   const [nameError, setNameError] = useState("");
   const [daysError, setDaysError] = useState("");
@@ -40,6 +47,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
       setCategoryId(habit?.categoryId ?? null);
       setActiveDays(habit?.activeDays ?? [1, 2, 3, 4, 5, 6, 7]);
       setEstimatedMinutes(habit?.estimatedMinutes?.toString() ?? "");
+      setStartTime(habit?.startTime ?? "");
       setNameError("");
       setDaysError("");
     }
@@ -78,6 +86,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
         categoryId: categoryId,
         activeDays,
         estimatedMinutes: minutes && !isNaN(minutes) ? minutes : undefined,
+        startTime: startTime || null,
       };
       await onSave(data);
       onClose();
@@ -197,22 +206,41 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                 </div>
               )}
 
-              {/* Estimated minutes */}
-              <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
-                  TIEMPO ESTIMADO (minutos, opcional)
-                </label>
-                <input
-                  type="number"
-                  value={estimatedMinutes}
-                  onChange={(e) => setEstimatedMinutes(e.target.value)}
-                  placeholder="Ej: 20"
-                  min={1}
-                  max={480}
-                  className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
-                  style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent" }}
-                />
+              {/* Start time + estimated minutes */}
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                    HORA DE INICIO
+                  </label>
+                  <input
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+                    style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent", colorScheme: "dark" }}
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                    DURACIÓN (min)
+                  </label>
+                  <input
+                    type="number"
+                    value={estimatedMinutes}
+                    onChange={(e) => setEstimatedMinutes(e.target.value)}
+                    placeholder="Ej: 20"
+                    min={1}
+                    max={480}
+                    className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+                    style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent" }}
+                  />
+                </div>
               </div>
+              {startTime && estimatedMinutes && !isNaN(parseInt(estimatedMinutes, 10)) && (
+                <p className="text-xs -mt-3" style={{ color: "#4CAF82" }}>
+                  Fin: {calcEndTime(startTime, parseInt(estimatedMinutes, 10))}
+                </p>
+              )}
 
               {/* Color */}
               <div>

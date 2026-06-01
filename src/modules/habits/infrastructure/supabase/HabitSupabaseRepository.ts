@@ -15,6 +15,7 @@ function mapDbToHabit(row: DbHabit): Habit {
     color: row.color,
     activeDays: row.active_days,
     estimatedMinutes: row.estimated_minutes,
+    startTime: row.start_time,
     order: row.order,
     isActive: row.is_active,
     createdAt: row.created_at,
@@ -94,6 +95,7 @@ export class HabitSupabaseRepository implements IHabitRepository {
         color: input.color ?? null,
         active_days: input.activeDays,
         estimated_minutes: input.estimatedMinutes ?? null,
+        start_time: input.startTime ?? null,
         order: count ?? 0,
         is_active: true,
       })
@@ -115,6 +117,7 @@ export class HabitSupabaseRepository implements IHabitRepository {
         ...(input.color !== undefined && { color: input.color }),
         ...(input.activeDays !== undefined && { active_days: input.activeDays }),
         ...(input.estimatedMinutes !== undefined && { estimated_minutes: input.estimatedMinutes }),
+        ...(input.startTime !== undefined && { start_time: input.startTime }),
         ...(input.order !== undefined && { order: input.order }),
         ...(input.isActive !== undefined && { is_active: input.isActive }),
       })

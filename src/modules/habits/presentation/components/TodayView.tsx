@@ -17,6 +17,21 @@ function getGreeting(name: string): string {
   return name ? `${base}, ${name}!` : `${base}!`;
 }
 
+function calcEndTime(start: string, minutes: number): string {
+  const [h, m] = start.split(":").map(Number);
+  const total = h * 60 + m + minutes;
+  return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
+function isHabitLocked(habit: HabitWithStatus): boolean {
+  if (!habit.startTime || !habit.estimatedMinutes) return false;
+  const now = new Date();
+  const [h, m] = habit.startTime.split(":").map(Number);
+  const endMinutes = h * 60 + m + habit.estimatedMinutes;
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  return nowMinutes > endMinutes;
+}
+
 function canFreeze(habit: HabitWithStatus): boolean {
   if (habit.isCompletedToday || !habit.streak || habit.streak.currentStreak === 0) return false;
   if (!habit.streak.freezeUsedAt) return true;
@@ -130,14 +145,25 @@ export default function TodayView({ userId, userName = "" }: Props) {
             </div>
           )}
 
-          {habits.map((habit) => (
-            <HabitRow
-              key={habit.id}
-              habit={habit}
-              onToggle={() => handleToggle(habit)}
-              onFreeze={canFreeze(habit) ? () => handleFreeze(habit.id) : undefined}
-            />
-          ))}
+          {[...habits]
+            .sort((a, b) => {
+              if (!a.startTime && !b.startTime) return 0;
+              if (!a.startTime) return 1;
+              if (!b.startTime) return -1;
+              return a.startTime.localeCompare(b.startTime);
+            })
+            .map((habit) => {
+              const locked = isHabitLocked(habit);
+              return (
+                <HabitRow
+                  key={habit.id}
+                  habit={habit}
+                  locked={locked}
+                  onToggle={() => !locked && handleToggle(habit)}
+                  onFreeze={canFreeze(habit) ? () => handleFreeze(habit.id) : undefined}
+                />
+              );
+            })}
         </div>
       </div>
     </>
@@ -147,9 +173,10 @@ export default function TodayView({ userId, userName = "" }: Props) {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function HabitRow({
-  habit, onToggle, onFreeze,
+  habit, locked, onToggle, onFreeze,
 }: {
   habit: HabitWithStatus;
+  locked: boolean;
   onToggle: () => void;
   onFreeze?: () => void;
 }) {
@@ -159,12 +186,15 @@ function HabitRow({
     <motion.button
       layout
       onClick={onToggle}
+      disabled={locked}
       className="w-full text-left rounded-[16px] p-4 flex items-center gap-4"
       style={{
         background: habit.isCompletedToday ? `${accentColor}18` : "#111111",
         border: `1px solid ${habit.isCompletedToday ? `${accentColor}40` : "transparent"}`,
+        opacity: locked ? 0.5 : 1,
+        cursor: locked ? "not-allowed" : "pointer",
       }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={locked ? {} : { scale: 0.98 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
     >
       {/* Animated checkbox */}
@@ -208,13 +238,19 @@ function HabitRow({
         >
           {habit.name}
         </p>
-        <div className="flex items-center gap-3 mt-0.5">
+        <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+          {habit.startTime && (
+            <span className="text-xs" style={{ color: locked ? "#FF5252" : "#8888AA" }}>
+              {locked ? "🔒 " : ""}{habit.startTime}
+              {habit.estimatedMinutes ? ` – ${calcEndTime(habit.startTime, habit.estimatedMinutes)}` : ""}
+            </span>
+          )}
           {habit.streak && habit.streak.currentStreak > 0 && (
             <span className="text-xs" style={{ color: "#8888AA" }}>
               🔥 {habit.streak.currentStreak} días
             </span>
           )}
-          {habit.estimatedMinutes && (
+          {!habit.startTime && habit.estimatedMinutes && (
             <span className="text-xs" style={{ color: "#8888AA" }}>
               {habit.estimatedMinutes} min
             </span>
