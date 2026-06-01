@@ -206,35 +206,35 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                 </div>
               )}
 
-              {/* Start time + duration — grid forces equal widths on mobile */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
-                    HORA DE INICIO
-                  </label>
-                  <input
-                    type="time"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                    className="w-full rounded-[12px] px-3 text-sm outline-none"
-                    style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent", colorScheme: "dark", height: "48px" }}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
-                    DURACIÓN (min)
-                  </label>
-                  <input
-                    type="number"
-                    value={estimatedMinutes}
-                    onChange={(e) => setEstimatedMinutes(e.target.value)}
-                    placeholder="Ej: 20"
-                    min={1}
-                    max={480}
-                    className="w-full rounded-[12px] px-3 text-sm outline-none"
-                    style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent", height: "48px" }}
-                  />
-                </div>
+              {/* Start time */}
+              <div>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                  HORA DE INICIO (opcional)
+                </label>
+                <input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+                  style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent", colorScheme: "dark" }}
+                />
+              </div>
+
+              {/* Estimated minutes */}
+              <div>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                  DURACIÓN (minutos, opcional)
+                </label>
+                <input
+                  type="number"
+                  value={estimatedMinutes}
+                  onChange={(e) => setEstimatedMinutes(e.target.value)}
+                  placeholder="Ej: 20"
+                  min={1}
+                  max={480}
+                  className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+                  style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent" }}
+                />
               </div>
               {startTime && estimatedMinutes && !isNaN(parseInt(estimatedMinutes, 10)) && (
                 <p className="text-xs -mt-3" style={{ color: "#4CAF82" }}>
