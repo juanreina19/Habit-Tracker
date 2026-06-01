@@ -105,7 +105,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
           style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
         />
         <Dialog.Content
-          className="fixed z-50 left-1/2 bottom-0 w-full max-w-lg -translate-x-1/2 rounded-t-[24px] outline-none overflow-y-auto"
+          className="fixed z-50 left-1/2 bottom-0 w-full max-w-lg -translate-x-1/2 rounded-t-[24px] outline-none overflow-y-auto overflow-x-hidden"
           style={{ background: "#111111", maxHeight: "92dvh" }}
         >
           <div className="p-6">
@@ -216,7 +216,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
-                  style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent", colorScheme: "dark" }}
+                  style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent", colorScheme: "dark", boxSizing: "border-box", maxWidth: "100%" }}
                 />
               </div>
 
