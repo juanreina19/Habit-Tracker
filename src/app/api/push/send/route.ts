@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const stripBOM = (s: string) => (s.charCodeAt(0) === 0xfeff ? s.slice(1) : s);
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   // Vercel cron sends Authorization: Bearer <CRON_SECRET>
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
