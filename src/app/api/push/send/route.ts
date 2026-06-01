@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
 import { createClient } from "@supabase/supabase-js";
 
-const stripBOM = (s: string) => (s.charCodeAt(0) === 0xfeff ? s.slice(1) : s);
+// Public key is safe in source — avoids env var encoding issues
+const VAPID_PUBLIC_KEY = "BKoHSjx2S8H0eihA_50XjrlJC23yEujVemY1TIGsHcWtIxhn5onRFUVAYO4fdZ1E3L_OLG65Pj8yjqRfBDEibbA";
+const stripBOM = (s: string) => (s.charCodeAt(0) === 0xfeff ? s.slice(1) : s).trim();
 
 export async function GET(request: NextRequest) {
   // Vercel cron sends Authorization: Bearer <CRON_SECRET>
@@ -13,8 +15,8 @@ export async function GET(request: NextRequest) {
 
   // Configure VAPID inside the handler so it runs at request time, not build time
   webpush.setVapidDetails(
-    stripBOM(process.env.VAPID_SUBJECT ?? ""),
-    stripBOM(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ""),
+    stripBOM(process.env.VAPID_SUBJECT ?? "mailto:croldanr5@gmail.com"),
+    VAPID_PUBLIC_KEY,
     stripBOM(process.env.VAPID_PRIVATE_KEY ?? "")
   );
 
