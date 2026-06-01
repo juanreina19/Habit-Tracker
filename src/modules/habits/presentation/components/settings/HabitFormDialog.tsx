@@ -215,8 +215,8 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   type="time"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
-                  style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent", colorScheme: "dark", boxSizing: "border-box", maxWidth: "100%" }}
+                  className="w-full rounded-[12px] px-4 py-3 outline-none"
+                  style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent", colorScheme: "dark", fontSize: "16px", WebkitAppearance: "none", appearance: "none", boxSizing: "border-box" }}
                 />
               </div>
 
