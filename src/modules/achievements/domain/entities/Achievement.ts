@@ -6,7 +6,9 @@ export type AchievementKey =
   | "streak_100"
   | "perfect_day"
   | "perfect_week"
-  | "consistent_30";
+  | "consistent_30"
+  | "comeback"
+  | "perfect_month";
 
 export interface Achievement {
   id: UUID;

@@ -5,12 +5,14 @@ import type { UUID } from "@/shared/types/database.types";
 
 // Fixed UUIDs so we can safely upsert without a unique index on `key`
 export const ACHIEVEMENT_SEEDS: Achievement[] = [
-  { id: "a0000000-0000-0000-0000-000000000001", key: "streak_7",      name: "Primera Llama",   description: "Completa un hábito 7 días seguidos",        icon: "🔥", threshold: 7   },
-  { id: "a0000000-0000-0000-0000-000000000002", key: "streak_30",     name: "Imparable",       description: "Completa un hábito 30 días seguidos",       icon: "⚡", threshold: 30  },
-  { id: "a0000000-0000-0000-0000-000000000003", key: "streak_100",    name: "Legendario",      description: "Completa un hábito 100 días seguidos",      icon: "👑", threshold: 100 },
-  { id: "a0000000-0000-0000-0000-000000000004", key: "perfect_day",   name: "Día Perfecto",    description: "100% de hábitos completados en un día",     icon: "⭐", threshold: 1   },
-  { id: "a0000000-0000-0000-0000-000000000005", key: "perfect_week",  name: "Semana Perfecta", description: "100% completado todos los días de una semana", icon: "🌟", threshold: 7 },
-  { id: "a0000000-0000-0000-0000-000000000006", key: "consistent_30", name: "Constante",       description: "Completa hábitos en 30 días distintos",     icon: "💎", threshold: 30  },
+  { id: "a0000000-0000-0000-0000-000000000001", key: "streak_7",      name: "Primera Llama",   description: "Completa un hábito 7 días seguidos",           icon: "🔥", threshold: 7   },
+  { id: "a0000000-0000-0000-0000-000000000002", key: "streak_30",     name: "Imparable",       description: "Completa un hábito 30 días seguidos",          icon: "⚡", threshold: 30  },
+  { id: "a0000000-0000-0000-0000-000000000003", key: "streak_100",    name: "Legendario",      description: "Completa un hábito 100 días seguidos",         icon: "👑", threshold: 100 },
+  { id: "a0000000-0000-0000-0000-000000000004", key: "perfect_day",   name: "Día Perfecto",    description: "100% de hábitos completados en un día",        icon: "⭐", threshold: 1   },
+  { id: "a0000000-0000-0000-0000-000000000005", key: "perfect_week",  name: "Semana Perfecta", description: "100% completado todos los días de una semana", icon: "🌟", threshold: 7   },
+  { id: "a0000000-0000-0000-0000-000000000006", key: "consistent_30", name: "Constante",       description: "Completa hábitos en 30 días distintos",        icon: "💎", threshold: 30  },
+  { id: "a0000000-0000-0000-0000-000000000007", key: "comeback",      name: "Regreso Épico",   description: "Reconstruye tu racha a 3 días tras romperla",  icon: "🦅", threshold: 3   },
+  { id: "a0000000-0000-0000-0000-000000000008", key: "perfect_month", name: "Mes Perfecto",    description: "100% completado cada día activo del mes",      icon: "🏆", threshold: 1   },
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

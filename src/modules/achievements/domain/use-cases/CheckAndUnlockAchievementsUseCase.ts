@@ -1,4 +1,4 @@
-import { startOfWeek, endOfWeek, subWeeks, eachDayOfInterval } from "date-fns";
+import { startOfWeek, endOfWeek, subWeeks, eachDayOfInterval, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import type { IHabitRepository } from "@/modules/habits/domain/repositories/IHabitRepository";
 import type { IAchievementRepository } from "../repositories/IAchievementRepository";
 import type { UserAchievement, AchievementKey } from "../entities/Achievement";
@@ -107,6 +107,43 @@ export class CheckAndUnlockAchievementsUseCase {
         try {
           const ua = await this.achievementRepo.unlock(userId, seed.id);
           newlyUnlocked.push(ua);
+        } catch { /* already unlocked */ }
+      }
+    }
+
+    // ── comeback ─────────────────────────────────────────────────────────────
+    // Award when currentStreak >= 3 AND bestStreak > currentStreak (streak was broken and rebuilt)
+    if (!alreadyUnlockedKeys.has("comeback")) {
+      const qualifyingComeback = streaks.find(
+        (s) => s.currentStreak >= 3 && s.bestStreak > s.currentStreak && s.bestStreak >= 7
+      );
+      if (qualifyingComeback) {
+        const seed = ACHIEVEMENT_SEEDS.find((a) => a.key === "comeback")!;
+        try {
+          const ua = await this.achievementRepo.unlock(userId, seed.id, qualifyingComeback.habitId);
+          newlyUnlocked.push(ua);
+          alreadyUnlockedKeys.add("comeback");
+        } catch { /* already unlocked */ }
+      }
+    }
+
+    // ── perfect_month ────────────────────────────────────────────────────────
+    // Award when every active day of the previous calendar month was 100% complete
+    if (!alreadyUnlockedKeys.has("perfect_month")) {
+      const prevMonthStart = startOfMonth(subMonths(now, 1));
+      const prevMonthEnd = endOfMonth(prevMonthStart);
+      const prevMonthDays = eachDayOfInterval({ start: prevMonthStart, end: prevMonthEnd });
+
+      const activeDays = prevMonthDays.filter((d) => {
+        return habits.some((h) => isHabitActiveOnDay(h.activeDays, d));
+      });
+
+      if (activeDays.length > 0 && activeDays.every((d) => wasDayComplete(d))) {
+        const seed = ACHIEVEMENT_SEEDS.find((a) => a.key === "perfect_month")!;
+        try {
+          const ua = await this.achievementRepo.unlock(userId, seed.id);
+          newlyUnlocked.push(ua);
+          alreadyUnlockedKeys.add("perfect_month");
         } catch { /* already unlocked */ }
       }
     }

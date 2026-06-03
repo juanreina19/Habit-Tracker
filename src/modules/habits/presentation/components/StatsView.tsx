@@ -7,7 +7,9 @@ import {
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useStats } from "../hooks/useStats";
+import { useYearlyHeatmap } from "../hooks/useYearlyHeatmap";
 import type { HabitStat, WeekTrend } from "../../domain/use-cases/GetStatsUseCase";
+import type { DayProgress } from "../../domain/use-cases/GetMonthlyProgressUseCase";
 import type { Achievement, UserAchievement } from "@/modules/achievements/domain/entities/Achievement";
 import type { UUID } from "@/shared/types/database.types";
 
@@ -18,6 +20,8 @@ interface Props {
 
 export default function StatsView({ userId, userCreatedAt }: Props) {
   const { data, isLoading, error } = useStats(userId, userCreatedAt);
+  const currentYear = new Date().getFullYear();
+  const { days: heatmapDays, isLoading: heatmapLoading } = useYearlyHeatmap(userId, currentYear);
   // Avoid Recharts SSR hydration mismatch
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
@@ -55,6 +59,15 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
         <StatCard label="Racha actual" value={bestCurrentStreak.toString()} unit="días" highlight={bestCurrentStreak >= 7} />
         <StatCard label="Este mes" value={`${monthlyRate}%`} unit="completado" highlight={monthlyRate >= 80} />
       </div>
+
+      {/* Yearly heatmap */}
+      <Section title={`Actividad ${currentYear}`}>
+        {heatmapLoading ? (
+          <div className="h-20 rounded-[10px] animate-pulse" style={{ background: "#1A1A1A" }} />
+        ) : (
+          <YearlyHeatmap days={heatmapDays} year={currentYear} />
+        )}
+      </Section>
 
       {/* Weekly trend chart */}
       <Section title="Tendencia semanal">
@@ -243,6 +256,106 @@ function AchievementCard({ achievement, userAchievement }: {
         <p className="text-[10px] mt-0.5 leading-tight" style={{ color: "#555555" }}>
           {isUnlocked ? unlockedDate! : achievement.description}
         </p>
+      </div>
+    </div>
+  );
+}
+
+const MONTH_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+function heatmapColor(rate: number, isFuture: boolean): string {
+  if (isFuture || rate === -1) return "#1A1A1A";
+  if (rate === 0) return "rgba(255,82,82,0.35)";
+  if (rate < 50) return "rgba(245,166,35,0.45)";
+  if (rate < 100) return "rgba(163,207,138,0.55)";
+  return "#4CAF82";
+}
+
+function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
+  const [selected, setSelected] = useState<DayProgress | null>(null);
+
+  if (days.length === 0) return <div className="h-20" />;
+
+  // Start from the Monday of the week containing Jan 1
+  const jan1 = new Date(year, 0, 1);
+  const rawDay = jan1.getDay(); // 0=Sun
+  const leadingNulls = rawDay === 0 ? 6 : rawDay - 1;
+
+  const allCells: (DayProgress | null)[] = [...Array(leadingNulls).fill(null), ...days];
+  const remainder = allCells.length % 7;
+  if (remainder !== 0) for (let i = 0; i < 7 - remainder; i++) allCells.push(null);
+
+  const weeks: (DayProgress | null)[][] = [];
+  for (let w = 0; w < allCells.length / 7; w++) {
+    weeks.push(allCells.slice(w * 7, (w + 1) * 7));
+  }
+
+  // Month label positions: week index of first day of each month
+  const monthPositions: { month: number; weekIdx: number }[] = [];
+  for (let m = 0; m < 12; m++) {
+    const firstOfMonth = new Date(year, m, 1);
+    const dayOfYear = Math.floor((firstOfMonth.getTime() - jan1.getTime()) / 86400000);
+    const weekIdx = Math.floor((dayOfYear + leadingNulls) / 7);
+    monthPositions.push({ month: m, weekIdx });
+  }
+
+  const CELL = 11; // cell size + gap
+
+  return (
+    <div>
+      {selected && (
+        <div className="mb-3 rounded-[10px] px-3 py-2 flex items-center justify-between"
+          style={{ background: "#1A1A1A" }}>
+          <p className="text-xs" style={{ color: "#8888AA" }}>
+            {format(selected.date, "EEEE d 'de' MMMM", { locale: es }).replace(/^\w/, c => c.toUpperCase())}
+          </p>
+          {!selected.isFuture && selected.scheduled > 0 ? (
+            <p className="text-sm font-semibold" style={{ color: heatmapColor(selected.completionRate, false) }}>
+              {selected.completionRate}% · {selected.completed}/{selected.scheduled}
+            </p>
+          ) : (
+            <p className="text-xs" style={{ color: "#555555" }}>
+              {selected.isFuture ? "Aún no" : "Sin hábitos"}
+            </p>
+          )}
+        </div>
+      )}
+      <div className="overflow-x-auto -mx-1 px-1">
+        <div style={{ width: weeks.length * CELL + 4 }}>
+          {/* Month labels */}
+          <div className="flex mb-1" style={{ paddingLeft: 0 }}>
+            {monthPositions.map(({ month, weekIdx }, i) => {
+              const nextWeekIdx = i < monthPositions.length - 1 ? monthPositions[i + 1].weekIdx : weeks.length;
+              const spanWidth = (nextWeekIdx - weekIdx) * CELL;
+              if (spanWidth < CELL * 2) return null;
+              return (
+                <div key={month} style={{ width: spanWidth, minWidth: spanWidth, marginLeft: i === 0 ? weekIdx * CELL : 0 }}>
+                  <span style={{ fontSize: 9, color: "#555555" }}>{MONTH_LABELS[month]}</span>
+                </div>
+              );
+            })}
+          </div>
+          {/* Grid: rows = days of week, columns = weeks */}
+          <div className="flex gap-[3px]">
+            {weeks.map((week, wi) => (
+              <div key={wi} className="flex flex-col gap-[3px]">
+                {week.map((day, di) => (
+                  <button
+                    key={di}
+                    onClick={() => day && setSelected(prev => prev?.date.getTime() === day.date.getTime() ? null : day)}
+                    className="rounded-[2px] flex-shrink-0"
+                    style={{
+                      width: 8, height: 8,
+                      background: day ? heatmapColor(day.completionRate, day.isFuture) : "transparent",
+                      outline: selected?.date.getTime() === day?.date.getTime() ? "1px solid rgba(255,255,255,0.6)" : "none",
+                      cursor: day ? "pointer" : "default",
+                    }}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

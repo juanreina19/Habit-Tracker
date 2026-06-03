@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Reorder, useDragControls } from "framer-motion";
-import { Pencil, Trash2, GripVertical, Bell, BellOff } from "lucide-react";
+import { Pencil, Trash2, GripVertical, Bell, BellOff, User } from "lucide-react";
 import { useBrowserNotifications } from "@/shared/hooks/useBrowserNotifications";
 import { useSettingsHabits } from "../../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function SettingsView({ userId }: Props) {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("habits");
 
   const {
@@ -75,7 +77,16 @@ export default function SettingsView({ userId }: Props) {
 
   return (
     <div className="px-5 pt-14 pb-8 max-w-lg mx-auto">
-      <h1 className="text-3xl font-semibold mb-6" style={{ color: "#FFFFFF" }}>Ajustes</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-semibold" style={{ color: "#FFFFFF" }}>Ajustes</h1>
+        <button
+          onClick={() => router.push("/profile")}
+          className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60"
+          style={{ background: "#1C1C1C" }}
+        >
+          <User size={18} color="#8888AA" />
+        </button>
+      </div>
 
       {/* Tabs */}
       <div className="flex rounded-[14px] p-1 mb-6" style={{ background: "#111111" }}>

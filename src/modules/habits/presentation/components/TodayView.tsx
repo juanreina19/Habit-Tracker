@@ -133,7 +133,7 @@ export default function TodayView({ userId, userName = "" }: Props) {
           </div>
         )}
 
-        {/* Habit list */}
+        {/* Habit list — grouped by time of day */}
         <div className="flex flex-col gap-3">
           {totalCount === 0 && (
             <div className="rounded-[20px] p-8 text-center" style={{ background: "#111111" }}>
@@ -145,25 +145,46 @@ export default function TodayView({ userId, userName = "" }: Props) {
             </div>
           )}
 
-          {[...habits]
-            .sort((a, b) => {
-              if (!a.startTime && !b.startTime) return 0;
-              if (!a.startTime) return 1;
-              if (!b.startTime) return -1;
-              return a.startTime.localeCompare(b.startTime);
-            })
-            .map((habit) => {
-              const locked = isHabitLocked(habit);
-              return (
-                <HabitRow
-                  key={habit.id}
-                  habit={habit}
-                  locked={locked}
-                  onToggle={() => !locked && handleToggle(habit)}
-                  onFreeze={canFreeze(habit) ? () => handleFreeze(habit.id) : undefined}
-                />
-              );
-            })}
+          {(["morning", "afternoon", "evening", "none"] as const).map((groupKey) => {
+            const groupLabel: Record<string, string> = {
+              morning: "Mañana", afternoon: "Tarde", evening: "Noche", none: "Sin hora",
+            };
+            const groupHabits = [...habits]
+              .filter((h) => {
+                if (groupKey === "morning") return !!h.startTime && h.startTime < "12:00";
+                if (groupKey === "afternoon") return !!h.startTime && h.startTime >= "12:00" && h.startTime < "18:00";
+                if (groupKey === "evening") return !!h.startTime && h.startTime >= "18:00";
+                return !h.startTime;
+              })
+              .sort((a, b) => (a.startTime ?? "").localeCompare(b.startTime ?? ""));
+
+            if (groupHabits.length === 0) return null;
+
+            return (
+              <div key={groupKey}>
+                <div className="flex items-center gap-2 mb-2 mt-1">
+                  <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#8888AA" }}>
+                    {groupLabel[groupKey]}
+                  </span>
+                  <div className="flex-1 h-px" style={{ background: "rgba(136,136,170,0.15)" }} />
+                </div>
+                <div className="flex flex-col gap-3">
+                  {groupHabits.map((habit) => {
+                    const locked = isHabitLocked(habit);
+                    return (
+                      <HabitRow
+                        key={habit.id}
+                        habit={habit}
+                        locked={locked}
+                        onToggle={() => !locked && handleToggle(habit)}
+                        onFreeze={canFreeze(habit) ? () => handleFreeze(habit.id) : undefined}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </>
@@ -183,16 +204,24 @@ function HabitRow({
   const accentColor = habit.color ?? "#4CAF82";
 
   return (
-    <motion.button
+    <motion.div
       layout
-      onClick={onToggle}
-      disabled={locked}
-      className="w-full text-left rounded-[16px] p-4 flex items-center gap-4"
+      drag={locked ? false : "x"}
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0.05, right: 0.3 }}
+      dragSnapToOrigin
+      onDragEnd={(_, info) => {
+        if (!locked && info.offset.x > 60) onToggle();
+      }}
+      onClick={locked ? undefined : onToggle}
+      className="w-full text-left rounded-[16px] p-4 flex items-center gap-4 relative overflow-hidden"
       style={{
         background: habit.isCompletedToday ? `${accentColor}18` : "#111111",
         border: `1px solid ${habit.isCompletedToday ? `${accentColor}40` : "transparent"}`,
         opacity: locked ? 0.5 : 1,
         cursor: locked ? "not-allowed" : "pointer",
+        userSelect: "none",
+        WebkitUserSelect: "none",
       }}
       whileTap={locked ? {} : { scale: 0.98 }}
       transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -263,7 +292,7 @@ function HabitRow({
           🧊 Salvar
         </button>
       )}
-    </motion.button>
+    </motion.div>
   );
 }
 
