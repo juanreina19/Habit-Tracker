@@ -240,14 +240,9 @@ function HabitRow({
         </p>
         <div className="flex items-center gap-3 mt-0.5 flex-wrap">
           {habit.startTime && (
-            <span className="text-xs" style={{ color: locked ? "#FF5252" : "#8888AA" }}>
-              {locked ? "🔒 " : ""}{habit.startTime}
+            <span className="text-xs" style={{ color: locked && !habit.isCompletedToday ? "#FF5252" : "#8888AA" }}>
+              {locked && !habit.isCompletedToday ? "🔒 " : ""}{habit.startTime}
               {habit.estimatedMinutes ? ` – ${calcEndTime(habit.startTime, habit.estimatedMinutes)}` : ""}
-            </span>
-          )}
-          {habit.streak && habit.streak.currentStreak > 0 && (
-            <span className="text-xs" style={{ color: "#8888AA" }}>
-              🔥 {habit.streak.currentStreak} días
             </span>
           )}
           {!habit.startTime && habit.estimatedMinutes && (
