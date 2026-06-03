@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -118,18 +119,17 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
 // ─── Calendar grid ─────────────────────────────────────────────────────────────
 
 function CalendarGrid({ data, userCreatedAt }: { data: { days: DayProgress[]; month: number; year: number }; userCreatedAt?: string }) {
+  const [selectedDay, setSelectedDay] = useState<DayProgress | null>(null);
+
   const firstDay = new Date(data.year, data.month, 1);
-  // dayOfWeek: Mon=1...Sun=7, so offset = (dayOfWeek - 1): Mon=0...Sun=6
-  const rawDay = firstDay.getDay(); // 0=Sun
+  const rawDay = firstDay.getDay();
   const startOffset = rawDay === 0 ? 6 : rawDay - 1;
 
-  // Pad days with nulls to fill the first row
   const cells: (DayProgress | null)[] = [
     ...Array(startOffset).fill(null),
     ...data.days,
   ];
 
-  // Fill trailing nulls to complete the last row
   const remainder = cells.length % 7;
   if (remainder !== 0) {
     for (let i = 0; i < 7 - remainder; i++) cells.push(null);
@@ -139,6 +139,10 @@ function CalendarGrid({ data, userCreatedAt }: { data: { days: DayProgress[]; mo
   for (let i = 0; i < cells.length; i += 7) {
     weeks.push(cells.slice(i, i + 7));
   }
+
+  const handleDayClick = (day: DayProgress) => {
+    setSelectedDay((prev) => (prev?.date.getTime() === day.date.getTime() ? null : day));
+  };
 
   return (
     <div className="rounded-[20px] p-4" style={{ background: "#111111" }}>
@@ -160,11 +164,24 @@ function CalendarGrid({ data, userCreatedAt }: { data: { days: DayProgress[]; mo
         {weeks.map((week, wi) => (
           <div key={wi} className="grid grid-cols-7 gap-1.5">
             {week.map((day, di) =>
-              day ? <DayCell key={di} day={day} userCreatedAt={userCreatedAt} /> : <div key={di} />
+              day ? (
+                <DayCell
+                  key={di}
+                  day={day}
+                  userCreatedAt={userCreatedAt}
+                  isSelected={selectedDay?.date.getTime() === day.date.getTime()}
+                  onClick={() => handleDayClick(day)}
+                />
+              ) : <div key={di} />
             )}
           </div>
         ))}
       </div>
+
+      {/* Day detail panel */}
+      {selectedDay && (
+        <DayDetail day={selectedDay} userCreatedAt={userCreatedAt} />
+      )}
 
       {/* Legend */}
       <div className="flex items-center justify-center gap-4 mt-4 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
@@ -184,11 +201,15 @@ function CalendarGrid({ data, userCreatedAt }: { data: { days: DayProgress[]; mo
   );
 }
 
-function DayCell({ day, userCreatedAt }: { day: DayProgress; userCreatedAt?: string }) {
+function DayCell({ day, userCreatedAt, isSelected, onClick }: {
+  day: DayProgress;
+  userCreatedAt?: string;
+  isSelected: boolean;
+  onClick: () => void;
+}) {
   const { completionRate, isFuture, isToday, date } = day;
   const dayNumber = date.getDate();
 
-  // Days before account creation are shown as inactive (no color, no dot)
   const isBeforeCreation = (() => {
     if (!userCreatedAt) return false;
     const created = new Date(userCreatedAt);
@@ -203,13 +224,19 @@ function DayCell({ day, userCreatedAt }: { day: DayProgress; userCreatedAt?: str
   const textColor = getTextColor(completionRate, inactive);
 
   return (
-    <div
-      className="aspect-square rounded-[10px] flex flex-col items-center justify-center relative"
+    <button
+      onClick={onClick}
+      className="aspect-square rounded-[10px] flex flex-col items-center justify-center relative active:scale-95 transition-transform"
       style={{
         background: bg,
-        outline: isToday ? "1.5px solid rgba(255,255,255,0.6)" : "none",
+        outline: isSelected
+          ? "2px solid rgba(255,255,255,0.8)"
+          : isToday
+          ? "1.5px solid rgba(255,255,255,0.6)"
+          : "none",
         outlineOffset: "-1.5px",
         opacity: isBeforeCreation ? 0.35 : 1,
+        cursor: inactive ? "default" : "pointer",
       }}
     >
       <span className="text-[13px] font-medium leading-none" style={{ color: textColor }}>
@@ -217,6 +244,53 @@ function DayCell({ day, userCreatedAt }: { day: DayProgress; userCreatedAt?: str
       </span>
       {!inactive && completionRate >= 0 && (
         <div className="w-1 h-1 rounded-full mt-0.5" style={{ background: getDotColor(completionRate) }} />
+      )}
+    </button>
+  );
+}
+
+function DayDetail({ day, userCreatedAt }: { day: DayProgress; userCreatedAt?: string }) {
+  const { date, completionRate, completed, scheduled, isFuture } = day;
+
+  const isBeforeCreation = (() => {
+    if (!userCreatedAt) return false;
+    const created = new Date(userCreatedAt);
+    created.setHours(0, 0, 0, 0);
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    return d < created;
+  })();
+
+  const label = format(date, "EEEE d 'de' MMMM", { locale: es });
+  const title = label.charAt(0).toUpperCase() + label.slice(1);
+
+  const accentColor =
+    completionRate === 100 ? "#4CAF82"
+    : completionRate >= 50 ? "#A3CF8A"
+    : completionRate > 0 ? "#F5A623"
+    : "#FF5252";
+
+  return (
+    <div
+      className="mt-3 rounded-[14px] px-4 py-3 flex items-center justify-between"
+      style={{ background: "#1A1A1A" }}
+    >
+      <div>
+        <p className="text-xs font-medium" style={{ color: "#8888AA" }}>{title}</p>
+        {isFuture || isBeforeCreation ? (
+          <p className="text-sm mt-0.5" style={{ color: "#555555" }}>Sin datos</p>
+        ) : scheduled === 0 ? (
+          <p className="text-sm mt-0.5" style={{ color: "#555555" }}>Sin hábitos</p>
+        ) : (
+          <p className="text-sm mt-0.5" style={{ color: "#FFFFFF" }}>
+            {completed} de {scheduled} completados
+          </p>
+        )}
+      </div>
+      {!isFuture && !isBeforeCreation && scheduled > 0 && (
+        <p className="text-2xl font-semibold" style={{ color: accentColor }}>
+          {completionRate}%
+        </p>
       )}
     </div>
   );
