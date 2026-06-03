@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Sun, CalendarDays, Calendar, BarChart2, Settings2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils/cn";
 
@@ -15,6 +16,12 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Prefetch all nav routes proactively so tab switches are instant
+  useEffect(() => {
+    navItems.forEach(({ href }) => router.prefetch(href));
+  }, [router]);
 
   return (
     <nav

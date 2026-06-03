@@ -34,6 +34,11 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--surface-elevated); border-radius: 2px; }
 
+/* Elimina el delay de 300ms en taps de iOS */
+button, a, [role="button"] {
+  touch-action: manipulation;
+}
+
 /* Safe area para PWA en iPhone con notch */
 .safe-top    { padding-top: env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }

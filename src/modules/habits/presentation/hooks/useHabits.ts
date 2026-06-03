@@ -24,7 +24,9 @@ export function useHabits(userId: UUID) {
   }, []);
 
   const fetchHabits = useCallback(async () => {
-    setLoading(true);
+    // Si hay datos en cache (persist), no mostramos skeleton — actualización silenciosa
+    const hasCache = useHabitStore.getState().habits.length > 0;
+    if (!hasCache) setLoading(true);
     setError(null);
     try {
       const repo = getRepository();

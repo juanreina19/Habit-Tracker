@@ -1,6 +1,7 @@
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const NAV_CACHE = `habit-nav-${CACHE_VERSION}`;
 const STATIC_CACHE = `habit-static-${CACHE_VERSION}`;
+const DATA_CACHE = `habit-data-${CACHE_VERSION}`;
 
 // ─── Offline fallback (inline, no external dependency) ───────────────────────
 const OFFLINE_HTML = `<!DOCTYPE html>
@@ -45,7 +46,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((k) => k !== NAV_CACHE && k !== STATIC_CACHE)
+          .filter((k) => k !== NAV_CACHE && k !== STATIC_CACHE && k !== DATA_CACHE)
           .map((k) => caches.delete(k))
       )
     ).then(() => self.clients.claim())
@@ -56,6 +57,22 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Supabase REST/Auth API → Stale-While-Revalidate (muestra cache inmediatamente, actualiza en background)
+  if (request.method === "GET" && url.hostname.endsWith(".supabase.co")) {
+    event.respondWith(
+      caches.open(DATA_CACHE).then(async (cache) => {
+        const cached = await cache.match(request);
+        const networkFetch = fetch(request).then((res) => {
+          if (res.ok) cache.put(request, res.clone());
+          return res;
+        }).catch(() => cached ?? new Response("", { status: 503 }));
+        // Retorna cache inmediatamente si existe; la red actualiza en background
+        return cached ?? networkFetch;
+      })
+    );
+    return;
+  }
 
   // Only handle GET from same origin
   if (request.method !== "GET" || url.origin !== self.location.origin) return;

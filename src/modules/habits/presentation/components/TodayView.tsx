@@ -205,7 +205,7 @@ function HabitRow({
 
   return (
     <motion.div
-      layout
+      layout="position"
       drag={locked ? false : "x"}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={{ left: 0.05, right: 0.3 }}
@@ -222,9 +222,10 @@ function HabitRow({
         cursor: locked ? "not-allowed" : "pointer",
         userSelect: "none",
         WebkitUserSelect: "none",
+        willChange: "transform",
       }}
       whileTap={locked ? {} : { scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      transition={{ type: "spring", stiffness: 500, damping: 35 }}
     >
       {/* Animated checkbox */}
       <motion.div
