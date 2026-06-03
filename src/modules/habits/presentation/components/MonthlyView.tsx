@@ -28,8 +28,9 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
     canGoPrev,
   } = useMonthly(userId, userCreatedAt);
 
+  const [selectedDay, setSelectedDay] = useState<DayProgress | null>(null);
+
   const monthLabel = format(new Date(year, month, 1), "MMMM yyyy", { locale: es });
-  // Capitalize first letter
   const monthTitle = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
 
   return (
@@ -64,43 +65,48 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
         </div>
       </div>
 
-      {/* Summary banner */}
-      {!isLoading && data && (
-        <div
-          className="rounded-[20px] px-5 py-4 mb-5 flex items-center justify-between"
-          style={{ background: "#111111" }}
-        >
-          <div>
-            <p className="text-2xl font-semibold" style={{ color: "#FFFFFF" }}>
-              {data.globalRate}%
-            </p>
-            <p className="text-xs mt-0.5" style={{ color: "#8888AA" }}>
-              {data.totalCompleted} de {data.totalScheduled} completados
-            </p>
-          </div>
-          <div className="flex gap-4 text-right">
+      {/* Day detail panel — shown when a day is selected */}
+      {selectedDay ? (
+        <DayDetail day={selectedDay} userCreatedAt={userCreatedAt} onClose={() => setSelectedDay(null)} />
+      ) : (
+        /* Summary banner — shown when no day is selected */
+        !isLoading && data && (
+          <div
+            className="rounded-[20px] px-5 py-4 mb-5 flex items-center justify-between"
+            style={{ background: "#111111" }}
+          >
             <div>
-              <p className="text-base font-semibold" style={{ color: "#4CAF82" }}>
-                {data.days.filter((d) => !d.isFuture && d.completionRate === 100 && d.scheduled > 0).length}
+              <p className="text-2xl font-semibold" style={{ color: "#FFFFFF" }}>
+                {data.globalRate}%
               </p>
-              <p className="text-[10px]" style={{ color: "#8888AA" }}>días perfectos</p>
+              <p className="text-xs mt-0.5" style={{ color: "#8888AA" }}>
+                {data.totalCompleted} de {data.totalScheduled} completados
+              </p>
             </div>
-            <div>
-              <p className="text-base font-semibold" style={{ color: "#FF5252" }}>
-                {data.days.filter((d) => {
-                  if (d.isFuture || d.completionRate !== 0 || d.scheduled === 0) return false;
-                  if (userCreatedAt) {
-                    const created = new Date(userCreatedAt); created.setHours(0,0,0,0);
-                    const dayMid = new Date(d.date); dayMid.setHours(0,0,0,0);
-                    if (dayMid < created) return false;
-                  }
-                  return true;
-                }).length}
-              </p>
-              <p className="text-[10px]" style={{ color: "#8888AA" }}>días perdidos</p>
+            <div className="flex gap-4 text-right">
+              <div>
+                <p className="text-base font-semibold" style={{ color: "#4CAF82" }}>
+                  {data.days.filter((d) => !d.isFuture && d.completionRate === 100 && d.scheduled > 0).length}
+                </p>
+                <p className="text-[10px]" style={{ color: "#8888AA" }}>días perfectos</p>
+              </div>
+              <div>
+                <p className="text-base font-semibold" style={{ color: "#FF5252" }}>
+                  {data.days.filter((d) => {
+                    if (d.isFuture || d.completionRate !== 0 || d.scheduled === 0) return false;
+                    if (userCreatedAt) {
+                      const created = new Date(userCreatedAt); created.setHours(0,0,0,0);
+                      const dayMid = new Date(d.date); dayMid.setHours(0,0,0,0);
+                      if (dayMid < created) return false;
+                    }
+                    return true;
+                  }).length}
+                </p>
+                <p className="text-[10px]" style={{ color: "#8888AA" }}>días perdidos</p>
+              </div>
             </div>
           </div>
-        </div>
+        )
       )}
 
       {isLoading ? (
@@ -110,17 +116,23 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
           <p className="text-sm" style={{ color: "#FF5252" }}>Error: {error}</p>
         </div>
       ) : data ? (
-        <CalendarGrid data={data} userCreatedAt={userCreatedAt} />
+        <CalendarGrid data={data} userCreatedAt={userCreatedAt} selectedDay={selectedDay} onDayClick={setSelectedDay} />
       ) : null}
+
     </div>
   );
 }
 
 // ─── Calendar grid ─────────────────────────────────────────────────────────────
 
-function CalendarGrid({ data, userCreatedAt }: { data: { days: DayProgress[]; month: number; year: number }; userCreatedAt?: string }) {
-  const [selectedDay, setSelectedDay] = useState<DayProgress | null>(null);
-
+function CalendarGrid({
+  data, userCreatedAt, selectedDay, onDayClick,
+}: {
+  data: { days: DayProgress[]; month: number; year: number };
+  userCreatedAt?: string;
+  selectedDay: DayProgress | null;
+  onDayClick: (day: DayProgress) => void;
+}) {
   const firstDay = new Date(data.year, data.month, 1);
   const rawDay = firstDay.getDay();
   const startOffset = rawDay === 0 ? 6 : rawDay - 1;
@@ -139,10 +151,6 @@ function CalendarGrid({ data, userCreatedAt }: { data: { days: DayProgress[]; mo
   for (let i = 0; i < cells.length; i += 7) {
     weeks.push(cells.slice(i, i + 7));
   }
-
-  const handleDayClick = (day: DayProgress) => {
-    setSelectedDay((prev) => (prev?.date.getTime() === day.date.getTime() ? null : day));
-  };
 
   return (
     <div className="rounded-[20px] p-4" style={{ background: "#111111" }}>
@@ -170,18 +178,13 @@ function CalendarGrid({ data, userCreatedAt }: { data: { days: DayProgress[]; mo
                   day={day}
                   userCreatedAt={userCreatedAt}
                   isSelected={selectedDay?.date.getTime() === day.date.getTime()}
-                  onClick={() => handleDayClick(day)}
+                  onClick={() => onDayClick(day)}
                 />
               ) : <div key={di} />
             )}
           </div>
         ))}
       </div>
-
-      {/* Day detail panel */}
-      {selectedDay && (
-        <DayDetail day={selectedDay} userCreatedAt={userCreatedAt} />
-      )}
 
       {/* Legend */}
       <div className="flex items-center justify-center gap-4 mt-4 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
@@ -249,7 +252,7 @@ function DayCell({ day, userCreatedAt, isSelected, onClick }: {
   );
 }
 
-function DayDetail({ day, userCreatedAt }: { day: DayProgress; userCreatedAt?: string }) {
+function DayDetail({ day, userCreatedAt, onClose }: { day: DayProgress; userCreatedAt?: string; onClose: () => void }) {
   const { date, completionRate, completed, scheduled, isFuture } = day;
 
   const isBeforeCreation = (() => {
@@ -272,26 +275,35 @@ function DayDetail({ day, userCreatedAt }: { day: DayProgress; userCreatedAt?: s
 
   return (
     <div
-      className="mt-3 rounded-[14px] px-4 py-3 flex items-center justify-between"
-      style={{ background: "#1A1A1A" }}
+      className="rounded-[20px] px-5 py-4 mb-5 flex items-center justify-between"
+      style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.08)" }}
     >
       <div>
-        <p className="text-xs font-medium" style={{ color: "#8888AA" }}>{title}</p>
+        <p className="text-xs font-medium mb-0.5" style={{ color: "#8888AA" }}>{title}</p>
         {isFuture || isBeforeCreation ? (
-          <p className="text-sm mt-0.5" style={{ color: "#555555" }}>Sin datos</p>
+          <p className="text-base font-semibold" style={{ color: "#555555" }}>Sin datos</p>
         ) : scheduled === 0 ? (
-          <p className="text-sm mt-0.5" style={{ color: "#555555" }}>Sin hábitos</p>
+          <p className="text-base font-semibold" style={{ color: "#555555" }}>Sin hábitos programados</p>
         ) : (
-          <p className="text-sm mt-0.5" style={{ color: "#FFFFFF" }}>
-            {completed} de {scheduled} completados
+          <p className="text-base font-semibold" style={{ color: "#FFFFFF" }}>
+            {completed} / {scheduled} completados
           </p>
         )}
       </div>
-      {!isFuture && !isBeforeCreation && scheduled > 0 && (
-        <p className="text-2xl font-semibold" style={{ color: accentColor }}>
-          {completionRate}%
-        </p>
-      )}
+      <div className="flex items-center gap-3">
+        {!isFuture && !isBeforeCreation && scheduled > 0 && (
+          <p className="text-3xl font-semibold" style={{ color: accentColor }}>
+            {completionRate}%
+          </p>
+        )}
+        <button
+          onClick={onClose}
+          className="w-7 h-7 rounded-full flex items-center justify-center"
+          style={{ background: "#2A2A2A", color: "#8888AA", fontSize: "16px", lineHeight: 1 }}
+        >
+          ×
+        </button>
+      </div>
     </div>
   );
 }
