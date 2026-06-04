@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Reorder, useDragControls } from "framer-motion";
 import { Pencil, Trash2, GripVertical } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { useSettingsHabits } from "../../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { HabitFormDialog } from "../settings/HabitFormDialog";
@@ -20,6 +22,7 @@ interface Props {
 }
 
 export default function HabitsView({ userId }: Props) {
+  const t = useTranslations("habits");
   const [tab, setTab] = useState<Tab>("habits");
 
   const {
@@ -76,23 +79,23 @@ export default function HabitsView({ userId }: Props) {
     <div className="px-5 pt-14 pb-8 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
       {/* Header */}
       <div className="mb-6">
-        <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Gestionar</p>
-        <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>Mis hábitos</h1>
+        <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>{t("manage")}</p>
+        <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>{t("title")}</h1>
       </div>
 
       {/* Tabs */}
       <div className="flex rounded-[14px] p-1 mb-6" style={{ background: "var(--surface)" }}>
-        {(["habits", "categories"] as Tab[]).map((t) => (
+        {(["habits", "categories"] as Tab[]).map((tabKey) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={tabKey}
+            onClick={() => setTab(tabKey)}
             className="flex-1 py-2.5 rounded-[10px] text-sm font-medium transition-all"
             style={{
-              background: tab === t ? "var(--surface-elevated)" : "transparent",
-              color: tab === t ? "var(--text-primary)" : "var(--text-secondary)",
+              background: tab === tabKey ? "var(--surface-elevated)" : "transparent",
+              color: tab === tabKey ? "var(--text-primary)" : "var(--text-secondary)",
             }}
           >
-            {t === "habits" ? "Hábitos" : "Categorías"}
+            {tabKey === "habits" ? t("tab_habits") : t("tab_categories")}
           </button>
         ))}
       </div>
@@ -161,6 +164,7 @@ function HabitsTab({
   onDelete: (h: Habit) => void;
   onReorder: (items: Habit[]) => void;
 }) {
+  const t = useTranslations("habits");
   const [localHabits, setLocalHabits] = useState(habits);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const catMap = new Map(categories.map((c) => [c.id, c]));
@@ -177,19 +181,19 @@ function HabitsTab({
     <div>
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          {localHabits.length} {localHabits.length === 1 ? "hábito" : "hábitos"}
+          {t("count", { count: localHabits.length })}
         </p>
         <button
           onClick={onAdd}
           className="flex items-center gap-1.5 px-4 py-2 rounded-[12px] text-sm font-semibold transition-opacity active:opacity-70"
           style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
         >
-          <span className="text-base leading-none">+</span> Nuevo hábito
+          <span className="text-base leading-none">+</span> {t("new_habit")}
         </button>
       </div>
 
       {localHabits.length === 0 ? (
-        <EmptyState message="Sin hábitos aún" hint="Toca + Nuevo hábito para empezar." />
+        <EmptyState message={t("no_habits")} hint={t("no_habits_hint")} />
       ) : (
         <Reorder.Group
           as="div"
@@ -227,6 +231,7 @@ function HabitReorderItem({
   onEdit: (h: Habit) => void;
   onDelete: (h: Habit) => void;
 }) {
+  const tHabit = useTranslations("habits");
   const dragControls = useDragControls();
 
   return (
@@ -246,10 +251,10 @@ function HabitReorderItem({
         <GripVertical size={18} />
       </div>
       <div
-        className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 text-lg"
-        style={{ background: accentColor + "25" }}
+        className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0"
+        style={{ background: accentColor + "25", color: accentColor }}
       >
-        {habit.icon ?? (cat?.icon ?? "🎯")}
+        <HabitIcon icon={habit.icon ?? cat?.icon ?? "🎯"} size={20} />
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate" style={{ color: "var(--text-primary)" }}>{habit.name}</p>
@@ -266,10 +271,10 @@ function HabitReorderItem({
         </div>
       </div>
       <div className="flex gap-1">
-        <IconButton onClick={() => onEdit(habit)} label="Editar">
+        <IconButton onClick={() => onEdit(habit)} label={tHabit("edit")}>
           <Pencil size={14} />
         </IconButton>
-        <IconButton onClick={() => onDelete(habit)} label="Eliminar" danger>
+        <IconButton onClick={() => onDelete(habit)} label={tHabit("delete")} danger>
           <Trash2 size={14} />
         </IconButton>
       </div>
@@ -289,6 +294,7 @@ function CategoriesTab({
   onDelete: (c: Category) => void;
   onReorder: (items: Category[]) => void;
 }) {
+  const t = useTranslations("habits");
   const [localCats, setLocalCats] = useState(categories);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -304,19 +310,19 @@ function CategoriesTab({
     <div>
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          {localCats.length} {localCats.length === 1 ? "categoría" : "categorías"}
+          {localCats.length}
         </p>
         <button
           onClick={onAdd}
           className="flex items-center gap-1.5 px-4 py-2 rounded-[12px] text-sm font-semibold transition-opacity active:opacity-70"
           style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
         >
-          <span className="text-base leading-none">+</span> Nueva categoría
+          <span className="text-base leading-none">+</span> {t("new_category")}
         </button>
       </div>
 
       {localCats.length === 0 ? (
-        <EmptyState message="Sin categorías aún" hint="Organiza tus hábitos con categorías de colores." />
+        <EmptyState message={t("no_categories")} hint={t("no_categories_hint")} />
       ) : (
         <Reorder.Group
           as="div"
@@ -348,6 +354,7 @@ function CategoryReorderItem({
   onEdit: (c: Category) => void;
   onDelete: (c: Category) => void;
 }) {
+  const tCat = useTranslations("habits");
   const dragControls = useDragControls();
 
   return (
@@ -380,10 +387,10 @@ function CategoryReorderItem({
       </div>
       <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: cat.color ?? "#8888AA" }} />
       <div className="flex gap-1">
-        <IconButton onClick={() => onEdit(cat)} label="Editar">
+        <IconButton onClick={() => onEdit(cat)} label={tCat("edit")}>
           <Pencil size={14} />
         </IconButton>
-        <IconButton onClick={() => onDelete(cat)} label="Eliminar" danger>
+        <IconButton onClick={() => onDelete(cat)} label={tCat("delete")} danger>
           <Trash2 size={14} />
         </IconButton>
       </div>
@@ -434,6 +441,7 @@ function DeleteConfirmDialog({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
+  const t = useTranslations("habits");
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
@@ -452,13 +460,10 @@ function DeleteConfirmDialog({
         style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
       >
         <p className="text-lg font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
-          ¿Eliminar {type === "habit" ? "hábito" : "categoría"}?
+          {type === "habit" ? t("delete_habit_title") : t("delete_category_title")}
         </p>
         <p className="text-sm mb-6" style={{ color: "var(--text-secondary)" }}>
-          <span style={{ color: "var(--text-primary)" }}>{name}</span>
-          {type === "category"
-            ? " será eliminada. Los hábitos asignados quedarán sin categoría."
-            : " será eliminado permanentemente."}
+          {t("delete_confirm", { name })}
         </p>
         <div className="flex gap-3">
           <button
@@ -466,7 +471,7 @@ function DeleteConfirmDialog({
             className="flex-1 py-3 rounded-[14px] text-sm font-medium"
             style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
           >
-            Cancelar
+            {t("delete_cancel")}
           </button>
           <button
             onClick={handleConfirm}
@@ -474,7 +479,7 @@ function DeleteConfirmDialog({
             className="flex-1 py-3 rounded-[14px] text-sm font-semibold disabled:opacity-50"
             style={{ background: "#FF5252", color: "#FFFFFF" }}
           >
-            {isDeleting ? "Eliminando…" : "Eliminar"}
+            {t("delete_confirm_btn")}
           </button>
         </div>
       </div>

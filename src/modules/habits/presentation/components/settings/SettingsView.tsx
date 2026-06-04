@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Bell, BellOff, User, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
+import { useLocale, type Locale } from "@/shared/i18n/useLocale";
 import { useBrowserNotifications } from "@/shared/hooks/useBrowserNotifications";
 import { createClient } from "@/shared/lib/supabase/client";
 import type { UUID } from "@/shared/types/database.types";
@@ -15,13 +17,31 @@ interface Props {
 export default function SettingsView({ userId: _userId }: Props) {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+  const { locale, setLocale } = useLocale();
+  const t = useTranslations("settings");
 
   return (
     <div className="px-5 pt-14 pb-8 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-semibold" style={{ color: "var(--text-primary)" }}>Ajustes</h1>
+        <h1 className="text-3xl font-semibold" style={{ color: "var(--text-primary)" }}>{t("title")}</h1>
         <div className="flex gap-2">
+          {/* Language toggle */}
+          <div className="flex rounded-[10px] overflow-hidden" style={{ background: "var(--surface-elevated)" }}>
+            {(["es", "en"] as Locale[]).map((l) => (
+              <button
+                key={l}
+                onClick={() => setLocale(l)}
+                className="px-3 py-1.5 text-xs font-bold transition-all"
+                style={{
+                  background: locale === l ? "var(--btn-primary-bg)" : "transparent",
+                  color: locale === l ? "var(--btn-primary-text)" : "var(--text-secondary)",
+                }}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <button
             onClick={toggleTheme}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60"
@@ -42,17 +62,17 @@ export default function SettingsView({ userId: _userId }: Props) {
       {/* Notifications */}
       <NotificationsSection />
 
-      {/* Account quick actions */}
+      {/* Account */}
       <div className="mt-8">
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
-          Cuenta
+          {t("account")}
         </p>
         <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--surface)" }}>
           <button
             onClick={() => router.push("/profile")}
             className="w-full px-5 py-4 flex items-center justify-between transition-opacity active:opacity-60"
           >
-            <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Mi perfil</span>
+            <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("my_profile")}</span>
             <span style={{ color: "var(--text-secondary)", fontSize: 18 }}>→</span>
           </button>
           <div style={{ height: 1, background: "var(--border)" }} />
@@ -65,6 +85,7 @@ export default function SettingsView({ userId: _userId }: Props) {
 
 function SignOutButton() {
   const router = useRouter();
+  const t = useTranslations("settings");
   const [loading, setLoading] = useState(false);
 
   const handleSignOut = async () => {
@@ -81,7 +102,7 @@ function SignOutButton() {
       className="w-full px-5 py-4 flex items-center justify-between transition-opacity active:opacity-60 disabled:opacity-40"
     >
       <span className="text-sm font-medium" style={{ color: "var(--danger)" }}>
-        {loading ? "Cerrando sesión…" : "Cerrar sesión"}
+        {loading ? t("signing_out") : t("sign_out")}
       </span>
     </button>
   );
@@ -90,13 +111,11 @@ function SignOutButton() {
 function NotificationsSection() {
   const { permission, isEnabled, reminderTime, enable, disable, setReminderTime, subscribeError, isLoading } =
     useBrowserNotifications();
+  const t = useTranslations("settings");
 
   const handleToggle = async () => {
-    if (isEnabled) {
-      disable();
-    } else {
-      await enable();
-    }
+    if (isEnabled) disable();
+    else await enable();
   };
 
   if (permission === "unsupported") return null;
@@ -104,10 +123,9 @@ function NotificationsSection() {
   return (
     <div>
       <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
-        Notificaciones
+        {t("notifications")}
       </p>
       <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--surface)" }}>
-        {/* Toggle row */}
         <div className="flex items-center gap-4 p-4">
           <div
             className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0"
@@ -119,16 +137,16 @@ function NotificationsSection() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>
-              Recordatorio diario
+              {t("daily_reminder")}
             </p>
             <p className="text-xs mt-0.5" style={{ color: subscribeError ? "var(--danger)" : "var(--text-secondary)" }}>
               {subscribeError
                 ? subscribeError
                 : permission === "denied"
-                  ? "Permiso denegado — actívalo en ajustes del navegador"
+                  ? t("reminder_denied")
                   : isEnabled
-                    ? "Notificación activa ✓"
-                    : "Recibe un aviso para no olvidar tus hábitos"}
+                    ? t("reminder_on")
+                    : t("reminder_off")}
             </p>
           </div>
           <button
@@ -150,13 +168,12 @@ function NotificationsSection() {
           </button>
         </div>
 
-        {/* Time picker */}
         {isEnabled && permission === "granted" && (
           <div
             className="flex items-center justify-between px-4 pb-4 pt-0"
             style={{ borderTop: "1px solid var(--border)" }}
           >
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Hora del recordatorio</p>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{t("reminder_time")}</p>
             <input
               type="time"
               value={reminderTime}

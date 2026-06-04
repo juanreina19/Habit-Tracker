@@ -2,20 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Sun, CalendarRange, ListTodo, BarChart2, Settings2, Moon } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 
-const navItems = [
-  { href: "/today",    label: "Hoy",        Icon: Sun },
-  { href: "/calendar", label: "Calendario", Icon: CalendarRange },
-  { href: "/habits",   label: "Hábitos",    Icon: ListTodo },
-  { href: "/stats",    label: "Stats",      Icon: BarChart2 },
-  { href: "/settings", label: "Ajustes",    Icon: Settings2 },
+const NAV_ROUTES = [
+  { href: "/today",    key: "today",    Icon: Sun },
+  { href: "/calendar", key: "calendar", Icon: CalendarRange },
+  { href: "/habits",   key: "habits",   Icon: ListTodo },
+  { href: "/stats",    key: "stats",    Icon: BarChart2 },
+  { href: "/settings", key: "settings", Icon: Settings2 },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const t = useTranslations("nav");
+  const ts = useTranslations("settings");
 
   return (
     <aside
@@ -34,7 +37,7 @@ export default function Sidebar() {
 
       {/* Nav items */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
-        {navItems.map(({ href, label, Icon }) => {
+        {NAV_ROUTES.map(({ href, key, Icon }) => {
           const isActive = pathname === href;
           return (
             <Link
@@ -44,7 +47,7 @@ export default function Sidebar() {
               style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
             >
               <Icon size={18} strokeWidth={isActive ? 2 : 1.5} />
-              <span className="text-sm font-medium">{label}</span>
+              <span className="text-sm font-medium">{t(key as Parameters<typeof t>[0])}</span>
             </Link>
           );
         })}
@@ -54,12 +57,12 @@ export default function Sidebar() {
       <div className="px-3 py-4 border-t" style={{ borderColor: "var(--border)" }}>
         <button
           onClick={toggleTheme}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[12px] transition-all"
+          className="sidebar-link w-full flex items-center gap-3 px-3 py-2.5 rounded-[12px] transition-all"
           style={{ color: "var(--text-secondary)" }}
         >
           {theme === "dark" ? <Sun size={18} strokeWidth={1.5} /> : <Moon size={18} strokeWidth={1.5} />}
           <span className="text-sm font-medium">
-            {theme === "dark" ? "Tema claro" : "Tema oscuro"}
+            {theme === "dark" ? ts("theme_light") : ts("theme_dark")}
           </span>
         </button>
       </div>

@@ -3,9 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import { startOfWeek, parseISO } from "date-fns";
 import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { HabitIcon } from "@/shared/components/ui/HabitIcon";
+import { useLocale } from "@/shared/i18n/useLocale";
 import { useHabits } from "../hooks/useHabits";
 import { useSettingsHabits } from "../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
@@ -15,12 +18,6 @@ import { Confetti } from "@/shared/components/ui/Confetti";
 import type { UUID } from "@/shared/types/database.types";
 import type { HabitWithStatus } from "../../domain/entities/Habit";
 import type { CreateHabitInput } from "../../domain/repositories/IHabitRepository";
-
-function getGreeting(name: string): string {
-  const h = new Date().getHours();
-  const base = h >= 5 && h < 12 ? "Buenos días" : h < 19 ? "Buenas tardes" : "Buenas noches";
-  return name ? `${base}, ${name}!` : `${base}!`;
-}
 
 function calcEndTime(start: string, minutes: number): string {
   const [h, m] = start.split(":").map(Number);
@@ -51,6 +48,10 @@ interface Props {
 }
 
 export default function TodayView({ userId, userName = "" }: Props) {
+  const t = useTranslations("today");
+  const { locale } = useLocale();
+  const dateFnsLocale = locale === "en" ? enUS : es;
+
   const {
     habits, isLoading, error,
     completedCount, totalCount, completionPercentage, estimatedMinutes,
@@ -63,7 +64,6 @@ export default function TodayView({ userId, userName = "" }: Props) {
   const [createOpen, setCreateOpen] = useState(false);
   const today = new Date();
 
-  // Confetti on 100% completion
   const [showConfetti, setShowConfetti] = useState(false);
   const prevPct = useRef(completionPercentage);
   useEffect(() => {
@@ -73,7 +73,6 @@ export default function TodayView({ userId, userName = "" }: Props) {
     prevPct.current = completionPercentage;
   }, [completionPercentage, totalCount]);
 
-  // Tracks habit IDs currently being toggled to prevent double-swipe race conditions
   const pendingIds = useRef<Set<UUID>>(new Set());
 
   const handleToggle = (habit: HabitWithStatus) => {
@@ -82,11 +81,10 @@ export default function TodayView({ userId, userName = "" }: Props) {
 
     if (habit.isCompletedToday) {
       const cancel = uncheckHabit(habit.id);
-      // Uncheck is deferred 3s — release lock after that window
       setTimeout(() => pendingIds.current.delete(habit.id), 3100);
       showToast({
-        message: "Hábito desmarcado",
-        actionLabel: "Deshacer",
+        message: t("habit_unchecked"),
+        actionLabel: t("undo"),
         onAction: () => {
           pendingIds.current.delete(habit.id);
           cancel();
@@ -101,10 +99,21 @@ export default function TodayView({ userId, userName = "" }: Props) {
   const handleFreeze = async (habitId: UUID) => {
     try {
       await freezeHabit(habitId);
-      showToast({ message: "¡Racha salvada! 🧊", duration: 2500 });
+      showToast({ message: t("streak_saved"), duration: 2500 });
     } catch (err) {
-      showToast({ message: err instanceof Error ? err.message : "Error al congelar racha", duration: 3000 });
+      showToast({ message: err instanceof Error ? err.message : "Error", duration: 3000 });
     }
+  };
+
+  const h = today.getHours();
+  const greeting = h >= 5 && h < 12 ? t("greeting_morning") : h < 19 ? t("greeting_afternoon") : t("greeting_evening");
+  const greetingText = userName ? `${greeting}, ${userName}!` : `${greeting}!`;
+
+  const GROUP_LABELS: Record<string, string> = {
+    morning: t("morning"),
+    afternoon: t("afternoon"),
+    evening: t("evening"),
+    none: t("no_time"),
   };
 
   if (isLoading) return <TodayViewSkeleton />;
@@ -125,10 +134,10 @@ export default function TodayView({ userId, userName = "" }: Props) {
         <div className="flex items-start justify-between mb-8">
           <div>
             <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-              {"Hoy, " + format(today, "d MMMM", { locale: es }).replace(/^\w/, (c) => c.toUpperCase())}
+              {t("date_prefix") + format(today, "d MMMM", { locale: dateFnsLocale }).replace(/^\w/, (c) => c.toUpperCase())}
             </p>
             <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
-              {completionPercentage === 100 ? "¡Día perfecto! 🎉" : getGreeting(userName)}
+              {completionPercentage === 100 ? t("perfect_day") : greetingText}
             </h1>
           </div>
           {/* Mobile: solo icono */}
@@ -136,24 +145,23 @@ export default function TodayView({ userId, userName = "" }: Props) {
             onClick={() => setCreateOpen(true)}
             className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70"
             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-            aria-label="Crear hábito"
+            aria-label={t("new_habit")}
           >
             <Plus size={22} strokeWidth={2.5} />
           </button>
-
           {/* Desktop: pill con texto */}
           <button
             onClick={() => setCreateOpen(true)}
             className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full flex-shrink-0 transition-opacity active:opacity-70"
             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-            aria-label="Crear hábito"
+            aria-label={t("new_habit")}
           >
             <Plus size={18} strokeWidth={2.5} />
-            <span className="text-sm font-semibold">Nuevo hábito</span>
+            <span className="text-sm font-semibold">{t("new_habit")}</span>
           </button>
         </div>
 
-        {/* Progress ring / summary */}
+        {/* Progress ring */}
         {totalCount > 0 && (
           <div
             className="rounded-[20px] p-5 mb-6 flex items-center gap-5"
@@ -164,32 +172,27 @@ export default function TodayView({ userId, userName = "" }: Props) {
               <p className="text-2xl font-semibold" style={{ color: "var(--text-primary)" }}>
                 {completedCount}/{totalCount}
               </p>
-              <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>hábitos completados</p>
+              <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>{t("habits_completed")}</p>
               {estimatedMinutes > 0 && (
                 <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
-                  ~{estimatedMinutes} min restantes
+                  {t("remaining_min", { n: estimatedMinutes })}
                 </p>
               )}
             </div>
           </div>
         )}
 
-        {/* Habit list — grouped by time of day */}
+        {/* Habit list grouped by time of day */}
         <div className="flex flex-col gap-3">
           {totalCount === 0 && (
             <div className="rounded-[20px] p-8 text-center" style={{ background: "var(--surface)" }}>
               <p className="text-4xl mb-3">✨</p>
-              <p className="font-medium" style={{ color: "var(--text-primary)" }}>Sin hábitos para hoy</p>
-              <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-                Pulsa el botón + para crear tu primer hábito.
-              </p>
+              <p className="font-medium" style={{ color: "var(--text-primary)" }}>{t("no_habits_title")}</p>
+              <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{t("no_habits_hint")}</p>
             </div>
           )}
 
           {(["morning", "afternoon", "evening", "none"] as const).map((groupKey) => {
-            const groupLabel: Record<string, string> = {
-              morning: "Mañana", afternoon: "Tarde", evening: "Noche", none: "Sin hora",
-            };
             const groupHabits = [...habits]
               .filter((h) => {
                 if (groupKey === "morning") return !!h.startTime && h.startTime < "12:00";
@@ -205,7 +208,7 @@ export default function TodayView({ userId, userName = "" }: Props) {
               <div key={groupKey}>
                 <div className="flex items-center gap-2 mb-2 mt-1">
                   <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-                    {groupLabel[groupKey]}
+                    {GROUP_LABELS[groupKey]}
                   </span>
                   <div className="flex-1 h-px" style={{ background: "var(--border)", opacity: 0.4 }} />
                 </div>
@@ -219,6 +222,7 @@ export default function TodayView({ userId, userName = "" }: Props) {
                         locked={locked}
                         onToggle={() => !locked && handleToggle(habit)}
                         onFreeze={canFreeze(habit) ? () => handleFreeze(habit.id) : undefined}
+                        freezeLabel={t("save_streak")}
                       />
                     );
                   })}
@@ -247,12 +251,13 @@ export default function TodayView({ userId, userName = "" }: Props) {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function HabitRow({
-  habit, locked, onToggle, onFreeze,
+  habit, locked, onToggle, onFreeze, freezeLabel,
 }: {
   habit: HabitWithStatus;
   locked: boolean;
   onToggle: () => void;
   onFreeze?: () => void;
+  freezeLabel: string;
 }) {
   const accentColor = habit.color ?? "#4CAF82";
 
@@ -308,7 +313,11 @@ function HabitRow({
       </motion.div>
 
       {/* Icon */}
-      {habit.icon && <span className="text-xl flex-shrink-0">{habit.icon}</span>}
+      {habit.icon && (
+        <span className="flex-shrink-0" style={{ color: accentColor }}>
+          <HabitIcon icon={habit.icon} size={22} />
+        </span>
+      )}
 
       {/* Content */}
       <div className="flex-1 min-w-0">
@@ -343,7 +352,7 @@ function HabitRow({
           className="flex-shrink-0 px-2.5 py-1.5 rounded-[10px] text-xs font-medium transition-opacity active:opacity-60"
           style={{ background: "rgba(100,160,255,0.12)", color: "#88AAFF" }}
         >
-          🧊 Salvar
+          {freezeLabel}
         </button>
       )}
     </motion.div>

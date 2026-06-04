@@ -3,24 +3,25 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Sun, CalendarRange, ListTodo, BarChart2, Settings2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils/cn";
 
-const navItems = [
-  { href: "/today",    label: "Hoy",        Icon: Sun },
-  { href: "/calendar", label: "Calendario", Icon: CalendarRange },
-  { href: "/habits",   label: "Hábitos",    Icon: ListTodo },
-  { href: "/stats",    label: "Stats",      Icon: BarChart2 },
-  { href: "/settings", label: "Ajustes",    Icon: Settings2 },
+const NAV_ROUTES = [
+  { href: "/today",    key: "today",    Icon: Sun },
+  { href: "/calendar", key: "calendar", Icon: CalendarRange },
+  { href: "/habits",   key: "habits",   Icon: ListTodo },
+  { href: "/stats",    key: "stats",    Icon: BarChart2 },
+  { href: "/settings", key: "settings", Icon: Settings2 },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const t = useTranslations("nav");
 
-  // Prefetch all nav routes proactively so tab switches are instant
   useEffect(() => {
-    navItems.forEach(({ href }) => router.prefetch(href));
+    NAV_ROUTES.forEach(({ href }) => router.prefetch(href));
   }, [router]);
 
   return (
@@ -43,7 +44,7 @@ export default function BottomNav() {
       }}
     >
       <div className="flex items-center justify-around px-2 py-2.5">
-        {navItems.map(({ href, label, Icon }) => {
+        {NAV_ROUTES.map(({ href, key, Icon }) => {
           const isActive = pathname === href;
           return (
             <Link
@@ -54,15 +55,12 @@ export default function BottomNav() {
                 isActive ? "opacity-100" : "opacity-35 active:opacity-60"
               )}
             >
-              <Icon
-                size={22}
-                strokeWidth={isActive ? 2 : 1.5}
-              />
+              <Icon size={22} strokeWidth={isActive ? 2 : 1.5} />
               <span
                 className="text-[10px] font-medium tracking-wide"
                 style={{ color: isActive ? "var(--text-primary)" : "var(--text-secondary)" }}
               >
-                {label}
+                {t(key as Parameters<typeof t>[0])}
               </span>
             </Link>
           );

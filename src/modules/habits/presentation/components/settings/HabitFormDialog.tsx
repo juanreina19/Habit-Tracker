@@ -1,12 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ColorPicker } from "@/shared/components/ui/ColorPicker";
-import { EmojiPicker } from "@/shared/components/ui/EmojiPicker";
+import { ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
+import { HABIT_EMOJIS } from "@/shared/components/ui/EmojiPicker";
+import { HabitIcon, LUCIDE_ICON_MAP, LUCIDE_CATEGORIES } from "@/shared/components/ui/HabitIcon";
 import type { Habit } from "../../../domain/entities/Habit";
 import type { CreateHabitInput, UpdateHabitInput } from "../../../domain/repositories/IHabitRepository";
 import type { Category } from "@/modules/categories/domain/entities/Category";
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function calcEndTime(start: string, minutes: number): string {
   const [h, m] = start.split(":").map(Number);
@@ -14,10 +20,12 @@ function calcEndTime(start: string, minutes: number): string {
   return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
-const DAY_LABELS: Record<number, string> = {
-  1: "L", 2: "M", 3: "X", 4: "J", 5: "V", 6: "S", 7: "D",
-};
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type Scene = "step0" | "step1" | "step2" | "color" | "icon";
+type IconTab = "emoji" | "svg";
 
 interface Props {
   open: boolean;
@@ -27,75 +35,110 @@ interface Props {
   onSave: (data: CreateHabitInput | UpdateHabitInput) => Promise<void>;
 }
 
+// ─── Slide animation variants ─────────────────────────────────────────────────
+
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir < 0 ? "100%" : "-100%", opacity: 0 }),
+};
+const slideTransition = { type: "spring", stiffness: 380, damping: 32 };
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
 export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Props) {
-  const [name, setName] = useState("");
-  const [icon, setIcon] = useState<string | null>(null);
-  const [color, setColor] = useState<string | null>(null);
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [activeDays, setActiveDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 7]);
-  const [estimatedMinutes, setEstimatedMinutes] = useState<string>("");
-  const [startTime, setStartTime] = useState<string>("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [nameError, setNameError] = useState("");
-  const [daysError, setDaysError] = useState("");
+  const t = useTranslations("habitForm");
+  const tDays = useTranslations("dayLabels");
+  const tCat = useTranslations("iconCategories");
+  const [scene, setScene] = useState<Scene>("step0");
+  const [slideDir, setSlideDir] = useState(1);
+  const [iconTab, setIconTab] = useState<IconTab>("emoji");
+
+  // Form state
+  const [name, setName]                       = useState("");
+  const [icon, setIcon]                       = useState<string | null>(null);
+  const [color, setColor]                     = useState<string | null>(null);
+  const [categoryId, setCategoryId]           = useState<string | null>(null);
+  const [activeDays, setActiveDays]           = useState<number[]>([1, 2, 3, 4, 5, 6, 7]);
+  const [timeEnabled, setTimeEnabled]         = useState(false);
+  const [startTime, setStartTime]             = useState("");
+  const [estimatedMinutes, setEstimatedMinutes] = useState("");
+  const [isSaving, setIsSaving]               = useState(false);
+  const [nameError, setNameError]             = useState("");
+  const [daysError, setDaysError]             = useState("");
 
   useEffect(() => {
     if (open) {
+      setScene("step0");
+      setSlideDir(1);
+      setIconTab("emoji");
       setName(habit?.name ?? "");
       setIcon(habit?.icon ?? null);
       setColor(habit?.color ?? null);
       setCategoryId(habit?.categoryId ?? null);
       setActiveDays(habit?.activeDays ?? [1, 2, 3, 4, 5, 6, 7]);
-      setEstimatedMinutes(habit?.estimatedMinutes?.toString() ?? "");
+      setTimeEnabled(!!(habit?.startTime));
       setStartTime(habit?.startTime ?? "");
+      setEstimatedMinutes(habit?.estimatedMinutes?.toString() ?? "");
       setNameError("");
       setDaysError("");
     }
   }, [open, habit]);
 
+  const navigate = (to: Scene, dir: number) => { setSlideDir(dir); setScene(to); };
+
   const toggleDay = (day: number) => {
-    setActiveDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort((a, b) => a - b)
-    );
+    setActiveDays((p) => p.includes(day) ? p.filter((d) => d !== day) : [...p, day].sort((a, b) => a - b));
     setDaysError("");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = name.trim();
-    let valid = true;
-
-    if (!trimmed) {
-      setNameError("El nombre es obligatorio");
-      valid = false;
+  const goNext = () => {
+    if (scene === "step0") {
+      if (!name.trim()) { setNameError(t("name_error")); return; }
+      setNameError("");
+      navigate("step1", 1);
+    } else if (scene === "step1") {
+      if (activeDays.length === 0) { setDaysError(t("days_error")); return; }
+      setDaysError("");
+      navigate("step2", 1);
     }
-    if (activeDays.length === 0) {
-      setDaysError("Selecciona al menos un día");
-      valid = false;
-    }
-    if (!valid) return;
+  };
 
+  const goBack = () => {
+    if (scene === "step1") navigate("step0", -1);
+    else if (scene === "step2") navigate("step1", -1);
+    else if (scene === "color" || scene === "icon") navigate("step2", -1);
+  };
+
+  const handleSave = async () => {
+    if (!name.trim()) { navigate("step0", -1); setNameError(t("name_error")); return; }
+    if (activeDays.length === 0) { navigate("step1", -1); setDaysError(t("days_error")); return; }
     const minutes = estimatedMinutes ? parseInt(estimatedMinutes, 10) : undefined;
-
     setIsSaving(true);
     try {
-      const data: CreateHabitInput | UpdateHabitInput = {
-        name: trimmed,
+      await onSave({
+        name: name.trim(),
         icon: icon ?? undefined,
         color: color ?? undefined,
-        categoryId: categoryId,
+        categoryId,
         activeDays,
         estimatedMinutes: minutes && !isNaN(minutes) ? minutes : undefined,
-        startTime: startTime || null,
-      };
-      await onSave(data);
-      onClose();
+        startTime: timeEnabled ? (startTime || null) : null,
+      });
     } catch (err) {
-      setNameError(err instanceof Error ? err.message : "Error al guardar");
+      navigate("step0", -1);
+      setNameError(err instanceof Error ? err.message : t("save_error"));
     } finally {
       setIsSaving(false);
     }
   };
+
+  const endTime = timeEnabled && startTime && estimatedMinutes && !isNaN(parseInt(estimatedMinutes, 10))
+    ? calcEndTime(startTime, parseInt(estimatedMinutes, 10))
+    : null;
+
+  const stepIndex = scene === "step0" ? 0 : scene === "step1" ? 1 : 2;
+  const isWizardScene = scene === "step0" || scene === "step1" || scene === "step2";
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
@@ -105,179 +148,451 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
           style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
         />
         <Dialog.Content
-          className="fixed z-50 left-1/2 bottom-0 w-full max-w-lg -translate-x-1/2 rounded-t-[24px] outline-none overflow-y-auto overflow-x-hidden"
+          className="fixed z-50 left-1/2 bottom-0 w-full max-w-lg -translate-x-1/2 rounded-t-[24px] outline-none overflow-hidden"
           style={{ background: "var(--surface)", maxHeight: "92dvh" }}
         >
-          <div className="p-6">
-            <Dialog.Title className="text-lg font-semibold mb-5" style={{ color: "var(--text-primary)" }}>
-              {habit ? "Editar hábito" : "Nuevo hábito"}
-            </Dialog.Title>
-
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              {/* Name */}
-              <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                  NOMBRE
-                </label>
-                <input
-                  autoFocus
-                  type="text"
-                  value={name}
-                  onChange={(e) => { setName(e.target.value); setNameError(""); }}
-                  placeholder="Ej: Meditación"
-                  maxLength={60}
-                  className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
-                  style={{
-                    background: "var(--surface-elevated)",
-                    color: "var(--text-primary)",
-                    border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
-                  }}
-                />
-                {nameError && (
-                  <p className="text-xs mt-1" style={{ color: "#FF5252" }}>{nameError}</p>
+          <div className="overflow-y-auto" style={{ maxHeight: "92dvh" }}>
+            <AnimatePresence mode="wait" custom={slideDir}>
+              <motion.div
+                key={scene}
+                custom={slideDir}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={slideTransition}
+                className="p-6"
+              >
+                {/* ── Wizard step header ──────────────────────────── */}
+                {isWizardScene && (
+                  <div className="flex items-center justify-between mb-6">
+                    <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                      {habit ? t("edit_title") : t("new_title")}
+                    </Dialog.Title>
+                    <div className="flex items-center gap-1.5">
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="rounded-full transition-all duration-300"
+                          style={{
+                            width: i === stepIndex ? 20 : 6,
+                            height: 6,
+                            background: i === stepIndex ? "var(--btn-primary-bg)" : "var(--border)",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </div>
 
-              {/* Active days */}
-              <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                  DÍAS ACTIVOS
-                </label>
-                <div className="flex gap-2">
-                  {ALL_DAYS.map((day) => {
-                    const isOn = activeDays.includes(day);
-                    return (
-                      <button
-                        key={day}
-                        type="button"
-                        onClick={() => toggleDay(day)}
-                        className="flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all active:scale-95"
-                        style={{
-                          background: isOn ? "#FFFFFF" : "var(--surface-elevated)",
-                          color: isOn ? "#000000" : "#8888AA",
-                        }}
-                      >
-                        {DAY_LABELS[day]}
-                      </button>
-                    );
-                  })}
-                </div>
-                {daysError && (
-                  <p className="text-xs mt-1" style={{ color: "#FF5252" }}>{daysError}</p>
-                )}
-              </div>
-
-              {/* Category */}
-              {categories.length > 0 && (
-                <div>
-                  <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                    CATEGORÍA
-                  </label>
-                  <div className="flex flex-wrap gap-2">
+                {/* ── Sub-sheet header ────────────────────────────── */}
+                {!isWizardScene && (
+                  <div className="flex items-center gap-3 mb-5">
                     <button
                       type="button"
-                      onClick={() => setCategoryId(null)}
-                      className="px-3 py-2 rounded-[10px] text-xs font-medium transition-all active:scale-95"
-                      style={{
-                        background: categoryId === null ? "var(--surface-elevated)" : "transparent",
-                        color: categoryId === null ? "#FFFFFF" : "#8888AA",
-                        border: `1.5px solid ${categoryId === null ? "#FFFFFF30" : "var(--surface-elevated)"}`,
-                      }}
+                      onClick={goBack}
+                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: "var(--surface-elevated)" }}
                     >
-                      Sin categoría
+                      <ChevronLeft size={16} />
                     </button>
-                    {categories.map((cat) => (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => setCategoryId(cat.id)}
-                        className="px-3 py-2 rounded-[10px] text-xs font-medium flex items-center gap-1.5 transition-all active:scale-95"
-                        style={{
-                          background: categoryId === cat.id ? (cat.color ?? "var(--surface-elevated)") + "25" : "transparent",
-                          color: categoryId === cat.id ? (cat.color ?? "#FFFFFF") : "#8888AA",
-                          border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "#FFFFFF") + "60" : "var(--surface-elevated)"}`,
-                        }}
-                      >
-                        {cat.icon && <span>{cat.icon}</span>}
-                        {cat.name}
-                      </button>
-                    ))}
+                    <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                      {scene === "color" ? t("color_label") : t("icon_label")}
+                    </Dialog.Title>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Start time */}
-              <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                  HORA DE INICIO (opcional)
-                </label>
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  className="w-full rounded-[12px] px-4 py-3 outline-none"
-                  style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent", colorScheme: "dark", fontSize: "16px", WebkitAppearance: "none", appearance: "none", boxSizing: "border-box" }}
-                />
-              </div>
+                {/* ── Step 0: Basic ───────────────────────────────── */}
+                {scene === "step0" && (
+                  <div className="flex flex-col gap-5">
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                        {t("name_label")}
+                      </label>
+                      <input
+                        autoFocus
+                        type="text"
+                        value={name}
+                        onChange={(e) => { setName(e.target.value); setNameError(""); }}
+                        placeholder={t("name_placeholder")}
+                        maxLength={60}
+                        className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+                        style={{
+                          background: "var(--surface-elevated)",
+                          color: "var(--text-primary)",
+                          border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
+                        }}
+                      />
+                      {nameError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{nameError}</p>}
+                    </div>
 
-              {/* Estimated minutes */}
-              <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                  DURACIÓN (minutos, opcional)
-                </label>
-                <input
-                  type="number"
-                  value={estimatedMinutes}
-                  onChange={(e) => setEstimatedMinutes(e.target.value)}
-                  placeholder="Ej: 20"
-                  min={1}
-                  max={480}
-                  className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
-                  style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
-                />
-              </div>
-              {startTime && estimatedMinutes && !isNaN(parseInt(estimatedMinutes, 10)) && (
-                <p className="text-xs -mt-3" style={{ color: "#4CAF82" }}>
-                  Fin: {calcEndTime(startTime, parseInt(estimatedMinutes, 10))}
-                </p>
-              )}
+                    {categories.length > 0 && (
+                      <div>
+                        <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                          {t("category_label")}
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setCategoryId(null)}
+                            className="px-3 py-2 rounded-[10px] text-xs font-medium transition-all active:scale-95"
+                            style={{
+                              background: categoryId === null ? "var(--surface-elevated)" : "transparent",
+                              color: categoryId === null ? "var(--text-primary)" : "var(--text-secondary)",
+                              border: `1.5px solid ${categoryId === null ? "rgba(255,255,255,0.15)" : "var(--surface-elevated)"}`,
+                            }}
+                          >
+                            {t("no_category")}
+                          </button>
+                          {categories.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => setCategoryId(cat.id)}
+                              className="px-3 py-2 rounded-[10px] text-xs font-medium flex items-center gap-1.5 transition-all active:scale-95"
+                              style={{
+                                background: categoryId === cat.id ? (cat.color ?? "#4CAF82") + "25" : "transparent",
+                                color: categoryId === cat.id ? (cat.color ?? "#4CAF82") : "var(--text-secondary)",
+                                border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "#4CAF82") + "60" : "var(--surface-elevated)"}`,
+                              }}
+                            >
+                              {cat.icon && <span>{cat.icon}</span>}
+                              {cat.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-              {/* Color */}
-              <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                  COLOR
-                </label>
-                <ColorPicker value={color} onChange={setColor} />
-              </div>
+                {/* ── Step 1: Schedule ────────────────────────────── */}
+                {scene === "step1" && (
+                  <div className="flex flex-col gap-5">
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                        {t("days_label")}
+                      </label>
+                      <div className="flex gap-2">
+                        {ALL_DAYS.map((day) => {
+                          const on = activeDays.includes(day);
+                          return (
+                            <button
+                              key={day}
+                              type="button"
+                              onClick={() => toggleDay(day)}
+                              className="flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all active:scale-95"
+                              style={{
+                                background: on ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
+                                color: on ? "var(--btn-primary-text)" : "var(--text-secondary)",
+                              }}
+                            >
+                                {tDays(`d${day}` as Parameters<typeof tDays>[0])}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {daysError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{daysError}</p>}
+                    </div>
 
-              {/* Icon */}
-              <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                  ICONO (toca para seleccionar o deseleccionar)
-                </label>
-                <EmojiPicker value={icon} onChange={setIcon} />
-              </div>
+                    {/* Time toggle row */}
+                    <div
+                      className="flex items-center justify-between px-4 py-3 rounded-[12px]"
+                      style={{ background: "var(--surface-elevated)" }}
+                    >
+                      <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                        {t("schedule_toggle")}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setTimeEnabled((v) => !v)}
+                        className="w-11 h-6 rounded-full relative transition-colors flex-shrink-0"
+                        style={{ background: timeEnabled ? "#4CAF82" : "var(--border)" }}
+                      >
+                        <span
+                          className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all"
+                          style={{ left: timeEnabled ? "calc(100% - 22px)" : "2px" }}
+                        />
+                      </button>
+                    </div>
 
-              {/* Actions */}
-              <div className="flex gap-3 pt-1 pb-safe">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
-                  style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
-                  style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-                >
-                  {isSaving ? "Guardando…" : "Guardar"}
-                </button>
-              </div>
-            </form>
+                    {timeEnabled && (
+                      <div className="flex flex-col gap-3">
+                        <div className="flex gap-3">
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                              {t("start_label")}
+                            </label>
+                            <input
+                              type="time"
+                              value={startTime}
+                              onChange={(e) => setStartTime(e.target.value)}
+                              className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+                              style={{
+                                background: "var(--surface-elevated)",
+                                color: "var(--text-primary)",
+                                border: "1.5px solid transparent",
+                                colorScheme: "dark",
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                              {t("duration_label")}
+                            </label>
+                            <input
+                              type="number"
+                              value={estimatedMinutes}
+                              onChange={(e) => setEstimatedMinutes(e.target.value)}
+                              placeholder="30"
+                              min={1}
+                              max={480}
+                              className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+                              style={{
+                                background: "var(--surface-elevated)",
+                                color: "var(--text-primary)",
+                                border: "1.5px solid transparent",
+                              }}
+                            />
+                          </div>
+                        </div>
+                        {endTime && (
+                          <p className="text-xs font-medium" style={{ color: "#4CAF82" }}>
+                            {t("ends_at", { time: endTime! })}
+                          </p>
+                        )}
+                        {/* Info tooltip */}
+                        <div
+                          className="flex items-start gap-2.5 rounded-[12px] px-3.5 py-3"
+                          style={{ background: "rgba(100,160,255,0.08)", border: "1px solid rgba(100,160,255,0.15)" }}
+                        >
+                          <Info size={14} className="flex-shrink-0 mt-0.5" color="#88AAFF" />
+                          <p className="text-xs leading-relaxed" style={{ color: "#88AAFF" }}>
+                            {t("lock_tooltip")}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ── Step 2: Appearance ──────────────────────────── */}
+                {scene === "step2" && (
+                  <div className="flex flex-col gap-3">
+                    {/* Color row */}
+                    <button
+                      type="button"
+                      onClick={() => navigate("color", 1)}
+                      className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
+                      style={{ background: "var(--surface-elevated)" }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-9 h-9 rounded-full flex-shrink-0 border-2"
+                          style={{
+                            background: color ?? "var(--border)",
+                            borderColor: color ? color + "60" : "var(--border)",
+                          }}
+                        />
+                        <div className="text-left">
+                          <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("color_label")}</p>
+                          <p className="text-xs mt-0.5" style={{ color: color ?? "var(--text-secondary)" }}>
+                            {color ?? t("no_color")}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
+                    </button>
+
+                    {/* Icon row */}
+                    <button
+                      type="button"
+                      onClick={() => navigate("icon", 1)}
+                      className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
+                      style={{ background: "var(--surface-elevated)" }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-9 h-9 rounded-[12px] flex items-center justify-center flex-shrink-0"
+                          style={{ background: icon ? (color ?? "#4CAF82") + "25" : "var(--border)" }}
+                        >
+                          {icon
+                            ? <HabitIcon icon={icon} size={20} color={color ?? "var(--text-primary)"} />
+                            : <span className="text-sm" style={{ color: "var(--text-muted)" }}>—</span>
+                          }
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("icon_label")}</p>
+                          <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                            {icon ? (icon.startsWith("lucide:") ? icon.slice(7) : icon) : t("no_icon")}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
+                    </button>
+                  </div>
+                )}
+
+                {/* ── Color sub-sheet ─────────────────────────────── */}
+                {scene === "color" && (
+                  <div>
+                    <div className="grid grid-cols-6 gap-3">
+                      {PRESET_COLORS.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => { setColor(c === color ? null : c); navigate("step2", -1); }}
+                          className="aspect-square rounded-full flex items-center justify-center transition-transform active:scale-90"
+                          style={{
+                            background: c,
+                            outline: color === c ? `3px solid ${c}` : "none",
+                            outlineOffset: "3px",
+                          }}
+                        >
+                          {color === c && (
+                            <svg width="14" height="11" viewBox="0 0 12 10" fill="none">
+                              <path d="M1 5l3.5 3.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    {color && (
+                      <button
+                        type="button"
+                        onClick={() => { setColor(null); navigate("step2", -1); }}
+                        className="mt-4 text-xs font-medium transition-opacity active:opacity-60"
+                        style={{ color: "var(--text-secondary)" }}
+                      >
+                        {t("remove_color")}
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* ── Icon sub-sheet ──────────────────────────────── */}
+                {scene === "icon" && (
+                  <div>
+                    {/* Tab toggle */}
+                    <div className="flex rounded-[12px] p-1 mb-4" style={{ background: "var(--surface-elevated)" }}>
+                      {(["emoji", "svg"] as IconTab[]).map((tabType) => (
+                        <button
+                          key={tabType}
+                          type="button"
+                          onClick={() => setIconTab(tabType)}
+                          className="flex-1 py-2 rounded-[8px] text-xs font-medium transition-all"
+                          style={{
+                            background: iconTab === tabType ? "var(--surface)" : "transparent",
+                            color: iconTab === tabType ? "var(--text-primary)" : "var(--text-secondary)",
+                          }}
+                        >
+                          {tabType === "emoji" ? t("tab_emoji") : t("tab_svg")}
+                        </button>
+                      ))}
+                    </div>
+
+                    {iconTab === "emoji" && (
+                      <div className="flex flex-wrap gap-2 pb-2">
+                        {HABIT_EMOJIS.map((emoji) => (
+                          <button
+                            key={emoji}
+                            type="button"
+                            onClick={() => { setIcon(icon === emoji ? null : emoji); navigate("step2", -1); }}
+                            className="w-12 h-12 rounded-[12px] flex items-center justify-center text-2xl transition-all active:scale-90"
+                            style={{
+                              background: icon === emoji ? "var(--surface-elevated)" : "transparent",
+                              border: `1.5px solid ${icon === emoji ? "var(--btn-primary-bg)" : "var(--border)"}`,
+                            }}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {iconTab === "svg" && (
+                      <div className="flex flex-col gap-5 pb-4">
+                        {LUCIDE_CATEGORIES.map(({ label, icons }) => (
+                          <div key={label}>
+                            <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--text-secondary)" }}>
+                              {tCat(label as Parameters<typeof tCat>[0])}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {icons.map((iconName) => {
+                                const IconComp = LUCIDE_ICON_MAP[iconName];
+                                const iconValue = `lucide:${iconName}`;
+                                const isSelected = icon === iconValue;
+                                return (
+                                  <button
+                                    key={iconName}
+                                    type="button"
+                                    onClick={() => { setIcon(isSelected ? null : iconValue); navigate("step2", -1); }}
+                                    className="w-12 h-12 rounded-[12px] flex items-center justify-center transition-all active:scale-90"
+                                    style={{
+                                      background: isSelected ? "var(--surface-elevated)" : "transparent",
+                                      border: `1.5px solid ${isSelected ? "var(--btn-primary-bg)" : "var(--border)"}`,
+                                      color: isSelected ? "var(--text-primary)" : "var(--text-secondary)",
+                                    }}
+                                  >
+                                    <IconComp size={22} />
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ── Wizard nav buttons ──────────────────────────── */}
+                {isWizardScene && (
+                  <div className="flex gap-3 mt-6 pb-safe">
+                    {scene === "step0" ? (
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
+                        style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
+                      >
+                        {t("cancel")}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={goBack}
+                        className="flex items-center justify-center gap-1 px-5 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
+                        style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
+                      >
+                        <ChevronLeft size={15} /> {t("previous")}
+                      </button>
+                    )}
+
+                    {scene !== "step2" ? (
+                      <button
+                        type="button"
+                        onClick={goNext}
+                        className="flex-1 flex items-center justify-center gap-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70"
+                        style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+                      >
+                        {t("next")} <ChevronRight size={15} />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                        style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+                      >
+                        {isSaving ? t("saving") : t("save")}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
