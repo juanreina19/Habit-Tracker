@@ -28,7 +28,7 @@ const slideVariants = {
   center: { x: 0, opacity: 1 },
   exit: (dir: number) => ({ x: dir < 0 ? "100%" : "-100%", opacity: 0 }),
 };
-const slideTransition = { type: "spring", stiffness: 380, damping: 32 };
+const slideTransition = { type: "tween", duration: 0.15, ease: [0.4, 0, 0.2, 1] } as const;
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
@@ -100,11 +100,12 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
           style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
         />
         <Dialog.Content
+          onOpenAutoFocus={(e) => e.preventDefault()}
           className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-[24px] outline-none overflow-hidden"
           style={{ background: "var(--surface)", maxHeight: "85dvh" }}
         >
           <div className="overflow-y-auto" style={{ maxHeight: "85dvh" }}>
-            <AnimatePresence mode="wait" custom={slideDir}>
+            <AnimatePresence mode="popLayout" custom={slideDir}>
               <motion.div
                 key={scene}
                 custom={slideDir}
@@ -113,6 +114,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                 animate="center"
                 exit="exit"
                 transition={slideTransition}
+                style={{ willChange: "transform, opacity" }}
                 className="p-6"
               >
                 {/* ── Wizard header (create mode) ────────────── */}
