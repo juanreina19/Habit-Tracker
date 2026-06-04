@@ -6,6 +6,7 @@ import type { UUID } from "@/shared/types/database.types";
 import type { DayStatus, WeeklyHabitProgress } from "../../domain/use-cases/GetWeeklyProgressUseCase";
 import { format, endOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
+import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 
 const DAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"];
 
@@ -145,10 +146,10 @@ function HabitWeekRow({ progress }: { progress: WeeklyHabitProgress }) {
       style={{ background: "var(--surface)" }}
     >
       <div
-        className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0 text-base"
-        style={{ background: accentColor + "20" }}
+        className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0"
+        style={{ background: accentColor + "20", color: accentColor }}
       >
-        {habit.icon ?? "🎯"}
+        <HabitIcon icon={habit.icon ?? "🎯"} size={18} />
       </div>
 
       <div className="flex-1 min-w-0">

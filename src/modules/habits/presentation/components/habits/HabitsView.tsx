@@ -257,11 +257,18 @@ function HabitReorderItem({
         <HabitIcon icon={habit.icon ?? cat?.icon ?? "🎯"} size={20} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium truncate" style={{ color: "var(--text-primary)" }}>{habit.name}</p>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex items-center gap-2">
+          <p className="font-medium truncate" style={{ color: "var(--text-primary)" }}>{habit.name}</p>
           {cat && (
-            <span className="text-xs" style={{ color: cat.color ?? "var(--text-secondary)" }}>{cat.name}</span>
+            <span
+              className="text-[10px] font-medium px-1.5 py-0.5 rounded-[6px] flex-shrink-0 whitespace-nowrap"
+              style={{ background: (cat.color ?? "#8888AA") + "22", color: cat.color ?? "#8888AA" }}
+            >
+              {cat.name}
+            </span>
           )}
+        </div>
+        <div className="flex items-center gap-2 mt-0.5">
           <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
             {habit.activeDays.map((d) => ["L","M","X","J","V","S","D"][d - 1]).join(" ")}
           </span>

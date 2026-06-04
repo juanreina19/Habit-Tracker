@@ -47,7 +47,7 @@ interface Props {
   userName?: string;
 }
 
-export default function TodayView({ userId, userName = "" }: Props) {
+export default function TodayView({ userId }: Props) {
   const t = useTranslations("today");
   const { locale } = useLocale();
   const dateFnsLocale = locale === "en" ? enUS : es;
@@ -105,9 +105,6 @@ export default function TodayView({ userId, userName = "" }: Props) {
     }
   };
 
-  const h = today.getHours();
-  const greeting = h >= 5 && h < 12 ? t("greeting_morning") : h < 19 ? t("greeting_afternoon") : t("greeting_evening");
-  const greetingText = userName ? `${greeting}, ${userName}!` : `${greeting}!`;
 
   const GROUP_LABELS: Record<string, string> = {
     morning: t("morning"),
@@ -134,10 +131,12 @@ export default function TodayView({ userId, userName = "" }: Props) {
         <div className="flex items-start justify-between mb-8">
           <div>
             <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-              {t("date_prefix") + format(today, "d MMMM", { locale: dateFnsLocale }).replace(/^\w/, (c) => c.toUpperCase())}
+              {t("today_label")}
             </p>
             <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
-              {completionPercentage === 100 ? t("perfect_day") : greetingText}
+              {completionPercentage === 100
+                ? t("perfect_day")
+                : format(today, "d MMMM", { locale: dateFnsLocale }).replace(/^\w/, (c) => c.toUpperCase())}
             </h1>
           </div>
           {/* Mobile: solo icono */}

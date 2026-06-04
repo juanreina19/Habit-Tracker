@@ -24,7 +24,8 @@
     "undo": "Deshacer",
     "streak_saved": "¡Racha salvada! 🧊",
     "save_streak": "🧊 Salvar",
-    "new_habit": "Nuevo hábito"
+    "new_habit": "Nuevo hábito",
+    "today_label": "Hoy"
   },
   "habitForm": {
     "new_title": "Nuevo hábito",
@@ -80,6 +81,25 @@
     "sign_out": "Cerrar sesión",
     "signing_out": "Cerrando sesión…",
     "language": "Idioma"
+  },
+  "stats": {
+    "title": "Estadísticas",
+    "active": "Activos",
+    "habits_unit": "hábitos",
+    "streak": "Racha actual",
+    "days_unit": "días",
+    "this_month": "Este mes",
+    "completed_unit": "completado",
+    "activity_year": "Actividad {year}",
+    "weekly_trend": "Tendencia semanal",
+    "completed_label": "Completado",
+    "per_habit": "Por hábito — últimos 30 días",
+    "achievements": "Logros",
+    "best_streak": "Mejor racha histórica:",
+    "best_streak_unit": "{n} días",
+    "no_data": "Sin datos aún",
+    "not_yet": "Aún no",
+    "no_habits": "Sin hábitos"
   },
   "habits": {
     "manage": "Gestionar",

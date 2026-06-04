@@ -5,7 +5,10 @@ import {
   BarChart, Bar, Cell, XAxis, YAxis, ResponsiveContainer, Tooltip,
 } from "recharts";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
+import { useTranslations } from "next-intl";
+import { useLocale } from "@/shared/i18n/useLocale";
+import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { useStats } from "../hooks/useStats";
 import { useYearlyHeatmap } from "../hooks/useYearlyHeatmap";
 import type { HabitStat, WeekTrend } from "../../domain/use-cases/GetStatsUseCase";
@@ -19,6 +22,10 @@ interface Props {
 }
 
 export default function StatsView({ userId, userCreatedAt }: Props) {
+  const t = useTranslations("stats");
+  const { locale } = useLocale();
+  const dateFnsLocale = locale === "en" ? enUS : es;
+
   const { data, isLoading, error } = useStats(userId, userCreatedAt);
   const currentYear = new Date().getFullYear();
   const { days: heatmapDays, isLoading: heatmapLoading } = useYearlyHeatmap(userId, currentYear);
@@ -46,22 +53,22 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
       {/* Header */}
       <div className="mb-6">
         <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-          {format(new Date(), "MMMM yyyy", { locale: es }).replace(/^\w/, (c) => c.toUpperCase())}
+          {format(new Date(), "MMMM yyyy", { locale: dateFnsLocale }).replace(/^\w/, (c) => c.toUpperCase())}
         </p>
         <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
-          Estadísticas
+          {t("title")}
         </h1>
       </div>
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <StatCard label="Activos" value={activeHabitsCount.toString()} unit="hábitos" />
-        <StatCard label="Racha actual" value={bestCurrentStreak.toString()} unit="días" highlight={bestCurrentStreak >= 7} />
-        <StatCard label="Este mes" value={`${monthlyRate}%`} unit="completado" highlight={monthlyRate >= 80} />
+        <StatCard label={t("active")} value={activeHabitsCount.toString()} unit={t("habits_unit")} />
+        <StatCard label={t("streak")} value={bestCurrentStreak.toString()} unit={t("days_unit")} highlight={bestCurrentStreak >= 7} />
+        <StatCard label={t("this_month")} value={`${monthlyRate}%`} unit={t("completed_unit")} highlight={monthlyRate >= 80} />
       </div>
 
       {/* Yearly heatmap */}
-      <Section title={`Actividad ${currentYear}`}>
+      <Section title={t("activity_year", { year: currentYear })}>
         {heatmapLoading ? (
           <div className="h-20 rounded-[10px] animate-pulse" style={{ background: "#1A1A1A" }} />
         ) : (
@@ -70,7 +77,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
       </Section>
 
       {/* Weekly trend chart */}
-      <Section title="Tendencia semanal">
+      <Section title={t("weekly_trend")}>
         {isMounted && weekTrends.length > 0 ? (
           <div style={{ height: 160 }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -98,7 +105,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
                   }}
                   itemStyle={{ color: "#FFFFFF" }}
                   labelStyle={{ color: "#888888" }}
-                  formatter={(value: number) => [`${value}%`, "Completado"]}
+                  formatter={(value: number) => [`${value}%`, t("completed_label")]}
                 />
                 <Bar dataKey="completionRate" radius={[6, 6, 0, 0]} maxBarSize={32}>
                   {weekTrends.map((entry, i) => (
@@ -115,7 +122,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
 
       {/* Per-habit stats */}
       {habitStats.length > 0 && (
-        <Section title="Por hábito — últimos 30 días">
+        <Section title={t("per_habit")}>
           <div className="flex flex-col gap-3">
             {habitStats.map((hs) => (
               <HabitStatRow key={hs.habit.id} stat={hs} />
@@ -125,7 +132,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
       )}
 
       {/* Achievements */}
-      <Section title="Logros">
+      <Section title={t("achievements")}>
         <div className="grid grid-cols-2 gap-3">
           {allAchievements.map((achievement) => {
             const userAchievement = userAchievements.find(
@@ -142,7 +149,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
         </div>
         {bestEverStreak > 0 && (
           <p className="text-center text-xs mt-4" style={{ color: "var(--text-secondary)" }}>
-            Mejor racha histórica: <span style={{ color: "var(--text-primary)" }}>{bestEverStreak} días</span>
+            {t("best_streak")} <span style={{ color: "var(--text-primary)" }}>{t("best_streak_unit", { n: bestEverStreak })}</span>
           </p>
         )}
       </Section>
@@ -184,15 +191,16 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function HabitStatRow({ stat }: { stat: HabitStat }) {
   const { habit, completionRate, totalCompleted, totalScheduled } = stat;
-  const accent = habit.color ?? "#4CAF82"; // keep hex for concatenation with opacity suffix
+  const accent = habit.color ?? "#4CAF82";
+  const t = useTranslations("stats");
 
   return (
     <div className="flex items-center gap-3">
       <div
-        className="w-8 h-8 rounded-[8px] flex items-center justify-center flex-shrink-0 text-sm"
-        style={{ background: accent + "20" }}
+        className="w-8 h-8 rounded-[8px] flex items-center justify-center flex-shrink-0"
+        style={{ background: accent + "20", color: accent }}
       >
-        {habit.icon ?? "🎯"}
+        <HabitIcon icon={habit.icon ?? "🎯"} size={16} />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
@@ -210,7 +218,7 @@ function HabitStatRow({ stat }: { stat: HabitStat }) {
           />
         </div>
         <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-          {totalCompleted} de {totalScheduled} días
+          {totalCompleted}/{totalScheduled} {t("days_unit")}
         </p>
       </div>
     </div>
@@ -221,9 +229,11 @@ function AchievementCard({ achievement, userAchievement }: {
   achievement: Achievement;
   userAchievement?: UserAchievement;
 }) {
+  const { locale } = useLocale();
+  const dateFnsLocale = locale === "en" ? enUS : es;
   const isUnlocked = Boolean(userAchievement);
   const unlockedDate = userAchievement
-    ? format(new Date(userAchievement.unlockedAt), "d MMM yyyy", { locale: es })
+    ? format(new Date(userAchievement.unlockedAt), "d MMM yyyy", { locale: dateFnsLocale })
     : null;
 
   return (
@@ -262,7 +272,6 @@ function AchievementCard({ achievement, userAchievement }: {
   );
 }
 
-const MONTH_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 function heatmapColor(rate: number, isFuture: boolean): string {
   if (isFuture || rate === -1) return "var(--surface-elevated)";
@@ -273,6 +282,9 @@ function heatmapColor(rate: number, isFuture: boolean): string {
 }
 
 function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
+  const t = useTranslations("stats");
+  const { locale } = useLocale();
+  const dateFnsLocale = locale === "en" ? enUS : es;
   const [selected, setSelected] = useState<DayProgress | null>(null);
 
   if (days.length === 0) return <div className="h-20" />;
@@ -308,7 +320,7 @@ function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
         <div className="mb-3 rounded-[10px] px-3 py-2 flex items-center justify-between"
           style={{ background: "var(--surface-elevated)" }}>
           <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            {format(selected.date, "EEEE d 'de' MMMM", { locale: es }).replace(/^\w/, c => c.toUpperCase())}
+            {format(selected.date, "EEEE d MMMM", { locale: dateFnsLocale }).replace(/^\w/, c => c.toUpperCase())}
           </p>
           {!selected.isFuture && selected.scheduled > 0 ? (
             <p className="text-sm font-semibold" style={{ color: heatmapColor(selected.completionRate, false) }}>
@@ -316,7 +328,7 @@ function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
             </p>
           ) : (
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {selected.isFuture ? "Aún no" : "Sin hábitos"}
+              {selected.isFuture ? t("not_yet") : t("no_habits")}
             </p>
           )}
         </div>
@@ -331,7 +343,9 @@ function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
               if (spanWidth < CELL * 2) return null;
               return (
                 <div key={month} style={{ width: spanWidth, minWidth: spanWidth, marginLeft: i === 0 ? weekIdx * CELL : 0 }}>
-                  <span style={{ fontSize: 9, color: "var(--text-muted)" }}>{MONTH_LABELS[month]}</span>
+                  <span style={{ fontSize: 9, color: "var(--text-muted)" }}>
+                    {format(new Date(year, month, 1), "MMM", { locale: dateFnsLocale })}
+                  </span>
                 </div>
               );
             })}
@@ -363,9 +377,10 @@ function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
 }
 
 function EmptyChart() {
+  const t = useTranslations("stats");
   return (
     <div className="flex items-center justify-center py-10">
-      <p className="text-sm" style={{ color: "var(--text-muted)" }}>Sin datos aún</p>
+      <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("no_data")}</p>
     </div>
   );
 }

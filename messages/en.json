@@ -24,7 +24,8 @@
     "undo": "Undo",
     "streak_saved": "Streak saved! 🧊",
     "save_streak": "🧊 Save",
-    "new_habit": "New habit"
+    "new_habit": "New habit",
+    "today_label": "Today"
   },
   "habitForm": {
     "new_title": "New habit",
@@ -80,6 +81,25 @@
     "sign_out": "Sign out",
     "signing_out": "Signing out…",
     "language": "Language"
+  },
+  "stats": {
+    "title": "Statistics",
+    "active": "Active",
+    "habits_unit": "habits",
+    "streak": "Current streak",
+    "days_unit": "days",
+    "this_month": "This month",
+    "completed_unit": "completed",
+    "activity_year": "Activity {year}",
+    "weekly_trend": "Weekly trend",
+    "completed_label": "Completed",
+    "per_habit": "Per habit — last 30 days",
+    "achievements": "Achievements",
+    "best_streak": "All-time best streak:",
+    "best_streak_unit": "{n} days",
+    "no_data": "No data yet",
+    "not_yet": "Not yet",
+    "no_habits": "No habits"
   },
   "habits": {
     "manage": "Manage",

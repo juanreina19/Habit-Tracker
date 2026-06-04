@@ -210,7 +210,6 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                         {t("name_label")}
                       </label>
                       <input
-                        autoFocus
                         type="text"
                         value={name}
                         onChange={(e) => { setName(e.target.value); setNameError(""); }}
@@ -318,8 +317,8 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
 
                     {timeEnabled && (
                       <div className="flex flex-col gap-3">
-                        <div className="flex gap-3">
-                          <div className="flex-1">
+                        <div className="flex flex-col gap-3">
+                          <div>
                             <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                               {t("start_label")}
                             </label>
@@ -336,7 +335,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                               }}
                             />
                           </div>
-                          <div className="flex-1">
+                          <div>
                             <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                               {t("duration_label")}
                             </label>
