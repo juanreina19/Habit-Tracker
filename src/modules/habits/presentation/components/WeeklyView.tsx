@@ -12,9 +12,10 @@ const DAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"];
 interface Props {
   userId: UUID;
   userCreatedAt?: string;
+  embedded?: boolean;
 }
 
-export default function WeeklyView({ userId, userCreatedAt }: Props) {
+export default function WeeklyView({ userId, userCreatedAt, embedded = false }: Props) {
   const { data, isLoading, error, weekStart, goToPrevWeek, goToNextWeek,
     canGoPrev, canGoNext, isCurrentWeek } = useWeekly(userId, userCreatedAt);
 
@@ -22,17 +23,19 @@ export default function WeeklyView({ userId, userCreatedAt }: Props) {
   const weekStartLabel = format(weekStart, "d MMM", { locale: es });
   const weekEndLabel = format(weekEnd, "d MMM", { locale: es });
 
-  return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+  const inner = (
+    <>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
             {weekStartLabel} — {weekEndLabel}
           </p>
-          <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
-            {isCurrentWeek ? "Esta semana" : "Semana"}
-          </h1>
+          {!embedded && (
+            <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
+              {isCurrentWeek ? "Esta semana" : "Semana"}
+            </h1>
+          )}
         </div>
         <div className="flex gap-2">
           <button
@@ -107,7 +110,7 @@ export default function WeeklyView({ userId, userCreatedAt }: Props) {
               <p className="text-4xl mb-3">📅</p>
               <p className="font-medium" style={{ color: "var(--text-primary)" }}>Sin hábitos esta semana</p>
               <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-                Crea hábitos en Ajustes para verlos aquí.
+                Crea hábitos en Hábitos para verlos aquí.
               </p>
             </div>
           ) : (
@@ -119,6 +122,13 @@ export default function WeeklyView({ userId, userCreatedAt }: Props) {
           )}
         </>
       )}
+    </>
+  );
+
+  if (embedded) return inner;
+  return (
+    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+      {inner}
     </div>
   );
 }

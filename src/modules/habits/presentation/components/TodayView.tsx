@@ -5,11 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { startOfWeek, parseISO } from "date-fns";
+import { Plus } from "lucide-react";
 import { useHabits } from "../hooks/useHabits";
+import { useSettingsHabits } from "../hooks/useSettingsHabits";
+import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
+import { HabitFormDialog } from "./settings/HabitFormDialog";
 import { useToast } from "@/shared/components/ui/Toast";
 import { Confetti } from "@/shared/components/ui/Confetti";
 import type { UUID } from "@/shared/types/database.types";
 import type { HabitWithStatus } from "../../domain/entities/Habit";
+import type { CreateHabitInput } from "../../domain/repositories/IHabitRepository";
 
 function getGreeting(name: string): string {
   const h = new Date().getHours();
@@ -49,10 +54,13 @@ export default function TodayView({ userId, userName = "" }: Props) {
   const {
     habits, isLoading, error,
     completedCount, totalCount, completionPercentage, estimatedMinutes,
-    completeHabit, uncheckHabit, freezeHabit,
+    completeHabit, uncheckHabit, freezeHabit, refetch,
   } = useHabits(userId);
 
   const { showToast } = useToast();
+  const { create: createHabit } = useSettingsHabits(userId);
+  const { categories } = useCategories(userId);
+  const [createOpen, setCreateOpen] = useState(false);
   const today = new Date();
 
   // Confetti on 100% completion
@@ -114,13 +122,23 @@ export default function TodayView({ userId, userName = "" }: Props) {
       {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
       <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
         {/* Header */}
-        <div className="mb-8">
-          <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-            {"Hoy, " + format(today, "d MMMM", { locale: es }).replace(/^\w/, (c) => c.toUpperCase())}
-          </p>
-          <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
-            {completionPercentage === 100 ? "¡Día perfecto! 🎉" : getGreeting(userName)}
-          </h1>
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+              {"Hoy, " + format(today, "d MMMM", { locale: es }).replace(/^\w/, (c) => c.toUpperCase())}
+            </p>
+            <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
+              {completionPercentage === 100 ? "¡Día perfecto! 🎉" : getGreeting(userName)}
+            </h1>
+          </div>
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70 mt-1"
+            style={{ background: "var(--surface)" }}
+            aria-label="Crear hábito"
+          >
+            <Plus size={20} />
+          </button>
         </div>
 
         {/* Progress ring / summary */}
@@ -198,6 +216,18 @@ export default function TodayView({ userId, userName = "" }: Props) {
           })}
         </div>
       </div>
+
+      <HabitFormDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        habit={null}
+        categories={categories}
+        onSave={async (data) => {
+          await createHabit(data as CreateHabitInput);
+          setCreateOpen(false);
+          refetch();
+        }}
+      />
     </>
   );
 }

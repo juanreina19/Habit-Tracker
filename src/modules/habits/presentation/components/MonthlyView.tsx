@@ -13,9 +13,10 @@ const WEEK_DAYS = ["L", "M", "X", "J", "V", "S", "D"];
 interface Props {
   userId: UUID;
   userCreatedAt?: string;
+  embedded?: boolean;
 }
 
-export default function MonthlyView({ userId, userCreatedAt }: Props) {
+export default function MonthlyView({ userId, userCreatedAt, embedded = false }: Props) {
   const {
     data,
     isLoading,
@@ -33,15 +34,20 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
   const monthLabel = format(new Date(year, month, 1), "MMMM yyyy", { locale: es });
   const monthTitle = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
 
-  return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+  const inner = (
+    <>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-            Vista mensual
-          </p>
-          <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
+          {!embedded && (
+            <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+              Vista mensual
+            </p>
+          )}
+          <h1
+            className={embedded ? "text-lg font-semibold" : "text-3xl font-semibold mt-1"}
+            style={{ color: "var(--text-primary)" }}
+          >
             {monthTitle}
           </h1>
         </div>
@@ -118,7 +124,13 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
       ) : data ? (
         <CalendarGrid data={data} userCreatedAt={userCreatedAt} selectedDay={selectedDay} onDayClick={setSelectedDay} />
       ) : null}
+    </>
+  );
 
+  if (embedded) return inner;
+  return (
+    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+      {inner}
     </div>
   );
 }

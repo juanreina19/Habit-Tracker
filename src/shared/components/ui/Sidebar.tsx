@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sun, CalendarDays, Calendar, BarChart2, Settings2, Moon } from "lucide-react";
+import { Sun, CalendarRange, ListTodo, BarChart2, Settings2, Moon } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 
 const navItems = [
-  { href: "/today",    label: "Hoy",      Icon: Sun },
-  { href: "/weekly",   label: "Semana",   Icon: CalendarDays },
-  { href: "/monthly",  label: "Mes",      Icon: Calendar },
-  { href: "/stats",    label: "Stats",    Icon: BarChart2 },
-  { href: "/settings", label: "Ajustes",  Icon: Settings2 },
+  { href: "/today",    label: "Hoy",        Icon: Sun },
+  { href: "/calendar", label: "Calendario", Icon: CalendarRange },
+  { href: "/habits",   label: "Hábitos",    Icon: ListTodo },
+  { href: "/stats",    label: "Stats",      Icon: BarChart2 },
+  { href: "/settings", label: "Ajustes",    Icon: Settings2 },
 ];
 
 export default function Sidebar() {
