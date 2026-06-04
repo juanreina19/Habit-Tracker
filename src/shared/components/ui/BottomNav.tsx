@@ -25,21 +25,21 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed z-50"
+      className="fixed z-50 lg:hidden"
       style={{
         left: "16px",
         right: "16px",
         bottom: "calc(env(safe-area-inset-bottom) + 16px)",
-        background: "rgba(20, 20, 22, 0.45)",
+        background: "var(--nav-bg)",
         backdropFilter: "blur(48px) saturate(200%) brightness(1.1)",
         WebkitBackdropFilter: "blur(48px) saturate(200%) brightness(1.1)",
         borderRadius: "26px",
-        border: "1px solid rgba(255,255,255,0.13)",
+        border: "1px solid var(--nav-border)",
         boxShadow:
           "0 8px 40px rgba(0,0,0,0.45), " +
           "0 2px 8px rgba(0,0,0,0.25), " +
-          "inset 0 1px 0 rgba(255,255,255,0.12), " +
-          "inset 0 -1px 0 rgba(0,0,0,0.2)",
+          "inset 0 1px 0 rgba(255,255,255,0.08), " +
+          "inset 0 -1px 0 rgba(0,0,0,0.1)",
       }}
     >
       <div className="flex items-center justify-around px-2 py-2.5">
@@ -57,11 +57,10 @@ export default function BottomNav() {
               <Icon
                 size={22}
                 strokeWidth={isActive ? 2 : 1.5}
-                color="#FFFFFF"
               />
               <span
                 className="text-[10px] font-medium tracking-wide"
-                style={{ color: isActive ? "#FFFFFF" : "#8888AA" }}
+                style={{ color: isActive ? "var(--text-primary)" : "var(--text-secondary)" }}
               >
                 {label}
               </span>

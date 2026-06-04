@@ -106,17 +106,17 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
         />
         <Dialog.Content
           className="fixed z-50 left-1/2 bottom-0 w-full max-w-lg -translate-x-1/2 rounded-t-[24px] outline-none overflow-y-auto overflow-x-hidden"
-          style={{ background: "#111111", maxHeight: "92dvh" }}
+          style={{ background: "var(--surface)", maxHeight: "92dvh" }}
         >
           <div className="p-6">
-            <Dialog.Title className="text-lg font-semibold mb-5" style={{ color: "#FFFFFF" }}>
+            <Dialog.Title className="text-lg font-semibold mb-5" style={{ color: "var(--text-primary)" }}>
               {habit ? "Editar hábito" : "Nuevo hábito"}
             </Dialog.Title>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               {/* Name */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                   NOMBRE
                 </label>
                 <input
@@ -128,8 +128,8 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   maxLength={60}
                   className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
                   style={{
-                    background: "#1C1C1C",
-                    color: "#FFFFFF",
+                    background: "var(--surface-elevated)",
+                    color: "var(--text-primary)",
                     border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
                   }}
                 />
@@ -140,7 +140,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
 
               {/* Active days */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                   DÍAS ACTIVOS
                 </label>
                 <div className="flex gap-2">
@@ -153,7 +153,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                         onClick={() => toggleDay(day)}
                         className="flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all active:scale-95"
                         style={{
-                          background: isOn ? "#FFFFFF" : "#1C1C1C",
+                          background: isOn ? "#FFFFFF" : "var(--surface-elevated)",
                           color: isOn ? "#000000" : "#8888AA",
                         }}
                       >
@@ -170,7 +170,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
               {/* Category */}
               {categories.length > 0 && (
                 <div>
-                  <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                  <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                     CATEGORÍA
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -179,9 +179,9 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                       onClick={() => setCategoryId(null)}
                       className="px-3 py-2 rounded-[10px] text-xs font-medium transition-all active:scale-95"
                       style={{
-                        background: categoryId === null ? "#1C1C1C" : "transparent",
+                        background: categoryId === null ? "var(--surface-elevated)" : "transparent",
                         color: categoryId === null ? "#FFFFFF" : "#8888AA",
-                        border: `1.5px solid ${categoryId === null ? "#FFFFFF30" : "#1C1C1C"}`,
+                        border: `1.5px solid ${categoryId === null ? "#FFFFFF30" : "var(--surface-elevated)"}`,
                       }}
                     >
                       Sin categoría
@@ -193,9 +193,9 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                         onClick={() => setCategoryId(cat.id)}
                         className="px-3 py-2 rounded-[10px] text-xs font-medium flex items-center gap-1.5 transition-all active:scale-95"
                         style={{
-                          background: categoryId === cat.id ? (cat.color ?? "#1C1C1C") + "25" : "transparent",
+                          background: categoryId === cat.id ? (cat.color ?? "var(--surface-elevated)") + "25" : "transparent",
                           color: categoryId === cat.id ? (cat.color ?? "#FFFFFF") : "#8888AA",
-                          border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "#FFFFFF") + "60" : "#1C1C1C"}`,
+                          border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "#FFFFFF") + "60" : "var(--surface-elevated)"}`,
                         }}
                       >
                         {cat.icon && <span>{cat.icon}</span>}
@@ -208,7 +208,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
 
               {/* Start time */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                   HORA DE INICIO (opcional)
                 </label>
                 <input
@@ -216,13 +216,13 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   className="w-full rounded-[12px] px-4 py-3 outline-none"
-                  style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent", colorScheme: "dark", fontSize: "16px", WebkitAppearance: "none", appearance: "none", boxSizing: "border-box" }}
+                  style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent", colorScheme: "dark", fontSize: "16px", WebkitAppearance: "none", appearance: "none", boxSizing: "border-box" }}
                 />
               </div>
 
               {/* Estimated minutes */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                   DURACIÓN (minutos, opcional)
                 </label>
                 <input
@@ -233,7 +233,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   min={1}
                   max={480}
                   className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
-                  style={{ background: "#1C1C1C", color: "#FFFFFF", border: "1.5px solid transparent" }}
+                  style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
                 />
               </div>
               {startTime && estimatedMinutes && !isNaN(parseInt(estimatedMinutes, 10)) && (
@@ -244,7 +244,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
 
               {/* Color */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                   COLOR
                 </label>
                 <ColorPicker value={color} onChange={setColor} />
@@ -252,7 +252,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
 
               {/* Icon */}
               <div>
-                <label className="text-xs font-medium mb-1.5 block" style={{ color: "#8888AA" }}>
+                <label className="text-xs font-medium mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                   ICONO (toca para seleccionar o deseleccionar)
                 </label>
                 <EmojiPicker value={icon} onChange={setIcon} />
@@ -264,7 +264,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   type="button"
                   onClick={onClose}
                   className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
-                  style={{ background: "#1C1C1C", color: "#8888AA" }}
+                  style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
                 >
                   Cancelar
                 </button>
@@ -272,7 +272,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   type="submit"
                   disabled={isSaving}
                   className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
-                  style={{ background: "#FFFFFF", color: "#000000" }}
+                  style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                 >
                   {isSaving ? "Guardando…" : "Guardar"}
                 </button>

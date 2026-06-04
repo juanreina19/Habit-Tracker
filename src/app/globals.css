@@ -3,14 +3,46 @@
 @tailwind utilities;
 
 :root {
-  --background: #000000;
-  --surface: #111111;
+  /* Backgrounds */
+  --bg:               #000000;
+  --surface:          #111111;
   --surface-elevated: #1C1C1C;
-  --primary: #FFFFFF;
-  --text-primary: #FFFFFF;
+  --border:           #2A2A2A;
+
+  /* Text */
+  --text-primary:   #FFFFFF;
   --text-secondary: #8888AA;
-  --success: #4CAF82;
-  --danger: #FF5252;
+  --text-muted:     #555555;
+
+  /* Accents (unchanged between themes) */
+  --accent:  #4CAF82;
+  --danger:  #FF5252;
+  --warning: #F5A623;
+
+  /* Primary action button */
+  --btn-primary-bg:   #FFFFFF;
+  --btn-primary-text: #000000;
+
+  /* Nav glassmorphism */
+  --nav-bg:     rgba(20, 20, 22, 0.55);
+  --nav-border: rgba(255,255,255,0.13);
+}
+
+.light {
+  --bg:               #F5F5F7;
+  --surface:          #FFFFFF;
+  --surface-elevated: #F0F0F2;
+  --border:           #E5E5EA;
+  --text-primary:   #1C1C1E;
+  --text-secondary: #6E6E8A;
+  --text-muted:     #AEAEB2;
+  --accent:  #4CAF82;
+  --danger:  #FF5252;
+  --warning: #F5A623;
+  --btn-primary-bg:   #1C1C1E;
+  --btn-primary-text: #FFFFFF;
+  --nav-bg:     rgba(240, 240, 242, 0.80);
+  --nav-border: rgba(0,0,0,0.10);
 }
 
 * {
@@ -22,7 +54,7 @@
 html,
 body {
   max-width: 100vw;
-  background-color: var(--background);
+  background-color: var(--bg);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;

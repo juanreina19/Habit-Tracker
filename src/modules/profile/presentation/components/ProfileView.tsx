@@ -55,15 +55,15 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
     : email[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto">
+    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
       {/* Header */}
       <div className="mb-8">
-        <p className="text-sm font-medium" style={{ color: "#8888AA" }}>Mi cuenta</p>
-        <h1 className="text-3xl font-semibold mt-1" style={{ color: "#FFFFFF" }}>Perfil</h1>
+        <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Mi cuenta</p>
+        <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>Perfil</h1>
       </div>
 
       {/* Avatar + name */}
-      <div className="rounded-[20px] p-6 mb-5 flex items-center gap-4" style={{ background: "#111111" }}>
+      <div className="rounded-[20px] p-6 mb-5 flex items-center gap-4" style={{ background: "var(--surface)" }}>
         <div className="flex-shrink-0">
           {avatarUrl ? (
             <Image
@@ -77,7 +77,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
           ) : (
             <div
               className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold"
-              style={{ background: "#2A2A2A", color: "#FFFFFF" }}
+              style={{ background: "var(--border)", color: "var(--text-primary)" }}
             >
               {initials}
             </div>
@@ -85,9 +85,9 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
         </div>
         <div className="min-w-0">
           {fullName && (
-            <p className="text-lg font-semibold truncate" style={{ color: "#FFFFFF" }}>{fullName}</p>
+            <p className="text-lg font-semibold truncate" style={{ color: "var(--text-primary)" }}>{fullName}</p>
           )}
-          <p className="text-sm truncate" style={{ color: "#8888AA" }}>{email}</p>
+          <p className="text-sm truncate" style={{ color: "var(--text-secondary)" }}>{email}</p>
         </div>
       </div>
 
@@ -99,20 +99,20 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
       </div>
 
       {/* Actions */}
-      <div className="rounded-[20px] overflow-hidden mb-4" style={{ background: "#111111" }}>
+      <div className="rounded-[20px] overflow-hidden mb-4" style={{ background: "var(--surface)" }}>
         <button
           onClick={handleSignOut}
           disabled={isSigningOut}
           className="w-full px-5 py-4 flex items-center justify-between transition-opacity active:opacity-60 disabled:opacity-40"
         >
-          <span className="text-sm font-medium" style={{ color: "#FFFFFF" }}>
+          <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
             {isSigningOut ? "Cerrando sesión…" : "Cerrar sesión"}
           </span>
-          <span style={{ color: "#8888AA", fontSize: 18 }}>→</span>
+          <span style={{ color: "var(--text-secondary)", fontSize: 18 }}>→</span>
         </button>
       </div>
 
-      <div className="rounded-[20px] overflow-hidden" style={{ background: "#111111" }}>
+      <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--surface)" }}>
         {!showDeleteConfirm ? (
           <button
             onClick={() => setShowDeleteConfirm(true)}
@@ -123,14 +123,14 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
           </button>
         ) : (
           <div className="px-5 py-4">
-            <p className="text-sm mb-4" style={{ color: "#8888AA" }}>
+            <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
               ¿Seguro? Esta acción eliminará todos tus datos permanentemente.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 py-2.5 rounded-[12px] text-sm font-medium"
-                style={{ background: "#2A2A2A", color: "#8888AA" }}
+                style={{ background: "var(--border)", color: "var(--text-secondary)" }}
               >
                 Cancelar
               </button>
@@ -153,12 +153,12 @@ function StatCard({ label, value, unit, highlight = false }: {
   label: string; value: string; unit: string; highlight?: boolean;
 }) {
   return (
-    <div className="rounded-[16px] p-3 flex flex-col gap-1" style={{ background: "#111111" }}>
-      <p className="text-[10px] font-medium" style={{ color: "#8888AA" }}>{label}</p>
-      <p className="text-xl font-bold leading-none" style={{ color: highlight ? "#4CAF82" : "#FFFFFF" }}>
+    <div className="rounded-[16px] p-3 flex flex-col gap-1" style={{ background: "var(--surface)" }}>
+      <p className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>{label}</p>
+      <p className="text-xl font-bold leading-none" style={{ color: highlight ? "var(--accent)" : "var(--text-primary)" }}>
         {value}
       </p>
-      <p className="text-[10px]" style={{ color: "#555555" }}>{unit}</p>
+      <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{unit}</p>
     </div>
   );
 }

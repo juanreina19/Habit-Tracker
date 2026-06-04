@@ -42,13 +42,13 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
     habitStats, weekTrends, userAchievements, allAchievements } = data;
 
   return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto">
+    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
       {/* Header */}
       <div className="mb-6">
-        <p className="text-sm font-medium" style={{ color: "#8888AA" }}>
+        <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
           {format(new Date(), "MMMM yyyy", { locale: es }).replace(/^\w/, (c) => c.toUpperCase())}
         </p>
-        <h1 className="text-3xl font-semibold mt-1" style={{ color: "#FFFFFF" }}>
+        <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
           Estadísticas
         </h1>
       </div>
@@ -140,8 +140,8 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
           })}
         </div>
         {bestEverStreak > 0 && (
-          <p className="text-center text-xs mt-4" style={{ color: "#8888AA" }}>
-            Mejor racha histórica: <span style={{ color: "#FFFFFF" }}>{bestEverStreak} días</span>
+          <p className="text-center text-xs mt-4" style={{ color: "var(--text-secondary)" }}>
+            Mejor racha histórica: <span style={{ color: "var(--text-primary)" }}>{bestEverStreak} días</span>
           </p>
         )}
       </Section>
@@ -155,15 +155,15 @@ function StatCard({ label, value, unit, highlight = false }: {
   label: string; value: string; unit: string; highlight?: boolean;
 }) {
   return (
-    <div className="rounded-[16px] p-3 flex flex-col gap-1" style={{ background: "#111111" }}>
-      <p className="text-[10px] font-medium" style={{ color: "#8888AA" }}>{label}</p>
+    <div className="rounded-[16px] p-3 flex flex-col gap-1" style={{ background: "var(--surface)" }}>
+      <p className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>{label}</p>
       <p
         className="text-xl font-bold leading-none"
-        style={{ color: highlight ? "#4CAF82" : "#FFFFFF" }}
+        style={{ color: highlight ? "var(--accent)" : "var(--text-primary)" }}
       >
         {value}
       </p>
-      <p className="text-[10px]" style={{ color: "#555555" }}>{unit}</p>
+      <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{unit}</p>
     </div>
   );
 }
@@ -171,10 +171,10 @@ function StatCard({ label, value, unit, highlight = false }: {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mb-6">
-      <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#8888AA" }}>
+      <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
         {title}
       </p>
-      <div className="rounded-[20px] p-4" style={{ background: "#111111" }}>
+      <div className="rounded-[20px] p-4" style={{ background: "var(--surface)" }}>
         {children}
       </div>
     </div>
@@ -183,7 +183,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function HabitStatRow({ stat }: { stat: HabitStat }) {
   const { habit, completionRate, totalCompleted, totalScheduled } = stat;
-  const accent = habit.color ?? "#4CAF82";
+  const accent = habit.color ?? "#4CAF82"; // keep hex for concatenation with opacity suffix
 
   return (
     <div className="flex items-center gap-3">
@@ -195,20 +195,20 @@ function HabitStatRow({ stat }: { stat: HabitStat }) {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <p className="text-xs font-medium truncate" style={{ color: "#FFFFFF" }}>
+          <p className="text-xs font-medium truncate" style={{ color: "var(--text-primary)" }}>
             {habit.name}
           </p>
-          <span className="text-xs ml-2 flex-shrink-0" style={{ color: completionRate >= 80 ? accent : "#8888AA" }}>
+          <span className="text-xs ml-2 flex-shrink-0" style={{ color: completionRate >= 80 ? accent : "var(--text-secondary)" }}>
             {completionRate}%
           </span>
         </div>
-        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "#2A2A2A" }}>
+        <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
           <div
             className="h-full rounded-full transition-all"
             style={{ width: `${completionRate}%`, background: accent }}
           />
         </div>
-        <p className="text-[10px] mt-0.5" style={{ color: "#555555" }}>
+        <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
           {totalCompleted} de {totalScheduled} días
         </p>
       </div>
@@ -229,8 +229,8 @@ function AchievementCard({ achievement, userAchievement }: {
     <div
       className="rounded-[16px] p-3 flex flex-col gap-1.5"
       style={{
-        background: isUnlocked ? "rgba(76,207,130,0.08)" : "#1A1A1A",
-        border: isUnlocked ? "1px solid rgba(76,207,130,0.2)" : "1px solid rgba(255,255,255,0.04)",
+        background: isUnlocked ? "rgba(76,207,130,0.08)" : "var(--surface-elevated)",
+        border: isUnlocked ? "1px solid rgba(76,207,130,0.2)" : "1px solid var(--border)",
       }}
     >
       <div className="flex items-center justify-between">
@@ -239,7 +239,7 @@ function AchievementCard({ achievement, userAchievement }: {
         </span>
         {isUnlocked && (
           <div className="w-4 h-4 rounded-full flex items-center justify-center"
-            style={{ background: "#4CAF82" }}>
+            style={{ background: "var(--accent)" }}>
             <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
               <path d="M1 3l2 2 4-4" stroke="#000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -249,11 +249,11 @@ function AchievementCard({ achievement, userAchievement }: {
       <div>
         <p
           className="text-xs font-semibold"
-          style={{ color: isUnlocked ? "#FFFFFF" : "#555555" }}
+          style={{ color: isUnlocked ? "var(--text-primary)" : "var(--text-muted)" }}
         >
           {achievement.name}
         </p>
-        <p className="text-[10px] mt-0.5 leading-tight" style={{ color: "#555555" }}>
+        <p className="text-[10px] mt-0.5 leading-tight" style={{ color: "var(--text-muted)" }}>
           {isUnlocked ? unlockedDate! : achievement.description}
         </p>
       </div>
@@ -264,7 +264,7 @@ function AchievementCard({ achievement, userAchievement }: {
 const MONTH_LABELS = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
 function heatmapColor(rate: number, isFuture: boolean): string {
-  if (isFuture || rate === -1) return "#1A1A1A";
+  if (isFuture || rate === -1) return "var(--surface-elevated)";
   if (rate === 0) return "rgba(255,82,82,0.35)";
   if (rate < 50) return "rgba(245,166,35,0.45)";
   if (rate < 100) return "rgba(163,207,138,0.55)";
@@ -305,8 +305,8 @@ function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
     <div>
       {selected && (
         <div className="mb-3 rounded-[10px] px-3 py-2 flex items-center justify-between"
-          style={{ background: "#1A1A1A" }}>
-          <p className="text-xs" style={{ color: "#8888AA" }}>
+          style={{ background: "var(--surface-elevated)" }}>
+          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
             {format(selected.date, "EEEE d 'de' MMMM", { locale: es }).replace(/^\w/, c => c.toUpperCase())}
           </p>
           {!selected.isFuture && selected.scheduled > 0 ? (
@@ -314,7 +314,7 @@ function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
               {selected.completionRate}% · {selected.completed}/{selected.scheduled}
             </p>
           ) : (
-            <p className="text-xs" style={{ color: "#555555" }}>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
               {selected.isFuture ? "Aún no" : "Sin hábitos"}
             </p>
           )}
@@ -330,7 +330,7 @@ function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
               if (spanWidth < CELL * 2) return null;
               return (
                 <div key={month} style={{ width: spanWidth, minWidth: spanWidth, marginLeft: i === 0 ? weekIdx * CELL : 0 }}>
-                  <span style={{ fontSize: 9, color: "#555555" }}>{MONTH_LABELS[month]}</span>
+                  <span style={{ fontSize: 9, color: "var(--text-muted)" }}>{MONTH_LABELS[month]}</span>
                 </div>
               );
             })}
@@ -364,7 +364,7 @@ function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
 function EmptyChart() {
   return (
     <div className="flex items-center justify-center py-10">
-      <p className="text-sm" style={{ color: "#555555" }}>Sin datos aún</p>
+      <p className="text-sm" style={{ color: "var(--text-muted)" }}>Sin datos aún</p>
     </div>
   );
 }
@@ -374,26 +374,26 @@ function getBarFill(rate: number): string {
   if (rate >= 75)  return "#A3CF8A";
   if (rate >= 50)  return "#F5A623";
   if (rate > 0)   return "#FF8A65";
-  return "#2A2A2A";
+  return "var(--border)";
 }
 
 function StatsSkeleton() {
   return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto animate-pulse">
+    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl animate-pulse">
       <div className="mb-6">
-        <div className="h-4 w-24 rounded-full mb-2" style={{ background: "#111111" }} />
-        <div className="h-8 w-40 rounded-full" style={{ background: "#111111" }} />
+        <div className="h-4 w-24 rounded-full mb-2" style={{ background: "var(--surface)" }} />
+        <div className="h-8 w-40 rounded-full" style={{ background: "var(--surface)" }} />
       </div>
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-[16px] h-20" style={{ background: "#111111" }} />
+          <div key={i} className="rounded-[16px] h-20" style={{ background: "var(--surface)" }} />
         ))}
       </div>
-      <div className="rounded-[20px] h-48 mb-6" style={{ background: "#111111" }} />
-      <div className="rounded-[20px] h-40 mb-6" style={{ background: "#111111" }} />
+      <div className="rounded-[20px] h-48 mb-6" style={{ background: "var(--surface)" }} />
+      <div className="rounded-[20px] h-40 mb-6" style={{ background: "var(--surface)" }} />
       <div className="grid grid-cols-2 gap-3">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="rounded-[16px] h-24" style={{ background: "#111111" }} />
+          <div key={i} className="rounded-[16px] h-24" style={{ background: "var(--surface)" }} />
         ))}
       </div>
     </div>

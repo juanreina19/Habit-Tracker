@@ -34,14 +34,14 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
   const monthTitle = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
 
   return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto">
+    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-sm font-medium" style={{ color: "#8888AA" }}>
+          <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
             Vista mensual
           </p>
-          <h1 className="text-3xl font-semibold mt-1" style={{ color: "#FFFFFF" }}>
+          <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
             {monthTitle}
           </h1>
         </div>
@@ -50,17 +50,17 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
             onClick={goToPrevMonth}
             disabled={!canGoPrev}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60 disabled:opacity-20"
-            style={{ background: "#1C1C1C" }}
+            style={{ background: "var(--surface-elevated)" }}
           >
-            <ChevronLeft size={18} color="#FFFFFF" />
+            <ChevronLeft size={18} />
           </button>
           <button
             onClick={goToNextMonth}
             disabled={!canGoNext}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60 disabled:opacity-20"
-            style={{ background: "#1C1C1C" }}
+            style={{ background: "var(--surface-elevated)" }}
           >
-            <ChevronRight size={18} color="#FFFFFF" />
+            <ChevronRight size={18} />
           </button>
         </div>
       </div>
@@ -73,25 +73,25 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
         !isLoading && data && (
           <div
             className="rounded-[20px] px-5 py-4 mb-5 flex items-center justify-between"
-            style={{ background: "#111111" }}
+            style={{ background: "var(--surface)" }}
           >
             <div>
-              <p className="text-2xl font-semibold" style={{ color: "#FFFFFF" }}>
+              <p className="text-2xl font-semibold" style={{ color: "var(--text-primary)" }}>
                 {data.globalRate}%
               </p>
-              <p className="text-xs mt-0.5" style={{ color: "#8888AA" }}>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
                 {data.totalCompleted} de {data.totalScheduled} completados
               </p>
             </div>
             <div className="flex gap-4 text-right">
               <div>
-                <p className="text-base font-semibold" style={{ color: "#4CAF82" }}>
+                <p className="text-base font-semibold" style={{ color: "var(--accent)" }}>
                   {data.days.filter((d) => !d.isFuture && d.completionRate === 100 && d.scheduled > 0).length}
                 </p>
-                <p className="text-[10px]" style={{ color: "#8888AA" }}>días perfectos</p>
+                <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>días perfectos</p>
               </div>
               <div>
-                <p className="text-base font-semibold" style={{ color: "#FF5252" }}>
+                <p className="text-base font-semibold" style={{ color: "var(--danger)" }}>
                   {data.days.filter((d) => {
                     if (d.isFuture || d.completionRate !== 0 || d.scheduled === 0) return false;
                     if (userCreatedAt) {
@@ -102,7 +102,7 @@ export default function MonthlyView({ userId, userCreatedAt }: Props) {
                     return true;
                   }).length}
                 </p>
-                <p className="text-[10px]" style={{ color: "#8888AA" }}>días perdidos</p>
+                <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>días perdidos</p>
               </div>
             </div>
           </div>
@@ -153,14 +153,14 @@ function CalendarGrid({
   }
 
   return (
-    <div className="rounded-[20px] p-4" style={{ background: "#111111" }}>
+    <div className="rounded-[20px] p-4" style={{ background: "var(--surface)" }}>
       {/* Day-of-week labels */}
       <div className="grid grid-cols-7 mb-2">
         {WEEK_DAYS.map((d) => (
           <div
             key={d}
             className="text-center text-[11px] font-semibold py-1"
-            style={{ color: "#8888AA" }}
+            style={{ color: "var(--text-secondary)" }}
           >
             {d}
           </div>
@@ -187,7 +187,7 @@ function CalendarGrid({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-4 mt-4 pt-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="flex items-center justify-center gap-4 mt-4 pt-3" style={{ borderTop: "1px solid var(--border)", opacity: 0.7 }}>
         {[
           { color: "#4CAF82", label: "100%" },
           { color: "#A3CF8A", label: "50-99%" },
@@ -196,7 +196,7 @@ function CalendarGrid({
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
-            <span className="text-[10px]" style={{ color: "#8888AA" }}>{label}</span>
+            <span className="text-[10px]" style={{ color: "var(--text-secondary)" }}>{label}</span>
           </div>
         ))}
       </div>
@@ -268,24 +268,24 @@ function DayDetail({ day, userCreatedAt, onClose }: { day: DayProgress; userCrea
   const title = label.charAt(0).toUpperCase() + label.slice(1);
 
   const accentColor =
-    completionRate === 100 ? "#4CAF82"
+    completionRate === 100 ? "var(--accent)"
     : completionRate >= 50 ? "#A3CF8A"
-    : completionRate > 0 ? "#F5A623"
-    : "#FF5252";
+    : completionRate > 0 ? "var(--warning)"
+    : "var(--danger)";
 
   return (
     <div
       className="rounded-[20px] px-5 py-4 mb-5 flex items-center justify-between"
-      style={{ background: "#111111", border: "1px solid rgba(255,255,255,0.08)" }}
+      style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
     >
       <div>
-        <p className="text-xs font-medium mb-0.5" style={{ color: "#8888AA" }}>{title}</p>
+        <p className="text-xs font-medium mb-0.5" style={{ color: "var(--text-secondary)" }}>{title}</p>
         {isFuture || isBeforeCreation ? (
-          <p className="text-base font-semibold" style={{ color: "#555555" }}>Sin datos</p>
+          <p className="text-base font-semibold" style={{ color: "var(--text-muted)" }}>Sin datos</p>
         ) : scheduled === 0 ? (
-          <p className="text-base font-semibold" style={{ color: "#555555" }}>Sin hábitos programados</p>
+          <p className="text-base font-semibold" style={{ color: "var(--text-muted)" }}>Sin hábitos programados</p>
         ) : (
-          <p className="text-base font-semibold" style={{ color: "#FFFFFF" }}>
+          <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
             {completed} / {scheduled} completados
           </p>
         )}
@@ -299,7 +299,7 @@ function DayDetail({ day, userCreatedAt, onClose }: { day: DayProgress; userCrea
         <button
           onClick={onClose}
           className="w-7 h-7 rounded-full flex items-center justify-center"
-          style={{ background: "#2A2A2A", color: "#8888AA", fontSize: "16px", lineHeight: 1 }}
+          style={{ background: "var(--border)", color: "var(--text-secondary)", fontSize: "16px", lineHeight: 1 }}
         >
           ×
         </button>
@@ -311,7 +311,7 @@ function DayDetail({ day, userCreatedAt, onClose }: { day: DayProgress; userCrea
 // ─── Color helpers ─────────────────────────────────────────────────────────────
 
 function getCellBackground(rate: number, isFuture: boolean): string {
-  if (isFuture || rate === -1) return "#1A1A1A";
+  if (isFuture || rate === -1) return "var(--surface-elevated)";
   if (rate === 0) return "rgba(255,82,82,0.12)";
   if (rate < 50) return "rgba(245,166,35,0.15)";
   if (rate < 100) return "rgba(163,207,138,0.15)";
@@ -319,10 +319,10 @@ function getCellBackground(rate: number, isFuture: boolean): string {
 }
 
 function getTextColor(rate: number, isFuture: boolean): string {
-  if (isFuture || rate === -1) return "#555555";
-  if (rate === 100) return "#FFFFFF";
+  if (isFuture || rate === -1) return "var(--text-muted)";
+  if (rate === 100) return "var(--text-primary)";
   if (rate === 0) return "#CC6666";
-  return "#CCCCCC";
+  return "var(--text-secondary)";
 }
 
 function getDotColor(rate: number): string {
@@ -336,16 +336,16 @@ function getDotColor(rate: number): string {
 
 function MonthlySkeleton() {
   return (
-    <div className="rounded-[20px] p-4 animate-pulse" style={{ background: "#111111" }}>
+    <div className="rounded-[20px] p-4 animate-pulse" style={{ background: "var(--surface)" }}>
       <div className="grid grid-cols-7 mb-2">
         {WEEK_DAYS.map((d) => (
-          <div key={d} className="h-5 rounded-full mx-1" style={{ background: "#1C1C1C" }} />
+          <div key={d} className="h-5 rounded-full mx-1" style={{ background: "var(--surface-elevated)" }} />
         ))}
       </div>
       {[1, 2, 3, 4, 5].map((i) => (
         <div key={i} className="grid grid-cols-7 gap-1.5 mb-1.5">
           {Array(7).fill(null).map((_, j) => (
-            <div key={j} className="aspect-square rounded-[10px]" style={{ background: "#1C1C1C" }} />
+            <div key={j} className="aspect-square rounded-[10px]" style={{ background: "var(--surface-elevated)" }} />
           ))}
         </div>
       ))}

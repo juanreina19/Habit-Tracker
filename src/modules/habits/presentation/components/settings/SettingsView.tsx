@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Reorder, useDragControls } from "framer-motion";
-import { Pencil, Trash2, GripVertical, Bell, BellOff, User } from "lucide-react";
+import { Pencil, Trash2, GripVertical, Bell, BellOff, User, Sun, Moon } from "lucide-react";
+import { useTheme } from "@/shared/components/ThemeProvider";
 import { useBrowserNotifications } from "@/shared/hooks/useBrowserNotifications";
 import { useSettingsHabits } from "../../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
@@ -23,6 +24,7 @@ interface Props {
 
 export default function SettingsView({ userId }: Props) {
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
   const [tab, setTab] = useState<Tab>("habits");
 
   const {
@@ -76,28 +78,37 @@ export default function SettingsView({ userId }: Props) {
   const isLoading = habitsLoading || catsLoading;
 
   return (
-    <div className="px-5 pt-14 pb-8 max-w-lg mx-auto">
+    <div className="px-5 pt-14 pb-8 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-semibold" style={{ color: "#FFFFFF" }}>Ajustes</h1>
-        <button
-          onClick={() => router.push("/profile")}
-          className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60"
-          style={{ background: "#1C1C1C" }}
-        >
-          <User size={18} color="#8888AA" />
-        </button>
+        <h1 className="text-3xl font-semibold" style={{ color: "var(--text-primary)" }}>Ajustes</h1>
+        <div className="flex gap-2">
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60"
+            style={{ background: "var(--surface-elevated)" }}
+          >
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          <button
+            onClick={() => router.push("/profile")}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60"
+            style={{ background: "var(--surface-elevated)" }}
+          >
+            <User size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex rounded-[14px] p-1 mb-6" style={{ background: "#111111" }}>
+      <div className="flex rounded-[14px] p-1 mb-6" style={{ background: "var(--surface)" }}>
         {(["habits", "categories"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
             className="flex-1 py-2.5 rounded-[10px] text-sm font-medium transition-all"
             style={{
-              background: tab === t ? "#1C1C1C" : "transparent",
-              color: tab === t ? "#FFFFFF" : "#8888AA",
+              background: tab === t ? "var(--surface-elevated)" : "transparent",
+              color: tab === t ? "var(--text-primary)" : "var(--text-secondary)",
             }}
           >
             {t === "habits" ? "Hábitos" : "Categorías"}
@@ -188,13 +199,13 @@ function HabitsTab({
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm" style={{ color: "#8888AA" }}>
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
           {localHabits.length} {localHabits.length === 1 ? "hábito" : "hábitos"}
         </p>
         <button
           onClick={onAdd}
           className="flex items-center gap-1.5 px-4 py-2 rounded-[12px] text-sm font-semibold transition-opacity active:opacity-70"
-          style={{ background: "#FFFFFF", color: "#000000" }}
+          style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
         >
           <span className="text-base leading-none">+</span> Nuevo hábito
         </button>
@@ -248,7 +259,7 @@ function HabitReorderItem({
       dragControls={dragControls}
       dragListener={false}
       className="rounded-[16px] p-4 flex items-center gap-3 touch-none"
-      style={{ background: "#111111" }}
+      style={{ background: "var(--surface)" }}
     >
       {/* Drag handle */}
       <div
@@ -269,16 +280,16 @@ function HabitReorderItem({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="font-medium truncate" style={{ color: "#FFFFFF" }}>{habit.name}</p>
+        <p className="font-medium truncate" style={{ color: "var(--text-primary)" }}>{habit.name}</p>
         <div className="flex items-center gap-2 mt-0.5">
           {cat && (
             <span className="text-xs" style={{ color: cat.color ?? "#8888AA" }}>{cat.name}</span>
           )}
-          <span className="text-xs" style={{ color: "#8888AA" }}>
+          <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
             {habit.activeDays.map((d) => ["L","M","X","J","V","S","D"][d - 1]).join(" ")}
           </span>
           {habit.estimatedMinutes && (
-            <span className="text-xs" style={{ color: "#8888AA" }}>{habit.estimatedMinutes} min</span>
+            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{habit.estimatedMinutes} min</span>
           )}
         </div>
       </div>
@@ -322,13 +333,13 @@ function CategoriesTab({
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm" style={{ color: "#8888AA" }}>
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
           {localCats.length} {localCats.length === 1 ? "categoría" : "categorías"}
         </p>
         <button
           onClick={onAdd}
           className="flex items-center gap-1.5 px-4 py-2 rounded-[12px] text-sm font-semibold transition-opacity active:opacity-70"
-          style={{ background: "#FFFFFF", color: "#000000" }}
+          style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
         >
           <span className="text-base leading-none">+</span> Nueva categoría
         </button>
@@ -376,7 +387,7 @@ function CategoryReorderItem({
       dragControls={dragControls}
       dragListener={false}
       className="rounded-[16px] p-4 flex items-center gap-3 touch-none"
-      style={{ background: "#111111" }}
+      style={{ background: "var(--surface)" }}
     >
       {/* Drag handle */}
       <div
@@ -397,8 +408,8 @@ function CategoryReorderItem({
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <p className="font-medium truncate" style={{ color: "#FFFFFF" }}>{cat.name}</p>
-        <p className="text-xs mt-0.5" style={{ color: "#8888AA" }}>
+        <p className="font-medium truncate" style={{ color: "var(--text-primary)" }}>{cat.name}</p>
+        <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
           {habitCount} {habitCount === 1 ? "hábito" : "hábitos"}
         </p>
       </div>
@@ -434,7 +445,7 @@ function IconButton({
       onClick={onClick}
       aria-label={label}
       className="w-8 h-8 rounded-[8px] flex items-center justify-center transition-opacity active:opacity-60"
-      style={{ background: danger ? "#FF525215" : "#1C1C1C" }}
+      style={{ background: danger ? "#FF525215" : "var(--surface-elevated)" }}
     >
       {children}
     </button>
@@ -443,10 +454,10 @@ function IconButton({
 
 function EmptyState({ message, hint }: { message: string; hint: string }) {
   return (
-    <div className="rounded-[20px] p-10 text-center" style={{ background: "#111111" }}>
+    <div className="rounded-[20px] p-10 text-center" style={{ background: "var(--surface)" }}>
       <p className="text-4xl mb-3">✨</p>
-      <p className="font-medium" style={{ color: "#FFFFFF" }}>{message}</p>
-      <p className="text-sm mt-1" style={{ color: "#8888AA" }}>{hint}</p>
+      <p className="font-medium" style={{ color: "var(--text-primary)" }}>{message}</p>
+      <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{hint}</p>
     </div>
   );
 }
@@ -474,13 +485,13 @@ function DeleteConfirmDialog({
     >
       <div
         className="w-full max-w-sm rounded-[24px] p-6"
-        style={{ background: "#111111", border: "1px solid #2A2A2A" }}
+        style={{ background: "var(--surface)", border: "1px solid #2A2A2A" }}
       >
-        <p className="text-lg font-semibold mb-2" style={{ color: "#FFFFFF" }}>
+        <p className="text-lg font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
           ¿Eliminar {type === "habit" ? "hábito" : "categoría"}?
         </p>
-        <p className="text-sm mb-6" style={{ color: "#8888AA" }}>
-          <span style={{ color: "#FFFFFF" }}>{name}</span>
+        <p className="text-sm mb-6" style={{ color: "var(--text-secondary)" }}>
+          <span style={{ color: "var(--text-primary)" }}>{name}</span>
           {type === "category"
             ? " será eliminada. Los hábitos asignados quedarán sin categoría."
             : " será eliminado permanentemente."}
@@ -489,7 +500,7 @@ function DeleteConfirmDialog({
           <button
             onClick={onCancel}
             className="flex-1 py-3 rounded-[14px] text-sm font-medium"
-            style={{ background: "#1C1C1C", color: "#8888AA" }}
+            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
           >
             Cancelar
           </button>
@@ -497,7 +508,7 @@ function DeleteConfirmDialog({
             onClick={handleConfirm}
             disabled={isDeleting}
             className="flex-1 py-3 rounded-[14px] text-sm font-semibold disabled:opacity-50"
-            style={{ background: "#FF5252", color: "#FFFFFF" }}
+            style={{ background: "#FF5252", color: "var(--text-primary)" }}
           >
             {isDeleting ? "Eliminando…" : "Eliminar"}
           </button>
@@ -523,22 +534,22 @@ function NotificationsSection() {
 
   return (
     <div className="mt-8">
-      <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#8888AA" }}>
+      <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
         General
       </p>
-      <div className="rounded-[20px] overflow-hidden" style={{ background: "#111111" }}>
+      <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--surface)" }}>
         {/* Toggle row */}
         <div className="flex items-center gap-4 p-4">
           <div
             className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0"
-            style={{ background: isEnabled ? "rgba(76,207,130,0.15)" : "#1C1C1C" }}
+            style={{ background: isEnabled ? "rgba(76,207,130,0.15)" : "var(--surface-elevated)" }}
           >
             {isEnabled
               ? <Bell size={18} color="#4CAF82" />
               : <BellOff size={18} color="#555555" />}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm" style={{ color: "#FFFFFF" }}>
+            <p className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>
               Recordatorio diario
             </p>
             <p className="text-xs mt-0.5" style={{ color: subscribeError ? "#FF5252" : "#8888AA" }}>
@@ -556,7 +567,7 @@ function NotificationsSection() {
             onClick={handleToggle}
             disabled={permission === "denied" || isLoading}
             className="flex-shrink-0 w-12 h-7 rounded-full relative transition-colors disabled:opacity-30"
-            style={{ background: isEnabled ? "#4CAF82" : "#2A2A2A" }}
+            style={{ background: isEnabled ? "#4CAF82" : "var(--border)" }}
           >
             {isLoading ? (
               <span className="absolute inset-0 flex items-center justify-center">
@@ -577,15 +588,15 @@ function NotificationsSection() {
             className="flex items-center justify-between px-4 pb-4 pt-0"
             style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
           >
-            <p className="text-sm" style={{ color: "#8888AA" }}>Hora del recordatorio</p>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Hora del recordatorio</p>
             <input
               type="time"
               value={reminderTime}
               onChange={(e) => setReminderTime(e.target.value)}
               className="rounded-[10px] px-3 py-1.5 text-sm font-medium outline-none"
               style={{
-                background: "#1C1C1C",
-                color: "#FFFFFF",
+                background: "var(--surface-elevated)",
+                color: "var(--text-primary)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 colorScheme: "dark",
               }}
@@ -601,7 +612,7 @@ function SettingsSkeleton() {
   return (
     <div className="animate-pulse flex flex-col gap-2">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="rounded-[16px] h-16" style={{ background: "#111111" }} />
+        <div key={i} className="rounded-[16px] h-16" style={{ background: "var(--surface)" }} />
       ))}
     </div>
   );
