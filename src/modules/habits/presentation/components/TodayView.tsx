@@ -65,17 +65,28 @@ export default function TodayView({ userId, userName = "" }: Props) {
     prevPct.current = completionPercentage;
   }, [completionPercentage, totalCount]);
 
+  // Tracks habit IDs currently being toggled to prevent double-swipe race conditions
+  const pendingIds = useRef<Set<UUID>>(new Set());
+
   const handleToggle = (habit: HabitWithStatus) => {
+    if (pendingIds.current.has(habit.id)) return;
+    pendingIds.current.add(habit.id);
+
     if (habit.isCompletedToday) {
       const cancel = uncheckHabit(habit.id);
+      // Uncheck is deferred 3s — release lock after that window
+      setTimeout(() => pendingIds.current.delete(habit.id), 3100);
       showToast({
         message: "Hábito desmarcado",
         actionLabel: "Deshacer",
-        onAction: cancel,
+        onAction: () => {
+          pendingIds.current.delete(habit.id);
+          cancel();
+        },
         duration: 3000,
       });
     } else {
-      completeHabit(habit.id);
+      completeHabit(habit.id).finally(() => pendingIds.current.delete(habit.id));
     }
   };
 
@@ -211,7 +222,7 @@ function HabitRow({
       dragElastic={{ left: 0.05, right: 0.3 }}
       dragSnapToOrigin
       onDragEnd={(_, info) => {
-        if (!locked && info.offset.x > 60) onToggle();
+        if (!locked && info.offset.x > 60 && Math.abs(info.velocity.x) > 0) onToggle();
       }}
       onClick={locked ? undefined : onToggle}
       className="w-full text-left rounded-[16px] p-4 flex items-center gap-4 relative overflow-hidden"
