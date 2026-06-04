@@ -1,10 +1,12 @@
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // PWA will be configured via next-pwa or custom service worker
-  // For now: standard Next.js config
   experimental: {
     typedRoutes: false,
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

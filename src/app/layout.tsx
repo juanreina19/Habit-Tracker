@@ -1,13 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { cookies } from "next/headers";
+import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import "./globals.css";
 import { PWARegistration } from "@/shared/components/PWARegistration";
 import { ThemeProvider } from "@/shared/components/ThemeProvider";
-import esMessages from "../../messages/es.json";
-import enMessages from "../../messages/en.json";
-
-const allMessages = { es: esMessages, en: enMessages };
 
 export const metadata: Metadata = {
   title: "Habit Tracker",
@@ -33,9 +29,8 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const locale = (cookieStore.get("locale")?.value ?? "es") as "es" | "en";
-  const messages = allMessages[locale] ?? allMessages.es;
+  const locale = await getLocale();
+  const messages = await getMessages();
 
   return (
     <html lang={locale}>
