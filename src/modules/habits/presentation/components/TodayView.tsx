@@ -133,11 +133,11 @@ export default function TodayView({ userId, userName = "" }: Props) {
           </div>
           <button
             onClick={() => setCreateOpen(true)}
-            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70 mt-1"
-            style={{ background: "var(--surface)" }}
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70"
+            style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
             aria-label="Crear hábito"
           >
-            <Plus size={20} />
+            <Plus size={22} strokeWidth={2.5} />
           </button>
         </div>
 
