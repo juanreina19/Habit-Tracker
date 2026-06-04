@@ -94,9 +94,10 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
                     background: "#1C1C1C",
                     border: "1px solid rgba(255,255,255,0.08)",
                     borderRadius: 10,
-                    color: "#FFFFFF",
                     fontSize: 12,
                   }}
+                  itemStyle={{ color: "#FFFFFF" }}
+                  labelStyle={{ color: "#888888" }}
                   formatter={(value: number) => [`${value}%`, "Completado"]}
                 />
                 <Bar dataKey="completionRate" radius={[6, 6, 0, 0]} maxBarSize={32}>

@@ -26,6 +26,11 @@
   /* Nav glassmorphism */
   --nav-bg:     rgba(20, 20, 22, 0.55);
   --nav-border: rgba(255,255,255,0.13);
+
+  /* Sidebar hover/active */
+  --sidebar-active-bg:    rgba(255, 255, 255, 0.10);
+  --sidebar-hover-bg:     rgba(255, 255, 255, 0.05);
+  --sidebar-active-color: #FFFFFF;
 }
 
 .light {
@@ -43,6 +48,11 @@
   --btn-primary-text: #FFFFFF;
   --nav-bg:     rgba(240, 240, 242, 0.80);
   --nav-border: rgba(0,0,0,0.10);
+
+  /* Sidebar hover/active */
+  --sidebar-active-bg:    rgba(0, 0, 0, 0.08);
+  --sidebar-hover-bg:     rgba(0, 0, 0, 0.04);
+  --sidebar-active-color: #000000;
 }
 
 * {
@@ -74,3 +84,11 @@ button, a, [role="button"] {
 /* Safe area para PWA en iPhone con notch */
 .safe-top    { padding-top: env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+/* Sidebar desktop — hover y active */
+.sidebar-link { transition: background 0.15s ease; }
+.sidebar-link:hover { background: var(--sidebar-hover-bg); }
+.sidebar-link.sidebar-active {
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-active-color) !important;
+}

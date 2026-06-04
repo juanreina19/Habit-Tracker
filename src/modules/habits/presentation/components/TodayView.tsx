@@ -131,13 +131,25 @@ export default function TodayView({ userId, userName = "" }: Props) {
               {completionPercentage === 100 ? "¡Día perfecto! 🎉" : getGreeting(userName)}
             </h1>
           </div>
+          {/* Mobile: solo icono */}
           <button
             onClick={() => setCreateOpen(true)}
-            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70"
+            className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70"
             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
             aria-label="Crear hábito"
           >
             <Plus size={22} strokeWidth={2.5} />
+          </button>
+
+          {/* Desktop: pill con texto */}
+          <button
+            onClick={() => setCreateOpen(true)}
+            className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full flex-shrink-0 transition-opacity active:opacity-70"
+            style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+            aria-label="Crear hábito"
+          >
+            <Plus size={18} strokeWidth={2.5} />
+            <span className="text-sm font-semibold">Nuevo hábito</span>
           </button>
         </div>
 
@@ -169,7 +181,7 @@ export default function TodayView({ userId, userName = "" }: Props) {
               <p className="text-4xl mb-3">✨</p>
               <p className="font-medium" style={{ color: "var(--text-primary)" }}>Sin hábitos para hoy</p>
               <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-                Ve a Ajustes para crear tus primeros hábitos.
+                Pulsa el botón + para crear tu primer hábito.
               </p>
             </div>
           )}
@@ -257,8 +269,8 @@ function HabitRow({
       onClick={locked ? undefined : onToggle}
       className="w-full text-left rounded-[16px] p-4 flex items-center gap-4 relative overflow-hidden"
       style={{
-        background: habit.isCompletedToday ? `${accentColor}18` : "var(--surface)",
-        border: `1px solid ${habit.isCompletedToday ? `${accentColor}40` : "transparent"}`,
+        background: habit.isCompletedToday ? `${accentColor}28` : "var(--surface)",
+        border: `1px solid ${habit.isCompletedToday ? `${accentColor}58` : locked ? "transparent" : `${accentColor}22`}`,
         opacity: locked ? 0.5 : 1,
         cursor: locked ? "not-allowed" : "pointer",
         userSelect: "none",

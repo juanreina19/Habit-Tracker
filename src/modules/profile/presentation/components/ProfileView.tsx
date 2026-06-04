@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { ChevronLeft } from "lucide-react";
 import { createClient } from "@/shared/lib/supabase/client";
 import type { UUID, DbStreak } from "@/shared/types/database.types";
 
@@ -57,9 +58,18 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
   return (
     <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
       {/* Header */}
-      <div className="mb-8">
-        <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Mi cuenta</p>
-        <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>Perfil</h1>
+      <div className="flex items-center gap-3 mb-8">
+        <button
+          onClick={() => router.back()}
+          className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-60"
+          style={{ background: "var(--surface-elevated)" }}
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <div>
+          <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Mi cuenta</p>
+          <h1 className="text-3xl font-semibold mt-0.5" style={{ color: "var(--text-primary)" }}>Perfil</h1>
+        </div>
       </div>
 
       {/* Avatar + name */}

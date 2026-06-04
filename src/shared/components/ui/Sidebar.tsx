@@ -40,11 +40,8 @@ export default function Sidebar() {
             <Link
               key={href}
               href={href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-[12px] transition-all"
-              style={{
-                background: isActive ? "var(--surface-elevated)" : "transparent",
-                color: isActive ? "var(--text-primary)" : "var(--text-secondary)",
-              }}
+              className={`sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-[12px] ${isActive ? "sidebar-active" : ""}`}
+              style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
             >
               <Icon size={18} strokeWidth={isActive ? 2 : 1.5} />
               <span className="text-sm font-medium">{label}</span>
