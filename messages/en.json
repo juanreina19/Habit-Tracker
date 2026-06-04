@@ -54,7 +54,25 @@
     "next": "Next",
     "save": "Save",
     "saving": "Saving…",
-    "save_error": "Error saving"
+    "save_error": "Error saving",
+    "edit_days_title": "Active days"
+  },
+  "categoryForm": {
+    "new_title": "New category",
+    "edit_title": "Edit category",
+    "name_label": "Name",
+    "name_placeholder": "E.g. Health",
+    "name_error": "Name is required",
+    "color_label": "Color",
+    "no_color": "No color",
+    "remove_color": "Remove color",
+    "icon_label": "Icon",
+    "no_icon": "No icon",
+    "cancel": "Cancel",
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save",
+    "saving": "Saving…"
   },
   "dayLabels": {
     "d1": "M", "d2": "T", "d3": "W", "d4": "T", "d5": "F", "d6": "S", "d7": "S"

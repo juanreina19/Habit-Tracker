@@ -24,7 +24,7 @@ const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Scene = "step0" | "step1" | "step2" | "color" | "icon";
+type Scene = "step0" | "step1" | "step2" | "color" | "icon" | "edit" | "edit_days";
 type IconTab = "emoji" | "svg";
 
 interface Props {
@@ -35,7 +35,7 @@ interface Props {
   onSave: (data: CreateHabitInput | UpdateHabitInput) => Promise<void>;
 }
 
-// ─── Slide animation variants ─────────────────────────────────────────────────
+// ─── Slide animation ──────────────────────────────────────────────────────────
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
@@ -54,22 +54,21 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
   const [slideDir, setSlideDir] = useState(1);
   const [iconTab, setIconTab] = useState<IconTab>("emoji");
 
-  // Form state
-  const [name, setName]                       = useState("");
-  const [icon, setIcon]                       = useState<string | null>(null);
-  const [color, setColor]                     = useState<string | null>(null);
-  const [categoryId, setCategoryId]           = useState<string | null>(null);
-  const [activeDays, setActiveDays]           = useState<number[]>([1, 2, 3, 4, 5, 6, 7]);
-  const [timeEnabled, setTimeEnabled]         = useState(false);
-  const [startTime, setStartTime]             = useState("");
+  const [name, setName]                         = useState("");
+  const [icon, setIcon]                         = useState<string | null>(null);
+  const [color, setColor]                       = useState<string | null>(null);
+  const [categoryId, setCategoryId]             = useState<string | null>(null);
+  const [activeDays, setActiveDays]             = useState<number[]>([1, 2, 3, 4, 5, 6, 7]);
+  const [timeEnabled, setTimeEnabled]           = useState(false);
+  const [startTime, setStartTime]               = useState("");
   const [estimatedMinutes, setEstimatedMinutes] = useState("");
-  const [isSaving, setIsSaving]               = useState(false);
-  const [nameError, setNameError]             = useState("");
-  const [daysError, setDaysError]             = useState("");
+  const [isSaving, setIsSaving]                 = useState(false);
+  const [nameError, setNameError]               = useState("");
+  const [daysError, setDaysError]               = useState("");
 
   useEffect(() => {
     if (open) {
-      setScene("step0");
+      setScene(habit ? "edit" : "step0");
       setSlideDir(1);
       setIconTab("emoji");
       setName(habit?.name ?? "");
@@ -86,6 +85,9 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
   }, [open, habit]);
 
   const navigate = (to: Scene, dir: number) => { setSlideDir(dir); setScene(to); };
+
+  // "home" scene = where color/icon sub-sheets return to
+  const homeScene = (): Scene => (habit ? "edit" : "step2");
 
   const toggleDay = (day: number) => {
     setActiveDays((p) => p.includes(day) ? p.filter((d) => d !== day) : [...p, day].sort((a, b) => a - b));
@@ -105,14 +107,23 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
   };
 
   const goBack = () => {
-    if (scene === "step1") navigate("step0", -1);
+    if (scene === "edit_days") navigate("edit", -1);
+    else if (scene === "color" || scene === "icon") navigate(homeScene(), -1);
     else if (scene === "step2") navigate("step1", -1);
-    else if (scene === "color" || scene === "icon") navigate("step2", -1);
+    else if (scene === "step1") navigate("step0", -1);
   };
 
   const handleSave = async () => {
-    if (!name.trim()) { navigate("step0", -1); setNameError(t("name_error")); return; }
-    if (activeDays.length === 0) { navigate("step1", -1); setDaysError(t("days_error")); return; }
+    if (!name.trim()) {
+      if (!habit) navigate("step0", -1);
+      setNameError(t("name_error"));
+      return;
+    }
+    if (activeDays.length === 0) {
+      if (!habit) navigate("step1", -1);
+      setDaysError(t("days_error"));
+      return;
+    }
     const minutes = estimatedMinutes ? parseInt(estimatedMinutes, 10) : undefined;
     setIsSaving(true);
     try {
@@ -126,7 +137,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
         startTime: timeEnabled ? (startTime || null) : null,
       });
     } catch (err) {
-      navigate("step0", -1);
+      if (!habit) navigate("step0", -1);
       setNameError(err instanceof Error ? err.message : t("save_error"));
     } finally {
       setIsSaving(false);
@@ -137,8 +148,9 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
     ? calcEndTime(startTime, parseInt(estimatedMinutes, 10))
     : null;
 
-  const stepIndex = scene === "step0" ? 0 : scene === "step1" ? 1 : 2;
   const isWizardScene = scene === "step0" || scene === "step1" || scene === "step2";
+  const isSubSheet = scene === "color" || scene === "icon" || scene === "edit_days";
+  const stepIndex = scene === "step0" ? 0 : scene === "step1" ? 1 : 2;
 
   return (
     <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
@@ -148,10 +160,10 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
           style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
         />
         <Dialog.Content
-          className="fixed z-50 left-1/2 bottom-0 w-full max-w-lg -translate-x-1/2 rounded-t-[24px] outline-none overflow-hidden"
-          style={{ background: "var(--surface)", maxHeight: "92dvh" }}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-[24px] outline-none overflow-hidden"
+          style={{ background: "var(--surface)", maxHeight: "85dvh" }}
         >
-          <div className="overflow-y-auto" style={{ maxHeight: "92dvh" }}>
+          <div className="overflow-y-auto" style={{ maxHeight: "85dvh" }}>
             <AnimatePresence mode="wait" custom={slideDir}>
               <motion.div
                 key={scene}
@@ -163,11 +175,12 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                 transition={slideTransition}
                 className="p-6"
               >
-                {/* ── Wizard step header ──────────────────────────── */}
+
+                {/* ── Wizard header (create mode, steps 0-2) ──── */}
                 {isWizardScene && (
                   <div className="flex items-center justify-between mb-6">
                     <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {habit ? t("edit_title") : t("new_title")}
+                      {t("new_title")}
                     </Dialog.Title>
                     <div className="flex items-center gap-1.5">
                       {[0, 1, 2].map((i) => (
@@ -185,8 +198,17 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   </div>
                 )}
 
-                {/* ── Sub-sheet header ────────────────────────────── */}
-                {!isWizardScene && (
+                {/* ── Edit flat-view header ────────────────────── */}
+                {scene === "edit" && (
+                  <div className="mb-6">
+                    <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                      {t("edit_title")}
+                    </Dialog.Title>
+                  </div>
+                )}
+
+                {/* ── Sub-sheet header (back + title) ──────────── */}
+                {isSubSheet && (
                   <div className="flex items-center gap-3 mb-5">
                     <button
                       type="button"
@@ -197,242 +219,103 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                       <ChevronLeft size={16} />
                     </button>
                     <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {scene === "color" ? t("color_label") : t("icon_label")}
+                      {scene === "color" ? t("color_label") : scene === "icon" ? t("icon_label") : t("edit_days_title")}
                     </Dialog.Title>
                   </div>
                 )}
 
-                {/* ── Step 0: Basic ───────────────────────────────── */}
+                {/* ── Step 0: Basic (create) ─────────────────────── */}
                 {scene === "step0" && (
                   <div className="flex flex-col gap-5">
-                    <div>
-                      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                        {t("name_label")}
-                      </label>
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => { setName(e.target.value); setNameError(""); }}
-                        placeholder={t("name_placeholder")}
-                        maxLength={60}
-                        className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
-                        style={{
-                          background: "var(--surface-elevated)",
-                          color: "var(--text-primary)",
-                          border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
-                        }}
-                      />
-                      {nameError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{nameError}</p>}
-                    </div>
-
-                    {categories.length > 0 && (
-                      <div>
-                        <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                          {t("category_label")}
-                        </label>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setCategoryId(null)}
-                            className="px-3 py-2 rounded-[10px] text-xs font-medium transition-all active:scale-95"
-                            style={{
-                              background: categoryId === null ? "var(--surface-elevated)" : "transparent",
-                              color: categoryId === null ? "var(--text-primary)" : "var(--text-secondary)",
-                              border: `1.5px solid ${categoryId === null ? "rgba(255,255,255,0.15)" : "var(--surface-elevated)"}`,
-                            }}
-                          >
-                            {t("no_category")}
-                          </button>
-                          {categories.map((cat) => (
-                            <button
-                              key={cat.id}
-                              type="button"
-                              onClick={() => setCategoryId(cat.id)}
-                              className="px-3 py-2 rounded-[10px] text-xs font-medium flex items-center gap-1.5 transition-all active:scale-95"
-                              style={{
-                                background: categoryId === cat.id ? (cat.color ?? "#4CAF82") + "25" : "transparent",
-                                color: categoryId === cat.id ? (cat.color ?? "#4CAF82") : "var(--text-secondary)",
-                                border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "#4CAF82") + "60" : "var(--surface-elevated)"}`,
-                              }}
-                            >
-                              {cat.icon && <span>{cat.icon}</span>}
-                              {cat.name}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    <NameField name={name} setName={setName} nameError={nameError} setNameError={setNameError} t={t} />
+                    <CategoryField categories={categories} categoryId={categoryId} setCategoryId={setCategoryId} t={t} />
                   </div>
                 )}
 
-                {/* ── Step 1: Schedule ────────────────────────────── */}
+                {/* ── Step 1: Schedule (create) ──────────────────── */}
                 {scene === "step1" && (
                   <div className="flex flex-col gap-5">
-                    <div>
-                      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                        {t("days_label")}
-                      </label>
-                      <div className="flex gap-2">
-                        {ALL_DAYS.map((day) => {
-                          const on = activeDays.includes(day);
-                          return (
-                            <button
-                              key={day}
-                              type="button"
-                              onClick={() => toggleDay(day)}
-                              className="flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all active:scale-95"
-                              style={{
-                                background: on ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                                color: on ? "var(--btn-primary-text)" : "var(--text-secondary)",
-                              }}
-                            >
-                                {tDays(`d${day}` as Parameters<typeof tDays>[0])}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {daysError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{daysError}</p>}
-                    </div>
+                    <DaysGrid activeDays={activeDays} toggleDay={toggleDay} daysError={daysError} tDays={tDays} t={t} />
+                    <ScheduleSection
+                      timeEnabled={timeEnabled} setTimeEnabled={setTimeEnabled}
+                      startTime={startTime} setStartTime={setStartTime}
+                      estimatedMinutes={estimatedMinutes} setEstimatedMinutes={setEstimatedMinutes}
+                      endTime={endTime} t={t}
+                    />
+                  </div>
+                )}
 
-                    {/* Time toggle row */}
-                    <div
-                      className="flex items-center justify-between px-4 py-3 rounded-[12px]"
+                {/* ── Step 2: Appearance (create) ────────────────── */}
+                {scene === "step2" && (
+                  <AppearanceRows color={color} icon={icon} navigate={navigate} homeScene={homeScene} t={t} />
+                )}
+
+                {/* ── Edit flat view (edit mode) ─────────────────── */}
+                {scene === "edit" && (
+                  <div className="flex flex-col gap-4">
+                    <NameField name={name} setName={setName} nameError={nameError} setNameError={setNameError} t={t} />
+                    <CategoryField categories={categories} categoryId={categoryId} setCategoryId={setCategoryId} t={t} />
+
+                    {/* Days button */}
+                    <button
+                      type="button"
+                      onClick={() => navigate("edit_days", 1)}
+                      className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
                       style={{ background: "var(--surface-elevated)" }}
                     >
-                      <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                        {t("schedule_toggle")}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        <div className="text-left">
+                          <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("days_label")}</p>
+                          <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                            {activeDays.length === 7
+                              ? "L M X J V S D"
+                              : activeDays.map((d) => ["L","M","X","J","V","S","D"][d - 1]).join(" ")}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
+                    </button>
+
+                    <ScheduleSection
+                      timeEnabled={timeEnabled} setTimeEnabled={setTimeEnabled}
+                      startTime={startTime} setStartTime={setStartTime}
+                      estimatedMinutes={estimatedMinutes} setEstimatedMinutes={setEstimatedMinutes}
+                      endTime={endTime} t={t}
+                    />
+
+                    <AppearanceRows color={color} icon={icon} navigate={navigate} homeScene={homeScene} t={t} />
+
+                    {/* Edit save/cancel */}
+                    <div className="flex gap-3 mt-2">
                       <button
                         type="button"
-                        onClick={() => setTimeEnabled((v) => !v)}
-                        className="w-11 h-6 rounded-full relative transition-colors flex-shrink-0"
-                        style={{ background: timeEnabled ? "#4CAF82" : "var(--border)" }}
+                        onClick={onClose}
+                        className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
+                        style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
                       >
-                        <span
-                          className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all"
-                          style={{ left: timeEnabled ? "calc(100% - 22px)" : "2px" }}
-                        />
+                        {t("cancel")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                        style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+                      >
+                        {isSaving ? t("saving") : t("save")}
                       </button>
                     </div>
-
-                    {timeEnabled && (
-                      <div className="flex flex-col gap-3">
-                        <div className="flex flex-col gap-3">
-                          <div>
-                            <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                              {t("start_label")}
-                            </label>
-                            <input
-                              type="time"
-                              value={startTime}
-                              onChange={(e) => setStartTime(e.target.value)}
-                              className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
-                              style={{
-                                background: "var(--surface-elevated)",
-                                color: "var(--text-primary)",
-                                border: "1.5px solid transparent",
-                                colorScheme: "dark",
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                              {t("duration_label")}
-                            </label>
-                            <input
-                              type="number"
-                              value={estimatedMinutes}
-                              onChange={(e) => setEstimatedMinutes(e.target.value)}
-                              placeholder="30"
-                              min={1}
-                              max={480}
-                              className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
-                              style={{
-                                background: "var(--surface-elevated)",
-                                color: "var(--text-primary)",
-                                border: "1.5px solid transparent",
-                              }}
-                            />
-                          </div>
-                        </div>
-                        {endTime && (
-                          <p className="text-xs font-medium" style={{ color: "#4CAF82" }}>
-                            {t("ends_at", { time: endTime! })}
-                          </p>
-                        )}
-                        {/* Info tooltip */}
-                        <div
-                          className="flex items-start gap-2.5 rounded-[12px] px-3.5 py-3"
-                          style={{ background: "rgba(100,160,255,0.08)", border: "1px solid rgba(100,160,255,0.15)" }}
-                        >
-                          <Info size={14} className="flex-shrink-0 mt-0.5" color="#88AAFF" />
-                          <p className="text-xs leading-relaxed" style={{ color: "#88AAFF" }}>
-                            {t("lock_tooltip")}
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
 
-                {/* ── Step 2: Appearance ──────────────────────────── */}
-                {scene === "step2" && (
-                  <div className="flex flex-col gap-3">
-                    {/* Color row */}
-                    <button
-                      type="button"
-                      onClick={() => navigate("color", 1)}
-                      className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
-                      style={{ background: "var(--surface-elevated)" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-9 h-9 rounded-full flex-shrink-0 border-2"
-                          style={{
-                            background: color ?? "var(--border)",
-                            borderColor: color ? color + "60" : "var(--border)",
-                          }}
-                        />
-                        <div className="text-left">
-                          <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("color_label")}</p>
-                          <p className="text-xs mt-0.5" style={{ color: color ?? "var(--text-secondary)" }}>
-                            {color ?? t("no_color")}
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
-                    </button>
-
-                    {/* Icon row */}
-                    <button
-                      type="button"
-                      onClick={() => navigate("icon", 1)}
-                      className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
-                      style={{ background: "var(--surface-elevated)" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-9 h-9 rounded-[12px] flex items-center justify-center flex-shrink-0"
-                          style={{ background: icon ? (color ?? "#4CAF82") + "25" : "var(--border)" }}
-                        >
-                          {icon
-                            ? <HabitIcon icon={icon} size={20} color={color ?? "var(--text-primary)"} />
-                            : <span className="text-sm" style={{ color: "var(--text-muted)" }}>—</span>
-                          }
-                        </div>
-                        <div className="text-left">
-                          <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("icon_label")}</p>
-                          <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                            {icon ? (icon.startsWith("lucide:") ? icon.slice(7) : icon) : t("no_icon")}
-                          </p>
-                        </div>
-                      </div>
-                      <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
-                    </button>
+                {/* ── Edit days sub-sheet ──────────────────────────── */}
+                {scene === "edit_days" && (
+                  <div className="flex flex-col gap-5">
+                    <DaysGrid activeDays={activeDays} toggleDay={toggleDay} daysError={daysError} tDays={tDays} t={t} />
                   </div>
                 )}
 
-                {/* ── Color sub-sheet ─────────────────────────────── */}
+                {/* ── Color sub-sheet ──────────────────────────────── */}
                 {scene === "color" && (
                   <div>
                     <div className="grid grid-cols-6 gap-3">
@@ -440,7 +323,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                         <button
                           key={c}
                           type="button"
-                          onClick={() => { setColor(c === color ? null : c); navigate("step2", -1); }}
+                          onClick={() => { setColor(c === color ? null : c); navigate(homeScene(), -1); }}
                           className="aspect-square rounded-full flex items-center justify-center transition-transform active:scale-90"
                           style={{
                             background: c,
@@ -459,7 +342,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                     {color && (
                       <button
                         type="button"
-                        onClick={() => { setColor(null); navigate("step2", -1); }}
+                        onClick={() => { setColor(null); navigate(homeScene(), -1); }}
                         className="mt-4 text-xs font-medium transition-opacity active:opacity-60"
                         style={{ color: "var(--text-secondary)" }}
                       >
@@ -469,10 +352,9 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   </div>
                 )}
 
-                {/* ── Icon sub-sheet ──────────────────────────────── */}
+                {/* ── Icon sub-sheet ───────────────────────────────── */}
                 {scene === "icon" && (
                   <div>
-                    {/* Tab toggle */}
                     <div className="flex rounded-[12px] p-1 mb-4" style={{ background: "var(--surface-elevated)" }}>
                       {(["emoji", "svg"] as IconTab[]).map((tabType) => (
                         <button
@@ -496,7 +378,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                           <button
                             key={emoji}
                             type="button"
-                            onClick={() => { setIcon(icon === emoji ? null : emoji); navigate("step2", -1); }}
+                            onClick={() => { setIcon(icon === emoji ? null : emoji); navigate(homeScene(), -1); }}
                             className="w-12 h-12 rounded-[12px] flex items-center justify-center text-2xl transition-all active:scale-90"
                             style={{
                               background: icon === emoji ? "var(--surface-elevated)" : "transparent",
@@ -525,7 +407,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                                   <button
                                     key={iconName}
                                     type="button"
-                                    onClick={() => { setIcon(isSelected ? null : iconValue); navigate("step2", -1); }}
+                                    onClick={() => { setIcon(isSelected ? null : iconValue); navigate(homeScene(), -1); }}
                                     className="w-12 h-12 rounded-[12px] flex items-center justify-center transition-all active:scale-90"
                                     style={{
                                       background: isSelected ? "var(--surface-elevated)" : "transparent",
@@ -545,9 +427,9 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                   </div>
                 )}
 
-                {/* ── Wizard nav buttons ──────────────────────────── */}
+                {/* ── Wizard nav buttons (create mode only) ─────────── */}
                 {isWizardScene && (
-                  <div className="flex gap-3 mt-6 pb-safe">
+                  <div className="flex gap-3 mt-6">
                     {scene === "step0" ? (
                       <button
                         type="button"
@@ -590,11 +472,280 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                     )}
                   </div>
                 )}
+
               </motion.div>
             </AnimatePresence>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+}
+
+// ─── Shared sub-components ────────────────────────────────────────────────────
+
+type TFunc = ReturnType<typeof useTranslations>;
+
+function NameField({ name, setName, nameError, setNameError, t }: {
+  name: string;
+  setName: (v: string) => void;
+  nameError: string;
+  setNameError: (v: string) => void;
+  t: TFunc;
+}) {
+  return (
+    <div>
+      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+        {t("name_label")}
+      </label>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => { setName(e.target.value); setNameError(""); }}
+        placeholder={t("name_placeholder")}
+        maxLength={60}
+        className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+        style={{
+          background: "var(--surface-elevated)",
+          color: "var(--text-primary)",
+          border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
+        }}
+      />
+      {nameError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{nameError}</p>}
+    </div>
+  );
+}
+
+function CategoryField({ categories, categoryId, setCategoryId, t }: {
+  categories: Category[];
+  categoryId: string | null;
+  setCategoryId: (v: string | null) => void;
+  t: TFunc;
+}) {
+  if (categories.length === 0) return null;
+  return (
+    <div>
+      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+        {t("category_label")}
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setCategoryId(null)}
+          className="px-3 py-2 rounded-[10px] text-xs font-medium transition-all active:scale-95"
+          style={{
+            background: categoryId === null ? "var(--surface-elevated)" : "transparent",
+            color: categoryId === null ? "var(--text-primary)" : "var(--text-secondary)",
+            border: `1.5px solid ${categoryId === null ? "rgba(255,255,255,0.15)" : "var(--surface-elevated)"}`,
+          }}
+        >
+          {t("no_category")}
+        </button>
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            type="button"
+            onClick={() => setCategoryId(cat.id)}
+            className="px-3 py-2 rounded-[10px] text-xs font-medium flex items-center gap-1.5 transition-all active:scale-95"
+            style={{
+              background: categoryId === cat.id ? (cat.color ?? "#4CAF82") + "25" : "transparent",
+              color: categoryId === cat.id ? (cat.color ?? "#4CAF82") : "var(--text-secondary)",
+              border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "#4CAF82") + "60" : "var(--surface-elevated)"}`,
+            }}
+          >
+            {cat.icon && <span>{cat.icon}</span>}
+            {cat.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DaysGrid({ activeDays, toggleDay, daysError, tDays, t }: {
+  activeDays: number[];
+  toggleDay: (d: number) => void;
+  daysError: string;
+  tDays: ReturnType<typeof useTranslations>;
+  t: TFunc;
+}) {
+  return (
+    <div>
+      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+        {t("days_label")}
+      </label>
+      <div className="flex gap-2">
+        {ALL_DAYS.map((day) => {
+          const on = activeDays.includes(day);
+          return (
+            <button
+              key={day}
+              type="button"
+              onClick={() => toggleDay(day)}
+              className="flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all active:scale-95"
+              style={{
+                background: on ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
+                color: on ? "var(--btn-primary-text)" : "var(--text-secondary)",
+              }}
+            >
+              {tDays(`d${day}` as Parameters<typeof tDays>[0])}
+            </button>
+          );
+        })}
+      </div>
+      {daysError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{daysError}</p>}
+    </div>
+  );
+}
+
+function ScheduleSection({ timeEnabled, setTimeEnabled, startTime, setStartTime, estimatedMinutes, setEstimatedMinutes, endTime, t }: {
+  timeEnabled: boolean;
+  setTimeEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
+  startTime: string;
+  setStartTime: (v: string) => void;
+  estimatedMinutes: string;
+  setEstimatedMinutes: (v: string) => void;
+  endTime: string | null;
+  t: TFunc;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div
+        className="flex items-center justify-between px-4 py-3 rounded-[12px]"
+        style={{ background: "var(--surface-elevated)" }}
+      >
+        <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+          {t("schedule_toggle")}
+        </span>
+        <button
+          type="button"
+          onClick={() => setTimeEnabled((v) => !v)}
+          className="w-11 h-6 rounded-full relative transition-colors flex-shrink-0"
+          style={{ background: timeEnabled ? "#4CAF82" : "var(--border)" }}
+        >
+          <span
+            className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all"
+            style={{ left: timeEnabled ? "calc(100% - 22px)" : "2px" }}
+          />
+        </button>
+      </div>
+
+      {timeEnabled && (
+        <div className="flex flex-col gap-3">
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+              {t("start_label")}
+            </label>
+            <input
+              type="time"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+              style={{
+                background: "var(--surface-elevated)",
+                color: "var(--text-primary)",
+                border: "1.5px solid transparent",
+                colorScheme: "dark",
+              }}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+              {t("duration_label")}
+            </label>
+            <input
+              type="number"
+              value={estimatedMinutes}
+              onChange={(e) => setEstimatedMinutes(e.target.value)}
+              placeholder="30"
+              min={1}
+              max={480}
+              className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+              style={{
+                background: "var(--surface-elevated)",
+                color: "var(--text-primary)",
+                border: "1.5px solid transparent",
+              }}
+            />
+          </div>
+          {endTime && (
+            <p className="text-xs font-medium" style={{ color: "#4CAF82" }}>
+              {t("ends_at", { time: endTime })}
+            </p>
+          )}
+          <div
+            className="flex items-start gap-2.5 rounded-[12px] px-3.5 py-3"
+            style={{ background: "rgba(100,160,255,0.08)", border: "1px solid rgba(100,160,255,0.15)" }}
+          >
+            <Info size={14} className="flex-shrink-0 mt-0.5" color="#88AAFF" />
+            <p className="text-xs leading-relaxed" style={{ color: "#88AAFF" }}>
+              {t("lock_tooltip")}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AppearanceRows({ color, icon, navigate, homeScene, t }: {
+  color: string | null;
+  icon: string | null;
+  navigate: (to: Scene, dir: number) => void;
+  homeScene: () => Scene;
+  t: TFunc;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <button
+        type="button"
+        onClick={() => navigate("color", 1)}
+        className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
+        style={{ background: "var(--surface-elevated)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="w-9 h-9 rounded-full flex-shrink-0 border-2"
+            style={{
+              background: color ?? "var(--border)",
+              borderColor: color ? color + "60" : "var(--border)",
+            }}
+          />
+          <div className="text-left">
+            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("color_label")}</p>
+            <p className="text-xs mt-0.5" style={{ color: color ?? "var(--text-secondary)" }}>
+              {color ?? t("no_color")}
+            </p>
+          </div>
+        </div>
+        <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
+      </button>
+
+      <button
+        type="button"
+        onClick={() => navigate("icon", 1)}
+        className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
+        style={{ background: "var(--surface-elevated)" }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="w-9 h-9 rounded-[12px] flex items-center justify-center flex-shrink-0"
+            style={{ background: icon ? (color ?? "#4CAF82") + "25" : "var(--border)" }}
+          >
+            {icon
+              ? <HabitIcon icon={icon} size={20} color={color ?? "var(--text-primary)"} />
+              : <span className="text-sm" style={{ color: "var(--text-muted)" }}>—</span>
+            }
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("icon_label")}</p>
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+              {icon ? (icon.startsWith("lucide:") ? icon.slice(7) : icon) : t("no_icon")}
+            </p>
+          </div>
+        </div>
+        <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
+      </button>
+    </div>
   );
 }

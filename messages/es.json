@@ -54,7 +54,25 @@
     "next": "Siguiente",
     "save": "Guardar",
     "saving": "Guardando…",
-    "save_error": "Error al guardar"
+    "save_error": "Error al guardar",
+    "edit_days_title": "Días activos"
+  },
+  "categoryForm": {
+    "new_title": "Nueva categoría",
+    "edit_title": "Editar categoría",
+    "name_label": "Nombre",
+    "name_placeholder": "Ej: Salud",
+    "name_error": "El nombre es obligatorio",
+    "color_label": "Color",
+    "no_color": "Sin color",
+    "remove_color": "Quitar color",
+    "icon_label": "Ícono",
+    "no_icon": "Sin ícono",
+    "cancel": "Cancelar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "save": "Guardar",
+    "saving": "Guardando…"
   },
   "dayLabels": {
     "d1": "L", "d2": "M", "d3": "X", "d4": "J", "d5": "V", "d6": "S", "d7": "D"
