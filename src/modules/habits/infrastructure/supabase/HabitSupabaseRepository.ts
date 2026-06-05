@@ -53,6 +53,11 @@ export class HabitSupabaseRepository implements IHabitRepository {
   async findActiveForDate(userId: UUID, date: ISODate): Promise<HabitWithStatus[]> {
     const dayDate = new Date(date + "T12:00:00"); // Evitar timezone issues
 
+    // [HT] LOG — valores exactos usados en la consulta
+    console.log(
+      `[HT REPO:findActiveForDate] ${Date.now()} date="${date}" dayDate="${dayDate.toISOString()}" dayOfWeek=${dayDate.getDay()} localTZ=${Intl.DateTimeFormat().resolvedOptions().timeZone}`
+    );
+
     const [habitsResult, logsResult, streaksResult] = await Promise.all([
       this.client.from("habits").select("*").eq("user_id", userId).eq("is_active", true).order("order"),
       this.client.from("habit_logs").select("*").eq("user_id", userId).eq("completed_at", date),
@@ -63,16 +68,28 @@ export class HabitSupabaseRepository implements IHabitRepository {
     if (logsResult.error) throw logsResult.error;
     if (streaksResult.error) throw streaksResult.error;
 
+    // [HT] LOG — qué logs devolvió la DB para esta fecha
+    console.log(
+      `[HT REPO:findActiveForDate] logs found=${logsResult.data.length} for completed_at="${date}":`,
+      logsResult.data.map((l) => `habit=${l.habit_id.slice(0, 6)} completed_at=${l.completed_at}`)
+    );
+
     const logHabitIds = new Set(logsResult.data.map((l) => l.habit_id));
     const streakMap = new Map(streaksResult.data.map((s) => [s.habit_id, mapDbToStreak(s)]));
 
-    return habitsResult.data
-      .filter((h) => isHabitActiveOnDay(h.active_days, dayDate))
-      .map((h) => ({
-        ...mapDbToHabit(h),
-        streak: streakMap.get(h.id) ?? null,
-        isCompletedToday: logHabitIds.has(h.id),
-      }));
+    const filtered = habitsResult.data.filter((h) => isHabitActiveOnDay(h.active_days, dayDate));
+
+    // [HT] LOG — qué hábitos pasan el filtro de día activo
+    console.log(
+      `[HT REPO:findActiveForDate] habits total=${habitsResult.data.length} after_day_filter=${filtered.length}`,
+      filtered.map((h) => `${h.id.slice(0, 6)} activeDays=[${h.active_days}] completed=${logHabitIds.has(h.id) ? "✓" : "✗"}`)
+    );
+
+    return filtered.map((h) => ({
+      ...mapDbToHabit(h),
+      streak: streakMap.get(h.id) ?? null,
+      isCompletedToday: logHabitIds.has(h.id),
+    }));
   }
 
   async findById(id: UUID): Promise<Habit | null> {
@@ -142,6 +159,11 @@ export class HabitSupabaseRepository implements IHabitRepository {
   }
 
   async logCompletion(habitId: UUID, userId: UUID, date: ISODate): Promise<HabitLog> {
+    // [HT] LOG — valores exactos que se pasan al INSERT/SELECT
+    console.log(
+      `[HT REPO:logCompletion] ${Date.now()} habitId=${habitId.slice(0, 6)} date="${date}" localNow="${new Date().toISOString()}" localDate="${new Date().toLocaleDateString()}"`
+    );
+
     // Buscar log existente antes de insertar (idempotente frente a race conditions y duplicados)
     const { data: existing } = await this.client
       .from("habit_logs")
@@ -152,6 +174,10 @@ export class HabitSupabaseRepository implements IHabitRepository {
       .maybeSingle();
 
     if (existing) {
+      // [HT] LOG — idempotencia: ya existía un log, NO se insertó nada nuevo
+      console.log(
+        `[HT REPO:logCompletion] IDEMPOTENT existing log id=${existing.id.slice(0, 6)} completed_at="${existing.completed_at}" (no INSERT)`
+      );
       return {
         id: existing.id,
         habitId: existing.habit_id,
@@ -168,6 +194,12 @@ export class HabitSupabaseRepository implements IHabitRepository {
       .single();
 
     if (error) throw error;
+
+    // [HT] LOG — INSERT completado, valor real que devolvió la DB
+    console.log(
+      `[HT REPO:logCompletion] INSERT done id=${data.id.slice(0, 6)} completed_at="${data.completed_at}" (DB value)`
+    );
+
     return {
       id: data.id,
       habitId: data.habit_id,
