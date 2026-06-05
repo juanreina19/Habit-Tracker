@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { useSettingsHabits } from "../../hooks/useSettingsHabits";
 import { useHabitStore } from "../../store/habitStore";
+import { refreshTodayHabitsInStore } from "../../hooks/useHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { HabitFormDialog } from "../settings/HabitFormDialog";
 import { CategoryFormDialog } from "@/modules/categories/presentation/components/CategoryFormDialog";
@@ -56,7 +57,7 @@ export default function HabitsView({ userId }: Props) {
     } else {
       await createHabit(data as CreateHabitInput);
     }
-    useHabitStore.getState().bumpVersion();
+    await refreshTodayHabitsInStore(userId);
     router.refresh();
   };
 
@@ -66,7 +67,7 @@ export default function HabitsView({ userId }: Props) {
     } else {
       await createCategory(data as CreateCategoryInput);
     }
-    useHabitStore.getState().bumpVersion();
+    await refreshTodayHabitsInStore(userId);
     router.refresh();
   };
 
@@ -78,7 +79,7 @@ export default function HabitsView({ userId }: Props) {
       await removeCategory(confirmDelete.id);
     }
     setConfirmDelete(null);
-    useHabitStore.getState().bumpVersion();
+    await refreshTodayHabitsInStore(userId);
     router.refresh();
   };
 

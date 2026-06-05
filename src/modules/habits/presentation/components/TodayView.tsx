@@ -64,6 +64,11 @@ export default function TodayView({ userId }: Props) {
   const [createOpen, setCreateOpen] = useState(false);
   const today = new Date();
 
+  // Mostrar errores de carga como toast (no pantalla completa)
+  useEffect(() => {
+    if (error) showToast({ message: error, duration: 4000 });
+  }, [error]);
+
   const [showConfetti, setShowConfetti] = useState(false);
   const prevPct = useRef(completionPercentage);
   useEffect(() => {
@@ -72,6 +77,15 @@ export default function TodayView({ userId }: Props) {
     }
     prevPct.current = completionPercentage;
   }, [completionPercentage, totalCount]);
+
+  // Refetch defensivo cuando el diálogo de crear se cierra
+  const prevCreateOpen = useRef(createOpen);
+  useEffect(() => {
+    if (prevCreateOpen.current === true && createOpen === false) {
+      refetch();
+    }
+    prevCreateOpen.current = createOpen;
+  }, [createOpen, refetch]);
 
   const pendingIds = useRef<Set<UUID>>(new Set());
 
@@ -115,49 +129,47 @@ export default function TodayView({ userId }: Props) {
 
   if (isLoading) return <TodayViewSkeleton />;
 
-  if (error) {
-    return (
-      <div className="p-6 pt-14 flex items-center justify-center min-h-screen">
-        <p className="text-sm" style={{ color: "#FF5252" }}>Error: {error}</p>
-      </div>
-    );
-  }
+  const maxStreak = habits.length > 0
+    ? Math.max(...habits.map((h) => h.streak?.currentStreak ?? 0))
+    : 0;
 
   return (
     <>
       {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
       <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-8">
-          <div>
+        {/* Header — 3 columnas: fecha | Hoy+racha | + */}
+        <div className="flex items-center mb-8">
+          {/* Izquierda: fecha */}
+          <div className="flex-1">
             <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-              {t("today_label")}
+              {format(today, "d MMMM", { locale: dateFnsLocale }).replace(/^\w/, (c) => c.toUpperCase())}
             </p>
-            <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
-              {completionPercentage === 100
-                ? t("perfect_day")
-                : format(today, "d MMMM", { locale: dateFnsLocale }).replace(/^\w/, (c) => c.toUpperCase())}
-            </h1>
           </div>
-          {/* Mobile: solo icono */}
-          <button
-            onClick={() => setCreateOpen(true)}
-            className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70"
-            style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-            aria-label={t("new_habit")}
-          >
-            <Plus size={22} strokeWidth={2.5} />
-          </button>
-          {/* Desktop: pill con texto */}
-          <button
-            onClick={() => setCreateOpen(true)}
-            className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full flex-shrink-0 transition-opacity active:opacity-70"
-            style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-            aria-label={t("new_habit")}
-          >
-            <Plus size={18} strokeWidth={2.5} />
-            <span className="text-sm font-semibold">{t("new_habit")}</span>
-          </button>
+
+          {/* Centro: "Hoy" + racha */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
+              {t("today_label")}
+            </span>
+            {maxStreak > 0 && (
+              <>
+                <span className="text-base leading-none">🔥</span>
+                <span className="text-sm font-bold" style={{ color: "#FF9500" }}>{maxStreak}</span>
+              </>
+            )}
+          </div>
+
+          {/* Derecha: botón + */}
+          <div className="flex-1 flex justify-end">
+            <button
+              onClick={() => setCreateOpen(true)}
+              className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
+              style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+              aria-label={t("new_habit")}
+            >
+              <Plus size={22} strokeWidth={2.5} />
+            </button>
+          </div>
         </div>
 
         {/* Progress ring */}

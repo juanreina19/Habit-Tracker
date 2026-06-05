@@ -14,6 +14,19 @@ import { UseFreezeUseCase } from "../../domain/use-cases/UseFreezeUseCase";
 import { today } from "@/shared/lib/utils/dates";
 import type { UUID } from "@/shared/types/database.types";
 
+// Actualiza el store de hábitos de hoy desde cualquier contexto (sin montar el hook)
+export async function refreshTodayHabitsInStore(userId: UUID): Promise<void> {
+  try {
+    const client = createClient();
+    const repo = new HabitSupabaseRepository(client);
+    const result = await new GetTodayHabitsUseCase(repo).execute(userId);
+    useHabitStore.getState().setHabits(result);
+    useHabitStore.getState().bumpVersion();
+  } catch {
+    // best-effort — no lanza error
+  }
+}
+
 export function useHabits(userId: UUID) {
   const { setHabits, toggleHabit, setLoading, setError, habits, isLoading, error,
     completedCount, totalCount, completionPercentage, estimatedMinutes, dataVersion } = useHabitStore();
