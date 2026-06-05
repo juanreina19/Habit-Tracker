@@ -136,6 +136,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
         estimatedMinutes: minutes && !isNaN(minutes) ? minutes : undefined,
         startTime: timeEnabled ? (startTime || null) : null,
       });
+      onClose();
     } catch (err) {
       if (!habit) navigate("step0", -1);
       setNameError(err instanceof Error ? err.message : t("save_error"));
