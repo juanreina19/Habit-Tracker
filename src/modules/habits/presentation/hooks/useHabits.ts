@@ -37,7 +37,6 @@ export function useHabits(userId: UUID) {
   }, []);
 
   const fetchHabits = useCallback(async () => {
-    // Si hay datos en cache (persist), no mostramos skeleton — actualización silenciosa
     const hasCache = useHabitStore.getState().habits.length > 0;
     if (!hasCache) setLoading(true);
     setError(null);
@@ -52,7 +51,16 @@ export function useHabits(userId: UUID) {
     }
   }, [userId, getRepository, setHabits, setLoading, setError]);
 
-  // Complete a habit (immediate, with achievement check)
+  // Ref estable para fetchHabits — permite llamarlo desde closures sin recrear suscripciones
+  const fetchHabitsRef = useRef(fetchHabits);
+  useEffect(() => { fetchHabitsRef.current = fetchHabits; });
+
+  // IDs de hábitos con desmarco pendiente (timer activo de 3s).
+  // El Realtime bloquea refetches mientras haya pendientes para evitar
+  // que la DB (que aún tiene isCompletedToday=true) revierta el estado optimista.
+  const pendingUnchecks = useRef(new Set<UUID>());
+
+  // ─── Complete ───────────────────────────────────────────────────────────────
   const completeHabit = useCallback(
     async (habitId: UUID) => {
       toggleHabit(habitId);
@@ -74,11 +82,11 @@ export function useHabits(userId: UUID) {
     [userId, getRepository, toggleHabit, setError]
   );
 
-  // Uncheck a habit with undo support: optimistic update immediately,
-  // API call deferred 3s. Returns a cancel function for undo.
+  // ─── Uncheck (con undo, timer de 3s) ────────────────────────────────────────
   const uncheckHabit = useCallback(
     (habitId: UUID): (() => void) => {
       toggleHabit(habitId); // optimistic
+      pendingUnchecks.current.add(habitId);
 
       let cancelled = false;
       const timer = setTimeout(async () => {
@@ -89,47 +97,49 @@ export function useHabits(userId: UUID) {
           await new UncompleteHabitUseCase(repo, calculateStreak).execute(habitId, userId, today());
         } catch (err) {
           if (!cancelled) {
-            toggleHabit(habitId); // revert on API error
+            toggleHabit(habitId); // revertir si falla API
             setError(err instanceof Error ? err.message : "Error al desmarcar hábito");
           }
+        } finally {
+          pendingUnchecks.current.delete(habitId);
+          if (!cancelled) fetchHabitsRef.current(); // sincronizar racha tras escritura
         }
       }, 3000);
 
       return () => {
         cancelled = true;
         clearTimeout(timer);
-        toggleHabit(habitId); // revert optimistic update
+        pendingUnchecks.current.delete(habitId);
+        toggleHabit(habitId); // revertir update optimista (undo)
       };
     },
     [userId, getRepository, toggleHabit, setError]
   );
 
-  // Use freeze (grace day) for a habit
+  // ─── Freeze ─────────────────────────────────────────────────────────────────
   const freezeHabit = useCallback(
     async (habitId: UUID): Promise<void> => {
       const repo = getRepository();
       await new UseFreezeUseCase(repo).execute(habitId, userId);
-      await fetchHabits(); // refetch to update streak.freezeUsedAt
+      await fetchHabits();
     },
     [userId, getRepository, fetchHabits]
   );
 
+  // ─── Fetch inicial y reactividad por dataVersion ─────────────────────────────
   useEffect(() => {
     fetchHabits();
   }, [fetchHabits, dataVersion]);
 
-  // Ref estable para fetchHabits — evita recrear la suscripción en cada render
-  const fetchHabitsRef = useRef(fetchHabits);
-  useEffect(() => { fetchHabitsRef.current = fetchHabits; });
-
-  // Supabase Realtime: sincronización automática de hábitos, logs y rachas
+  // ─── Supabase Realtime ────────────────────────────────────────────────────────
   useEffect(() => {
     const client = createClient();
     let debounceTimer: ReturnType<typeof setTimeout>;
 
-    // Sin filtro de user_id: RLS en fetchHabits garantiza que solo llegan datos propios.
-    // Con filtro el evento puede no llegar si las políticas RLS de Realtime no están configuradas.
     const debouncedFetch = () => {
+      // No refetch si hay un desmarco pendiente: la DB aún tiene isCompletedToday=true
+      // y sobreescribiría el estado optimista, revirtiendo la UI en el dispositivo origen.
+      if (pendingUnchecks.current.size > 0) return;
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => fetchHabitsRef.current(), 300);
     };
@@ -145,7 +155,7 @@ export function useHabits(userId: UUID) {
       clearTimeout(debounceTimer);
       client.removeChannel(channel);
     };
-  }, [userId]); // solo userId — la suscripción se crea una vez por sesión
+  }, [userId]);
 
   return {
     habits,
