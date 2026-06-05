@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import WeeklyView from "./WeeklyView";
 import MonthlyView from "./MonthlyView";
 import type { UUID } from "@/shared/types/database.types";
@@ -14,15 +15,16 @@ interface Props {
 
 export default function CalendarView({ userId, userCreatedAt }: Props) {
   const [mode, setMode] = useState<Mode>("weekly");
+  const t = useTranslations("calendar");
 
   return (
     <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
       {/* Header with mode toggle */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>Vista</p>
+          <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>{t("subtitle")}</p>
           <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
-            Calendario
+            {t("title")}
           </h1>
         </div>
         <div className="flex rounded-[12px] p-1" style={{ background: "var(--surface)" }}>
@@ -36,7 +38,7 @@ export default function CalendarView({ userId, userCreatedAt }: Props) {
                 color: mode === m ? "var(--text-primary)" : "var(--text-secondary)",
               }}
             >
-              {m === "weekly" ? "Semana" : "Mes"}
+              {m === "weekly" ? t("mode_weekly") : t("mode_monthly")}
             </button>
           ))}
         </div>

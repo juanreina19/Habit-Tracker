@@ -327,7 +327,7 @@ function CategoriesTab({
     <div>
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          {localCats.length}
+          {t("count_categories", { count: localCats.length })}
         </p>
         <button
           onClick={onAdd}

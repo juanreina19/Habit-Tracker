@@ -125,6 +125,7 @@
     "tab_habits": "Habits",
     "tab_categories": "Categories",
     "count": "{count, plural, =1 {1 habit} other {{count} habits}}",
+    "count_categories": "{count, plural, =1 {1 category} other {{count} categories}}",
     "new_habit": "New habit",
     "no_habits": "No habits yet",
     "no_habits_hint": "Tap + New habit to get started.",
@@ -138,5 +139,28 @@
     "delete_confirm": "Are you sure? \"{name}\" will be deleted.",
     "delete_cancel": "Cancel",
     "delete_confirm_btn": "Delete"
+  },
+  "calendar": {
+    "subtitle": "View",
+    "title": "Calendar",
+    "mode_weekly": "Week",
+    "mode_monthly": "Month",
+    "this_week": "This week",
+    "week": "Week",
+    "days_completed": "days completed",
+    "perfect_week": "Perfect week! 🔥",
+    "very_good": "Very good!",
+    "going_well": "Going well",
+    "keep_going": "Keep going",
+    "no_habits_title": "No habits this week",
+    "no_habits_hint": "Create habits in Habits to see them here.",
+    "monthly_subtitle": "Monthly view",
+    "summary": "{completed} of {total} completed",
+    "perfect_days": "perfect days",
+    "missed_days": "missed days",
+    "no_data": "No data",
+    "no_habits_scheduled": "No habits scheduled",
+    "detail_progress": "{completed} / {scheduled} completed",
+    "day_format": "EEEE, MMMM d"
   }
 }

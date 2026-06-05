@@ -3,12 +3,13 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
+import type { Locale as DateFnsLocale } from "date-fns";
+import { useTranslations } from "next-intl";
+import { useLocale } from "@/shared/i18n/useLocale";
 import { useMonthly } from "../hooks/useMonthly";
 import type { DayProgress } from "../../domain/use-cases/GetMonthlyProgressUseCase";
 import type { UUID } from "@/shared/types/database.types";
-
-const WEEK_DAYS = ["L", "M", "X", "J", "V", "S", "D"];
 
 interface Props {
   userId: UUID;
@@ -29,9 +30,16 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
     canGoPrev,
   } = useMonthly(userId, userCreatedAt);
 
+  const t = useTranslations("calendar");
+  const tDays = useTranslations("dayLabels");
+  const { locale } = useLocale();
+  const dateFnsLocale = locale === "en" ? enUS : es;
+
+  const WEEK_DAYS = [tDays("d1"), tDays("d2"), tDays("d3"), tDays("d4"), tDays("d5"), tDays("d6"), tDays("d7")];
+
   const [selectedDay, setSelectedDay] = useState<DayProgress | null>(null);
 
-  const monthLabel = format(new Date(year, month, 1), "MMMM yyyy", { locale: es });
+  const monthLabel = format(new Date(year, month, 1), "MMMM yyyy", { locale: dateFnsLocale });
   const monthTitle = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
 
   const inner = (
@@ -41,7 +49,7 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
         <div>
           {!embedded && (
             <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
-              Vista mensual
+              {t("monthly_subtitle")}
             </p>
           )}
           <h1
@@ -73,7 +81,13 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
 
       {/* Day detail panel — shown when a day is selected */}
       {selectedDay ? (
-        <DayDetail day={selectedDay} userCreatedAt={userCreatedAt} onClose={() => setSelectedDay(null)} />
+        <DayDetail
+          day={selectedDay}
+          userCreatedAt={userCreatedAt}
+          onClose={() => setSelectedDay(null)}
+          t={t}
+          dateFnsLocale={dateFnsLocale}
+        />
       ) : (
         /* Summary banner — shown when no day is selected */
         !isLoading && data && (
@@ -86,7 +100,7 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
                 {data.globalRate}%
               </p>
               <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                {data.totalCompleted} de {data.totalScheduled} completados
+                {t("summary", { completed: data.totalCompleted, total: data.totalScheduled })}
               </p>
             </div>
             <div className="flex gap-4 text-right">
@@ -94,7 +108,7 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
                 <p className="text-base font-semibold" style={{ color: "var(--accent)" }}>
                   {data.days.filter((d) => !d.isFuture && d.completionRate === 100 && d.scheduled > 0).length}
                 </p>
-                <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>días perfectos</p>
+                <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>{t("perfect_days")}</p>
               </div>
               <div>
                 <p className="text-base font-semibold" style={{ color: "var(--danger)" }}>
@@ -108,7 +122,7 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
                     return true;
                   }).length}
                 </p>
-                <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>días perdidos</p>
+                <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>{t("missed_days")}</p>
               </div>
             </div>
           </div>
@@ -116,13 +130,19 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
       )}
 
       {isLoading ? (
-        <MonthlySkeleton />
+        <MonthlySkeleton weekDays={WEEK_DAYS} />
       ) : error ? (
         <div className="flex items-center justify-center py-20">
           <p className="text-sm" style={{ color: "#FF5252" }}>Error: {error}</p>
         </div>
       ) : data ? (
-        <CalendarGrid data={data} userCreatedAt={userCreatedAt} selectedDay={selectedDay} onDayClick={setSelectedDay} />
+        <CalendarGrid
+          data={data}
+          userCreatedAt={userCreatedAt}
+          selectedDay={selectedDay}
+          onDayClick={setSelectedDay}
+          weekDays={WEEK_DAYS}
+        />
       ) : null}
     </>
   );
@@ -138,12 +158,13 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
 // ─── Calendar grid ─────────────────────────────────────────────────────────────
 
 function CalendarGrid({
-  data, userCreatedAt, selectedDay, onDayClick,
+  data, userCreatedAt, selectedDay, onDayClick, weekDays,
 }: {
   data: { days: DayProgress[]; month: number; year: number };
   userCreatedAt?: string;
   selectedDay: DayProgress | null;
   onDayClick: (day: DayProgress) => void;
+  weekDays: string[];
 }) {
   const firstDay = new Date(data.year, data.month, 1);
   const rawDay = firstDay.getDay();
@@ -168,9 +189,9 @@ function CalendarGrid({
     <div className="rounded-[20px] p-4" style={{ background: "var(--surface)" }}>
       {/* Day-of-week labels */}
       <div className="grid grid-cols-7 mb-2">
-        {WEEK_DAYS.map((d) => (
+        {weekDays.map((d, i) => (
           <div
-            key={d}
+            key={i}
             className="text-center text-[11px] font-semibold py-1"
             style={{ color: "var(--text-secondary)" }}
           >
@@ -264,7 +285,13 @@ function DayCell({ day, userCreatedAt, isSelected, onClick }: {
   );
 }
 
-function DayDetail({ day, userCreatedAt, onClose }: { day: DayProgress; userCreatedAt?: string; onClose: () => void }) {
+function DayDetail({ day, userCreatedAt, onClose, t, dateFnsLocale }: {
+  day: DayProgress;
+  userCreatedAt?: string;
+  onClose: () => void;
+  t: ReturnType<typeof useTranslations>;
+  dateFnsLocale: DateFnsLocale;
+}) {
   const { date, completionRate, completed, scheduled, isFuture } = day;
 
   const isBeforeCreation = (() => {
@@ -276,7 +303,7 @@ function DayDetail({ day, userCreatedAt, onClose }: { day: DayProgress; userCrea
     return d < created;
   })();
 
-  const label = format(date, "EEEE d 'de' MMMM", { locale: es });
+  const label = format(date, t("day_format") as string, { locale: dateFnsLocale });
   const title = label.charAt(0).toUpperCase() + label.slice(1);
 
   const accentColor =
@@ -293,12 +320,12 @@ function DayDetail({ day, userCreatedAt, onClose }: { day: DayProgress; userCrea
       <div>
         <p className="text-xs font-medium mb-0.5" style={{ color: "var(--text-secondary)" }}>{title}</p>
         {isFuture || isBeforeCreation ? (
-          <p className="text-base font-semibold" style={{ color: "var(--text-muted)" }}>Sin datos</p>
+          <p className="text-base font-semibold" style={{ color: "var(--text-muted)" }}>{t("no_data")}</p>
         ) : scheduled === 0 ? (
-          <p className="text-base font-semibold" style={{ color: "var(--text-muted)" }}>Sin hábitos programados</p>
+          <p className="text-base font-semibold" style={{ color: "var(--text-muted)" }}>{t("no_habits_scheduled")}</p>
         ) : (
           <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
-            {completed} / {scheduled} completados
+            {t("detail_progress", { completed, scheduled })}
           </p>
         )}
       </div>
@@ -346,12 +373,12 @@ function getDotColor(rate: number): string {
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
 
-function MonthlySkeleton() {
+function MonthlySkeleton({ weekDays }: { weekDays: string[] }) {
   return (
     <div className="rounded-[20px] p-4 animate-pulse" style={{ background: "var(--surface)" }}>
       <div className="grid grid-cols-7 mb-2">
-        {WEEK_DAYS.map((d) => (
-          <div key={d} className="h-5 rounded-full mx-1" style={{ background: "var(--surface-elevated)" }} />
+        {weekDays.map((d, i) => (
+          <div key={i} className="h-5 rounded-full mx-1" style={{ background: "var(--surface-elevated)" }} />
         ))}
       </div>
       {[1, 2, 3, 4, 5].map((i) => (

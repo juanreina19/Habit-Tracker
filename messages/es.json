@@ -125,6 +125,7 @@
     "tab_habits": "Hábitos",
     "tab_categories": "Categorías",
     "count": "{count, plural, =1 {1 hábito} other {{count} hábitos}}",
+    "count_categories": "{count, plural, =1 {1 categoría} other {{count} categorías}}",
     "new_habit": "Nuevo hábito",
     "no_habits": "Sin hábitos aún",
     "no_habits_hint": "Toca + Nuevo hábito para empezar.",
@@ -138,5 +139,28 @@
     "delete_confirm": "¿Estás seguro? Se eliminará \"{name}\".",
     "delete_cancel": "Cancelar",
     "delete_confirm_btn": "Eliminar"
+  },
+  "calendar": {
+    "subtitle": "Vista",
+    "title": "Calendario",
+    "mode_weekly": "Semana",
+    "mode_monthly": "Mes",
+    "this_week": "Esta semana",
+    "week": "Semana",
+    "days_completed": "días completados",
+    "perfect_week": "¡Semana perfecta! 🔥",
+    "very_good": "¡Muy bien!",
+    "going_well": "Vas bien",
+    "keep_going": "Sigue adelante",
+    "no_habits_title": "Sin hábitos esta semana",
+    "no_habits_hint": "Crea hábitos en Hábitos para verlos aquí.",
+    "monthly_subtitle": "Vista mensual",
+    "summary": "{completed} de {total} completados",
+    "perfect_days": "días perfectos",
+    "missed_days": "días perdidos",
+    "no_data": "Sin datos",
+    "no_habits_scheduled": "Sin hábitos programados",
+    "detail_progress": "{completed} / {scheduled} completados",
+    "day_format": "EEEE d 'de' MMMM"
   }
 }

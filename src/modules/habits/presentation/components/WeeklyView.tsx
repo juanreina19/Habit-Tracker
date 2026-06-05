@@ -1,14 +1,15 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useWeekly } from "../hooks/useWeekly";
+import { useLocale } from "@/shared/i18n/useLocale";
 import type { UUID } from "@/shared/types/database.types";
 import type { DayStatus, WeeklyHabitProgress } from "../../domain/use-cases/GetWeeklyProgressUseCase";
 import { format, endOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
-
-const DAY_LABELS = ["L", "M", "X", "J", "V", "S", "D"];
 
 interface Props {
   userId: UUID;
@@ -20,9 +21,16 @@ export default function WeeklyView({ userId, userCreatedAt, embedded = false }: 
   const { data, isLoading, error, weekStart, goToPrevWeek, goToNextWeek,
     canGoPrev, canGoNext, isCurrentWeek } = useWeekly(userId, userCreatedAt);
 
+  const t = useTranslations("calendar");
+  const tDays = useTranslations("dayLabels");
+  const { locale } = useLocale();
+  const dateFnsLocale = locale === "en" ? enUS : es;
+
+  const DAY_LABELS = [tDays("d1"), tDays("d2"), tDays("d3"), tDays("d4"), tDays("d5"), tDays("d6"), tDays("d7")];
+
   const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-  const weekStartLabel = format(weekStart, "d MMM", { locale: es });
-  const weekEndLabel = format(weekEnd, "d MMM", { locale: es });
+  const weekStartLabel = format(weekStart, "d MMM", { locale: dateFnsLocale });
+  const weekEndLabel = format(weekEnd, "d MMM", { locale: dateFnsLocale });
 
   const inner = (
     <>
@@ -34,7 +42,7 @@ export default function WeeklyView({ userId, userCreatedAt, embedded = false }: 
           </p>
           {!embedded && (
             <h1 className="text-3xl font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
-              {isCurrentWeek ? "Esta semana" : "Semana"}
+              {isCurrentWeek ? t("this_week") : t("week")}
             </h1>
           )}
         </div>
@@ -70,12 +78,12 @@ export default function WeeklyView({ userId, userCreatedAt, embedded = false }: 
               {data.totalCompleted}/{data.totalScheduled}
             </p>
             <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
-              días completados
+              {t("days_completed")}
             </p>
             <p className="text-xs mt-1.5" style={{ color: data.globalRate >= 80 ? "var(--accent)" : "var(--text-secondary)" }}>
-              {data.globalRate >= 100 ? "¡Semana perfecta! 🔥" :
-               data.globalRate >= 80 ? "¡Muy bien!" :
-               data.globalRate >= 50 ? "Vas bien" : "Sigue adelante"}
+              {data.globalRate >= 100 ? t("perfect_week") :
+               data.globalRate >= 80 ? t("very_good") :
+               data.globalRate >= 50 ? t("going_well") : t("keep_going")}
             </p>
           </div>
         </div>
@@ -109,9 +117,9 @@ export default function WeeklyView({ userId, userCreatedAt, embedded = false }: 
           {data.habits.length === 0 ? (
             <div className="rounded-[20px] p-10 text-center" style={{ background: "var(--surface)" }}>
               <p className="text-4xl mb-3">📅</p>
-              <p className="font-medium" style={{ color: "var(--text-primary)" }}>Sin hábitos esta semana</p>
+              <p className="font-medium" style={{ color: "var(--text-primary)" }}>{t("no_habits_title")}</p>
               <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-                Crea hábitos en Hábitos para verlos aquí.
+                {t("no_habits_hint")}
               </p>
             </div>
           ) : (

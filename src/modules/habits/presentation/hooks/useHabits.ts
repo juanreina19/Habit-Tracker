@@ -42,6 +42,10 @@ export function useHabits(userId: UUID) {
     try {
       const repo = getRepository();
       const result = await new GetTodayHabitsUseCase(repo).execute(userId);
+      // Descarta el resultado si hay actualizaciones optimistas en vuelo.
+      // Previene que un fetch en curso sobreescriba isCompletedToday antes de que
+      // la operación del usuario termine (causa el flash/flicker visual).
+      if (pendingCompletes.current.size > 0 || pendingUnchecks.current.size > 0) return;
       setHabits(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al cargar hábitos");
@@ -54,15 +58,17 @@ export function useHabits(userId: UUID) {
   const fetchHabitsRef = useRef(fetchHabits);
   useEffect(() => { fetchHabitsRef.current = fetchHabits; });
 
-  // IDs de hábitos con desmarco pendiente (timer activo de 3s).
-  // El Realtime bloquea refetches mientras haya pendientes para evitar
-  // que la DB (que aún tiene isCompletedToday=true) revierta el estado optimista.
+  // IDs con operaciones optimistas en vuelo. Mientras haya pendientes, cualquier
+  // fetchHabits() que regrese con datos de DB descarta el resultado para no
+  // sobreescribir el estado optimista (evita el flash/flicker visual).
   const pendingUnchecks = useRef(new Set<UUID>());
+  const pendingCompletes = useRef(new Set<UUID>());
 
   // ─── Complete ───────────────────────────────────────────────────────────────
   const completeHabit = useCallback(
     async (habitId: UUID) => {
       toggleHabit(habitId); // optimista: isCompletedToday = true
+      pendingCompletes.current.add(habitId); // bloquear refetches mientras opera
 
       const repo = getRepository();
 
@@ -70,6 +76,7 @@ export function useHabits(userId: UUID) {
       try {
         await repo.logCompletion(habitId, userId, today());
       } catch (err) {
+        pendingCompletes.current.delete(habitId);
         toggleHabit(habitId); // revertir: el log no se guardó
         setError(err instanceof Error ? err.message : "Error al completar hábito");
         return;
@@ -82,7 +89,8 @@ export function useHabits(userId: UUID) {
         // best-effort: no revertir el toggle
       }
 
-      // Notificar a useWeekly y otros hooks suscritos (actualiza racha en calendario)
+      // Desbloquear refetches y notificar a useWeekly (actualiza racha en calendario)
+      pendingCompletes.current.delete(habitId);
       useHabitStore.getState().bumpVersion();
 
       if ("vibrate" in navigator) navigator.vibrate(10);
@@ -158,9 +166,9 @@ export function useHabits(userId: UUID) {
     let debounceTimer: ReturnType<typeof setTimeout>;
 
     const debouncedFetch = () => {
-      // No refetch si hay un desmarco pendiente: la DB aún tiene isCompletedToday=true
-      // y sobreescribiría el estado optimista, revirtiendo la UI en el dispositivo origen.
-      if (pendingUnchecks.current.size > 0) return;
+      // No refetch si hay operaciones optimistas pendientes (complete o uncheck):
+      // la DB podría no reflejar aún el cambio del usuario y sobreescribiría la UI.
+      if (pendingUnchecks.current.size > 0 || pendingCompletes.current.size > 0) return;
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => fetchHabitsRef.current(), 300);
     };

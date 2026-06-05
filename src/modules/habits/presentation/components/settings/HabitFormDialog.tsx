@@ -663,11 +663,12 @@ function ScheduleSection({ timeEnabled, setTimeEnabled, startTime, setStartTime,
               placeholder="30"
               min={1}
               max={480}
-              className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+              className="w-full rounded-[12px] px-4 py-3 text-sm outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               style={{
                 background: "var(--surface-elevated)",
                 color: "var(--text-primary)",
                 border: "1.5px solid transparent",
+                colorScheme: "dark",
               }}
             />
           </div>
