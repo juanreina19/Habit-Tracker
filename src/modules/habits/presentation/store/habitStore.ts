@@ -11,6 +11,7 @@ interface HabitState {
   totalCount: number;
   completionPercentage: number;
   estimatedMinutes: number;
+  dataVersion: number;
 
   setHabits: (data: {
     habits: HabitWithStatus[];
@@ -23,6 +24,7 @@ interface HabitState {
   toggleHabit: (habitId: UUID) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  bumpVersion: () => void;
 }
 
 export const useHabitStore = create<HabitState>()(
@@ -35,8 +37,10 @@ export const useHabitStore = create<HabitState>()(
       totalCount: 0,
       completionPercentage: 0,
       estimatedMinutes: 0,
+      dataVersion: 0,
 
       setHabits: (data) => set(data),
+      bumpVersion: () => set((s) => ({ dataVersion: s.dataVersion + 1 })),
 
       toggleHabit: (habitId) =>
         set((state) => {

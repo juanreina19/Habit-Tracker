@@ -16,7 +16,7 @@ import type { UUID } from "@/shared/types/database.types";
 
 export function useHabits(userId: UUID) {
   const { setHabits, toggleHabit, setLoading, setError, habits, isLoading, error,
-    completedCount, totalCount, completionPercentage, estimatedMinutes } = useHabitStore();
+    completedCount, totalCount, completionPercentage, estimatedMinutes, dataVersion } = useHabitStore();
 
   const getRepository = useCallback(() => {
     const client = createClient();
@@ -103,7 +103,7 @@ export function useHabits(userId: UUID) {
 
   useEffect(() => {
     fetchHabits();
-  }, [fetchHabits]);
+  }, [fetchHabits, dataVersion]);
 
   return {
     habits,
