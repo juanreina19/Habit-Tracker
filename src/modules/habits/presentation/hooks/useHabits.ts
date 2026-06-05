@@ -7,7 +7,6 @@ import { HabitSupabaseRepository } from "../../infrastructure/supabase/HabitSupa
 import { AchievementSupabaseRepository } from "@/modules/achievements/infrastructure/supabase/AchievementSupabaseRepository";
 import { CheckAndUnlockAchievementsUseCase } from "@/modules/achievements/domain/use-cases/CheckAndUnlockAchievementsUseCase";
 import { GetTodayHabitsUseCase } from "../../domain/use-cases/GetTodayHabitsUseCase";
-import { CompleteHabitUseCase } from "../../domain/use-cases/CompleteHabitUseCase";
 import { UncompleteHabitUseCase } from "../../domain/use-cases/UncompleteHabitUseCase";
 import { CalculateStreakUseCase } from "../../domain/use-cases/CalculateStreakUseCase";
 import { UseFreezeUseCase } from "../../domain/use-cases/UseFreezeUseCase";
@@ -63,21 +62,35 @@ export function useHabits(userId: UUID) {
   // ─── Complete ───────────────────────────────────────────────────────────────
   const completeHabit = useCallback(
     async (habitId: UUID) => {
-      toggleHabit(habitId);
+      toggleHabit(habitId); // optimista: isCompletedToday = true
+
+      const repo = getRepository();
+
+      // Paso 1: insertar log — si falla, revertir toggle y salir
       try {
-        const repo = getRepository();
-        const calculateStreak = new CalculateStreakUseCase(repo);
-        await new CompleteHabitUseCase(repo, calculateStreak).execute(habitId, userId, today());
-        if ("vibrate" in navigator) navigator.vibrate(10);
-        const client = createClient();
-        void new CheckAndUnlockAchievementsUseCase(
-          repo,
-          new AchievementSupabaseRepository(client)
-        ).execute(userId).catch(() => {});
+        await repo.logCompletion(habitId, userId, today());
       } catch (err) {
-        toggleHabit(habitId);
+        toggleHabit(habitId); // revertir: el log no se guardó
         setError(err instanceof Error ? err.message : "Error al completar hábito");
+        return;
       }
+
+      // Paso 2: calcular racha — no crítico, el log ya está en DB
+      // Si falla, Realtime / fetchHabits sincronizará el estado correcto
+      try {
+        await new CalculateStreakUseCase(repo).execute(habitId, userId);
+      } catch {
+        // best-effort: no revertir el toggle
+      }
+
+      if ("vibrate" in navigator) navigator.vibrate(10);
+
+      // Logros (fire-and-forget)
+      const client = createClient();
+      void new CheckAndUnlockAchievementsUseCase(
+        repo,
+        new AchievementSupabaseRepository(client)
+      ).execute(userId).catch(() => {});
     },
     [userId, getRepository, toggleHabit, setError]
   );

@@ -142,6 +142,25 @@ export class HabitSupabaseRepository implements IHabitRepository {
   }
 
   async logCompletion(habitId: UUID, userId: UUID, date: ISODate): Promise<HabitLog> {
+    // Buscar log existente antes de insertar (idempotente frente a race conditions y duplicados)
+    const { data: existing } = await this.client
+      .from("habit_logs")
+      .select("*")
+      .eq("habit_id", habitId)
+      .eq("user_id", userId)
+      .eq("completed_at", date)
+      .maybeSingle();
+
+    if (existing) {
+      return {
+        id: existing.id,
+        habitId: existing.habit_id,
+        userId: existing.user_id,
+        completedAt: existing.completed_at,
+        createdAt: existing.created_at,
+      };
+    }
+
     const { data, error } = await this.client
       .from("habit_logs")
       .insert({ habit_id: habitId, user_id: userId, completed_at: date })
