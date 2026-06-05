@@ -83,7 +83,7 @@ export function useHabits(userId: UUID) {
         return;
       }
       // [HT] LOG — aplicado al store
-      console.log(`[HT FETCH:apply] ${tsEnd} gen=${generation} reason=${reason} dt=${tsEnd - tsStart}ms habits=[${htSnap(result.habits)}]`);
+      console.log(`[HT FETCH:apply] ${tsEnd} gen=${generation} current=${fetchGeneration.current} reason=${reason} dt=${tsEnd - tsStart}ms habits=[${htSnap(result.habits)}]`);
       setHabits(result);
     } catch (err) {
       if (fetchGeneration.current === generation) {
