@@ -76,12 +76,14 @@ export function useHabits(userId: UUID) {
       }
 
       // Paso 2: calcular racha — no crítico, el log ya está en DB
-      // Si falla, Realtime / fetchHabits sincronizará el estado correcto
       try {
         await new CalculateStreakUseCase(repo).execute(habitId, userId);
       } catch {
         // best-effort: no revertir el toggle
       }
+
+      // Notificar a useWeekly y otros hooks suscritos (actualiza racha en calendario)
+      useHabitStore.getState().bumpVersion();
 
       if ("vibrate" in navigator) navigator.vibrate(10);
 
@@ -117,17 +119,19 @@ export function useHabits(userId: UUID) {
           }
         } finally {
           pendingUnchecks.current.delete(habitId);
-          if (!cancelled) fetchHabitsRef.current(); // confirmar racha real desde DB
+          // bumpVersion dispara fetchHabits (useHabits) y re-fetch en useWeekly (calendario)
+          if (!cancelled) useHabitStore.getState().bumpVersion();
         }
       }, 3000);
 
       return () => {
-        // Undo: revertir estado optimista y restaurar racha real desde DB
+        // Undo: revertir estado optimista y resincronizar desde DB
         cancelled = true;
         clearTimeout(timer);
         pendingUnchecks.current.delete(habitId);
         toggleHabit(habitId); // isCompletedToday = true de nuevo
-        fetchHabitsRef.current(); // restaurar streak correcto desde DB
+        // bumpVersion dispara fetchHabits (streak real) y re-fetch en useWeekly
+        useHabitStore.getState().bumpVersion();
       };
     },
     [userId, getRepository, toggleHabit, setError]

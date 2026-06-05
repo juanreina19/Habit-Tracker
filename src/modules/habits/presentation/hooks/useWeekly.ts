@@ -5,6 +5,7 @@ import { startOfWeek, subWeeks } from "date-fns";
 import { createClient } from "@/shared/lib/supabase/client";
 import { HabitSupabaseRepository } from "../../infrastructure/supabase/HabitSupabaseRepository";
 import { GetWeeklyProgressUseCase, type WeeklyProgress } from "../../domain/use-cases/GetWeeklyProgressUseCase";
+import { useHabitStore } from "../store/habitStore";
 import type { UUID } from "@/shared/types/database.types";
 
 export function useWeekly(userId: UUID, userCreatedAt?: string) {
@@ -12,6 +13,9 @@ export function useWeekly(userId: UUID, userCreatedAt?: string) {
   const [data, setData] = useState<WeeklyProgress | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Se suscribe a dataVersion para re-fetchar cuando hay mutaciones (completar, desmarcar, crear, borrar)
+  const dataVersion = useHabitStore((s) => s.dataVersion);
 
   // The Monday of the displayed week
   const weekStart = useMemo(() => {
@@ -35,7 +39,7 @@ export function useWeekly(userId: UUID, userCreatedAt?: string) {
       }
     };
     load();
-  }, [userId, weekStart]);
+  }, [userId, weekStart, dataVersion]);
 
   const canGoNext = weekOffset > 0;
 
