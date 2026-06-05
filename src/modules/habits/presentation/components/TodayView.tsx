@@ -161,13 +161,23 @@ export default function TodayView({ userId }: Props) {
 
           {/* Derecha: botón + */}
           <div className="flex-1 flex justify-end">
+            {/* Móvil: solo ícono */}
             <button
               onClick={() => setCreateOpen(true)}
-              className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
+              className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
               style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
               aria-label={t("new_habit")}
             >
               <Plus size={22} strokeWidth={2.5} />
+            </button>
+            {/* Desktop: pill con texto */}
+            <button
+              onClick={() => setCreateOpen(true)}
+              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full transition-opacity active:opacity-70"
+              style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+            >
+              <Plus size={18} strokeWidth={2.5} />
+              <span className="text-sm font-semibold">{t("new_habit")}</span>
             </button>
           </div>
         </div>

@@ -118,6 +118,29 @@ export function useHabits(userId: UUID) {
     fetchHabits();
   }, [fetchHabits, dataVersion]);
 
+  // Supabase Realtime: sincronización automática de hábitos, logs y rachas
+  useEffect(() => {
+    const client = createClient();
+    let debounceTimer: ReturnType<typeof setTimeout>;
+
+    const debouncedFetch = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => fetchHabits(), 300);
+    };
+
+    const channel = client
+      .channel(`today-${userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "habits",     filter: `user_id=eq.${userId}` }, debouncedFetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "habit_logs", filter: `user_id=eq.${userId}` }, debouncedFetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "streaks",    filter: `user_id=eq.${userId}` }, debouncedFetch)
+      .subscribe();
+
+    return () => {
+      clearTimeout(debounceTimer);
+      client.removeChannel(channel);
+    };
+  }, [userId, fetchHabits]);
+
   return {
     habits,
     isLoading,
