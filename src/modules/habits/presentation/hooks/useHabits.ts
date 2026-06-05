@@ -28,7 +28,7 @@ export async function refreshTodayHabitsInStore(userId: UUID): Promise<void> {
 }
 
 export function useHabits(userId: UUID) {
-  const { setHabits, toggleHabit, setLoading, setError, habits, isLoading, error,
+  const { setHabits, toggleHabit, zeroHabitStreak, setLoading, setError, habits, isLoading, error,
     completedCount, totalCount, completionPercentage, estimatedMinutes, dataVersion } = useHabitStore();
 
   const getRepository = useCallback(() => {
@@ -85,7 +85,8 @@ export function useHabits(userId: UUID) {
   // ─── Uncheck (con undo, timer de 3s) ────────────────────────────────────────
   const uncheckHabit = useCallback(
     (habitId: UUID): (() => void) => {
-      toggleHabit(habitId); // optimistic
+      toggleHabit(habitId);      // optimista: isCompletedToday = false
+      zeroHabitStreak(habitId);  // optimista: streak = 0 (CalculateStreakUseCase siempre devuelve 0 cuando hoy no está completado)
       pendingUnchecks.current.add(habitId);
 
       let cancelled = false;
@@ -102,18 +103,20 @@ export function useHabits(userId: UUID) {
           }
         } finally {
           pendingUnchecks.current.delete(habitId);
-          if (!cancelled) fetchHabitsRef.current(); // sincronizar racha tras escritura
+          if (!cancelled) fetchHabitsRef.current(); // confirmar racha real desde DB
         }
       }, 3000);
 
       return () => {
+        // Undo: revertir estado optimista y restaurar racha real desde DB
         cancelled = true;
         clearTimeout(timer);
         pendingUnchecks.current.delete(habitId);
-        toggleHabit(habitId); // revertir update optimista (undo)
+        toggleHabit(habitId); // isCompletedToday = true de nuevo
+        fetchHabitsRef.current(); // restaurar streak correcto desde DB
       };
     },
-    [userId, getRepository, toggleHabit, setError]
+    [userId, getRepository, toggleHabit, zeroHabitStreak, setError]
   );
 
   // ─── Freeze ─────────────────────────────────────────────────────────────────
