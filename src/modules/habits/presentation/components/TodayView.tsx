@@ -239,8 +239,8 @@ export default function TodayView({ userId }: Props) {
         categories={categories}
         onSave={async (data) => {
           await createHabit(data as CreateHabitInput);
-          setCreateOpen(false);
-          refetch();
+          await refetch();
+          // dialog closed by handleSave after this returns
         }}
       />
     </>

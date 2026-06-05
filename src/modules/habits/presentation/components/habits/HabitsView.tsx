@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Reorder, useDragControls } from "framer-motion";
 import { Pencil, Trash2, GripVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -23,6 +24,7 @@ interface Props {
 
 export default function HabitsView({ userId }: Props) {
   const t = useTranslations("habits");
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("habits");
 
   const {
@@ -53,6 +55,7 @@ export default function HabitsView({ userId }: Props) {
     } else {
       await createHabit(data as CreateHabitInput);
     }
+    router.refresh();
   };
 
   const handleSaveCategory = async (data: CreateCategoryInput | UpdateCategoryInput) => {
@@ -61,6 +64,7 @@ export default function HabitsView({ userId }: Props) {
     } else {
       await createCategory(data as CreateCategoryInput);
     }
+    router.refresh();
   };
 
   const handleConfirmDelete = async () => {
