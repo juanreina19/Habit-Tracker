@@ -36,21 +36,22 @@ export function useHabits(userId: UUID) {
   }, []);
 
   const fetchHabits = useCallback(async () => {
+    const generation = ++fetchGeneration.current;
     const hasCache = useHabitStore.getState().habits.length > 0;
     if (!hasCache) setLoading(true);
     setError(null);
     try {
       const repo = getRepository();
       const result = await new GetTodayHabitsUseCase(repo).execute(userId);
-      // Descarta el resultado si hay actualizaciones optimistas en vuelo.
-      // Previene que un fetch en curso sobreescriba isCompletedToday antes de que
-      // la operación del usuario termine (causa el flash/flicker visual).
+      if (fetchGeneration.current !== generation) return;
       if (pendingCompletes.current.size > 0 || pendingUnchecks.current.size > 0) return;
       setHabits(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al cargar hábitos");
+      if (fetchGeneration.current === generation) {
+        setError(err instanceof Error ? err.message : "Error al cargar hábitos");
+      }
     } finally {
-      setLoading(false);
+      if (fetchGeneration.current === generation) setLoading(false);
     }
   }, [userId, getRepository, setHabits, setLoading, setError]);
 
@@ -63,6 +64,10 @@ export function useHabits(userId: UUID) {
   // sobreescribir el estado optimista (evita el flash/flicker visual).
   const pendingUnchecks = useRef(new Set<UUID>());
   const pendingCompletes = useRef(new Set<UUID>());
+
+  // Generación del fetch. Solo el fetch más reciente puede actualizar el store;
+  // cualquier invocación anterior descarta su resultado (race condition definitivo).
+  const fetchGeneration = useRef(0);
 
   // ─── Complete ───────────────────────────────────────────────────────────────
   const completeHabit = useCallback(
