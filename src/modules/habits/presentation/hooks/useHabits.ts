@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useHabitStore } from "../store/habitStore";
 import { createClient } from "@/shared/lib/supabase/client";
 import { HabitSupabaseRepository } from "../../infrastructure/supabase/HabitSupabaseRepository";
@@ -118,28 +118,34 @@ export function useHabits(userId: UUID) {
     fetchHabits();
   }, [fetchHabits, dataVersion]);
 
+  // Ref estable para fetchHabits — evita recrear la suscripción en cada render
+  const fetchHabitsRef = useRef(fetchHabits);
+  useEffect(() => { fetchHabitsRef.current = fetchHabits; });
+
   // Supabase Realtime: sincronización automática de hábitos, logs y rachas
   useEffect(() => {
     const client = createClient();
     let debounceTimer: ReturnType<typeof setTimeout>;
 
+    // Sin filtro de user_id: RLS en fetchHabits garantiza que solo llegan datos propios.
+    // Con filtro el evento puede no llegar si las políticas RLS de Realtime no están configuradas.
     const debouncedFetch = () => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => fetchHabits(), 300);
+      debounceTimer = setTimeout(() => fetchHabitsRef.current(), 300);
     };
 
     const channel = client
       .channel(`today-${userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "habits",     filter: `user_id=eq.${userId}` }, debouncedFetch)
-      .on("postgres_changes", { event: "*", schema: "public", table: "habit_logs", filter: `user_id=eq.${userId}` }, debouncedFetch)
-      .on("postgres_changes", { event: "*", schema: "public", table: "streaks",    filter: `user_id=eq.${userId}` }, debouncedFetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "habits" },     debouncedFetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "habit_logs" }, debouncedFetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "streaks" },    debouncedFetch)
       .subscribe();
 
     return () => {
       clearTimeout(debounceTimer);
       client.removeChannel(channel);
     };
-  }, [userId, fetchHabits]);
+  }, [userId]); // solo userId — la suscripción se crea una vez por sesión
 
   return {
     habits,
