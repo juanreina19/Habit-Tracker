@@ -22,7 +22,6 @@ interface HabitState {
   }) => void;
 
   toggleHabit: (habitId: UUID) => void;
-  zeroHabitStreak: (habitId: UUID) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   bumpVersion: () => void;
@@ -59,15 +58,6 @@ export const useHabitStore = create<HabitState>()(
               : 0,
           };
         }),
-
-      zeroHabitStreak: (habitId) =>
-        set((state) => ({
-          habits: state.habits.map((h) =>
-            h.id === habitId && h.streak
-              ? { ...h, streak: { ...h.streak, currentStreak: 0 } }
-              : h
-          ),
-        })),
 
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),

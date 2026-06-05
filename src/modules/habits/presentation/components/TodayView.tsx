@@ -129,9 +129,14 @@ export default function TodayView({ userId }: Props) {
 
   if (isLoading) return <TodayViewSkeleton />;
 
-  const maxStreak = habits.length > 0
-    ? Math.max(...habits.map((h) => h.streak?.currentStreak ?? 0))
-    : 0;
+  // Solo cuenta hábitos completados HOY: al desmarcar (optimista isCompletedToday=false)
+  // ese hábito sale del cálculo y 🔥 desaparece de inmediato.
+  const maxStreak = Math.max(
+    0,
+    ...habits
+      .filter((h) => h.isCompletedToday)
+      .map((h) => h.streak?.currentStreak ?? 0)
+  );
 
   return (
     <>

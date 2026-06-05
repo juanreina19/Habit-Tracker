@@ -28,7 +28,7 @@ export async function refreshTodayHabitsInStore(userId: UUID): Promise<void> {
 }
 
 export function useHabits(userId: UUID) {
-  const { setHabits, toggleHabit, zeroHabitStreak, setLoading, setError, habits, isLoading, error,
+  const { setHabits, toggleHabit, setLoading, setError, habits, isLoading, error,
     completedCount, totalCount, completionPercentage, estimatedMinutes, dataVersion } = useHabitStore();
 
   const getRepository = useCallback(() => {
@@ -85,8 +85,9 @@ export function useHabits(userId: UUID) {
   // ─── Uncheck (con undo, timer de 3s) ────────────────────────────────────────
   const uncheckHabit = useCallback(
     (habitId: UUID): (() => void) => {
-      toggleHabit(habitId);      // optimista: isCompletedToday = false
-      zeroHabitStreak(habitId);  // optimista: streak = 0 (CalculateStreakUseCase siempre devuelve 0 cuando hoy no está completado)
+      toggleHabit(habitId); // optimista: isCompletedToday = false
+      // maxStreak en TodayView solo cuenta hábitos con isCompletedToday=true,
+      // así que el 🔥 desaparece de inmediato sin tocar el store de streak.
       pendingUnchecks.current.add(habitId);
 
       let cancelled = false;
@@ -116,7 +117,7 @@ export function useHabits(userId: UUID) {
         fetchHabitsRef.current(); // restaurar streak correcto desde DB
       };
     },
-    [userId, getRepository, toggleHabit, zeroHabitStreak, setError]
+    [userId, getRepository, toggleHabit, setError]
   );
 
   // ─── Freeze ─────────────────────────────────────────────────────────────────
