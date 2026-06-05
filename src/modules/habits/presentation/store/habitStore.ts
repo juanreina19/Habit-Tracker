@@ -27,10 +27,6 @@ interface HabitState {
   bumpVersion: () => void;
 }
 
-// ─── [HT] Helpers de diagnóstico ─────────────────────────────────────────────
-const htSnap = (habits: HabitWithStatus[]) =>
-  habits.map((h) => `${h.id.slice(0, 6)}=${h.isCompletedToday ? "✓" : "✗"}`).join(" ");
-
 export const useHabitStore = create<HabitState>()(
   persist(
     (set) => ({
@@ -44,25 +40,14 @@ export const useHabitStore = create<HabitState>()(
       dataVersion: 0,
 
       setHabits: (data) => {
-        // [HT] LOG — quién escribe al store y qué valor trae
-        console.log(`[HT STORE:setHabits] ${Date.now()} habits=[${htSnap(data.habits)}]`);
         set(data);
       },
 
       bumpVersion: () =>
-        set((s) => {
-          // [HT] LOG — cada invalidación de caché
-          console.log(`[HT STORE:bump] ${Date.now()} v=${s.dataVersion} → ${s.dataVersion + 1}`);
-          return { dataVersion: s.dataVersion + 1 };
-        }),
+        set((s) => ({ dataVersion: s.dataVersion + 1 })),
 
       toggleHabit: (habitId) =>
         set((state) => {
-          const habit = state.habits.find((h) => h.id === habitId);
-          // [HT] LOG — actualización optimista
-          console.log(
-            `[HT STORE:toggle] ${Date.now()} id=${habitId.slice(0, 6)} ${habit?.isCompletedToday ? "✓→✗" : "✗→✓"}`
-          );
           const habits = state.habits.map((h) =>
             h.id === habitId ? { ...h, isCompletedToday: !h.isCompletedToday } : h
           );
