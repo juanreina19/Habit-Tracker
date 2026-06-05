@@ -285,6 +285,15 @@ function HabitRow({
   onFreeze?: () => void;
   freezeLabel: string;
 }) {
+  // [HT] LOG — detectar cuándo React renderiza un cambio de isCompletedToday
+  const prevCompleted = useRef(habit.isCompletedToday);
+  if (prevCompleted.current !== habit.isCompletedToday) {
+    prevCompleted.current = habit.isCompletedToday;
+    console.log(
+      `[HT RENDER:HabitRow] ${Date.now()} id=${habit.id.slice(0, 6)} isCompleted → ${habit.isCompletedToday ? "✓" : "✗"}`
+    );
+  }
+
   const accentColor = habit.color ?? "#4CAF82";
 
   return (
