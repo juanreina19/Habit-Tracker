@@ -149,3 +149,26 @@ create policy "Users manage own user_achievements"
   on user_achievements for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- ─── TAREAS ──────────────────────────────────────────────────
+
+create table if not exists tasks (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid references auth.users(id) on delete cascade not null,
+  title        text not null check (char_length(trim(title)) > 0),
+  description  text,
+  priority     text not null default 'medium'
+                 check (priority in ('low', 'medium', 'high', 'urgent')),
+  due_date     date,
+  completed_at timestamptz,
+  created_at   timestamptz default now() not null
+);
+
+alter table tasks enable row level security;
+
+create policy "Users manage own tasks"
+  on tasks for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create index idx_tasks_user_id on tasks(user_id);

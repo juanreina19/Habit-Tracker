@@ -85,6 +85,17 @@ export interface DbPushSubscription {
   created_at: ISOTimestamp;
 }
 
+export interface DbTask {
+  id: UUID;
+  user_id: UUID;
+  title: string;
+  description: string | null;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  due_date: ISODate | null;
+  completed_at: ISOTimestamp | null;
+  created_at: ISOTimestamp;
+}
+
 // ─── Helper para Supabase client tipado ──────────────────────────────────────
 
 export interface Database {
@@ -124,6 +135,11 @@ export interface Database {
         Row: DbPushSubscription;
         Insert: Omit<DbPushSubscription, "id" | "created_at">;
         Update: never;
+      };
+      tasks: {
+        Row: DbTask;
+        Insert: Omit<DbTask, "id" | "created_at">;
+        Update: Partial<Omit<DbTask, "id" | "user_id" | "created_at">>;
       };
     };
   };

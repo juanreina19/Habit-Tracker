@@ -5,11 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { startOfWeek, parseISO } from "date-fns";
+import Link from "next/link";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { useHabits } from "../hooks/useHabits";
+import { useTodayTasks } from "@/modules/tasks/presentation/hooks/useTodayTasks";
+import { TaskCard } from "@/modules/tasks/presentation/components/TaskCard";
 import { useSettingsHabits } from "../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { HabitFormDialog } from "./settings/HabitFormDialog";
@@ -49,6 +52,7 @@ interface Props {
 
 export default function TodayView({ userId }: Props) {
   const t = useTranslations("today");
+  const tTasks = useTranslations("tasks");
   const { locale } = useLocale();
   const dateFnsLocale = locale === "en" ? enUS : es;
 
@@ -62,6 +66,8 @@ export default function TodayView({ userId }: Props) {
   const { create: createHabit } = useSettingsHabits(userId);
   const { categories } = useCategories(userId);
   const [createOpen, setCreateOpen] = useState(false);
+
+  const { tasks: todayTasks, toggleTask: toggleTodayTask } = useTodayTasks(userId);
   const today = new Date();
 
   // Mostrar errores de carga como toast (no pantalla completa)
@@ -257,6 +263,37 @@ export default function TodayView({ userId }: Props) {
             );
           })}
         </div>
+
+        {/* Tasks section */}
+        {todayTasks.length > 0 && (
+          <div className="mt-6">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+                {tTasks("today_tasks")}
+              </span>
+              <div className="flex-1 h-px" style={{ background: "var(--border)", opacity: 0.4 }} />
+              <Link
+                href="/tasks"
+                className="text-xs font-medium"
+                style={{ color: "var(--accent, #3b82f6)" }}
+              >
+                {tTasks("see_all")} →
+              </Link>
+            </div>
+            <div className="flex flex-col gap-2">
+              {todayTasks.map((task) => (
+                <Link key={task.id} href="/tasks" className="block">
+                  <TaskCard
+                    task={task}
+                    onToggle={() => toggleTodayTask(task)}
+                    onClick={() => {}}
+                    compact
+                  />
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <HabitFormDialog
