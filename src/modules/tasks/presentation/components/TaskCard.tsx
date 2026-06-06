@@ -163,22 +163,6 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
               sideOffset={4}
               onClick={(e) => e.stopPropagation()}
             >
-              {onEdit && (
-                <DropdownMenu.Item
-                  className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-sm cursor-pointer outline-none"
-                  style={{ color: "var(--text-primary)" }}
-                  onSelect={onEdit}
-                >
-                  <Pencil size={14} strokeWidth={2} />
-                  {t("menu_edit")}
-                </DropdownMenu.Item>
-              )}
-              {onEdit && onDelete && (
-                <DropdownMenu.Separator
-                  className="my-1 h-px"
-                  style={{ background: "var(--border)" }}
-                />
-              )}
               {onDelete && (
                 <DropdownMenu.Item
                   className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-sm cursor-pointer outline-none"

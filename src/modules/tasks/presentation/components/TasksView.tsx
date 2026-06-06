@@ -43,7 +43,7 @@ export default function TasksView({ userId }: Props) {
   const [dialogOpen, setDialogOpen]               = useState(false);
   const [selectedTask, setSelectedTask]           = useState<Task | null>(null);
   const [dialogStartAtDelete, setDialogStartAtDelete] = useState(false);
-  const [showDone, setShowDone]                   = useState(false);
+  const [showDone, setShowDone]                   = useState(true);
 
   const pending = sortPending(tasks.filter((t) => !isTaskDone(t)));
   const done    = tasks.filter((t) => isTaskDone(t));
