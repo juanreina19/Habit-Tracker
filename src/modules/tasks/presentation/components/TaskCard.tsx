@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
-import { Clock, MoreVertical, Pencil, Trash2, CheckSquare } from "lucide-react";
+import { Clock, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
@@ -90,14 +90,6 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         willChange: "transform",
       }}
     >
-      {/* Priority icon slot — mirrors habit icon visual language */}
-      <div
-        className="flex-shrink-0 w-9 h-9 rounded-[10px] flex items-center justify-center"
-        style={{ background: priorityColor + "1A" }}
-      >
-        <CheckSquare size={17} strokeWidth={2} style={{ color: priorityColor }} />
-      </div>
-
       {/* Checkbox */}
       <button
         type="button"
@@ -163,6 +155,19 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
               sideOffset={4}
               onClick={(e) => e.stopPropagation()}
             >
+              {onEdit && (
+                <DropdownMenu.Item
+                  className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-sm cursor-pointer outline-none"
+                  style={{ color: "var(--text-primary)" }}
+                  onSelect={onEdit}
+                >
+                  <Pencil size={14} strokeWidth={2} />
+                  {t("menu_edit")}
+                </DropdownMenu.Item>
+              )}
+              {onEdit && onDelete && (
+                <DropdownMenu.Separator className="my-1 h-px" style={{ background: "var(--border)" }} />
+              )}
               {onDelete && (
                 <DropdownMenu.Item
                   className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-sm cursor-pointer outline-none"
