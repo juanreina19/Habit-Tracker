@@ -40,15 +40,31 @@ export default function TasksView({ userId }: Props) {
   const t = useTranslations("tasks");
   const { tasks, isLoading, createTask, updateTask, toggleTask, deleteTask } = useTasks(userId);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [showDone, setShowDone] = useState(false);
+  const [dialogOpen, setDialogOpen]               = useState(false);
+  const [selectedTask, setSelectedTask]           = useState<Task | null>(null);
+  const [dialogStartAtDelete, setDialogStartAtDelete] = useState(false);
+  const [showDone, setShowDone]                   = useState(false);
 
   const pending = sortPending(tasks.filter((t) => !isTaskDone(t)));
-  const done = tasks.filter((t) => isTaskDone(t));
+  const done    = tasks.filter((t) => isTaskDone(t));
 
-  const openCreate = () => { setSelectedTask(null); setDialogOpen(true); };
-  const openEdit   = (task: Task) => { setSelectedTask(task); setDialogOpen(true); };
+  const openCreate = () => {
+    setSelectedTask(null);
+    setDialogStartAtDelete(false);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (task: Task) => {
+    setSelectedTask(task);
+    setDialogStartAtDelete(false);
+    setDialogOpen(true);
+  };
+
+  const openDelete = (task: Task) => {
+    setSelectedTask(task);
+    setDialogStartAtDelete(true);
+    setDialogOpen(true);
+  };
 
   if (isLoading) return <TasksSkeleton />;
 
@@ -99,7 +115,8 @@ export default function TasksView({ userId }: Props) {
                     key={task.id}
                     task={task}
                     onToggle={() => toggleTask(task)}
-                    onClick={() => openEdit(task)}
+                    onEdit={() => openEdit(task)}
+                    onDelete={() => openDelete(task)}
                   />
                 ))}
               </AnimatePresence>
@@ -137,7 +154,8 @@ export default function TasksView({ userId }: Props) {
                         key={task.id}
                         task={task}
                         onToggle={() => toggleTask(task)}
-                        onClick={() => openEdit(task)}
+                        onEdit={() => openEdit(task)}
+                        onDelete={() => openDelete(task)}
                       />
                     ))}
                   </div>
@@ -150,8 +168,9 @@ export default function TasksView({ userId }: Props) {
 
       <TaskFormDialog
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        onClose={() => { setDialogOpen(false); setDialogStartAtDelete(false); }}
         task={selectedTask}
+        defaultConfirmDelete={dialogStartAtDelete}
         onCreate={async (input: CreateTaskInput) => { await createTask(input); }}
         onUpdate={async (id, input: UpdateTaskInput) => { await updateTask(id, input); }}
         onDelete={async (id) => { await deleteTask(id); }}
@@ -166,7 +185,7 @@ function TasksSkeleton() {
       <div className="h-7 w-24 rounded-lg mb-8 animate-pulse" style={{ background: "var(--surface)" }} />
       <div className="flex flex-col gap-2">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-14 rounded-2xl animate-pulse" style={{ background: "var(--surface)" }} />
+          <div key={i} className="h-16 rounded-[16px] animate-pulse" style={{ background: "var(--surface)" }} />
         ))}
       </div>
     </div>

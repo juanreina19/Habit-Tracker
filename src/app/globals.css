@@ -85,6 +85,9 @@ button, a, [role="button"] {
 .safe-top    { padding-top: env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
+/* Radix DropdownMenu item highlight */
+.task-menu-item[data-highlighted] { background: var(--surface); }
+
 /* Sidebar desktop — hover y active */
 .sidebar-link { transition: background 0.15s ease; }
 .sidebar-link:hover { background: var(--sidebar-hover-bg); }

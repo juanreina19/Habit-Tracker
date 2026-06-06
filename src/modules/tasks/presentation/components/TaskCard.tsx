@@ -3,6 +3,8 @@
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
+import { Clock, MoreVertical, Pencil, Trash2, CheckSquare } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { today } from "@/shared/lib/utils/dates";
@@ -21,36 +23,30 @@ function parseLocalDate(iso: string): Date {
   return new Date(y, m - 1, d);
 }
 
-interface DueDateBadgeProps {
-  dueDate: string;
-  done: boolean;
-}
-
-function DueDateBadge({ dueDate, done }: DueDateBadgeProps) {
+function DueDate({ dueDate, done }: { dueDate: string; done: boolean }) {
   const t = useTranslations("tasks");
   const { locale } = useLocale();
   const dateFnsLocale = locale === "en" ? enUS : es;
   const todayStr = today();
 
-  if (done) return null;
-
   let label: string;
   let color: string;
 
-  if (dueDate < todayStr) {
+  if (dueDate < todayStr && !done) {
     label = t("overdue");
     color = "#ef4444";
   } else if (dueDate === todayStr) {
     label = t("today");
-    color = "var(--accent, #3b82f6)";
+    color = "var(--accent)";
   } else {
     label = format(parseLocalDate(dueDate), "d MMM", { locale: dateFnsLocale });
     color = "var(--text-secondary)";
   }
 
   return (
-    <span className="text-xs" style={{ color }}>
-      {label}
+    <span className="flex items-center gap-1" style={{ color }}>
+      <Clock size={11} strokeWidth={2} />
+      <span className="text-xs">{label}</span>
     </span>
   );
 }
@@ -58,14 +54,16 @@ function DueDateBadge({ dueDate, done }: DueDateBadgeProps) {
 interface Props {
   task: Task;
   onToggle: () => void;
-  onClick: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
   compact?: boolean;
 }
 
-export function TaskCard({ task, onToggle, onClick, compact = false }: Props) {
+export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: Props) {
   const t = useTranslations("tasks");
   const done = isTaskDone(task);
   const priorityColor = PRIORITY_COLORS[task.priority];
+  const showMenu = !compact && (onEdit || onDelete);
 
   return (
     <motion.div
@@ -74,10 +72,22 @@ export function TaskCard({ task, onToggle, onClick, compact = false }: Props) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.18 }}
-      className="flex items-center gap-3 rounded-2xl px-4 py-3 cursor-pointer select-none"
-      style={{ background: "var(--surface)" }}
-      onClick={onClick}
+      className="flex items-center gap-4 rounded-[16px] p-4 select-none"
+      style={{
+        background: "var(--surface)",
+        opacity: done ? 0.65 : 1,
+        cursor: onEdit ? "pointer" : "default",
+      }}
+      onClick={() => onEdit?.()}
     >
+      {/* Priority icon slot — mirrors habit icon visual language */}
+      <div
+        className="flex-shrink-0 w-9 h-9 rounded-[10px] flex items-center justify-center"
+        style={{ background: priorityColor + "1A" }}
+      >
+        <CheckSquare size={17} strokeWidth={2} style={{ color: priorityColor }} />
+      </div>
+
       {/* Checkbox */}
       <button
         type="button"
@@ -112,22 +122,67 @@ export function TaskCard({ task, onToggle, onClick, compact = false }: Props) {
           {task.title}
         </p>
         {!compact && task.dueDate && (
-          <div className="mt-0.5">
-            <DueDateBadge dueDate={task.dueDate} done={done} />
+          <div className="mt-1">
+            <DueDate dueDate={task.dueDate} done={done} />
           </div>
         )}
       </div>
 
-      {/* Priority badge */}
-      <span
-        className="flex-shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full"
-        style={{
-          background: priorityColor + "22",
-          color: priorityColor,
-        }}
-      >
-        {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
-      </span>
+      {/* Three-dots menu */}
+      {showMenu && (
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild>
+            <button
+              type="button"
+              onClick={(e) => e.stopPropagation()}
+              aria-label="Opciones"
+              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors active:opacity-60"
+              style={{ color: "var(--text-muted)" }}
+            >
+              <MoreVertical size={16} strokeWidth={2} />
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              className="z-50 min-w-[148px] rounded-[14px] p-1.5 shadow-xl outline-none"
+              style={{
+                background: "var(--surface-elevated)",
+                border: "1px solid var(--border)",
+              }}
+              align="end"
+              sideOffset={4}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {onEdit && (
+                <DropdownMenu.Item
+                  className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-sm cursor-pointer outline-none"
+                  style={{ color: "var(--text-primary)" }}
+                  onSelect={onEdit}
+                >
+                  <Pencil size={14} strokeWidth={2} />
+                  {t("menu_edit")}
+                </DropdownMenu.Item>
+              )}
+              {onEdit && onDelete && (
+                <DropdownMenu.Separator
+                  className="my-1 h-px"
+                  style={{ background: "var(--border)" }}
+                />
+              )}
+              {onDelete && (
+                <DropdownMenu.Item
+                  className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-sm cursor-pointer outline-none"
+                  style={{ color: "#ef4444" }}
+                  onSelect={onDelete}
+                >
+                  <Trash2 size={14} strokeWidth={2} />
+                  {t("menu_delete")}
+                </DropdownMenu.Item>
+              )}
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+      )}
     </motion.div>
   );
 }

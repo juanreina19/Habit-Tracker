@@ -286,7 +286,6 @@ export default function TodayView({ userId }: Props) {
                   <TaskCard
                     task={task}
                     onToggle={() => toggleTodayTask(task)}
-                    onClick={() => {}}
                     compact
                   />
                 </Link>

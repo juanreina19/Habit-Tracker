@@ -174,7 +174,9 @@
     "today": "Today",
     "overdue": "Overdue",
     "mark_done": "Mark as done",
-    "mark_pending": "Mark as pending"
+    "mark_pending": "Mark as pending",
+    "menu_edit": "Edit",
+    "menu_delete": "Delete"
   },
   "calendar": {
     "subtitle": "View",

@@ -174,7 +174,9 @@
     "today": "Hoy",
     "overdue": "Vencida",
     "mark_done": "Marcar como completada",
-    "mark_pending": "Marcar como pendiente"
+    "mark_pending": "Marcar como pendiente",
+    "menu_edit": "Editar",
+    "menu_delete": "Eliminar"
   },
   "calendar": {
     "subtitle": "Vista",
