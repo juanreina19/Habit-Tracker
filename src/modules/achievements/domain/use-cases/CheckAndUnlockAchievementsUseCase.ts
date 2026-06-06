@@ -33,7 +33,7 @@ export class CheckAndUnlockAchievementsUseCase {
     // ── Helper: check if a day was 100% complete ─────────────────────────────
     const wasDayComplete = (date: Date): boolean => {
       const dateKey = toISODate(date);
-      const scheduled = habits.filter((h) => isHabitActiveOnDay(h.activeDays, date));
+      const scheduled = habits.filter((h) => isHabitActiveOnDay(h.activeDays, date, h.createdAt));
       if (scheduled.length === 0) return false;
       return scheduled.every((h) => logSet.has(`${h.id}:${dateKey}`));
     };
@@ -135,7 +135,7 @@ export class CheckAndUnlockAchievementsUseCase {
       const prevMonthDays = eachDayOfInterval({ start: prevMonthStart, end: prevMonthEnd });
 
       const activeDays = prevMonthDays.filter((d) => {
-        return habits.some((h) => isHabitActiveOnDay(h.activeDays, d));
+        return habits.some((h) => isHabitActiveOnDay(h.activeDays, d, h.createdAt));
       });
 
       if (activeDays.length > 0 && activeDays.every((d) => wasDayComplete(d))) {

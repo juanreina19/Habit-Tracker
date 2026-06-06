@@ -79,7 +79,7 @@ export class GetStatsUseCase {
     for (const day of monthDays) {
       const dayISO = toISODate(day);
       for (const habit of habits) {
-        if (isHabitActiveOnDay(habit.activeDays, day)) {
+        if (isHabitActiveOnDay(habit.activeDays, day, habit.createdAt)) {
           monthScheduled++;
           if (monthLogSet.has(`${habit.id}:${dayISO}`)) monthCompleted++;
         }
@@ -94,7 +94,7 @@ export class GetStatsUseCase {
     const last30Days = eachDayOfInterval({ start: thirtyDaysAgo, end: now });
 
     const habitStats: HabitStat[] = habits.map((habit) => {
-      const scheduledDays = last30Days.filter((d) => isHabitActiveOnDay(habit.activeDays, d));
+      const scheduledDays = last30Days.filter((d) => isHabitActiveOnDay(habit.activeDays, d, habit.createdAt));
       const completedDays = scheduledDays.filter((d) =>
         logSet.has(`${habit.id}:${toISODate(d)}`)
       );
@@ -127,7 +127,7 @@ export class GetStatsUseCase {
           // Only include days within our log fetch window
         }
         for (const habit of habits) {
-          if (isHabitActiveOnDay(habit.activeDays, day)) {
+          if (isHabitActiveOnDay(habit.activeDays, day, habit.createdAt)) {
             scheduled++;
             if (logSet.has(`${habit.id}:${dayISO}`)) completed++;
           }

@@ -62,7 +62,7 @@ export class GetWeeklyProgressUseCase {
           dayStart.setHours(0, 0, 0, 0);
 
           const isFuture = dayStart > now;
-          const isScheduled = isHabitActiveOnDay(habit.activeDays, date);
+          const isScheduled = isHabitActiveOnDay(habit.activeDays, date, habit.createdAt);
           const isCompleted = isScheduled && logSet.has(`${habit.id}:${toISODate(date)}`);
           return { date, isScheduled, isCompleted, isFuture };
         });

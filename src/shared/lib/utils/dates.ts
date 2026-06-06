@@ -35,7 +35,13 @@ export function formatFriendly(date: Date): string {
   return format(date, "d 'de' MMMM", { locale: es });
 }
 
-/** Verifica si un hábito debe ejecutarse en un día dado */
-export function isHabitActiveOnDay(activeDays: number[], date: Date): boolean {
+/** Verifica si un hábito debe ejecutarse en un día dado.
+ *  Si se pasa createdAt, días anteriores a la creación del hábito devuelven false. */
+export function isHabitActiveOnDay(activeDays: number[], date: Date, createdAt?: string): boolean {
+  if (createdAt) {
+    const creationDay = format(new Date(createdAt), "yyyy-MM-dd");
+    const thisDay = format(date, "yyyy-MM-dd");
+    if (thisDay < creationDay) return false;
+  }
   return activeDays.includes(dayOfWeek(date));
 }

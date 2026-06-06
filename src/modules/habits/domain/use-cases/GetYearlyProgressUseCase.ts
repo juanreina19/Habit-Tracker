@@ -29,7 +29,7 @@ export class GetYearlyProgressUseCase {
       const isFuture = dateMidnight > todayMidnight;
       const isToday = dateMidnight.getTime() === todayMidnight.getTime();
 
-      const scheduledHabits = habits.filter((h) => isHabitActiveOnDay(h.activeDays, date));
+      const scheduledHabits = habits.filter((h) => isHabitActiveOnDay(h.activeDays, date, h.createdAt));
       const scheduled = scheduledHabits.length;
 
       if (isFuture) {
