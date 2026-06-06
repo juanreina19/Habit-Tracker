@@ -41,7 +41,7 @@ export interface IHabitRepository {
   /** Actualiza un hábito existente */
   update(id: UUID, input: UpdateHabitInput): Promise<Habit>;
 
-  /** Elimina (soft-delete: isActive = false) */
+  /** Elimina el hábito permanentemente (hard delete — habit_logs y streaks se eliminan por CASCADE) */
   deactivate(id: UUID): Promise<void>;
 
   /** Reordena hábitos según array de IDs ordenado */

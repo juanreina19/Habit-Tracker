@@ -130,7 +130,7 @@ export class HabitSupabaseRepository implements IHabitRepository {
   }
 
   async deactivate(id: UUID): Promise<void> {
-    const { error } = await this.client.from("habits").update({ is_active: false }).eq("id", id);
+    const { error } = await this.client.from("habits").delete().eq("id", id);
     if (error) throw error;
   }
 
