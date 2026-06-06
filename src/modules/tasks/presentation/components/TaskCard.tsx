@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useMotionValue, animate } from "framer-motion";
+import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { Clock, MoreVertical, Pencil, Trash2 } from "lucide-react";
@@ -60,59 +59,32 @@ interface Props {
   compact?: boolean;
 }
 
-const SWIPE_THRESHOLD = 60;
-
 export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: Props) {
   const t = useTranslations("tasks");
   const done = isTaskDone(task);
   const priorityColor = PRIORITY_COLORS[task.priority];
   const showMenu = !compact && (onEdit || onDelete);
 
-  // Swipe via useMotionValue — only x, zero interference with y
-  const x = useMotionValue(0);
-  const startX = useRef(0);
-  const didSwipe = useRef(false);
-
-  const handlePointerDown = !compact
-    ? (e: React.PointerEvent<HTMLDivElement>) => {
-        e.currentTarget.setPointerCapture(e.pointerId);
-        startX.current = e.clientX;
-        didSwipe.current = false;
-      }
-    : undefined;
-
-  const handlePointerMove = !compact
-    ? (e: React.PointerEvent<HTMLDivElement>) => {
-        const dx = e.clientX - startX.current;
-        if (dx > 4) {
-          didSwipe.current = true;
-          x.set(dx);
-        }
-      }
-    : undefined;
-
-  const handlePointerUp = !compact
-    ? () => {
-        if (x.get() >= SWIPE_THRESHOLD) onToggle();
-        animate(x, 0, { type: "spring", stiffness: 500, damping: 40 });
-        didSwipe.current = false;
-      }
-    : undefined;
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.18 }}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
+      layout="position"
+      drag={!compact ? "x" : false}
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={{ left: 0.05, right: 0.3 }}
+      dragSnapToOrigin
+      onDragEnd={!compact ? (_, info) => {
+        if (info.offset.x > 60 && Math.abs(info.velocity.x) > 0) onToggle();
+      } : undefined}
+      whileTap={!compact ? { scale: 0.98 } : {}}
+      transition={{ type: "spring", stiffness: 500, damping: 35 }}
       className="flex items-center gap-4 rounded-[16px] p-4 select-none"
       style={{
-        x,
         background: "var(--surface)",
         opacity: done ? 0.65 : 1,
+        cursor: "default",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        willChange: "transform",
       }}
     >
       {/* Checkbox */}
@@ -130,6 +102,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
           <motion.svg
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 25 }}
             width="12" height="12" viewBox="0 0 12 12" fill="none"
           >
             <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -162,6 +135,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
             <button
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               aria-label="Opciones"
               className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors active:opacity-60"
               style={{ color: "var(--text-muted)" }}
