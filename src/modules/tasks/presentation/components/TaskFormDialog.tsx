@@ -125,7 +125,7 @@ export function TaskFormDialog({
                   </p>
                   <div className="flex gap-3">
                     <button
-                      onClick={() => setConfirmDelete(false)}
+                      onClick={onClose}
                       className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
                       style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
                     >
