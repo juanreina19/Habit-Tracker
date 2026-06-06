@@ -67,12 +67,10 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.18 }}
-      // Swipe right to toggle (full mode only)
       drag={!compact ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={{ left: 0.05, right: 0.3 }}
@@ -81,13 +79,10 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         if (info.offset.x > 60 && Math.abs(info.velocity.x) > 0) onToggle();
       } : undefined}
       whileTap={!compact ? { scale: 0.98 } : {}}
-      onClick={!compact ? onToggle : undefined}
       className="flex items-center gap-4 rounded-[16px] p-4 select-none"
       style={{
         background: "var(--surface)",
         opacity: done ? 0.65 : 1,
-        cursor: "pointer",
-        willChange: "transform",
       }}
     >
       {/* Checkbox */}
