@@ -181,7 +181,19 @@ export class TaskSupabaseRepository implements ITaskRepository {
       .from("task_completions")
       .delete()
       .eq("task_id", taskId)
+      .eq("user_id", userId)
       .eq("completed_date", date);
     if (error) throw error;
+  }
+
+  async findCompletionsInRange(userId: UUID, startDate: ISODate, endDate: ISODate): Promise<Set<string>> {
+    const { data, error } = await this.client
+      .from("task_completions")
+      .select("task_id, completed_date")
+      .eq("user_id", userId)
+      .gte("completed_date", startDate)
+      .lte("completed_date", endDate);
+    if (error) throw error;
+    return new Set((data ?? []).map((r) => `${r.task_id}:${r.completed_date}`));
   }
 }

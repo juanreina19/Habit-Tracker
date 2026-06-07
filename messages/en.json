@@ -187,7 +187,17 @@
     "start_time_label": "Start",
     "end_time_label": "End (optional)",
     "time_end_error": "End time must be after start",
-    "time_expired": "Expired"
+    "time_expired": "Expired",
+    "tab_today": "Today",
+    "tab_week": "Week",
+    "tab_all": "All",
+    "overdue_section": "Past due",
+    "filter_all": "All",
+    "filter_priority": "Priority",
+    "filter_type": "Type",
+    "filter_type_once": "One time",
+    "filter_type_recurring": "Recurring",
+    "week_empty": "No tasks scheduled this week"
   },
   "calendar": {
     "subtitle": "View",

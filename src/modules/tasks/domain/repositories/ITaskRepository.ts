@@ -28,4 +28,12 @@ export interface ITaskRepository {
   addCompletion(taskId: UUID, userId: UUID, date: ISODate): Promise<void>;
   /** Elimina la completación de una tarea recurrente para la fecha dada. */
   removeCompletion(taskId: UUID, userId: UUID, date: ISODate): Promise<void>;
+
+  /**
+   * Completaciones de tareas recurrentes en un rango de fechas [start, end] (inclusive).
+   * Devuelve un set de claves "taskId:YYYY-MM-DD" — permite derivar el estado de
+   * completado de cada (tarea, día) de forma independiente, sin depender de
+   * `isCompletedToday` (que solo refleja el estado de "hoy"). Usado por la vista Semana.
+   */
+  findCompletionsInRange(userId: UUID, startDate: ISODate, endDate: ISODate): Promise<Set<string>>;
 }

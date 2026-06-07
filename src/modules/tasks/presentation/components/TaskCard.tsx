@@ -11,7 +11,7 @@ import { today } from "@/shared/lib/utils/dates";
 import { isTaskDone, isRecurring, formatTaskTime, isTaskTimeExpired } from "../../domain/entities/Task";
 import type { TaskWithStatus, TaskPriority } from "../../domain/entities/Task";
 
-const PRIORITY_COLORS: Record<TaskPriority, string> = {
+export const PRIORITY_COLORS: Record<TaskPriority, string> = {
   urgent: "#ef4444",
   high:   "#f97316",
   medium: "#eab308",
