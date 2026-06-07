@@ -104,6 +104,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
       className="flex items-center gap-4 rounded-[16px] p-4 select-none"
       style={{
         background: "var(--surface)",
+        border: `1.5px solid ${priorityColor}`,
         opacity: done ? 0.65 : expired ? 0.55 : 1,
         cursor: "default",
         userSelect: "none",
@@ -149,12 +150,12 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         </p>
 
         {!compact && (
-          <div className="mt-1 flex items-center gap-2 flex-wrap">
+          <div className="mt-1 flex items-center gap-2 flex-wrap min-h-4">
             {recurring
               ? <RecurrenceBadge days={task.recurrenceDays!} />
               : task.dueDate && <DueDate dueDate={task.dueDate} done={done} />
             }
-            {task.startTime && (
+            {task.startTime && !expired && (
               <TimeBadge startTime={task.startTime} endTime={task.endTime} />
             )}
           </div>

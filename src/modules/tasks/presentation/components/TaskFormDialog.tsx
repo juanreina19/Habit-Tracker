@@ -374,7 +374,7 @@ export function TaskFormDialog({
                           exit={{ opacity: 0, height: 0 }}
                           className="overflow-hidden"
                         >
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="flex flex-col gap-3">
                             <div>
                               <label className="text-xs mb-1 block" style={{ color: "var(--text-muted)" }}>
                                 {t("start_time_label")}
