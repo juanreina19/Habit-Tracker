@@ -77,7 +77,9 @@ export default function TasksView({ userId }: Props) {
 
   return (
     <>
-      <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+      <div
+        className={`px-5 pt-14 pb-6 mx-auto lg:pt-8 lg:px-10 ${tab === "week" ? "max-w-lg lg:max-w-7xl" : "max-w-lg lg:max-w-3xl"}`}
+      >
         {/* Header */}
         <div className="flex items-center mb-6">
           <div className="flex-1">

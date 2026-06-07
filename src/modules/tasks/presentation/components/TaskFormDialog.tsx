@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
 import { formatTaskTime } from "../../domain/entities/Task";
+import { today } from "@/shared/lib/utils/dates";
 import type { Task, CreateTaskInput, UpdateTaskInput, TaskPriority } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 
@@ -335,6 +336,7 @@ export function TaskFormDialog({
                         <input
                           type="date"
                           value={dueDate}
+                          min={isEdit ? undefined : today()}
                           onChange={(e) => setDueDate(e.target.value)}
                           className="w-full rounded-[12px] px-3 py-3 text-sm outline-none"
                           style={{

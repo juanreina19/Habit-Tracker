@@ -75,7 +75,13 @@
     "saving": "Guardando…"
   },
   "dayLabels": {
-    "d1": "L", "d2": "M", "d3": "X", "d4": "J", "d5": "V", "d6": "S", "d7": "D"
+    "d1": "L",
+    "d2": "M",
+    "d3": "X",
+    "d4": "J",
+    "d5": "V",
+    "d6": "S",
+    "d7": "D"
   },
   "iconCategories": {
     "Fitness": "Fitness",
@@ -172,7 +178,7 @@
     "new_title": "Nueva tarea",
     "edit_title": "Editar tarea",
     "today": "Hoy",
-    "overdue": "Vencida",
+    "overdue": "Atrasada",
     "mark_done": "Marcar como completada",
     "mark_pending": "Marcar como pendiente",
     "menu_edit": "Editar",
@@ -187,7 +193,7 @@
     "start_time_label": "Inicio",
     "end_time_label": "Fin (opcional)",
     "time_end_error": "La hora de fin debe ser posterior al inicio",
-    "time_expired": "Vencida",
+    "time_expired": "Atrasada",
     "tab_today": "Hoy",
     "tab_week": "Semana",
     "tab_all": "Todas",
@@ -197,7 +203,16 @@
     "filter_type": "Tipo",
     "filter_type_once": "Única",
     "filter_type_recurring": "Recurrente",
-    "week_empty": "No hay tareas programadas esta semana"
+    "week_empty": "No hay tareas programadas esta semana",
+    "view_details": "Ver detalle",
+    "no_time": "Sin hora",
+    "no_description": "Sin descripción",
+    "date_label": "Fecha",
+    "status_label": "Estado",
+    "status_pending": "Pendiente",
+    "status_completed": "Completada",
+    "created_on": "Creada el {date}",
+    "close": "Cerrar"
   },
   "calendar": {
     "subtitle": "Vista",

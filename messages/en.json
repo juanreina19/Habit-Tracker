@@ -75,7 +75,13 @@
     "saving": "Saving…"
   },
   "dayLabels": {
-    "d1": "M", "d2": "T", "d3": "W", "d4": "T", "d5": "F", "d6": "S", "d7": "S"
+    "d1": "M",
+    "d2": "T",
+    "d3": "W",
+    "d4": "T",
+    "d5": "F",
+    "d6": "S",
+    "d7": "S"
   },
   "iconCategories": {
     "Fitness": "Fitness",
@@ -187,7 +193,7 @@
     "start_time_label": "Start",
     "end_time_label": "End (optional)",
     "time_end_error": "End time must be after start",
-    "time_expired": "Expired",
+    "time_expired": "Overdue",
     "tab_today": "Today",
     "tab_week": "Week",
     "tab_all": "All",
@@ -197,7 +203,16 @@
     "filter_type": "Type",
     "filter_type_once": "One time",
     "filter_type_recurring": "Recurring",
-    "week_empty": "No tasks scheduled this week"
+    "week_empty": "No tasks scheduled this week",
+    "view_details": "View details",
+    "no_time": "No time set",
+    "no_description": "No description",
+    "date_label": "Date",
+    "status_label": "Status",
+    "status_pending": "Pending",
+    "status_completed": "Completed",
+    "created_on": "Created on {date}",
+    "close": "Close"
   },
   "calendar": {
     "subtitle": "View",
