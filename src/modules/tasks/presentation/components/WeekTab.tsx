@@ -13,14 +13,15 @@ import { TaskDetailDialog, type TaskDetailEntry } from "./TaskDetailDialog";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { isRecurring, formatTaskTime } from "../../domain/entities/Task";
 import { toISODate, today } from "@/shared/lib/utils/dates";
-import type { Task } from "../../domain/entities/Task";
+import type { Task, TaskWithStatus } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
   userId: UUID;
+  tasks: TaskWithStatus[];
 }
 
-export function WeekTab({ userId }: Props) {
+export function WeekTab({ userId, tasks }: Props) {
   const t = useTranslations("tasks");
   const { locale } = useLocale();
   const dateFnsLocale = locale === "en" ? enUS : es;
@@ -34,6 +35,26 @@ export function WeekTab({ userId }: Props) {
     const currentMonday = startOfWeek(new Date(), { weekStartsOn: 1 });
     return subWeeks(currentMonday, weekOffset);
   }, [weekOffset]);
+
+  // Límite de navegación hacia atrás basado en datos reales (no en una constante
+  // arbitraria): la semana más antigua que PUEDE tener contenido es la semana de la
+  // tarea con `createdAt` más antiguo — antes de eso, garantizado vacío (mismo criterio
+  // que la guarda de GetWeekTasksUseCase). Hacia adelante no hay límite: se puede
+  // planificar/revisar libremente lo que viene.
+  const oldestWeekStart = useMemo(() => {
+    if (tasks.length === 0) return startOfWeek(new Date(), { weekStartsOn: 1 });
+    // .getTime() una sola vez por comparación — evita instanciar Date por partida doble
+    // en cada paso del reduce. Necesario además: un ISO timestamp no garantiza estar
+    // siempre normalizado al mismo formato/zona, así que comparar como string sería frágil.
+    const oldestCreatedAt = tasks.reduce((min, t) => {
+      const minTime = new Date(min).getTime();
+      const tTime = new Date(t.createdAt).getTime();
+      return tTime < minTime ? t.createdAt : min;
+    }, tasks[0].createdAt);
+    return startOfWeek(new Date(oldestCreatedAt), { weekStartsOn: 1 });
+  }, [tasks]);
+
+  const canGoPrev = weekStart > oldestWeekStart;
 
   useEffect(() => {
     let cancelled = false;
@@ -50,7 +71,6 @@ export function WeekTab({ userId }: Props) {
 
   const goToPrevWeek = useCallback(() => setWeekOffset((o) => o + 1), []);
   const goToNextWeek = useCallback(() => setWeekOffset((o) => o - 1), []);
-  const canGoNext = weekOffset > 0;
 
   const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
   const weekStartLabel = format(weekStart, "d MMM", { locale: dateFnsLocale });
@@ -67,7 +87,8 @@ export function WeekTab({ userId }: Props) {
         <div className="flex gap-2">
           <button
             onClick={goToPrevWeek}
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60"
+            disabled={!canGoPrev}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60 disabled:opacity-20"
             style={{ background: "var(--surface-elevated)" }}
             aria-label="previous week"
           >
@@ -75,8 +96,7 @@ export function WeekTab({ userId }: Props) {
           </button>
           <button
             onClick={goToNextWeek}
-            disabled={!canGoNext}
-            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60 disabled:opacity-20"
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-60"
             style={{ background: "var(--surface-elevated)" }}
             aria-label="next week"
           >
@@ -198,17 +218,22 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
   // recuperable retroactivamente), así que no se marca como tal — solo se atenúa.
   const showOverdue = !status.isCompleted && isPastDay && !isRecurring(task);
   const muted = status.isCompleted || (isPastDay && !showOverdue);
-  const hasMetaRow = !!task.startTime || showOverdue;
 
   return (
     <div
-      className="flex flex-col gap-1.5 rounded-[14px] px-3.5 py-3"
+      // min-h derivado de las medidas reales de Tailwind del propio layout (no adivinado):
+      // fila 1 sola ≈ 24px padding + 28px (botón ojo, w-7/h-7) = 52px; fila 1 + fila 2/3
+      // ≈ 52px + 6px gap + 16px (text-xs/Clock) = 74px. 76px deja que la variante de
+      // 1 fila crezca hasta igualar visualmente a la de 2 filas (el caso dispar más común),
+      // sin recortar la de 3 filas (~96px), que excede el mínimo de forma natural.
+      className="flex flex-col gap-1.5 rounded-[14px] px-3.5 py-3 min-h-[76px] justify-center"
       style={{
         background: "var(--surface)",
         border: `1px solid ${priorityColor}66`,
         opacity: muted ? 0.55 : 1,
       }}
     >
+      {/* Fila 1 — checkbox + título + ojo (siempre presente) */}
       <div className="flex items-center gap-2.5">
         <span
           className="flex-shrink-0 w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center"
@@ -225,6 +250,7 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
         </span>
         <span
           className="text-sm font-medium truncate flex-1 min-w-0"
+          title={task.title}
           style={{
             color: status.isCompleted ? "var(--text-secondary)" : "var(--text-primary)",
             textDecoration: status.isCompleted ? "line-through" : "none",
@@ -243,24 +269,27 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
         </button>
       </div>
 
-      {hasMetaRow && (
-        <div className="flex items-center gap-2 pl-[26px]">
-          {task.startTime && (
-            <span className="flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
-              <Clock size={11} strokeWidth={2} />
-              <span className="text-xs">
-                {formatTaskTime(task.startTime)}{task.endTime ? ` – ${formatTaskTime(task.endTime)}` : ""}
-              </span>
-            </span>
-          )}
-          {showOverdue && (
-            <span
-              className="flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-              style={{ background: "#ef444418", color: "#ef4444" }}
-            >
-              {t("overdue")}
-            </span>
-          )}
+      {/* Fila 2 — horario, en su propia línea (solo si existe) */}
+      {task.startTime && (
+        <div className="flex items-center gap-1 pl-[26px]" style={{ color: "var(--text-secondary)" }}>
+          <Clock size={11} strokeWidth={2} />
+          <span className="text-xs whitespace-nowrap">
+            {formatTaskTime(task.startTime)}{task.endTime ? ` – ${formatTaskTime(task.endTime)}` : ""}
+          </span>
+        </div>
+      )}
+
+      {/* Fila 3 — badge "Atrasada", en su propia línea (solo si aplica).
+          whitespace-nowrap + truncate dentro de overflow-hidden: el badge nunca
+          empuja el ancho de la tarjeta ni envuelve, ni siquiera con textos más largos. */}
+      {showOverdue && (
+        <div className="pl-[26px] overflow-hidden">
+          <span
+            className="inline-block max-w-full truncate whitespace-nowrap text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+            style={{ background: "#ef444418", color: "#ef4444" }}
+          >
+            {t("overdue")}
+          </span>
         </div>
       )}
     </div>

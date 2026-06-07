@@ -9,7 +9,7 @@ import { UpdateTaskUseCase } from "../../domain/use-cases/UpdateTaskUseCase";
 import { ToggleTaskUseCase } from "../../domain/use-cases/ToggleTaskUseCase";
 import { DeleteTaskUseCase } from "../../domain/use-cases/DeleteTaskUseCase";
 import { isRecurring } from "../../domain/entities/Task";
-import type { TaskWithStatus, CreateTaskInput, UpdateTaskInput } from "../../domain/entities/Task";
+import type { Task, TaskWithStatus, CreateTaskInput, UpdateTaskInput } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 import { today } from "@/shared/lib/utils/dates";
 
@@ -74,10 +74,12 @@ export function useTasks(userId: UUID) {
     setTasks((prev) => [{ ...created, isCompletedToday: false }, ...prev]);
   }, [userId, getRepo]);
 
-  const updateTask = useCallback(async (id: UUID, input: UpdateTaskInput): Promise<void> => {
-    const updated = await new UpdateTaskUseCase(getRepo()).execute(id, input);
+  // Recibe `Task` (no `TaskWithStatus`): solo se usa `task.id`/`task.dueDate`, y el caller
+  // (TaskFormDialog → onUpdate) trabaja con la entidad base, no con el estado derivado de "hoy".
+  const updateTask = useCallback(async (task: Task, input: UpdateTaskInput): Promise<void> => {
+    const updated = await new UpdateTaskUseCase(getRepo()).execute(task, input);
     setTasks((prev) => prev.map((t) => {
-      if (t.id !== id) return t;
+      if (t.id !== task.id) return t;
       // Preservar isCompletedToday para tareas recurrentes (no cambia con update)
       const isCompletedToday = isRecurring(updated)
         ? t.isCompletedToday

@@ -25,7 +25,7 @@ interface Props {
   task?: Task | null;
   defaultConfirmDelete?: boolean;
   onCreate: (input: CreateTaskInput) => Promise<void>;
-  onUpdate: (id: UUID, input: UpdateTaskInput) => Promise<void>;
+  onUpdate: (task: Task, input: UpdateTaskInput) => Promise<void>;
   onDelete: (id: UUID) => Promise<void>;
 }
 
@@ -113,7 +113,7 @@ export function TaskFormDialog({
       } as const;
 
       if (isEdit && task) {
-        await onUpdate(task.id, input);
+        await onUpdate(task, input);
       } else {
         await onCreate({
           title:           input.title,
@@ -304,10 +304,12 @@ export function TaskFormDialog({
                                   key={day}
                                   type="button"
                                   onClick={() => toggleDay(day)}
-                                  className="flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all active:scale-95"
+                                  className="flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all duration-200 active:scale-95 hover:brightness-110"
                                   style={{
-                                    background: on ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                                    color:      on ? "var(--btn-primary-text)" : "var(--text-secondary)",
+                                    background: on ? "var(--accent)" : "var(--surface-elevated)",
+                                    color:      on ? "#ffffff" : "var(--text-secondary)",
+                                    border:     on ? "2px solid #3d9468" : "2px solid transparent",
+                                    boxShadow:  on ? "0 2px 10px -3px rgba(76,175,130,0.55)" : "none",
                                   }}
                                 >
                                   {tDays(`d${day}` as Parameters<typeof tDays>[0])}
@@ -336,7 +338,7 @@ export function TaskFormDialog({
                         <input
                           type="date"
                           value={dueDate}
-                          min={isEdit ? undefined : today()}
+                          min={today()}
                           onChange={(e) => setDueDate(e.target.value)}
                           className="w-full rounded-[12px] px-3 py-3 text-sm outline-none"
                           style={{

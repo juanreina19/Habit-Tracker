@@ -46,11 +46,18 @@ export class GetWeekTasksUseCase {
 
     const entries: WeekTaskEntry[] = tasks
       .map((task) => {
+        const createdISO = toISODate(new Date(task.createdAt));
         const days: DayTaskStatus[] = weekDays.map((date) => {
           const iso = toISODate(date);
           let isScheduled: boolean;
           let isCompleted: boolean;
-          if (isRecurring(task)) {
+          // Una tarea no puede estar programada/completada en un día anterior a su
+          // propia creación — mismo criterio que isHabitActiveOnDay para Hábitos
+          // (dates.ts:40-47): evita proyectarla retroactivamente al navegar al pasado.
+          if (iso < createdISO) {
+            isScheduled = false;
+            isCompleted = false;
+          } else if (isRecurring(task)) {
             isScheduled = task.recurrenceDays!.includes(dayOfWeek(date));
             isCompleted = isScheduled && completions.has(`${task.id}:${iso}`);
           } else {

@@ -123,7 +123,7 @@ export default function TasksView({ userId }: Props) {
         </div>
 
         {tab === "today" && <TodayTab userId={userId} onEdit={openEdit} onDelete={openDelete} />}
-        {tab === "week" && <WeekTab userId={userId} />}
+        {tab === "week" && <WeekTab userId={userId} tasks={tasks} />}
         {tab === "all" && (
           <AllTab tasks={tasks} toggleTask={toggleTask} onEdit={openEdit} onDelete={openDelete} />
         )}
@@ -135,7 +135,7 @@ export default function TasksView({ userId }: Props) {
         task={selectedTask}
         defaultConfirmDelete={dialogStartAtDelete}
         onCreate={async (input: CreateTaskInput) => { await createTask(input); }}
-        onUpdate={async (id, input: UpdateTaskInput) => { await updateTask(id, input); }}
+        onUpdate={async (task, input: UpdateTaskInput) => { await updateTask(task, input); }}
         onDelete={async (id) => { await deleteTask(id); }}
       />
     </>

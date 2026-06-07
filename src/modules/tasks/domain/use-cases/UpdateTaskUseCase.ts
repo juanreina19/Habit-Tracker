@@ -1,11 +1,11 @@
+import { today } from "@/shared/lib/utils/dates";
 import type { ITaskRepository } from "../repositories/ITaskRepository";
-import type { UUID } from "@/shared/types/database.types";
 import type { Task, UpdateTaskInput } from "../entities/Task";
 
 export class UpdateTaskUseCase {
   constructor(private readonly repo: ITaskRepository) {}
 
-  async execute(id: UUID, input: UpdateTaskInput): Promise<Task> {
+  async execute(task: Task, input: UpdateTaskInput): Promise<Task> {
     if (input.title !== undefined) {
       const trimmed = input.title.trim();
       if (!trimmed) throw new Error("Task title cannot be empty");
@@ -28,6 +28,16 @@ export class UpdateTaskUseCase {
       };
     }
 
-    return this.repo.update(id, input);
+    // Rechaza solo un CAMBIO ACTIVO de dueDate hacia el pasado — cubre tanto mover una
+    // fecha existente ("2026-06-20" → "2026-06-01") como asignar una fecha pasada a una
+    // tarea que antes no tenía (null → "2026-06-01"; null !== "..." también dispara).
+    // Jamás bloquea guardar una tarea YA vencida sin tocar su fecha (edición = informativa).
+    // today() acota por arriba a createdAt (una tarea nunca nace en el futuro), así que
+    // esta única comparación ya garantiza dueDate >= max(createdAt, today) de forma transitiva.
+    if (input.dueDate && input.dueDate !== task.dueDate && input.dueDate < today()) {
+      throw new Error("Due date cannot be set to a past date");
+    }
+
+    return this.repo.update(task.id, input);
   }
 }

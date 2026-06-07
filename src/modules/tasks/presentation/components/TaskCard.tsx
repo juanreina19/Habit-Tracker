@@ -84,28 +84,27 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
   const t = useTranslations("tasks");
   const done = isTaskDone(task);
   const recurring = isRecurring(task);
-  const expired = isTaskTimeExpired(task) && !done;
+  const expired = isTaskTimeExpired(task) && !done;   // solo para el badge "Vencida" — informativo, no restrictivo
   const priorityColor = PRIORITY_COLORS[task.priority];
   const showMenu = !compact && (onEdit || onDelete);
-  const interactive = !expired;
 
   return (
     <motion.div
       layout="position"
-      drag={!compact && interactive ? "x" : false}
+      drag={!compact ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={{ left: 0.05, right: 0.3 }}
       dragSnapToOrigin
-      onDragEnd={!compact && interactive ? (_, info) => {
+      onDragEnd={!compact ? (_, info) => {
         if (info.offset.x > 60 && Math.abs(info.velocity.x) > 0) onToggle();
       } : undefined}
-      whileTap={!compact && interactive ? { scale: 0.98 } : {}}
+      whileTap={!compact ? { scale: 0.98 } : {}}
       transition={{ type: "spring", stiffness: 500, damping: 35 }}
       className="flex items-center gap-4 rounded-[16px] p-4 select-none"
       style={{
         background: "var(--surface)",
         border: `1px solid ${priorityColor}66`,
-        opacity: done ? 0.65 : expired ? 0.55 : 1,
+        opacity: done ? 0.65 : 1,
         cursor: "default",
         userSelect: "none",
         WebkitUserSelect: "none",
@@ -115,14 +114,13 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
       {/* Checkbox */}
       <button
         type="button"
-        onClick={(e) => { e.stopPropagation(); if (interactive) onToggle(); }}
-        disabled={expired}
+        onClick={(e) => { e.stopPropagation(); onToggle(); }}
         aria-label={done ? t("mark_pending") : t("mark_done")}
         className="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
         style={{
           borderColor: done ? priorityColor : "var(--border)",
           background:  done ? priorityColor : "transparent",
-          cursor: expired ? "not-allowed" : "pointer",
+          cursor: "pointer",
         }}
       >
         {done && (
