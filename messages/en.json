@@ -186,7 +186,8 @@
     "schedule_toggle": "Set time",
     "start_time_label": "Start",
     "end_time_label": "End (optional)",
-    "time_end_error": "End time must be after start"
+    "time_end_error": "End time must be after start",
+    "time_expired": "Expired"
   },
   "calendar": {
     "subtitle": "View",

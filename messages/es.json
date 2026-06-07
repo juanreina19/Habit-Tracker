@@ -186,7 +186,8 @@
     "schedule_toggle": "Añadir hora",
     "start_time_label": "Inicio",
     "end_time_label": "Fin (opcional)",
-    "time_end_error": "La hora de fin debe ser posterior al inicio"
+    "time_end_error": "La hora de fin debe ser posterior al inicio",
+    "time_expired": "Vencida"
   },
   "calendar": {
     "subtitle": "Vista",

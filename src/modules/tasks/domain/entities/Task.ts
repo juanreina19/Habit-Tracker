@@ -32,6 +32,20 @@ export const isTaskDone = (t: Task | TaskWithStatus): boolean =>
 /** Formatea un string de tiempo "HH:MM:SS" → "HH:MM" para display. */
 export const formatTaskTime = (t: string): string => t.slice(0, 5);
 
+/**
+ * Devuelve true si el endTime de la tarea ya pasó hoy.
+ * Solo aplica cuando la tarea tiene endTime definido.
+ * Una tarea expirada no puede marcarse como completada.
+ */
+export const isTaskTimeExpired = (t: Task | TaskWithStatus): boolean => {
+  if (!t.endTime) return false;
+  const [h, m] = t.endTime.split(":").map(Number);
+  const endMinutes = h * 60 + m;
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  return nowMinutes > endMinutes;
+};
+
 export interface CreateTaskInput {
   title:           string;
   description?:    string;

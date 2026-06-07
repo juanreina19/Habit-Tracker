@@ -8,7 +8,7 @@ import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { today } from "@/shared/lib/utils/dates";
-import { isTaskDone, isRecurring, formatTaskTime } from "../../domain/entities/Task";
+import { isTaskDone, isRecurring, formatTaskTime, isTaskTimeExpired } from "../../domain/entities/Task";
 import type { TaskWithStatus, TaskPriority } from "../../domain/entities/Task";
 
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
@@ -84,25 +84,27 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
   const t = useTranslations("tasks");
   const done = isTaskDone(task);
   const recurring = isRecurring(task);
+  const expired = isTaskTimeExpired(task) && !done;
   const priorityColor = PRIORITY_COLORS[task.priority];
   const showMenu = !compact && (onEdit || onDelete);
+  const interactive = !expired;
 
   return (
     <motion.div
       layout="position"
-      drag={!compact ? "x" : false}
+      drag={!compact && interactive ? "x" : false}
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={{ left: 0.05, right: 0.3 }}
       dragSnapToOrigin
-      onDragEnd={!compact ? (_, info) => {
+      onDragEnd={!compact && interactive ? (_, info) => {
         if (info.offset.x > 60 && Math.abs(info.velocity.x) > 0) onToggle();
       } : undefined}
-      whileTap={!compact ? { scale: 0.98 } : {}}
+      whileTap={!compact && interactive ? { scale: 0.98 } : {}}
       transition={{ type: "spring", stiffness: 500, damping: 35 }}
       className="flex items-center gap-4 rounded-[16px] p-4 select-none"
       style={{
         background: "var(--surface)",
-        opacity: done ? 0.65 : 1,
+        opacity: done ? 0.65 : expired ? 0.55 : 1,
         cursor: "default",
         userSelect: "none",
         WebkitUserSelect: "none",
@@ -112,12 +114,14 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
       {/* Checkbox */}
       <button
         type="button"
-        onClick={(e) => { e.stopPropagation(); onToggle(); }}
+        onClick={(e) => { e.stopPropagation(); if (interactive) onToggle(); }}
+        disabled={expired}
         aria-label={done ? t("mark_pending") : t("mark_done")}
         className="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
         style={{
           borderColor: done ? priorityColor : "var(--border)",
           background:  done ? priorityColor : "transparent",
+          cursor: expired ? "not-allowed" : "pointer",
         }}
       >
         {done && (
@@ -156,6 +160,16 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
           </div>
         )}
       </div>
+
+      {/* Badge "Vencida" cuando el tiempo ha expirado */}
+      {expired && (
+        <span
+          className="flex-shrink-0 text-xs font-semibold px-2 py-1 rounded-full"
+          style={{ background: "#ef444418", color: "#ef4444" }}
+        >
+          {t("time_expired")}
+        </span>
+      )}
 
       {/* Three-dots menu */}
       {showMenu && (
