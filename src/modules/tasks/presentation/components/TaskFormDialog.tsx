@@ -341,6 +341,8 @@ export function TaskFormDialog({
                             background: "var(--surface-elevated)",
                             color: dueDate ? "var(--text-primary)" : "var(--text-muted)",
                             border: "1.5px solid transparent",
+                            WebkitAppearance: "none",
+                            appearance: "none",
                           }}
                         />
                       </motion.div>
@@ -388,6 +390,8 @@ export function TaskFormDialog({
                                   background: "var(--surface-elevated)",
                                   color: "var(--text-primary)",
                                   border: `1.5px solid ${timeError ? "#ef4444" : "transparent"}`,
+                                  WebkitAppearance: "none",
+                                  appearance: "none",
                                 }}
                               />
                             </div>
@@ -404,6 +408,8 @@ export function TaskFormDialog({
                                   background: "var(--surface-elevated)",
                                   color: "var(--text-primary)",
                                   border: `1.5px solid ${timeError ? "#ef4444" : "transparent"}`,
+                                  WebkitAppearance: "none",
+                                  appearance: "none",
                                 }}
                               />
                             </div>
