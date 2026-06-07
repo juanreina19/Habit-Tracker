@@ -8,6 +8,17 @@ export class CreateTaskUseCase {
   async execute(userId: UUID, input: CreateTaskInput): Promise<Task> {
     const trimmed = input.title.trim();
     if (!trimmed) throw new Error("Task title cannot be empty");
-    return this.repo.create(userId, { ...input, title: trimmed });
+
+    if (input.endTime && input.startTime && input.endTime <= input.startTime) {
+      throw new Error("End time must be after start time");
+    }
+
+    // Normalizar: array vacío = tarea única
+    const recurrenceDays = input.recurrenceDays?.length ? input.recurrenceDays : undefined;
+
+    // Si es recurrente, due_date no aplica
+    const dueDate = recurrenceDays ? undefined : input.dueDate;
+
+    return this.repo.create(userId, { ...input, title: trimmed, recurrenceDays, dueDate });
   }
 }

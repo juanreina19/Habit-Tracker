@@ -92,7 +92,18 @@ export interface DbTask {
   description: string | null;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   due_date: ISODate | null;
+  recurrence_days: number[] | null;  // null=única, [1..7]=recurrente
+  start_time: string | null;         // "HH:MM:SS" (Supabase devuelve TIME como string)
+  end_time: string | null;           // "HH:MM:SS"
   completed_at: ISOTimestamp | null;
+  created_at: ISOTimestamp;
+}
+
+export interface DbTaskCompletion {
+  id: UUID;
+  task_id: UUID;
+  user_id: UUID;
+  completed_date: ISODate;
   created_at: ISOTimestamp;
 }
 
@@ -140,6 +151,11 @@ export interface Database {
         Row: DbTask;
         Insert: Omit<DbTask, "id" | "created_at">;
         Update: Partial<Omit<DbTask, "id" | "user_id" | "created_at">>;
+      };
+      task_completions: {
+        Row: DbTaskCompletion;
+        Insert: Omit<DbTaskCompletion, "id" | "created_at">;
+        Update: never;
       };
     };
   };

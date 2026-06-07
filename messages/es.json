@@ -176,7 +176,17 @@
     "mark_done": "Marcar como completada",
     "mark_pending": "Marcar como pendiente",
     "menu_edit": "Editar",
-    "menu_delete": "Eliminar"
+    "menu_delete": "Eliminar",
+    "recurrence_label": "Recurrencia",
+    "recurrence_once": "Una vez",
+    "recurrence_repeat": "Repetir",
+    "recurrence_days_error": "Selecciona al menos un día",
+    "recurrence_daily": "Diario",
+    "schedule_label": "Horario",
+    "schedule_toggle": "Añadir hora",
+    "start_time_label": "Inicio",
+    "end_time_label": "Fin (opcional)",
+    "time_end_error": "La hora de fin debe ser posterior al inicio"
   },
   "calendar": {
     "subtitle": "Vista",

@@ -176,7 +176,17 @@
     "mark_done": "Mark as done",
     "mark_pending": "Mark as pending",
     "menu_edit": "Edit",
-    "menu_delete": "Delete"
+    "menu_delete": "Delete",
+    "recurrence_label": "Recurrence",
+    "recurrence_once": "One time",
+    "recurrence_repeat": "Repeat",
+    "recurrence_days_error": "Select at least one day",
+    "recurrence_daily": "Daily",
+    "schedule_label": "Schedule",
+    "schedule_toggle": "Set time",
+    "start_time_label": "Start",
+    "end_time_label": "End (optional)",
+    "time_end_error": "End time must be after start"
   },
   "calendar": {
     "subtitle": "View",

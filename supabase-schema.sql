@@ -172,3 +172,40 @@ create policy "Users manage own tasks"
   with check (auth.uid() = user_id);
 
 create index idx_tasks_user_id on tasks(user_id);
+
+-- ─── TAREAS — FASE 1.5: RECURRENCIA Y HORARIOS ───────────────
+-- Migración aditiva: datos existentes no requieren cambio (recurrence_days = NULL)
+
+alter table tasks
+  add column if not exists recurrence_days integer[],   -- NULL=única, [1..7] 1=lun 7=dom
+  add column if not exists start_time      time,        -- HH:MM (validación nativa PG)
+  add column if not exists end_time        time;        -- HH:MM opcional
+
+create index if not exists idx_tasks_recurrence_days
+  on tasks using gin (recurrence_days);
+
+-- ─── COMPLETACIONES DE TAREAS RECURRENTES ────────────────────
+-- Equivale a habit_logs pero para tareas recurrentes.
+-- Tareas únicas siguen usando completed_at en tasks.
+
+create table if not exists task_completions (
+  id              uuid        primary key default gen_random_uuid(),
+  task_id         uuid        not null references tasks(id) on delete cascade,
+  user_id         uuid        not null references auth.users(id) on delete cascade,
+  completed_date  date        not null,
+  created_at      timestamptz not null default now(),
+  unique (task_id, completed_date)
+);
+
+alter table task_completions enable row level security;
+
+create policy "Users manage own task_completions"
+  on task_completions for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create index if not exists idx_task_completions_task_date
+  on task_completions(task_id, completed_date);
+
+create index if not exists idx_task_completions_user_date
+  on task_completions(user_id, completed_date);

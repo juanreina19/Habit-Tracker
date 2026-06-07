@@ -1,24 +1,31 @@
-import type { UUID } from "@/shared/types/database.types";
-import type { Task, CreateTaskInput, UpdateTaskInput } from "../entities/Task";
+import type { UUID, ISODate } from "@/shared/types/database.types";
+import type { Task, TaskWithStatus, CreateTaskInput, UpdateTaskInput } from "../entities/Task";
 
 export interface ITaskRepository {
   /**
-   * Todas las tareas del usuario.
-   * Orden: completedAt IS NULL (pendientes) primero → completed_at DESC (completadas).
-   * El componente TasksView aplica orden secundario dentro del grupo de pendientes.
+   * Todas las tareas del usuario enriquecidas con isCompletedToday.
+   * Tareas únicas: isCompletedToday = completedAt !== null
+   * Tareas recurrentes: isCompletedToday = existe completion para `today`
    */
-  findAllByUser(userId: UUID): Promise<Task[]>;
+  findAllByUser(userId: UUID, today: ISODate): Promise<TaskWithStatus[]>;
 
   /**
-   * Tareas para Today view. Orden: priority DESC, created_at ASC.
-   *   - vencidas:   due_date < hoy AND completed_at IS NULL
-   *   - de hoy:     due_date = hoy  (independientemente de completed_at)
-   *   - sin fecha:  due_date IS NULL AND completed_at IS NULL
+   * Tareas que aplican hoy:
+   *   - Recurrentes: recurrence_days contiene el día de la semana de hoy
+   *   - Únicas atrasadas: due_date < hoy AND completed_at IS NULL
+   *   - Únicas de hoy: due_date = hoy
+   *   - Únicas sin fecha: due_date IS NULL AND completed_at IS NULL
+   * Filtrado delegado a SQL. Orden: priority ASC (urgent=0), created_at ASC.
    */
-  findForToday(userId: UUID): Promise<Task[]>;
+  findForToday(userId: UUID, today: ISODate): Promise<TaskWithStatus[]>;
 
   create(userId: UUID, input: CreateTaskInput): Promise<Task>;
   update(id: UUID, input: UpdateTaskInput): Promise<Task>;
-  /** Hard delete */
+  /** Hard delete. task_completions se borran por CASCADE. */
   delete(id: UUID): Promise<void>;
+
+  /** Marca tarea recurrente como completada en la fecha dada (upsert). */
+  addCompletion(taskId: UUID, userId: UUID, date: ISODate): Promise<void>;
+  /** Elimina la completación de una tarea recurrente para la fecha dada. */
+  removeCompletion(taskId: UUID, userId: UUID, date: ISODate): Promise<void>;
 }

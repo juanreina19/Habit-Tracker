@@ -10,19 +10,19 @@ import { TaskCard } from "./TaskCard";
 import { TaskEmptyState } from "./TaskEmptyState";
 import { TaskFormDialog } from "./TaskFormDialog";
 import { isTaskDone } from "../../domain/entities/Task";
-import type { Task, TaskPriority, CreateTaskInput, UpdateTaskInput } from "../../domain/entities/Task";
+import type { TaskWithStatus, TaskPriority, CreateTaskInput, UpdateTaskInput } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 
 const PRIORITY_ORDER: Record<TaskPriority, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
 
-function getGroup(task: Task, todayStr: string): number {
+function getGroup(task: TaskWithStatus, todayStr: string): number {
   if (!task.dueDate) return 3;
   if (task.dueDate < todayStr) return 0;
   if (task.dueDate === todayStr) return 1;
   return 2;
 }
 
-function sortPending(tasks: Task[]): Task[] {
+function sortPending(tasks: TaskWithStatus[]): TaskWithStatus[] {
   const todayStr = format(new Date(), "yyyy-MM-dd");
   return [...tasks].sort((a, b) => {
     const ga = getGroup(a, todayStr);
@@ -41,7 +41,7 @@ export default function TasksView({ userId }: Props) {
   const { tasks, isLoading, createTask, updateTask, toggleTask, deleteTask } = useTasks(userId);
 
   const [dialogOpen, setDialogOpen]               = useState(false);
-  const [selectedTask, setSelectedTask]           = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask]           = useState<TaskWithStatus | null>(null);
   const [dialogStartAtDelete, setDialogStartAtDelete] = useState(false);
   const [showDone, setShowDone]                   = useState(true);
 
@@ -54,13 +54,13 @@ export default function TasksView({ userId }: Props) {
     setDialogOpen(true);
   };
 
-  const openEdit = (task: Task) => {
+  const openEdit = (task: TaskWithStatus) => {
     setSelectedTask(task);
     setDialogStartAtDelete(false);
     setDialogOpen(true);
   };
 
-  const openDelete = (task: Task) => {
+  const openDelete = (task: TaskWithStatus) => {
     setSelectedTask(task);
     setDialogStartAtDelete(true);
     setDialogOpen(true);

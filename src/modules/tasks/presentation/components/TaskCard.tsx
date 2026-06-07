@@ -3,13 +3,13 @@
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
-import { Clock, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Clock, CalendarDays, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { today } from "@/shared/lib/utils/dates";
-import { isTaskDone } from "../../domain/entities/Task";
-import type { Task, TaskPriority } from "../../domain/entities/Task";
+import { isTaskDone, isRecurring, formatTaskTime } from "../../domain/entities/Task";
+import type { TaskWithStatus, TaskPriority } from "../../domain/entities/Task";
 
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
   urgent: "#ef4444",
@@ -28,21 +28,16 @@ function DueDate({ dueDate, done }: { dueDate: string; done: boolean }) {
   const { locale } = useLocale();
   const dateFnsLocale = locale === "en" ? enUS : es;
   const todayStr = today();
-
   let label: string;
   let color: string;
-
   if (dueDate < todayStr && !done) {
-    label = t("overdue");
-    color = "#ef4444";
+    label = t("overdue"); color = "#ef4444";
   } else if (dueDate === todayStr) {
-    label = t("today");
-    color = "var(--accent)";
+    label = t("today"); color = "var(--accent)";
   } else {
     label = format(parseLocalDate(dueDate), "d MMM", { locale: dateFnsLocale });
     color = "var(--text-secondary)";
   }
-
   return (
     <span className="flex items-center gap-1" style={{ color }}>
       <Clock size={11} strokeWidth={2} />
@@ -51,8 +46,34 @@ function DueDate({ dueDate, done }: { dueDate: string; done: boolean }) {
   );
 }
 
+function RecurrenceBadge({ days }: { days: number[] }) {
+  const tDays = useTranslations("dayLabels");
+  const t = useTranslations("tasks");
+  const label = days.length === 7
+    ? t("recurrence_daily")
+    : days.map(d => tDays(`d${d}` as Parameters<typeof tDays>[0])).join(" ");
+  return (
+    <span className="flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+      <CalendarDays size={11} strokeWidth={2} />
+      <span className="text-xs">{label}</span>
+    </span>
+  );
+}
+
+function TimeBadge({ startTime, endTime }: { startTime: string; endTime?: string | null }) {
+  const start = formatTaskTime(startTime);
+  const end = endTime ? formatTaskTime(endTime) : null;
+  const label = end ? `${start} – ${end}` : start;
+  return (
+    <span className="flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+      <Clock size={11} strokeWidth={2} />
+      <span className="text-xs">{label}</span>
+    </span>
+  );
+}
+
 interface Props {
-  task: Task;
+  task: TaskWithStatus;
   onToggle: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -62,6 +83,7 @@ interface Props {
 export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: Props) {
   const t = useTranslations("tasks");
   const done = isTaskDone(task);
+  const recurring = isRecurring(task);
   const priorityColor = PRIORITY_COLORS[task.priority];
   const showMenu = !compact && (onEdit || onDelete);
 
@@ -121,9 +143,16 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         >
           {task.title}
         </p>
-        {!compact && task.dueDate && (
-          <div className="mt-1">
-            <DueDate dueDate={task.dueDate} done={done} />
+
+        {!compact && (
+          <div className="mt-1 flex items-center gap-2 flex-wrap">
+            {recurring
+              ? <RecurrenceBadge days={task.recurrenceDays!} />
+              : task.dueDate && <DueDate dueDate={task.dueDate} done={done} />
+            }
+            {task.startTime && (
+              <TimeBadge startTime={task.startTime} endTime={task.endTime} />
+            )}
           </div>
         )}
       </div>
@@ -146,10 +175,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
           <DropdownMenu.Portal>
             <DropdownMenu.Content
               className="z-50 min-w-[148px] rounded-[14px] p-1.5 shadow-xl outline-none"
-              style={{
-                background: "var(--surface-elevated)",
-                border: "1px solid var(--border)",
-              }}
+              style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
               align="end"
               sideOffset={4}
             >
