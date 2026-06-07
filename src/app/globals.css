@@ -95,3 +95,11 @@ button, a, [role="button"] {
   background: var(--sidebar-active-bg);
   color: var(--sidebar-active-color) !important;
 }
+
+/* Inputs nativos type="date"/"time" — el ícono del picker trae su propio
+   fondo opaco que rompe el border-radius del input en el lado derecho */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  cursor: pointer;
+}

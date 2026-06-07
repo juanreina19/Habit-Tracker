@@ -104,7 +104,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
       className="flex items-center gap-4 rounded-[16px] p-4 select-none"
       style={{
         background: "var(--surface)",
-        border: `1.5px solid ${priorityColor}`,
+        border: `1px solid ${priorityColor}66`,
         opacity: done ? 0.65 : expired ? 0.55 : 1,
         cursor: "default",
         userSelect: "none",
