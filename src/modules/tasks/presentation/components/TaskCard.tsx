@@ -96,7 +96,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
       } : undefined}
       whileTap={!compact ? { scale: 0.98 } : {}}
       transition={{ type: "spring", stiffness: 500, damping: 35 }}
-      className="flex items-center gap-4 rounded-[16px] p-4 select-none"
+      className="flex flex-col gap-2 rounded-[16px] p-4 select-none"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -107,63 +107,66 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         willChange: "transform",
       }}
     >
-      <TaskCheckbox
-        done={done}
-        size={TASK_CHECKBOX_SIZE.card}
-        animated
-        onToggle={onToggle}
-        ariaLabel={done ? t("mark_pending") : t("mark_done")}
-      />
-
-      {task.icon && (
-        <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
-          <HabitIcon icon={task.icon} size={18} />
+      {/* Fila 1 — prioridad */}
+      <div className="flex items-center gap-1.5">
+        <span
+          className="w-2 h-2 rounded-full flex-shrink-0"
+          style={{ background: PRIORITY_COLORS[task.priority] }}
+        />
+        <span className="text-xs font-semibold" style={{ color: PRIORITY_COLORS[task.priority] }}>
+          {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
         </span>
-      )}
-
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 mb-0.5">
-          <span
-            className="w-2 h-2 rounded-full flex-shrink-0"
-            style={{ background: PRIORITY_COLORS[task.priority] }}
-          />
-          <span className="text-xs font-semibold" style={{ color: PRIORITY_COLORS[task.priority] }}>
-            {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
-          </span>
-        </div>
-        <p
-          className="text-sm font-medium truncate leading-snug"
-          style={{
-            color: done ? "var(--text-secondary)" : "var(--text-primary)",
-            textDecoration: done ? "line-through" : "none",
-          }}
-        >
-          {task.title}
-        </p>
-
-        {!compact && (
-          <div className="mt-1 flex items-center gap-2 flex-wrap min-h-4">
-            {recurring
-              ? <RecurrenceBadge days={task.recurrenceDays!} />
-              : task.dueDate && <DueDate dueDate={task.dueDate} done={done} />
-            }
-            {task.startTime && !expired && (
-              <TimeBadge startTime={task.startTime} endTime={task.endTime} />
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Badge "Vencida" cuando el tiempo ha expirado */}
-      {expired && (
-        <span
-          className="flex-shrink-0 text-xs font-semibold px-2 py-1 rounded-full"
-          style={{ background: "#ef444418", color: "#ef4444" }}
-        >
-          {t("time_expired")}
-        </span>
-      )}
+      {/* Fila 2 — checkbox + icono + contenido + acciones */}
+      <div className="flex items-center gap-4">
+        <TaskCheckbox
+          done={done}
+          size={TASK_CHECKBOX_SIZE.card}
+          animated
+          onToggle={onToggle}
+          ariaLabel={done ? t("mark_pending") : t("mark_done")}
+        />
+
+        {task.icon && (
+          <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
+            <HabitIcon icon={task.icon} size={18} />
+          </span>
+        )}
+
+        <div className="flex-1 min-w-0">
+          <p
+            className="text-sm font-medium truncate leading-snug"
+            style={{
+              color: done ? "var(--text-secondary)" : "var(--text-primary)",
+              textDecoration: done ? "line-through" : "none",
+            }}
+          >
+            {task.title}
+          </p>
+
+          {!compact && (
+            <div className="mt-1 flex items-center gap-2 flex-wrap min-h-4">
+              {recurring
+                ? <RecurrenceBadge days={task.recurrenceDays!} />
+                : task.dueDate && <DueDate dueDate={task.dueDate} done={done} />
+              }
+              {task.startTime && !expired && (
+                <TimeBadge startTime={task.startTime} endTime={task.endTime} />
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Badge "Vencida" cuando el tiempo ha expirado */}
+        {expired && (
+          <span
+            className="flex-shrink-0 text-xs font-semibold px-2 py-1 rounded-full"
+            style={{ background: "#ef444418", color: "#ef4444" }}
+          >
+            {t("time_expired")}
+          </span>
+        )}
 
       {/* Three-dots menu */}
       {showMenu && (
@@ -214,6 +217,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
           </DropdownMenu.Portal>
         </DropdownMenu.Root>
       )}
+      </div>
     </motion.div>
   );
 }
