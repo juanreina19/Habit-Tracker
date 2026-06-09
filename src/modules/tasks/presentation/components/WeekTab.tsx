@@ -238,7 +238,7 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
       <div className="flex items-center gap-1">
         <span
           className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-          style={{ background: "var(--text-secondary)" }}
+          style={{ background: PRIORITY_COLORS[task.priority] }}
         />
         <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
           {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
