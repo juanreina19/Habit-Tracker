@@ -111,9 +111,9 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
       <div className="flex items-center gap-1.5">
         <span
           className="w-2 h-2 rounded-full flex-shrink-0"
-          style={{ background: PRIORITY_COLORS[task.priority] }}
+          style={{ background: "var(--text-secondary)" }}
         />
-        <span className="text-xs font-semibold" style={{ color: PRIORITY_COLORS[task.priority] }}>
+        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
           {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
         </span>
       </div>
