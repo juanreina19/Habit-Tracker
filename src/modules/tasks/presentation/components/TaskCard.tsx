@@ -81,9 +81,10 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
   const t = useTranslations("tasks");
   const done = isTaskDone(task);
   const recurring = isRecurring(task);
-  const expired  = isTaskTimeExpired(task) && !done;
+  const expired   = isTaskTimeExpired(task) && !done;
   const isOverdue = !recurring && !!task.dueDate && task.dueDate < today() && !done;
-  const showMenu = !compact && (onEdit || onDelete);
+  const isLate    = expired || isOverdue;
+  const showMenu  = !compact && (onEdit || onDelete);
 
   return (
     <motion.div
@@ -108,26 +109,8 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         willChange: "transform",
       }}
     >
-      {/* Fila 1 — badges de estado (izq) + prioridad (der) */}
+      {/* Fila 1 — prioridad (izq) + badge de estado (der) */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          {isOverdue && (
-            <span
-              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-              style={{ background: "#ef444415", color: "#ef4444" }}
-            >
-              {t("overdue")}
-            </span>
-          )}
-          {expired && (
-            <span
-              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-              style={{ background: "#ef444415", color: "#ef4444" }}
-            >
-              {t("time_expired")}
-            </span>
-          )}
-        </div>
         <div className="flex items-center gap-1.5">
           <span
             className="w-2 h-2 rounded-full flex-shrink-0"
@@ -137,6 +120,14 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
             {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
           </span>
         </div>
+        {isLate && (
+          <span
+            className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+            style={{ background: "#ef444415", color: "#ef4444" }}
+          >
+            {t("overdue")}
+          </span>
+        )}
       </div>
 
       {/* Fila 2 — checkbox + icono + contenido + acciones */}
