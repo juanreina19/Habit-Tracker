@@ -10,13 +10,8 @@ import { useLocale } from "@/shared/i18n/useLocale";
 import { today } from "@/shared/lib/utils/dates";
 import { isTaskDone, isRecurring, formatTaskTime, isTaskTimeExpired } from "../../domain/entities/Task";
 import type { TaskWithStatus, TaskPriority } from "../../domain/entities/Task";
-
-export const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  urgent: "#ef4444",
-  high:   "#f97316",
-  medium: "#eab308",
-  low:    "#6b7280",
-};
+import { PRIORITY_COLORS } from "../constants/taskColors";
+export { PRIORITY_COLORS };
 
 function parseLocalDate(iso: string): Date {
   const [y, m, d] = iso.split("-").map(Number);

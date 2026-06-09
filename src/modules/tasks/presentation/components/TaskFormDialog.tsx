@@ -8,16 +8,10 @@ import { formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
 import type { Task, CreateTaskInput, UpdateTaskInput, TaskPriority } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
+import { PRIORITY_COLORS } from "../constants/taskColors";
 
 const PRIORITIES: TaskPriority[] = ["low", "medium", "high", "urgent"];
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
-
-const PRIORITY_COLORS: Record<TaskPriority, string> = {
-  urgent: "#ef4444",
-  high:   "#f97316",
-  medium: "#eab308",
-  low:    "#6b7280",
-};
 
 interface Props {
   open: boolean;

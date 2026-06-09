@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useLocale } from "@/shared/i18n/useLocale";
-import { PRIORITY_COLORS } from "./TaskCard";
+import { PRIORITY_COLORS } from "../constants/taskColors";
 import { isRecurring, formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
 import type { DayTaskStatus } from "../../domain/use-cases/GetWeekTasksUseCase";
