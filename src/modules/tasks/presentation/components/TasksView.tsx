@@ -155,8 +155,8 @@ interface TodayTabProps {
 function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
   const t = useTranslations("tasks");
   const { tasks, toggleTask } = useTodayTasks(userId);
-  const [showOverdue, setShowOverdue] = useState(true);
-  const [showDone,    setShowDone]    = useState(false);
+  const [showOverdue, setShowOverdue] = useState(false);
+  const [showDone,    setShowDone]    = useState(true);
 
   const todayStr   = format(new Date(), "yyyy-MM-dd");
   const pending    = tasks.filter((tk) => !isTaskDone(tk));

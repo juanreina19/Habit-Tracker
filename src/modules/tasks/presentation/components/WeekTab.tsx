@@ -14,7 +14,8 @@ import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { isRecurring, formatTaskTime } from "../../domain/entities/Task";
 import { toISODate, today } from "@/shared/lib/utils/dates";
-import type { Task, TaskWithStatus } from "../../domain/entities/Task";
+import type { Task, TaskWithStatus, TaskPriority } from "../../domain/entities/Task";
+import { PRIORITY_COLORS } from "../constants/taskColors";
 import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
@@ -233,24 +234,35 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
         opacity: muted ? 0.55 : 1,
       }}
     >
-      {/* Fila 1 — checkbox + icono + título + ojo (siempre presente) */}
-      <div className="flex items-center gap-2">
+      {/* Fila 1 — checkbox + icono + (prioridad / título) + ojo */}
+      <div className="flex items-start gap-2">
         <TaskCheckbox done={status.isCompleted} size={TASK_CHECKBOX_SIZE.week} />
         {task.icon && (
-          <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
+          <span className="flex-shrink-0 mt-0.5" style={{ color: "var(--text-secondary)" }}>
             <HabitIcon icon={task.icon} size={12} />
           </span>
         )}
-        <span
-          className="text-sm font-medium truncate flex-1 min-w-0"
-          title={task.title}
-          style={{
-            color: status.isCompleted ? "var(--text-secondary)" : "var(--text-primary)",
-            textDecoration: status.isCompleted ? "line-through" : "none",
-          }}
-        >
-          {task.title}
-        </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1 mb-0.5">
+            <span
+              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+              style={{ background: PRIORITY_COLORS[task.priority] }}
+            />
+            <span className="text-[10px] font-semibold" style={{ color: PRIORITY_COLORS[task.priority] }}>
+              {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
+            </span>
+          </div>
+          <span
+            className="text-sm font-medium truncate block"
+            title={task.title}
+            style={{
+              color: status.isCompleted ? "var(--text-secondary)" : "var(--text-primary)",
+              textDecoration: status.isCompleted ? "line-through" : "none",
+            }}
+          >
+            {task.title}
+          </span>
+        </div>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onViewDetail(); }}

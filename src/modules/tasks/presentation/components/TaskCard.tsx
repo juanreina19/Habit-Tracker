@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { today } from "@/shared/lib/utils/dates";
 import { isTaskDone, isRecurring, formatTaskTime, isTaskTimeExpired } from "../../domain/entities/Task";
-import type { TaskWithStatus } from "../../domain/entities/Task";
+import type { TaskWithStatus, TaskPriority } from "../../domain/entities/Task";
 import { PRIORITY_COLORS } from "../constants/taskColors";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
@@ -123,6 +123,15 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
 
       {/* Content */}
       <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <span
+            className="w-2 h-2 rounded-full flex-shrink-0"
+            style={{ background: PRIORITY_COLORS[task.priority] }}
+          />
+          <span className="text-xs font-semibold" style={{ color: PRIORITY_COLORS[task.priority] }}>
+            {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
+          </span>
+        </div>
         <p
           className="text-sm font-medium truncate leading-snug"
           style={{
