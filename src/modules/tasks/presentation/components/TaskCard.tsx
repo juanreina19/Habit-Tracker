@@ -9,8 +9,10 @@ import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { today } from "@/shared/lib/utils/dates";
 import { isTaskDone, isRecurring, formatTaskTime, isTaskTimeExpired } from "../../domain/entities/Task";
-import type { TaskWithStatus, TaskPriority } from "../../domain/entities/Task";
+import type { TaskWithStatus } from "../../domain/entities/Task";
 import { PRIORITY_COLORS } from "../constants/taskColors";
+import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
+import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 export { PRIORITY_COLORS };
 
 function parseLocalDate(iso: string): Date {
@@ -80,7 +82,6 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
   const done = isTaskDone(task);
   const recurring = isRecurring(task);
   const expired = isTaskTimeExpired(task) && !done;   // solo para el badge "Vencida" — informativo, no restrictivo
-  const priorityColor = PRIORITY_COLORS[task.priority];
   const showMenu = !compact && (onEdit || onDelete);
 
   return (
@@ -98,7 +99,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
       className="flex items-center gap-4 rounded-[16px] p-4 select-none"
       style={{
         background: "var(--surface)",
-        border: `1px solid ${priorityColor}66`,
+        border: "1px solid var(--border)",
         opacity: done ? 0.65 : 1,
         cursor: "default",
         userSelect: "none",
@@ -106,29 +107,19 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         willChange: "transform",
       }}
     >
-      {/* Checkbox */}
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); onToggle(); }}
-        aria-label={done ? t("mark_pending") : t("mark_done")}
-        className="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
-        style={{
-          borderColor: done ? priorityColor : "var(--border)",
-          background:  done ? priorityColor : "transparent",
-          cursor: "pointer",
-        }}
-      >
-        {done && (
-          <motion.svg
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 500, damping: 25 }}
-            width="12" height="12" viewBox="0 0 12 12" fill="none"
-          >
-            <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </motion.svg>
-        )}
-      </button>
+      <TaskCheckbox
+        done={done}
+        size={TASK_CHECKBOX_SIZE.card}
+        animated
+        onToggle={onToggle}
+        ariaLabel={done ? t("mark_pending") : t("mark_done")}
+      />
+
+      {task.icon && (
+        <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
+          <HabitIcon icon={task.icon} size={18} />
+        </span>
+      )}
 
       {/* Content */}
       <div className="flex-1 min-w-0">

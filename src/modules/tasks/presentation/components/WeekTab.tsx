@@ -8,8 +8,9 @@ import { es, enUS } from "date-fns/locale";
 import { createClient } from "@/shared/lib/supabase/client";
 import { TaskSupabaseRepository } from "../../infrastructure/supabase/TaskSupabaseRepository";
 import { GetWeekTasksUseCase, type WeekTasksResult, type DayTaskStatus } from "../../domain/use-cases/GetWeekTasksUseCase";
-import { PRIORITY_COLORS } from "./TaskCard";
 import { TaskDetailDialog, type TaskDetailEntry } from "./TaskDetailDialog";
+import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
+import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { isRecurring, formatTaskTime } from "../../domain/entities/Task";
 import { toISODate, today } from "@/shared/lib/utils/dates";
@@ -211,7 +212,6 @@ export function WeekTab({ userId, tasks }: Props) {
 
 function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; status: DayTaskStatus; dateISO: string; onViewDetail: () => void }) {
   const t = useTranslations("tasks");
-  const priorityColor = PRIORITY_COLORS[task.priority];
   const isPastDay = dateISO < today();
   // "Atrasada" solo aplica a tareas únicas: una instancia recurrente no completada
   // en un día pasado no tiene un estado de "vencimiento" en el dominio (no es
@@ -229,25 +229,18 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
       className="flex flex-col gap-1.5 rounded-[14px] px-3.5 py-3 min-h-[76px] justify-center"
       style={{
         background: "var(--surface)",
-        border: `1px solid ${priorityColor}66`,
+        border: "1px solid var(--border)",
         opacity: muted ? 0.55 : 1,
       }}
     >
-      {/* Fila 1 — checkbox + título + ojo (siempre presente) */}
-      <div className="flex items-center gap-2.5">
-        <span
-          className="flex-shrink-0 w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center"
-          style={{
-            borderColor: status.isCompleted ? priorityColor : "var(--border)",
-            background:  status.isCompleted ? priorityColor : "transparent",
-          }}
-        >
-          {status.isCompleted && (
-            <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-              <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </span>
+      {/* Fila 1 — checkbox + icono + título + ojo (siempre presente) */}
+      <div className="flex items-center gap-2">
+        <TaskCheckbox done={status.isCompleted} size={TASK_CHECKBOX_SIZE.week} />
+        {task.icon && (
+          <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
+            <HabitIcon icon={task.icon} size={12} />
+          </span>
+        )}
         <span
           className="text-sm font-medium truncate flex-1 min-w-0"
           title={task.title}
