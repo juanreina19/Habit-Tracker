@@ -8,7 +8,8 @@ import { formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
 import type { Task, CreateTaskInput, UpdateTaskInput, TaskPriority } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
-import { PRIORITY_COLORS } from "../constants/taskColors";
+import { PRIORITY_COLORS, TASK_ICON_SET } from "../constants/taskColors";
+import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 
 const PRIORITIES: TaskPriority[] = ["low", "medium", "high", "urgent"];
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
@@ -47,6 +48,8 @@ export function TaskFormDialog({
   const [endTime, setEndTime]         = useState("");
   const [timeError, setTimeError]     = useState("");
 
+  const [icon, setIcon]               = useState<string | null>(null);
+
   const [titleError, setTitleError]   = useState("");
   const [isSaving, setIsSaving]       = useState(false);
   const [isDeleting, setIsDeleting]   = useState(false);
@@ -67,6 +70,8 @@ export function TaskFormDialog({
       setHasSchedule(hasSched);
       setStartTime(task?.startTime ? formatTaskTime(task.startTime) : "");
       setEndTime(task?.endTime ? formatTaskTime(task.endTime) : "");
+
+      setIcon(task?.icon ?? null);
 
       setTitleError("");
       setDaysError("");
@@ -104,6 +109,7 @@ export function TaskFormDialog({
         recurrenceDays:  isRecurring ? recurrenceDays : null,
         startTime:       hasSchedule && startTime ? startTime : null,
         endTime:         hasSchedule && startTime && endTime ? endTime : null,
+        icon:            icon ?? null,
       } as const;
 
       if (isEdit && task) {
@@ -117,6 +123,7 @@ export function TaskFormDialog({
           recurrenceDays:  input.recurrenceDays ?? undefined,
           startTime:       input.startTime ?? undefined,
           endTime:         input.endTime ?? undefined,
+          icon:            input.icon ?? undefined,
         });
       }
       onClose();
@@ -416,6 +423,42 @@ export function TaskFormDialog({
                         </motion.div>
                       )}
                     </AnimatePresence>
+                  </div>
+
+                  {/* Icono */}
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                      {t("icon_label")}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIcon(null)}
+                        className="w-9 h-9 rounded-[10px] flex items-center justify-center text-sm font-medium transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                        style={{
+                          border:      icon === null ? "2px solid var(--accent)" : "2px solid transparent",
+                          background:  icon === null ? "var(--accent-soft)" : "var(--surface-elevated)",
+                          color:       "var(--text-secondary)",
+                        }}
+                      >
+                        {t("icon_none")}
+                      </button>
+                      {TASK_ICON_SET.map((iconKey) => (
+                        <button
+                          key={iconKey}
+                          type="button"
+                          onClick={() => setIcon(iconKey)}
+                          className="w-9 h-9 rounded-[10px] flex items-center justify-center transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                          style={{
+                            border:     icon === iconKey ? "2px solid var(--accent)" : "2px solid transparent",
+                            background: icon === iconKey ? "var(--accent-soft)" : "var(--surface-elevated)",
+                            color:      icon === iconKey ? "var(--accent)" : "var(--text-secondary)",
+                          }}
+                        >
+                          <HabitIcon icon={iconKey} size={20} />
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Actions */}

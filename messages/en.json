@@ -212,7 +212,9 @@
     "status_pending": "Pending",
     "status_completed": "Completed",
     "created_on": "Created on {date}",
-    "close": "Close"
+    "close": "Close",
+    "icon_label": "Icon",
+    "icon_none": "—"
   },
   "calendar": {
     "subtitle": "View",
