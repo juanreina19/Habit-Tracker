@@ -81,7 +81,8 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
   const t = useTranslations("tasks");
   const done = isTaskDone(task);
   const recurring = isRecurring(task);
-  const expired = isTaskTimeExpired(task) && !done;   // solo para el badge "Vencida" — informativo, no restrictivo
+  const expired  = isTaskTimeExpired(task) && !done;
+  const isOverdue = !recurring && !!task.dueDate && task.dueDate < today() && !done;
   const showMenu = !compact && (onEdit || onDelete);
 
   return (
@@ -107,15 +108,35 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         willChange: "transform",
       }}
     >
-      {/* Fila 1 — prioridad */}
-      <div className="flex items-center gap-1.5">
-        <span
-          className="w-2 h-2 rounded-full flex-shrink-0"
-          style={{ background: PRIORITY_COLORS[task.priority] }}
-        />
-        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-          {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
-        </span>
+      {/* Fila 1 — badges de estado (izq) + prioridad (der) */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          {isOverdue && (
+            <span
+              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              style={{ background: "#ef444415", color: "#ef4444" }}
+            >
+              {t("overdue")}
+            </span>
+          )}
+          {expired && (
+            <span
+              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              style={{ background: "#ef444415", color: "#ef4444" }}
+            >
+              {t("time_expired")}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span
+            className="w-2 h-2 rounded-full flex-shrink-0"
+            style={{ background: PRIORITY_COLORS[task.priority] }}
+          />
+          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+            {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
+          </span>
+        </div>
       </div>
 
       {/* Fila 2 — checkbox + icono + contenido + acciones */}
@@ -149,7 +170,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
             <div className="mt-1 flex items-center gap-2 flex-wrap min-h-4">
               {recurring
                 ? <RecurrenceBadge days={task.recurrenceDays!} />
-                : task.dueDate && <DueDate dueDate={task.dueDate} done={done} />
+                : task.dueDate && !isOverdue && <DueDate dueDate={task.dueDate} done={done} />
               }
               {task.startTime && !expired && (
                 <TimeBadge startTime={task.startTime} endTime={task.endTime} />
@@ -157,16 +178,6 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
             </div>
           )}
         </div>
-
-        {/* Badge "Vencida" cuando el tiempo ha expirado */}
-        {expired && (
-          <span
-            className="flex-shrink-0 text-xs font-semibold px-2 py-1 rounded-full"
-            style={{ background: "#ef444418", color: "#ef4444" }}
-          >
-            {t("time_expired")}
-          </span>
-        )}
 
       {/* Three-dots menu */}
       {showMenu && (
