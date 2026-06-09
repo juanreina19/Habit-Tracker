@@ -155,16 +155,31 @@ interface TodayTabProps {
 function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
   const t = useTranslations("tasks");
   const { tasks, toggleTask } = useTodayTasks(userId);
-  const [showDone, setShowDone] = useState(true);
+  const [showOverdue, setShowOverdue] = useState(true);
+  const [showDone,    setShowDone]    = useState(false);
 
-  const pending = sortPending(tasks.filter((tk) => !isTaskDone(tk)));
-  const done    = tasks.filter((tk) => isTaskDone(tk));
+  const todayStr   = format(new Date(), "yyyy-MM-dd");
+  const pending    = tasks.filter((tk) => !isTaskDone(tk));
+  const overdue    = sortByPriority(pending.filter((tk) => tk.dueDate && tk.dueDate < todayStr));
+  const todayTasks = sortPending(pending.filter((tk) => !(tk.dueDate && tk.dueDate < todayStr)));
+  const done       = tasks.filter((tk) => isTaskDone(tk));
 
   return (
     <>
+      {overdue.length > 0 && (
+        <CollapsibleTaskSection
+          title={`${t("overdue_section")} (${overdue.length})`}
+          tasks={overdue}
+          toggleTask={toggleTask}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          show={showOverdue}
+          onToggleShow={() => setShowOverdue((p) => !p)}
+        />
+      )}
       <TaskSection
-        title={`${t("pending")} (${pending.length})`}
-        tasks={pending}
+        title={`${t("tab_today")} (${todayTasks.length})`}
+        tasks={todayTasks}
         toggleTask={toggleTask}
         onEdit={onEdit}
         onDelete={onDelete}
