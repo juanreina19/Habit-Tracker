@@ -163,7 +163,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
                 ? <RecurrenceBadge days={task.recurrenceDays!} />
                 : task.dueDate && !isOverdue && <DueDate dueDate={task.dueDate} done={done} />
               }
-              {task.startTime && !expired && (
+              {task.startTime && (
                 <TimeBadge startTime={task.startTime} endTime={task.endTime} />
               )}
             </div>
