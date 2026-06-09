@@ -181,6 +181,12 @@ alter table tasks
   add column if not exists start_time      time,        -- HH:MM (validación nativa PG)
   add column if not exists end_time        time;        -- HH:MM opcional
 
+-- ─── TAREAS — FASE 2: ICONOS ─────────────────────────────────
+-- Las filas existentes quedan con icon = NULL ("sin icono").
+
+alter table tasks
+  add column if not exists icon text;                   -- "lucide:Name"; null = sin icono
+
 create index if not exists idx_tasks_recurrence_days
   on tasks using gin (recurrence_days);
 

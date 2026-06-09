@@ -14,6 +14,7 @@ export interface Task {
   endTime:        string | null;     // "HH:MM:SS"
   completedAt:    ISOTimestamp | null;  // solo para tareas únicas
   createdAt:      ISOTimestamp;
+  icon:           string | null;     // "lucide:Name"; null = sin icono
 }
 
 /** Read model enriquecido para presentación y queries. */
@@ -54,6 +55,7 @@ export interface CreateTaskInput {
   recurrenceDays?: number[];       // undefined/[] = única
   startTime?:      string;         // "HH:MM"
   endTime?:        string;         // "HH:MM"
+  icon?:           string | null;  // "lucide:Name"
 }
 
 export interface UpdateTaskInput {
@@ -65,4 +67,5 @@ export interface UpdateTaskInput {
   startTime?:      string | null;
   endTime?:        string | null;
   completedAt?:    ISOTimestamp | null;  // gestionado exclusivamente por ToggleTaskUseCase
+  icon?:           string | null;        // "lucide:Name"
 }

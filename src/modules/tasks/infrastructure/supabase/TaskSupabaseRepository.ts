@@ -22,6 +22,7 @@ export class TaskSupabaseRepository implements ITaskRepository {
       endTime:        row.end_time ?? null,
       completedAt:    row.completed_at,
       createdAt:      row.created_at,
+      icon:           row.icon ?? null,
     };
   }
 
@@ -130,6 +131,7 @@ export class TaskSupabaseRepository implements ITaskRepository {
         start_time:      input.startTime ?? null,
         end_time:        input.endTime ?? null,
         completed_at:    null,
+        icon:            input.icon ?? null,
       })
       .select()
       .single();
@@ -148,6 +150,7 @@ export class TaskSupabaseRepository implements ITaskRepository {
     if ("recurrenceDays" in input)             patch.recurrence_days = input.recurrenceDays ?? null;
     if ("startTime" in input)                  patch.start_time = input.startTime ?? null;
     if ("endTime" in input)                    patch.end_time = input.endTime ?? null;
+    if ("icon" in input)                       patch.icon = input.icon ?? null;
 
     const { data, error } = await this.client
       .from("tasks")

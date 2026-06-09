@@ -97,6 +97,7 @@ export interface DbTask {
   end_time: string | null;           // "HH:MM:SS"
   completed_at: ISOTimestamp | null;
   created_at: ISOTimestamp;
+  icon: string | null;               // "lucide:Name"; null = sin icono
 }
 
 export interface DbTaskCompletion {
