@@ -28,7 +28,13 @@ function DueDate({ dueDate, done }: { dueDate: string; done: boolean }) {
   let label: string;
   let color: string;
   if (dueDate < todayStr && !done) {
-    label = t("overdue"); color = "#ef4444";
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const yesterdayStr = format(d, "yyyy-MM-dd");
+    label = dueDate === yesterdayStr
+      ? t("yesterday")
+      : format(parseLocalDate(dueDate), "d MMM", { locale: dateFnsLocale });
+    color = "#ef4444";
   } else if (dueDate === todayStr) {
     label = t("today"); color = "var(--accent)";
   } else {
@@ -161,7 +167,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
             <div className="mt-1 flex items-center gap-2 flex-wrap min-h-4">
               {recurring
                 ? <RecurrenceBadge days={task.recurrenceDays!} />
-                : task.dueDate && !isOverdue && <DueDate dueDate={task.dueDate} done={done} />
+                : task.dueDate && <DueDate dueDate={task.dueDate} done={done} />
               }
               {task.startTime && (
                 <TimeBadge startTime={task.startTime} endTime={task.endTime} />

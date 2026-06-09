@@ -178,6 +178,7 @@
     "new_title": "New task",
     "edit_title": "Edit task",
     "today": "Today",
+    "yesterday": "Yesterday",
     "overdue": "Overdue",
     "mark_done": "Mark as done",
     "mark_pending": "Mark as pending",
