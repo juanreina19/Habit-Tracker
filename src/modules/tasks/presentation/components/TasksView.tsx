@@ -77,9 +77,7 @@ export default function TasksView({ userId }: Props) {
 
   return (
     <>
-      <div
-        className={`px-5 pt-14 pb-6 mx-auto lg:pt-8 lg:px-10 ${tab === "week" ? "max-w-lg lg:max-w-7xl" : "max-w-lg lg:max-w-3xl"}`}
-      >
+      <div className="px-5 pt-14 pb-6 mx-auto lg:pt-8 lg:px-10 max-w-lg lg:max-w-7xl">
         {/* Header */}
         <div className="flex items-center mb-6">
           <div className="flex-1">
@@ -166,34 +164,65 @@ function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
 
   return (
     <>
-      {overdue.length > 0 && (
+      {/* Mobile — secciones apiladas, colapsables */}
+      <div className="lg:hidden">
+        {overdue.length > 0 && (
+          <CollapsibleTaskSection
+            title={`${t("overdue_section")} (${overdue.length})`}
+            tasks={overdue}
+            toggleTask={toggleTask}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            show={showOverdue}
+            onToggleShow={() => setShowOverdue((p) => !p)}
+          />
+        )}
+        <TaskSection
+          title={`${t("tab_today")} (${todayTasks.length})`}
+          tasks={todayTasks}
+          toggleTask={toggleTask}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          emptyState={<TaskEmptyState />}
+        />
         <CollapsibleTaskSection
+          title={`${t("completed")} (${done.length})`}
+          tasks={done}
+          toggleTask={toggleTask}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          show={showDone}
+          onToggleShow={() => setShowDone((p) => !p)}
+        />
+      </div>
+
+      {/* Desktop — 3 columnas: Atrasadas / Hoy / Completadas */}
+      <div className="hidden lg:grid lg:grid-cols-3 lg:gap-4">
+        <TaskColumn
           title={`${t("overdue_section")} (${overdue.length})`}
           tasks={overdue}
           toggleTask={toggleTask}
           onEdit={onEdit}
           onDelete={onDelete}
-          show={showOverdue}
-          onToggleShow={() => setShowOverdue((p) => !p)}
+          emptyState={<EmptyColumnPlaceholder text="—" />}
         />
-      )}
-      <TaskSection
-        title={`${t("tab_today")} (${todayTasks.length})`}
-        tasks={todayTasks}
-        toggleTask={toggleTask}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        emptyState={<TaskEmptyState />}
-      />
-      <CollapsibleTaskSection
-        title={`${t("completed")} (${done.length})`}
-        tasks={done}
-        toggleTask={toggleTask}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        show={showDone}
-        onToggleShow={() => setShowDone((p) => !p)}
-      />
+        <TaskColumn
+          title={`${t("tab_today")} (${todayTasks.length})`}
+          tasks={todayTasks}
+          toggleTask={toggleTask}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          emptyState={<TaskEmptyState />}
+        />
+        <TaskColumn
+          title={`${t("completed")} (${done.length})`}
+          tasks={done}
+          toggleTask={toggleTask}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          emptyState={<EmptyColumnPlaceholder text={t("no_completed")} />}
+        />
+      </div>
     </>
   );
 }
@@ -256,34 +285,65 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete }: AllTabProps) {
         />
       </div>
 
-      {overdue.length > 0 && (
+      {/* Mobile — secciones apiladas */}
+      <div className="lg:hidden">
+        {overdue.length > 0 && (
+          <TaskSection
+            title={`${t("overdue_section")} (${overdue.length})`}
+            tasks={overdue}
+            toggleTask={toggleTask}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        )}
+
         <TaskSection
+          title={`${t("pending")} (${pending.length})`}
+          tasks={pending}
+          toggleTask={toggleTask}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          emptyState={<TaskEmptyState />}
+        />
+
+        <CollapsibleTaskSection
+          title={`${t("completed")} (${done.length})`}
+          tasks={done}
+          toggleTask={toggleTask}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          show={showDone}
+          onToggleShow={() => setShowDone((p) => !p)}
+        />
+      </div>
+
+      {/* Desktop — 3 columnas: Atrasadas / Pendientes / Completadas */}
+      <div className="hidden lg:grid lg:grid-cols-3 lg:gap-4">
+        <TaskColumn
           title={`${t("overdue_section")} (${overdue.length})`}
           tasks={overdue}
           toggleTask={toggleTask}
           onEdit={onEdit}
           onDelete={onDelete}
+          emptyState={<EmptyColumnPlaceholder text="—" />}
         />
-      )}
-
-      <TaskSection
-        title={`${t("pending")} (${pending.length})`}
-        tasks={pending}
-        toggleTask={toggleTask}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        emptyState={<TaskEmptyState />}
-      />
-
-      <CollapsibleTaskSection
-        title={`${t("completed")} (${done.length})`}
-        tasks={done}
-        toggleTask={toggleTask}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        show={showDone}
-        onToggleShow={() => setShowDone((p) => !p)}
-      />
+        <TaskColumn
+          title={`${t("pending")} (${pending.length})`}
+          tasks={pending}
+          toggleTask={toggleTask}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          emptyState={<TaskEmptyState />}
+        />
+        <TaskColumn
+          title={`${t("completed")} (${done.length})`}
+          tasks={done}
+          toggleTask={toggleTask}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          emptyState={<EmptyColumnPlaceholder text={t("no_completed")} />}
+        />
+      </div>
     </>
   );
 }
@@ -411,6 +471,56 @@ function CollapsibleTaskSection({ title, tasks, toggleTask, onEdit, onDelete, sh
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+// ─── Columna desktop (Today/All a 3 columnas) ────────────────────────────────
+// Mismo patrón de columna que WeekTab (header + lista con scroll interno),
+// pero con TaskCard interactivo en lugar de WeekDayCard de solo lectura.
+
+interface TaskColumnProps {
+  title: string;
+  tasks: TaskWithStatus[];
+  toggleTask: (task: TaskWithStatus) => void;
+  onEdit: (task: TaskWithStatus) => void;
+  onDelete: (task: TaskWithStatus) => void;
+  emptyState: React.ReactNode;
+}
+
+function TaskColumn({ title, tasks, toggleTask, onEdit, onDelete, emptyState }: TaskColumnProps) {
+  return (
+    <div className="flex flex-col gap-2.5 min-w-0">
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+          {title}
+        </span>
+        <div className="flex-1 h-px" style={{ background: "var(--border)", opacity: 0.4 }} />
+      </div>
+
+      <div className="flex flex-col gap-2 overflow-y-auto pr-0.5" style={{ maxHeight: "min(620px, 60vh)" }}>
+        {tasks.length === 0 ? emptyState : (
+          <AnimatePresence initial={false}>
+            {tasks.map((task) => (
+              <TaskCard
+                key={task.id}
+                task={task}
+                onToggle={() => toggleTask(task)}
+                onEdit={() => onEdit(task)}
+                onDelete={() => onDelete(task)}
+              />
+            ))}
+          </AnimatePresence>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EmptyColumnPlaceholder({ text }: { text: string }) {
+  return (
+    <div className="rounded-[12px] py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
+      {text}
     </div>
   );
 }
