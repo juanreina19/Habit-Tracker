@@ -115,8 +115,9 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         willChange: "transform",
       }}
     >
-      {/* Fila 1 — prioridad (izq) + badge de estado (der) */}
-      <div className="flex items-center justify-between gap-2">
+      {/* Fila 1 — prioridad (izq) + badge de estado (der). Altura fija para que
+          la card no crezca cuando aparece el badge "Atrasada". */}
+      <div className="flex items-center justify-between gap-2 h-5">
         <div className="flex items-center gap-1.5">
           <span
             className="w-2 h-2 rounded-full flex-shrink-0"
