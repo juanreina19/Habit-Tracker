@@ -187,7 +187,7 @@ export default function TodayView({ userId }: Props) {
           </div>
         </div>
 
-        <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:gap-4 lg:items-start">
+        <div className="lg:grid lg:grid-cols-[18fr_7fr] lg:gap-4 lg:items-start">
         {/* Columna izquierda: progreso + hábitos */}
         <div className="flex flex-col gap-3 min-w-0">
 
