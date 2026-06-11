@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
+import { useTheme } from "@/shared/components/ThemeProvider";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { useStats } from "../hooks/useStats";
 import { useYearlyHeatmap } from "../hooks/useYearlyHeatmap";
@@ -26,6 +27,9 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
   const t = useTranslations("stats");
   const { locale } = useLocale();
   const dateFnsLocale = locale === "en" ? enUS : es;
+  const { theme } = useTheme();
+  const trendLineColor = theme === "light" ? "#1C1C1E" : "#FFFFFF";
+  const trendRefLineColor = theme === "light" ? "rgba(28,28,30,0.25)" : "rgba(255,255,255,0.3)";
 
   const { data, isLoading, error } = useStats(userId, userCreatedAt);
   const currentYear = new Date().getFullYear();
@@ -96,8 +100,8 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
               <AreaChart data={weekTrends} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
                 <defs>
                   <linearGradient id="weeklyTrendFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.25} />
-                    <stop offset="100%" stopColor="#FFFFFF" stopOpacity={0} />
+                    <stop offset="0%" stopColor={trendLineColor} stopOpacity={0.25} />
+                    <stop offset="100%" stopColor={trendLineColor} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis
@@ -127,18 +131,18 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
                 />
                 <ReferenceLine
                   y={weekTrends.reduce((sum, w) => sum + w.completionRate, 0) / weekTrends.length}
-                  stroke="rgba(255,255,255,0.3)"
+                  stroke={trendRefLineColor}
                   strokeDasharray="4 4"
                   strokeWidth={1}
                 />
                 <Area
                   type="monotone"
                   dataKey="completionRate"
-                  stroke="#FFFFFF"
+                  stroke={trendLineColor}
                   strokeWidth={2.5}
                   fill="url(#weeklyTrendFill)"
-                  dot={{ r: 3, fill: "#FFFFFF", strokeWidth: 0 }}
-                  activeDot={{ r: 5, fill: "#FFFFFF" }}
+                  dot={{ r: 3, fill: trendLineColor, strokeWidth: 0 }}
+                  activeDot={{ r: 5, fill: trendLineColor }}
                   animationDuration={1200}
                   animationEasing="ease-out"
                 />
@@ -161,7 +165,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
               >
-                <HabitStatRow stat={hs} />
+                <HabitStatRow stat={hs} index={index} />
               </motion.div>
             ))}
           </div>
@@ -232,7 +236,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-function HabitStatRow({ stat }: { stat: HabitStat }) {
+function HabitStatRow({ stat, index = 0 }: { stat: HabitStat; index?: number }) {
   const { habit, completionRate, totalCompleted, totalScheduled } = stat;
   const accent = habit.color ?? "#4CAF82";
   const t = useTranslations("stats");
@@ -255,9 +259,12 @@ function HabitStatRow({ stat }: { stat: HabitStat }) {
           </span>
         </div>
         <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${completionRate}%`, background: accent }}
+          <motion.div
+            className="h-full rounded-full"
+            style={{ background: accent }}
+            initial={{ width: 0 }}
+            animate={{ width: `${completionRate}%` }}
+            transition={{ duration: 0.8, delay: index * 0.04 + 0.2, ease: "easeOut" }}
           />
         </div>
         <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
