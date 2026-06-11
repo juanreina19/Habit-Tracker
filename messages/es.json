@@ -198,6 +198,7 @@
     "tab_today": "Hoy",
     "tab_week": "Semana",
     "tab_all": "Todas",
+    "tab_focus": "Enfoque",
     "overdue_section": "Atrasadas",
     "filter_all": "Todas",
     "filter_priority": "Prioridad",
@@ -215,7 +216,12 @@
     "created_on": "Creada el {date}",
     "close": "Cerrar",
     "icon_label": "Ícono",
-    "icon_none": "—"
+    "icon_none": "—",
+    "focus_mode_label": "Focus Mode",
+    "focus_mode_toggle": "Activar",
+    "focus_duration_custom": "Personalizado",
+    "focus_duration_custom_placeholder": "Minutos",
+    "focus_duration_error": "Ingresa una duración válida"
   },
   "calendar": {
     "subtitle": "Vista",
@@ -239,5 +245,25 @@
     "no_habits_scheduled": "Sin hábitos programados",
     "detail_progress": "{completed} / {scheduled} completados",
     "day_format": "EEEE d 'de' MMMM"
+  },
+  "focus": {
+    "picker_title": "¿En qué te vas a enfocar?",
+    "picker_empty_no_focus_tasks": "Ninguna de tus tareas tiene Focus Mode activado",
+    "picker_empty_hint": "Edita una tarea y configura una duración de enfoque para que aparezca aquí.",
+    "task_deleted_notice": "La tarea \"{title}\" fue eliminada. Volviendo al selector…",
+    "session_too_short": "La sesión fue muy corta para registrarse (menos de 1 min).",
+    "duration_unit": "min",
+    "start_session": "Iniciar sesión",
+    "continue_session": "Continuar sesión",
+    "status_running": "Enfoque en curso",
+    "status_paused": "Pausado",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "finish": "Finalizar",
+    "session_completed_title": "🎉 Sesión completada",
+    "register_session": "Registrar sesión",
+    "continue_working": "Continuar trabajando",
+    "register_and_restart": "Registrar y comenzar otra sesión",
+    "finish_error": "No se pudo registrar la sesión. Inténtalo de nuevo."
   }
 }

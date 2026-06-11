@@ -190,6 +190,17 @@ alter table tasks
 create index if not exists idx_tasks_recurrence_days
   on tasks using gin (recurrence_days);
 
+-- ─── TAREAS — FASE 3: FOCUS MODE (DURACIÓN CONFIGURABLE) ─────
+-- Migración aditiva: tareas existentes quedan con focus_duration_min = NULL
+-- (no participan en Focus Mode hasta que el usuario lo configure).
+
+alter table tasks
+  add column if not exists focus_duration_min int
+    check (
+      focus_duration_min is null
+      or (focus_duration_min > 0 and focus_duration_min <= 480)
+    );
+
 -- ─── COMPLETACIONES DE TAREAS RECURRENTES ────────────────────
 -- Equivale a habit_logs pero para tareas recurrentes.
 -- Tareas únicas siguen usando completed_at en tasks.
@@ -215,3 +226,84 @@ create index if not exists idx_task_completions_task_date
 
 create index if not exists idx_task_completions_user_date
   on task_completions(user_id, completed_date);
+
+-- ─── SESIONES DE ENFOQUE (POMODORO) ──────────────────────────
+-- Cada fila = una sesión finalizada (completa o terminada antes de tiempo).
+-- duration_min es la duración configurada en la tarea AL MOMENTO de iniciar la sesión.
+-- elapsed_sec puede superar duration_min*60 si el usuario continuó trabajando ("tiempo extra").
+-- El timer en curso vive en localStorage, no en DB.
+
+create table if not exists focus_sessions (
+  id            uuid        primary key default gen_random_uuid(),
+  task_id       uuid        not null references tasks(id) on delete cascade,
+  user_id       uuid        not null references auth.users(id) on delete cascade,
+  duration_min  int         not null check (duration_min > 0),
+  started_at    timestamptz not null,
+  ended_at      timestamptz not null,
+  elapsed_sec   int         not null check (elapsed_sec >= 0),
+  status        text        not null default 'completed'
+                  check (status in ('completed', 'abandoned')),
+  created_at    timestamptz not null default now(),
+  check (ended_at >= started_at)
+);
+
+alter table focus_sessions enable row level security;
+
+create policy "Users manage own focus_sessions"
+  on focus_sessions for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+-- Para el badge "🍅 N sesiones" por tarea
+create index if not exists idx_focus_sessions_task_id
+  on focus_sessions(task_id);
+
+-- Para futuras vistas de stats/metas semanales (sin re-arquitectura)
+create index if not exists idx_focus_sessions_user_started
+  on focus_sessions(user_id, started_at desc);
+
+-- Para historial por tarea (futuro): listar sesiones de una tarea específica
+create index if not exists idx_focus_sessions_user_task
+  on focus_sessions(user_id, task_id);
+
+-- Índice específico para count_focus_sessions_by_task (badge "🍅 N"): cubre
+-- user_id + status + ended_at (filtro de "hoy") + task_id (agrupación). No es
+-- urgente para el volumen de un MVP, pero deja la RPC preparada para crecer
+-- sin necesitar una migración de índices después.
+create index if not exists idx_focus_sessions_badge
+  on focus_sessions(user_id, status, ended_at, task_id);
+
+-- RPC usada por countByTask(): un solo round-trip para contar sesiones COMPLETADAS
+-- por tarea, cuya `ended_at` cae dentro de "hoy" (>= p_since) — el badge "🍅 N"
+-- representa SESIONES COMPLETADAS HOY (no el total histórico), alineando desde
+-- el inicio el significado de N con la futura meta diaria "🍅 N/M":
+-- N no cambiará de significado al agregar M, solo se le agrega el denominador.
+-- Se filtra por `ended_at` (no `started_at`): una sesión iniciada 23:50 y
+-- finalizada 00:15 del día siguiente cuenta para el día en que TERMINÓ, que es
+-- cuando el usuario la ve registrada y el badge se actualiza.
+-- Las abandonadas no cuentan para el badge, pero se conservan para estadísticas
+-- futuras.
+-- p_since es un timestamptz calculado por el cliente como el inicio del día en
+-- su hora local (getStartOfLocalDay()). No es un dato sensible: pasarlo desde
+-- el cliente solo afecta qué rango de SUS PROPIAS sesiones (auth.uid()) se
+-- cuenta, sin implicaciones de seguridad.
+-- security invoker (declarado explícitamente, aunque sea el default) + auth.uid():
+-- no recibe userId del cliente, usa directamente el usuario autenticado — alineado
+-- con RLS. Hacerlo explícito evita que alguien la recree en el futuro como
+-- SECURITY DEFINER por error y facilita la auditoría.
+-- Diseñada para listas de tamaño humano (las tareas visibles en pantalla, <200);
+-- no es un endpoint analítico de propósito general.
+create or replace function count_focus_sessions_by_task(p_task_ids uuid[], p_since timestamptz)
+returns table (task_id uuid, total bigint)
+language sql
+stable
+security invoker
+as $$
+  select task_id, count(*) as total
+  from focus_sessions
+  where user_id = auth.uid()
+    and task_id = any(p_task_ids)
+    and status = 'completed'
+    and ended_at >= p_since
+  group by task_id;
+$$;

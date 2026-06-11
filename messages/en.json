@@ -198,6 +198,7 @@
     "tab_today": "Today",
     "tab_week": "Week",
     "tab_all": "All",
+    "tab_focus": "Focus",
     "overdue_section": "Past due",
     "filter_all": "All",
     "filter_priority": "Priority",
@@ -215,7 +216,12 @@
     "created_on": "Created on {date}",
     "close": "Close",
     "icon_label": "Icon",
-    "icon_none": "—"
+    "icon_none": "—",
+    "focus_mode_label": "Focus Mode",
+    "focus_mode_toggle": "Enable",
+    "focus_duration_custom": "Custom",
+    "focus_duration_custom_placeholder": "Minutes",
+    "focus_duration_error": "Enter a valid duration"
   },
   "calendar": {
     "subtitle": "View",
@@ -239,5 +245,25 @@
     "no_habits_scheduled": "No habits scheduled",
     "detail_progress": "{completed} / {scheduled} completed",
     "day_format": "EEEE, MMMM d"
+  },
+  "focus": {
+    "picker_title": "What will you focus on?",
+    "picker_empty_no_focus_tasks": "None of your tasks have Focus Mode enabled",
+    "picker_empty_hint": "Edit a task and set a focus duration so it appears here.",
+    "task_deleted_notice": "The task \"{title}\" was deleted. Returning to the picker…",
+    "session_too_short": "The session was too short to record (less than 1 min).",
+    "duration_unit": "min",
+    "start_session": "Start session",
+    "continue_session": "Continue session",
+    "status_running": "Focus in progress",
+    "status_paused": "Paused",
+    "pause": "Pause",
+    "resume": "Resume",
+    "finish": "Finish",
+    "session_completed_title": "🎉 Session completed",
+    "register_session": "Register session",
+    "continue_working": "Keep working",
+    "register_and_restart": "Register and start another session",
+    "finish_error": "Couldn't record the session. Please try again."
   }
 }

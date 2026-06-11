@@ -23,6 +23,7 @@ export class TaskSupabaseRepository implements ITaskRepository {
       completedAt:    row.completed_at,
       createdAt:      row.created_at,
       icon:           row.icon ?? null,
+      focusDurationMin: row.focus_duration_min ?? null,
     };
   }
 
@@ -132,6 +133,7 @@ export class TaskSupabaseRepository implements ITaskRepository {
         end_time:        input.endTime ?? null,
         completed_at:    null,
         icon:            input.icon ?? null,
+        focus_duration_min: input.focusDurationMin ?? null,
       })
       .select()
       .single();
@@ -151,6 +153,7 @@ export class TaskSupabaseRepository implements ITaskRepository {
     if ("startTime" in input)                  patch.start_time = input.startTime ?? null;
     if ("endTime" in input)                    patch.end_time = input.endTime ?? null;
     if ("icon" in input)                       patch.icon = input.icon ?? null;
+    if ("focusDurationMin" in input)           patch.focus_duration_min = input.focusDurationMin ?? null;
 
     const { data, error } = await this.client
       .from("tasks")

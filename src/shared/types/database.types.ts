@@ -98,6 +98,7 @@ export interface DbTask {
   completed_at: ISOTimestamp | null;
   created_at: ISOTimestamp;
   icon: string | null;               // "lucide:Name"; null = sin icono
+  focus_duration_min: number | null;
 }
 
 export interface DbTaskCompletion {
@@ -105,6 +106,18 @@ export interface DbTaskCompletion {
   task_id: UUID;
   user_id: UUID;
   completed_date: ISODate;
+  created_at: ISOTimestamp;
+}
+
+export interface DbFocusSession {
+  id: UUID;
+  task_id: UUID;
+  user_id: UUID;
+  duration_min: number;
+  started_at: ISOTimestamp;
+  ended_at: ISOTimestamp;
+  elapsed_sec: number;
+  status: "completed" | "abandoned";
   created_at: ISOTimestamp;
 }
 
@@ -157,6 +170,11 @@ export interface Database {
         Row: DbTaskCompletion;
         Insert: Omit<DbTaskCompletion, "id" | "created_at">;
         Update: never;
+      };
+      focus_sessions: {
+        Row: DbFocusSession;
+        Insert: Omit<DbFocusSession, "id" | "created_at">;
+        Update: never;  // append-only, igual que task_completions
       };
     };
   };

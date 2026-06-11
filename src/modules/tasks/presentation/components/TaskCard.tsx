@@ -81,9 +81,10 @@ interface Props {
   onEdit?: () => void;
   onDelete?: () => void;
   compact?: boolean;
+  sessionCount?: number;
 }
 
-export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: Props) {
+export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, sessionCount }: Props) {
   const t = useTranslations("tasks");
   const done = isTaskDone(task);
   const recurring = isRecurring(task);
@@ -172,6 +173,11 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
               }
               {task.startTime && (
                 <TimeBadge startTime={task.startTime} endTime={task.endTime} />
+              )}
+              {!!sessionCount && (
+                <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                  🍅 {sessionCount}
+                </span>
               )}
             </div>
           )}

@@ -13,6 +13,7 @@ import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 
 const PRIORITIES: TaskPriority[] = ["low", "medium", "high", "urgent"];
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
+const FOCUS_PRESETS = [15, 20, 25, 50];
 
 interface Props {
   open: boolean;
@@ -50,6 +51,13 @@ export function TaskFormDialog({
 
   const [icon, setIcon]               = useState<string | null>(null);
 
+  // Focus Mode
+  const [focusEnabled, setFocusEnabled]         = useState(false);
+  const [focusDurationMin, setFocusDurationMin] = useState<number>(25);
+  const [isCustomFocus, setIsCustomFocus]       = useState(false);
+  const [customFocusMin, setCustomFocusMin]     = useState("");
+  const [focusError, setFocusError]             = useState("");
+
   const [titleError, setTitleError]   = useState("");
   const [isSaving, setIsSaving]       = useState(false);
   const [isDeleting, setIsDeleting]   = useState(false);
@@ -72,6 +80,22 @@ export function TaskFormDialog({
       setEndTime(task?.endTime ? formatTaskTime(task.endTime) : "");
 
       setIcon(task?.icon ?? null);
+
+      const fdm = task?.focusDurationMin ?? null;
+      setFocusEnabled(fdm !== null);
+      if (fdm !== null && FOCUS_PRESETS.includes(fdm)) {
+        setFocusDurationMin(fdm);
+        setIsCustomFocus(false);
+        setCustomFocusMin("");
+      } else if (fdm !== null) {
+        setIsCustomFocus(true);
+        setCustomFocusMin(String(fdm));
+      } else {
+        setFocusDurationMin(25);
+        setIsCustomFocus(false);
+        setCustomFocusMin("");
+      }
+      setFocusError("");
 
       setTitleError("");
       setDaysError("");
@@ -99,6 +123,20 @@ export function TaskFormDialog({
       setTimeError(t("time_end_error")); return;
     }
 
+    let finalFocusDuration: number | null = null;
+    if (focusEnabled) {
+      if (isCustomFocus) {
+        const n = Number(customFocusMin);
+        // 480 = 8h, mismo límite que el check constraint de focus_duration_min
+        if (!customFocusMin || !Number.isInteger(n) || n <= 0 || n > 480) {
+          setFocusError(t("focus_duration_error")); return;
+        }
+        finalFocusDuration = n;
+      } else {
+        finalFocusDuration = focusDurationMin;
+      }
+    }
+
     setIsSaving(true);
     try {
       const input = {
@@ -110,6 +148,7 @@ export function TaskFormDialog({
         startTime:       hasSchedule && startTime ? startTime : null,
         endTime:         hasSchedule && startTime && endTime ? endTime : null,
         icon:            icon ?? null,
+        focusDurationMin: finalFocusDuration,
       } as const;
 
       if (isEdit && task) {
@@ -124,6 +163,7 @@ export function TaskFormDialog({
           startTime:       input.startTime ?? undefined,
           endTime:         input.endTime ?? undefined,
           icon:            input.icon ?? undefined,
+          focusDurationMin: input.focusDurationMin,
         });
       }
       onClose();
@@ -459,6 +499,93 @@ export function TaskFormDialog({
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Focus Mode */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+                        {t("focus_mode_label")}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => { setFocusEnabled(p => !p); setFocusError(""); }}
+                        className="text-xs font-medium px-3 py-1 rounded-full transition-all"
+                        style={{
+                          background: focusEnabled ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
+                          color:      focusEnabled ? "var(--btn-primary-text)" : "var(--text-secondary)",
+                        }}
+                      >
+                        {t("focus_mode_toggle")}
+                      </button>
+                    </div>
+
+                    <AnimatePresence>
+                      {focusEnabled && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="grid grid-cols-5 gap-2">
+                            {FOCUS_PRESETS.map((min) => (
+                              <button
+                                key={min}
+                                type="button"
+                                onClick={() => { setFocusDurationMin(min); setIsCustomFocus(false); setFocusError(""); }}
+                                className="py-2.5 rounded-[12px] text-xs font-semibold transition-all"
+                                style={{
+                                  background: !isCustomFocus && focusDurationMin === min ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
+                                  color:      !isCustomFocus && focusDurationMin === min ? "var(--btn-primary-text)" : "var(--text-secondary)",
+                                }}
+                              >
+                                {min}
+                              </button>
+                            ))}
+                            <button
+                              type="button"
+                              onClick={() => { setIsCustomFocus(true); setFocusError(""); }}
+                              className="py-2.5 rounded-[12px] text-xs font-semibold transition-all"
+                              style={{
+                                background: isCustomFocus ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
+                                color:      isCustomFocus ? "var(--btn-primary-text)" : "var(--text-secondary)",
+                              }}
+                            >
+                              {t("focus_duration_custom")}
+                            </button>
+                          </div>
+
+                          <AnimatePresence>
+                            {isCustomFocus && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="overflow-hidden mt-2"
+                              >
+                                <input
+                                  type="number"
+                                  min={1}
+                                  value={customFocusMin}
+                                  onChange={(e) => { setCustomFocusMin(e.target.value); setFocusError(""); }}
+                                  placeholder={t("focus_duration_custom_placeholder")}
+                                  className="w-full rounded-[12px] px-3 py-3 text-sm outline-none"
+                                  style={{
+                                    background: "var(--surface-elevated)",
+                                    color: "var(--text-primary)",
+                                    border: `1.5px solid ${focusError ? "#ef4444" : "transparent"}`,
+                                    WebkitAppearance: "none",
+                                    appearance: "none",
+                                  }}
+                                />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                          {focusError && <p className="text-xs mt-1.5" style={{ color: "#ef4444" }}>{focusError}</p>}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   {/* Actions */}

@@ -15,6 +15,7 @@ export interface Task {
   completedAt:    ISOTimestamp | null;  // solo para tareas únicas
   createdAt:      ISOTimestamp;
   icon:           string | null;     // "lucide:Name"; null = sin icono
+  focusDurationMin: number | null;   // null = sin Focus Mode; número > 0 = minutos recomendados de sesión
 }
 
 /** Read model enriquecido para presentación y queries. */
@@ -56,6 +57,7 @@ export interface CreateTaskInput {
   startTime?:      string;         // "HH:MM"
   endTime?:        string;         // "HH:MM"
   icon?:           string | null;  // "lucide:Name"
+  focusDurationMin?: number | null;  // undefined/null = sin Focus Mode
 }
 
 export interface UpdateTaskInput {
@@ -68,4 +70,5 @@ export interface UpdateTaskInput {
   endTime?:        string | null;
   completedAt?:    ISOTimestamp | null;  // gestionado exclusivamente por ToggleTaskUseCase
   icon?:           string | null;        // "lucide:Name"
+  focusDurationMin?: number | null;
 }
