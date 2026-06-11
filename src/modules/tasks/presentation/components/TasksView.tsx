@@ -123,24 +123,21 @@ export default function TasksView({ userId }: Props) {
           ))}
         </div>
 
-        <AnimatePresence>
-          <motion.div
-            key={tab}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-          >
-            {tab === "today" && (
-              <TodayTab userId={userId} onEdit={openEdit} onDelete={openDelete} sessionCounts={sessionCounts} />
-            )}
-            {tab === "week" && <WeekTab userId={userId} tasks={tasks} />}
-            {tab === "all" && (
-              <AllTab tasks={tasks} toggleTask={toggleTask} onEdit={openEdit} onDelete={openDelete} sessionCounts={sessionCounts} />
-            )}
-            {tab === "focus" && <FocusTab userId={userId} tasks={tasks} toggleTask={toggleTask} />}
-          </motion.div>
-        </AnimatePresence>
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+        >
+          {tab === "today" && (
+            <TodayTab userId={userId} onEdit={openEdit} onDelete={openDelete} sessionCounts={sessionCounts} />
+          )}
+          {tab === "week" && <WeekTab userId={userId} tasks={tasks} />}
+          {tab === "all" && (
+            <AllTab tasks={tasks} toggleTask={toggleTask} onEdit={openEdit} onDelete={openDelete} sessionCounts={sessionCounts} />
+          )}
+          {tab === "focus" && <FocusTab userId={userId} tasks={tasks} toggleTask={toggleTask} />}
+        </motion.div>
       </div>
 
       <TaskFormDialog
