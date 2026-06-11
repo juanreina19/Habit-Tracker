@@ -67,8 +67,17 @@ body {
   background-color: var(--bg);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+}
+
+/* "-webkit-font-smoothing: antialiased" se pensó para pantallas Retina de macOS:
+   en Windows desactiva ClearType y deja el texto (sobre todo blanco en fondo
+   oscuro) más fino y borroso. Se activa solo en pantallas de alta densidad
+   (Retina y equivalentes), donde sí mejora el render. */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  html, body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 /* Scrollbar minimalista */
