@@ -25,7 +25,8 @@
     "streak_saved": "¡Racha salvada! 🧊",
     "save_streak": "🧊 Salvar",
     "new_habit": "Nuevo hábito",
-    "today_label": "Hoy"
+    "today_label": "Hoy",
+    "expired": "Vencido"
   },
   "habitForm": {
     "new_title": "Nuevo hábito",

@@ -6,13 +6,14 @@ import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { startOfWeek, parseISO } from "date-fns";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { useHabits } from "../hooks/useHabits";
 import { useTodayTasks } from "@/modules/tasks/presentation/hooks/useTodayTasks";
 import { TaskCard } from "@/modules/tasks/presentation/components/TaskCard";
+import { today as todayISODate } from "@/shared/lib/utils/dates";
 import { useSettingsHabits } from "../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { HabitFormDialog } from "./settings/HabitFormDialog";
@@ -67,7 +68,10 @@ export default function TodayView({ userId }: Props) {
   const { categories } = useCategories(userId);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const { tasks: todayTasks, toggleTask: toggleTodayTask } = useTodayTasks(userId);
+  const { tasks: allTodayTasks, toggleTask: toggleTodayTask } = useTodayTasks(userId);
+  const todayStr = todayISODate();
+  // Excluye tareas atrasadas: aquí solo se muestran las tareas de hoy
+  const todayTasks = allTodayTasks.filter((task) => !(task.dueDate && task.dueDate < todayStr));
   const today = new Date();
 
   // Mostrar errores de carga como toast (no pantalla completa)
@@ -334,7 +338,9 @@ function HabitRow({
   onFreeze?: () => void;
   freezeLabel: string;
 }) {
+  const t = useTranslations("today");
   const accentColor = habit.color ?? "#4CAF82";
+  const expired = locked && !habit.isCompletedToday;
 
   return (
     <motion.div
@@ -407,9 +413,12 @@ function HabitRow({
         </p>
         <div className="flex items-center gap-3 mt-0.5 flex-wrap">
           {habit.startTime && (
-            <span className="text-xs" style={{ color: locked && !habit.isCompletedToday ? "var(--danger)" : "var(--text-secondary)" }}>
-              {locked && !habit.isCompletedToday ? "🔒 " : ""}{habit.startTime}
-              {habit.estimatedMinutes ? ` – ${calcEndTime(habit.startTime, habit.estimatedMinutes)}` : ""}
+            <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
+              <Clock size={11} strokeWidth={2} />
+              <span>
+                {habit.startTime}
+                {habit.estimatedMinutes ? ` – ${calcEndTime(habit.startTime, habit.estimatedMinutes)}` : ""}
+              </span>
             </span>
           )}
           {!habit.startTime && habit.estimatedMinutes && (
@@ -419,6 +428,16 @@ function HabitRow({
           )}
         </div>
       </div>
+
+      {/* Expired badge */}
+      {expired && (
+        <span
+          className="flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+          style={{ background: "#ef444415", color: "#ef4444" }}
+        >
+          {t("expired")}
+        </span>
+      )}
 
       {/* Freeze button */}
       {onFreeze && (

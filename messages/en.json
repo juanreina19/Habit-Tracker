@@ -25,7 +25,8 @@
     "streak_saved": "Streak saved! 🧊",
     "save_streak": "🧊 Save",
     "new_habit": "New habit",
-    "today_label": "Today"
+    "today_label": "Today",
+    "expired": "Expired"
   },
   "habitForm": {
     "new_title": "New habit",
