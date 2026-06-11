@@ -61,9 +61,12 @@ export function useTasks(userId: UUID) {
       debounce = setTimeout(() => fetchRef.current(), 300);
     };
 
+    // Sin filtro user_id: igual que en useHabits.ts, el filtrado por usuario en postgres_changes
+    // requiere RLS específico para Realtime que no está configurado. Recibimos cambios de todos
+    // los usuarios pero el refetch ya está RLS-scoped (TaskSupabaseRepository filtra por user_id).
     const ch = client.channel(`tasks-all-${userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "tasks",            filter: `user_id=eq.${userId}` }, refetch)
-      .on("postgres_changes", { event: "*", schema: "public", table: "task_completions", filter: `user_id=eq.${userId}` }, refetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, refetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "task_completions" }, refetch)
       .subscribe();
 
     return () => { clearTimeout(debounce); client.removeChannel(ch); };

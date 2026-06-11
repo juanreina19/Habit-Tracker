@@ -58,9 +58,12 @@ export function useTodayTasks(userId: UUID) {
       debounce = setTimeout(() => fetchRef.current(), 300);
     };
 
+    // Sin filtro user_id: igual que en useHabits.ts, el filtrado por usuario en postgres_changes
+    // requiere RLS específico para Realtime que no está configurado. Recibimos cambios de todos
+    // los usuarios pero el refetch ya está RLS-scoped (TaskSupabaseRepository filtra por user_id).
     const ch = client.channel(`tasks-today-${userId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "tasks",            filter: `user_id=eq.${userId}` }, refetch)
-      .on("postgres_changes", { event: "*", schema: "public", table: "task_completions", filter: `user_id=eq.${userId}` }, refetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, refetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "task_completions" }, refetch)
       .subscribe();
 
     return () => { clearTimeout(debounce); client.removeChannel(ch); };
@@ -68,6 +71,26 @@ export function useTodayTasks(userId: UUID) {
 
   const toggleTask = useCallback(async (task: TaskWithStatus): Promise<void> => {
     if (pendingToggles.current.has(task.id)) return; // ignora doble-tap mientras el primero resuelve
+
+    const todayStr = today();
+    const isOverdue = !isRecurring(task) && !!task.dueDate && task.dueDate < todayStr;
+
+    if (isOverdue) {
+      // Completar una tarea atrasada: desaparece de Hoy directamente en vez de pasar por
+      // "Completadas" — findForToday() ya la excluiría tras un refresh (due_date < hoy y
+      // completed_at no nulo), así que mostrarla como completada primero da una falsa impresión.
+      pendingToggles.current.add(task.id);
+      setTasks((prev) => prev.filter((t) => t.id !== task.id));
+      try {
+        await new ToggleTaskUseCase(getRepo()).execute(task, todayStr);
+      } catch (err) {
+        setTasks((prev) => [task, ...prev]);
+        setError(err instanceof Error ? err.message : "Error al actualizar tarea");
+      } finally {
+        pendingToggles.current.delete(task.id);
+      }
+      return;
+    }
 
     const nowDone = !task.isCompletedToday;
     const optimistic: TaskWithStatus = {
@@ -78,7 +101,7 @@ export function useTodayTasks(userId: UUID) {
     pendingToggles.current.add(task.id);
     setTasks((prev) => prev.map((t) => (t.id === task.id ? optimistic : t)));
     try {
-      await new ToggleTaskUseCase(getRepo()).execute(task, today());
+      await new ToggleTaskUseCase(getRepo()).execute(task, todayStr);
     } catch (err) {
       setTasks((prev) => prev.map((t) => (t.id === task.id ? task : t)));
       setError(err instanceof Error ? err.message : "Error al actualizar tarea");
