@@ -307,3 +307,228 @@ as $$
     and ended_at >= p_since
   group by task_id;
 $$;
+
+
+-- ============================================================
+-- WEBHOOKS — Tablas, triggers y funciones (módulo Tasks)
+-- ============================================================
+
+-- ─── ENDPOINTS DE WEBHOOK (configurados por el usuario) ──────
+
+create table if not exists webhook_endpoints (
+  id            uuid        primary key default gen_random_uuid(),
+  user_id       uuid        not null references auth.users(id) on delete cascade,
+  url           text        not null check (url ~ '^https://'),
+  description   text,                         -- ej: "Zapier - Notion sync"
+  secret        text        not null,          -- HMAC-SHA256, ver firma de payloads
+  event_types   text[]      not null default
+                  array['task.created','task.updated','task.completed','task.uncompleted','task.deleted']
+                  check (event_types <@ array['task.created','task.updated','task.completed','task.uncompleted','task.deleted']),
+  is_active     boolean     not null default true,
+  created_at    timestamptz not null default now(),
+  -- Denormalizado para la UI de Settings sin JOIN
+  last_triggered_at    timestamptz,
+  last_status          text check (last_status in ('success','failed')),
+  consecutive_failures int not null default 0
+);
+
+alter table webhook_endpoints enable row level security;
+
+create policy "Users manage own webhook_endpoints"
+  on webhook_endpoints for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create index if not exists idx_webhook_endpoints_user_id on webhook_endpoints(user_id);
+create index if not exists idx_webhook_endpoints_active on webhook_endpoints(user_id) where is_active;
+
+
+-- ─── OUTBOX: EVENTOS DE TAREAS (escrito SOLO por triggers) ───
+-- Append-only. Cada fila = un hecho de dominio ya confirmado
+-- (misma transacción que la mutación de tasks/task_completions).
+
+create table if not exists webhook_events (
+  id            uuid        primary key default gen_random_uuid(),
+  user_id       uuid        not null references auth.users(id) on delete cascade,
+  event_type    text        not null
+                  check (event_type in ('task.created','task.updated','task.completed','task.uncompleted','task.deleted')),
+  task_id       uuid        not null,         -- sin FK: task.deleted ocurre tras el DELETE de tasks
+  payload       jsonb       not null,          -- payload "delgado", forma según event_type
+  created_at    timestamptz not null default now(),
+  -- 'pending'   : aún no se intentó para ningún endpoint activo
+  -- 'delivered' : entregado (o no había endpoints activos) — terminal
+  -- 'failed'    : se agotaron los reintentos para algún endpoint — terminal pero visible
+  dispatch_status text not null default 'pending'
+                  check (dispatch_status in ('pending','delivered','failed'))
+);
+
+alter table webhook_events enable row level security;
+
+-- Lectura: el usuario audita "qué eventos se generaron" (Settings → Webhooks → Activity).
+-- Sin policy de insert/update/delete para usuarios: estas filas las crea el trigger
+-- (security definer) y las actualiza el cron (service role, bypassa RLS).
+create policy "Users read own webhook_events"
+  on webhook_events for select
+  using (auth.uid() = user_id);
+
+create index if not exists idx_webhook_events_dispatch
+  on webhook_events(dispatch_status, created_at) where dispatch_status = 'pending';
+
+create index if not exists idx_webhook_events_user_id on webhook_events(user_id, created_at desc);
+
+
+-- ─── DELIVERIES: INTENTOS DE ENTREGA POR (EVENTO, ENDPOINT) ──
+
+create table if not exists webhook_deliveries (
+  id              uuid        primary key default gen_random_uuid(),
+  event_id        uuid        not null references webhook_events(id) on delete cascade,
+  endpoint_id     uuid        not null references webhook_endpoints(id) on delete cascade,
+  user_id         uuid        not null references auth.users(id) on delete cascade,
+  status          text        not null default 'pending'
+                    check (status in ('pending','success','failed')),
+  attempt_count   int         not null default 0,
+  last_attempt_at timestamptz,
+  next_attempt_at timestamptz not null default now(),  -- cuándo el cron debe reintentar
+  response_status int,                                  -- HTTP status de la última respuesta
+  response_body   text,                                 -- primeros ~500 chars, debugging
+  created_at      timestamptz not null default now(),
+  -- Idempotencia de creación: una sola fila de delivery por (evento, endpoint)
+  unique (event_id, endpoint_id)
+);
+
+alter table webhook_deliveries enable row level security;
+
+create policy "Users read own webhook_deliveries"
+  on webhook_deliveries for select
+  using (auth.uid() = user_id);
+
+create index if not exists idx_webhook_deliveries_due
+  on webhook_deliveries(next_attempt_at) where status in ('pending');
+
+create index if not exists idx_webhook_deliveries_user_id on webhook_deliveries(user_id, created_at desc);
+create index if not exists idx_webhook_deliveries_event_id on webhook_deliveries(event_id);
+
+
+-- ============================================================
+-- TRIGGER: tasks → webhook_events
+-- ============================================================
+-- security definer + search_path fijo: el usuario autenticado NO tiene
+-- INSERT en webhook_events (solo SELECT), pero el trigger debe escribir
+-- ahí dentro de SU transacción. search_path fijo evita ataques de
+-- search-path hijacking (mitigación estándar para security definer).
+-- Si el ÚNICO cambio de un UPDATE es completed_at, NO se emite también
+-- task.updated: sería un doble disparo para la misma acción del usuario
+-- (completar/descompletar ya genera task.completed/task.uncompleted).
+create or replace function fn_tasks_webhook_event()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_changes jsonb := '{}'::jsonb;
+  v_field text;
+  v_tracked_fields text[] := array['title','description','priority','due_date',
+    'recurrence_days','start_time','end_time','icon','focus_duration_min'];
+begin
+  if TG_OP = 'INSERT' then
+    insert into webhook_events (user_id, event_type, task_id, payload)
+    values (NEW.user_id, 'task.created', NEW.id, jsonb_build_object(
+      'id', NEW.id, 'title', NEW.title, 'priority', NEW.priority,
+      'dueDate', NEW.due_date, 'recurrenceDays', NEW.recurrence_days,
+      'createdAt', NEW.created_at
+    ));
+    return NEW;
+  end if;
+
+  if TG_OP = 'UPDATE' then
+    -- task.completed / task.uncompleted (tareas únicas vía completed_at)
+    if OLD.completed_at is null and NEW.completed_at is not null then
+      insert into webhook_events (user_id, event_type, task_id, payload)
+      values (NEW.user_id, 'task.completed', NEW.id, jsonb_build_object(
+        'id', NEW.id, 'title', NEW.title, 'completedAt', NEW.completed_at, 'recurring', false
+      ));
+    elsif OLD.completed_at is not null and NEW.completed_at is null then
+      insert into webhook_events (user_id, event_type, task_id, payload)
+      values (NEW.user_id, 'task.uncompleted', NEW.id, jsonb_build_object(
+        'id', NEW.id, 'title', NEW.title, 'recurring', false
+      ));
+    end if;
+
+    -- ¿Cambios en campos editables además de completed_at?
+    foreach v_field in array v_tracked_fields loop
+      if to_jsonb(OLD) -> v_field is distinct from to_jsonb(NEW) -> v_field then
+        v_changes := v_changes || jsonb_build_object(v_field,
+          jsonb_build_object('old', to_jsonb(OLD) -> v_field, 'new', to_jsonb(NEW) -> v_field));
+      end if;
+    end loop;
+
+    if v_changes <> '{}'::jsonb then
+      insert into webhook_events (user_id, event_type, task_id, payload)
+      values (NEW.user_id, 'task.updated', NEW.id, jsonb_build_object(
+        'id', NEW.id, 'title', NEW.title, 'changes', v_changes
+      ));
+    end if;
+
+    return NEW;
+  end if;
+
+  if TG_OP = 'DELETE' then
+    insert into webhook_events (user_id, event_type, task_id, payload)
+    values (OLD.user_id, 'task.deleted', OLD.id, jsonb_build_object(
+      'id', OLD.id, 'title', OLD.title
+    ));
+    return OLD;
+  end if;
+
+  return null;
+end;
+$$;
+
+drop trigger if exists trg_tasks_webhook_event on tasks;
+create trigger trg_tasks_webhook_event
+  after insert or update or delete on tasks
+  for each row execute function fn_tasks_webhook_event();
+
+
+-- ============================================================
+-- TRIGGER: task_completions → webhook_events (tareas recurrentes)
+-- ============================================================
+-- Misma justificación de security definer que fn_tasks_webhook_event().
+
+create or replace function fn_task_completions_webhook_event()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_title text;
+begin
+  if TG_OP = 'INSERT' then
+    select title into v_title from tasks where id = NEW.task_id;
+    insert into webhook_events (user_id, event_type, task_id, payload)
+    values (NEW.user_id, 'task.completed', NEW.task_id, jsonb_build_object(
+      'id', NEW.task_id, 'title', v_title, 'completedAt', NEW.created_at,
+      'completedDate', NEW.completed_date, 'recurring', true
+    ));
+    return NEW;
+  end if;
+
+  if TG_OP = 'DELETE' then
+    select title into v_title from tasks where id = OLD.task_id;
+    insert into webhook_events (user_id, event_type, task_id, payload)
+    values (OLD.user_id, 'task.uncompleted', OLD.task_id, jsonb_build_object(
+      'id', OLD.task_id, 'title', v_title, 'completedDate', OLD.completed_date, 'recurring', true
+    ));
+    return OLD;
+  end if;
+
+  return null;
+end;
+$$;
+
+drop trigger if exists trg_task_completions_webhook_event on task_completions;
+create trigger trg_task_completions_webhook_event
+  after insert or delete on task_completions
+  for each row execute function fn_task_completions_webhook_event();
