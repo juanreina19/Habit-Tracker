@@ -3,47 +3,68 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { FocusSessionSupabaseRepository } from "../../infrastructure/supabase/FocusSessionSupabaseRepository";
+import { ActiveFocusSessionSupabaseRepository } from "../../infrastructure/supabase/ActiveFocusSessionSupabaseRepository";
 import { RecordFocusSessionUseCase } from "../../domain/use-cases/RecordFocusSessionUseCase";
 import type { TaskWithStatus } from "../../domain/entities/Task";
 import type { FocusSessionStatus } from "../../domain/entities/FocusSession";
 import type { UUID } from "@/shared/types/database.types";
 import {
   type ActiveFocusSession,
-  readActiveSession,
-  writeActiveSession,
-  clearActiveSession,
   isStalePausedSession,
   getElapsedSec,
-} from "../lib/focusSessionStorage";
+} from "../../domain/entities/ActiveFocusSession";
 
 export function useFocusSession(userId: UUID) {
   const [active, setActive] = useState<ActiveFocusSession | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isFinishing, setIsFinishing] = useState(false);
   const finishingRef = useRef(false);
+  const activeRef = useRef<ActiveFocusSession | null>(null);
+  useEffect(() => { activeRef.current = active; }, [active]);
 
+  const getActiveRepo = useCallback(() => new ActiveFocusSessionSupabaseRepository(createClient()), []);
   const getRepo = useCallback(() => new FocusSessionSupabaseRepository(createClient()), []);
 
-  const loadActive = useCallback(() => {
-    const session = readActiveSession();
-    if (!session || session.userId !== userId) { setActive(null); return; }
-    if (isStalePausedSession(session)) { clearActiveSession(); setActive(null); return; }
-    setActive(session);
-  }, [userId]);
+  const loadActive = useCallback(async () => {
+    try {
+      const session = await getActiveRepo().get(userId);
+      if (session && isStalePausedSession(session)) {
+        await getActiveRepo().clear(userId);
+        setActive(null);
+        return;
+      }
+      setActive(session);
+    } catch {
+      setActive(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, getActiveRepo]);
+
+  const loadActiveRef = useRef(loadActive);
+  useEffect(() => { loadActiveRef.current = loadActive; });
 
   useEffect(() => { loadActive(); }, [loadActive]);
 
-  // Sincroniza `active` entre pestañas (ej. finish() en otra pestaña limpia el blob).
+  // Realtime: la sesión activa de cualquier dispositivo (sin filtro user_id, ver useTodayTasks.ts).
   useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === null || e.key === "focus_active_session") loadActive();
+    const client = createClient();
+    let debounce: ReturnType<typeof setTimeout>;
+    const refetch = () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => loadActiveRef.current(), 300);
     };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, [loadActive]);
 
-  const start = useCallback((task: TaskWithStatus) => {
+    const ch = client.channel(`active-focus-${userId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "active_focus_sessions" }, refetch)
+      .subscribe();
+
+    return () => { clearTimeout(debounce); client.removeChannel(ch); };
+  }, [userId]);
+
+  const start = useCallback(async (task: TaskWithStatus) => {
     if (task.focusDurationMin === null) return;
-    if (readActiveSession() !== null) return; // localStorage es la fuente de verdad: solo una sesión activa a la vez
+    if (activeRef.current !== null) return; // ya hay una sesión activa (propia o de otro dispositivo)
 
     const session: ActiveFocusSession = {
       userId,
@@ -56,9 +77,14 @@ export function useFocusSession(userId: UUID) {
       accumulatedSec: 0,
       continuedPastGoal: false,
     };
-    writeActiveSession(session);
-    setActive(session);
-  }, [userId]);
+
+    try {
+      const result = await getActiveRepo().start(userId, session);
+      setActive(result);
+    } catch {
+      // Si falla la persistencia, Realtime/loadActive en el próximo intento reflejará el estado real.
+    }
+  }, [userId, getActiveRepo]);
 
   const pause = useCallback(() => {
     setActive((prev) => {
@@ -68,40 +94,40 @@ export function useFocusSession(userId: UUID) {
         accumulatedSec: getElapsedSec(prev),
         pausedAt: new Date().toISOString(),
       };
-      writeActiveSession(next);
+      getActiveRepo().update(userId, { accumulatedSec: next.accumulatedSec, pausedAt: next.pausedAt }).catch(() => {});
       return next;
     });
-  }, []);
+  }, [userId, getActiveRepo]);
 
   const resume = useCallback(() => {
     setActive((prev) => {
       if (!prev || prev.pausedAt === null) return prev;
       const next: ActiveFocusSession = { ...prev, startedAt: new Date().toISOString(), pausedAt: null };
-      writeActiveSession(next);
+      getActiveRepo().update(userId, { startedAt: next.startedAt, pausedAt: null }).catch(() => {});
       return next;
     });
-  }, []);
+  }, [userId, getActiveRepo]);
 
   const continueWorking = useCallback(() => {
     setActive((prev) => {
       if (!prev) return prev;
       const next: ActiveFocusSession = { ...prev, continuedPastGoal: true };
-      writeActiveSession(next);
+      getActiveRepo().update(userId, { continuedPastGoal: true }).catch(() => {});
       return next;
     });
-  }, []);
+  }, [userId, getActiveRepo]);
 
   const discard = useCallback(() => {
-    clearActiveSession();
     setActive(null);
-  }, []);
+    getActiveRepo().clear(userId).catch(() => {});
+  }, [userId, getActiveRepo]);
 
-  /** Persiste la sesión activa (si corresponde) y limpia el storage. Idempotente. */
+  /** Persiste la sesión activa (si corresponde) y la limpia. Idempotente. */
   const finish = useCallback(async (): Promise<{ recorded: boolean }> => {
     if (finishingRef.current) return { recorded: false };
 
-    // Releer storage: si otra pestaña ya finalizó esta sesión, no-op.
-    const current = readActiveSession();
+    // Releer la fuente de verdad: si otro dispositivo ya finalizó esta sesión, no-op.
+    const current = await getActiveRepo().get(userId);
     if (!current) {
       setActive(null);
       return { recorded: false };
@@ -112,7 +138,7 @@ export function useFocusSession(userId: UUID) {
     try {
       const elapsedSec = Math.floor(getElapsedSec(current));
       if (elapsedSec < 60) {
-        clearActiveSession();
+        await getActiveRepo().clear(userId);
         setActive(null);
         return { recorded: false };
       }
@@ -132,14 +158,14 @@ export function useFocusSession(userId: UUID) {
         status,
       });
 
-      clearActiveSession();
+      await getActiveRepo().clear(userId);
       setActive(null);
       return { recorded: true };
     } finally {
       finishingRef.current = false;
       setIsFinishing(false);
     }
-  }, [userId, getRepo]);
+  }, [userId, getRepo, getActiveRepo]);
 
-  return { active, start, pause, resume, continueWorking, finish, discard, isFinishing };
+  return { active, loading, start, pause, resume, continueWorking, finish, discard, isFinishing };
 }

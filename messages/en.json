@@ -247,6 +247,7 @@
     "day_format": "EEEE, MMMM d"
   },
   "focus": {
+    "loading": "Loading...",
     "picker_title": "What will you focus on?",
     "picker_empty_no_focus_tasks": "None of your tasks have Focus Mode enabled",
     "picker_empty_hint": "Edit a task and set a focus duration so it appears here.",

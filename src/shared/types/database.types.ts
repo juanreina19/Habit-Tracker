@@ -121,6 +121,19 @@ export interface DbFocusSession {
   created_at: ISOTimestamp;
 }
 
+export interface DbActiveFocusSession {
+  user_id: UUID;
+  client_session_id: string;
+  task_id: UUID;
+  task_title: string;
+  duration_min: number;
+  started_at: ISOTimestamp;
+  paused_at: ISOTimestamp | null;
+  accumulated_sec: number;
+  continued_past_goal: boolean;
+  updated_at: ISOTimestamp;
+}
+
 export type TaskWebhookEventType =
   | "task.created"
   | "task.updated"
@@ -220,6 +233,11 @@ export interface Database {
         Row: DbFocusSession;
         Insert: Omit<DbFocusSession, "id" | "created_at">;
         Update: never;  // append-only, igual que task_completions
+      };
+      active_focus_sessions: {
+        Row: DbActiveFocusSession;
+        Insert: DbActiveFocusSession; // user_id es PK, no autogenerado
+        Update: Partial<Omit<DbActiveFocusSession, "user_id">>;
       };
       webhook_endpoints: {
         Row: DbWebhookEndpoint;

@@ -247,6 +247,7 @@
     "day_format": "EEEE d 'de' MMMM"
   },
   "focus": {
+    "loading": "Cargando...",
     "picker_title": "¿En qué te vas a enfocar?",
     "picker_empty_no_focus_tasks": "Ninguna de tus tareas tiene Focus Mode activado",
     "picker_empty_hint": "Edita una tarea y configura una duración de enfoque para que aparezca aquí.",

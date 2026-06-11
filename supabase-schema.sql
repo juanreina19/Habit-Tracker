@@ -532,3 +532,30 @@ drop trigger if exists trg_task_completions_webhook_event on task_completions;
 create trigger trg_task_completions_webhook_event
   after insert or delete on task_completions
   for each row execute function fn_task_completions_webhook_event();
+
+-- ─── SESIÓN DE ENFOQUE ACTIVA (CROSS-DEVICE) ─────────────────
+-- Una fila por usuario = el "timer en curso" de Focus Mode, sincronizado
+-- entre dispositivos vía Realtime. user_id como PK garantiza una sola
+-- sesión activa global por usuario (insert falla con 23505 si ya hay una;
+-- el cliente "perdedor" de una carrera adopta la fila existente).
+-- Las sesiones FINALIZADAS siguen registrándose en focus_sessions.
+
+create table if not exists active_focus_sessions (
+  user_id              uuid        primary key references auth.users(id) on delete cascade,
+  client_session_id    uuid        not null,
+  task_id              uuid        not null references tasks(id) on delete cascade,
+  task_title           text        not null,
+  duration_min         int         not null check (duration_min > 0),
+  started_at           timestamptz not null,
+  paused_at            timestamptz,
+  accumulated_sec      int         not null default 0 check (accumulated_sec >= 0),
+  continued_past_goal  boolean     not null default false,
+  updated_at           timestamptz not null default now()
+);
+
+alter table active_focus_sessions enable row level security;
+
+create policy "Users manage own active_focus_sessions"
+  on active_focus_sessions for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);

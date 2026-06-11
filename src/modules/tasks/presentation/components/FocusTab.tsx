@@ -27,6 +27,14 @@ export function FocusTab({ userId, tasks, toggleTask }: Props) {
     if (active && !task) focus.discard();
   }, [active, task, focus.discard]);
 
+  if (focus.loading) {
+    return (
+      <p className="text-sm text-center py-8" style={{ color: "var(--text-secondary)" }}>
+        {t("loading")}
+      </p>
+    );
+  }
+
   if (active) {
     if (!task) {
       return (

@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Play, Pause, Check, CheckCircle2, type LucideIcon } from "lucide-react";
-import type { ActiveFocusSession } from "../lib/focusSessionStorage";
-import { getElapsedSec } from "../lib/focusSessionStorage";
+import type { ActiveFocusSession } from "../../domain/entities/ActiveFocusSession";
+import { getElapsedSec } from "../../domain/entities/ActiveFocusSession";
 
 const NOTIFIED_KEY = "focus_last_notified_session";
 
