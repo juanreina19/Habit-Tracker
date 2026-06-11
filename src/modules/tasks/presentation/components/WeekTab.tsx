@@ -223,10 +223,9 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
   return (
     <div
       // min-h derivado de las medidas reales de Tailwind del propio layout (no adivinado):
-      // fila 1 sola ≈ 24px padding + 28px (botón ojo, w-7/h-7) = 52px; fila 1 + fila 2/3
-      // ≈ 52px + 6px gap + 16px (text-xs/Clock) = 74px. 76px deja que la variante de
-      // 1 fila crezca hasta igualar visualmente a la de 2 filas (el caso dispar más común),
-      // sin recortar la de 3 filas (~96px), que excede el mínimo de forma natural.
+      // fila 1 sola ≈ 24px padding + 28px (botón ojo, w-7/h-7) = 52px; fila 1 + fila 2
+      // (horario) ≈ 52px + 6px gap + 16px (text-xs/Clock) = 74px. 76px deja que la
+      // variante de 1 fila crezca hasta igualar visualmente a la de 2 filas.
       className="flex flex-col gap-1.5 rounded-[14px] px-3.5 py-3 min-h-[76px] justify-center"
       style={{
         background: "var(--surface)",
@@ -234,15 +233,25 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
         opacity: muted ? 0.55 : 1,
       }}
     >
-      {/* Fila 1 — prioridad */}
-      <div className="flex items-center gap-1">
-        <span
-          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-          style={{ background: PRIORITY_COLORS[task.priority] }}
-        />
-        <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-          {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
-        </span>
+      {/* Fila 1 — prioridad (izq) + badge "Atrasada" (der) */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1">
+          <span
+            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+            style={{ background: PRIORITY_COLORS[task.priority] }}
+          />
+          <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+            {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
+          </span>
+        </div>
+        {showOverdue && (
+          <span
+            className="flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+            style={{ background: "#ef444418", color: "#ef4444" }}
+          >
+            {t("overdue")}
+          </span>
+        )}
       </div>
 
       {/* Fila 2 — checkbox + icono + título + ojo */}
@@ -280,20 +289,6 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
           <Clock size={11} strokeWidth={2} />
           <span className="text-xs whitespace-nowrap">
             {formatTaskTime(task.startTime)}{task.endTime ? ` – ${formatTaskTime(task.endTime)}` : ""}
-          </span>
-        </div>
-      )}
-
-      {/* Fila 3 — badge "Atrasada", en su propia línea (solo si aplica).
-          whitespace-nowrap + truncate dentro de overflow-hidden: el badge nunca
-          empuja el ancho de la tarjeta ni envuelve, ni siquiera con textos más largos. */}
-      {showOverdue && (
-        <div className="pl-[26px] overflow-hidden">
-          <span
-            className="inline-block max-w-full truncate whitespace-nowrap text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-            style={{ background: "#ef444418", color: "#ef4444" }}
-          >
-            {t("overdue")}
           </span>
         </div>
       )}
