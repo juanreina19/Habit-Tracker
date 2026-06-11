@@ -151,7 +151,7 @@ export default function TodayView({ userId }: Props) {
   return (
     <>
       {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
-      <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+      <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-7xl">
         {/* Header — 3 columnas: fecha | Hoy+racha | + */}
         <div className="flex items-center mb-8">
           {/* Izquierda: fecha */}
@@ -197,10 +197,14 @@ export default function TodayView({ userId }: Props) {
           </div>
         </div>
 
-        {/* Progress ring */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
+        {/* Columna izquierda: progreso + hábitos */}
+        <div className="flex flex-col gap-3 min-w-0">
+
+        {/* Progress ring — mobile (horizontal, compacto) */}
         {totalCount > 0 && (
           <div
-            className="rounded-[20px] p-5 mb-6 flex items-center gap-5"
+            className="lg:hidden rounded-[20px] p-5 flex items-center gap-5"
             style={{ background: "var(--surface)" }}
           >
             <ProgressRing percentage={completionPercentage} size={72} />
@@ -218,8 +222,27 @@ export default function TodayView({ userId }: Props) {
           </div>
         )}
 
+        {/* Progress ring — desktop (vertical, anillo grande) */}
+        {totalCount > 0 && (
+          <div
+            className="hidden lg:flex flex-col items-center text-center rounded-[20px] p-6"
+            style={{ background: "var(--surface)" }}
+          >
+            <ProgressRing percentage={completionPercentage} size={120} />
+            <p className="text-2xl font-semibold mt-4" style={{ color: "var(--text-primary)" }}>
+              {completedCount}/{totalCount}
+            </p>
+            <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>{t("habits_completed")}</p>
+            {estimatedMinutes > 0 && (
+              <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
+                {t("remaining_min", { n: estimatedMinutes })}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Habit list grouped by time of day */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 lg:overflow-y-auto lg:pr-0.5 lg:max-h-[min(620px,60vh)]">
           {totalCount === 0 && (
             <div className="rounded-[20px] p-8 text-center" style={{ background: "var(--surface)" }}>
               <p className="text-4xl mb-3">✨</p>
@@ -273,43 +296,47 @@ export default function TodayView({ userId }: Props) {
             );
           })}
         </div>
+        </div>
 
-        {/* Tasks section */}
-        {todayTasks.length > 0 && (
-          <div className="mt-6">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-                {tTasks("today_tasks")}
-              </span>
-              <div className="flex-1 h-px" style={{ background: "var(--border)", opacity: 0.4 }} />
-              <Link
-                href="/tasks"
-                className="text-xs font-medium"
-                style={{ color: "var(--accent, #3b82f6)" }}
-              >
-                {tTasks("see_all")} →
-              </Link>
-            </div>
-            <div className="flex flex-col gap-2">
-              {todayTasks.map((task, index) => (
-                <motion.div
-                  key={task.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+        {/* Columna derecha: tareas pendientes de hoy */}
+        <div className="flex flex-col gap-2.5 min-w-0 mt-6 lg:mt-0">
+          {todayTasks.length > 0 && (
+            <>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+                  {tTasks("today_tasks")}
+                </span>
+                <div className="flex-1 h-px" style={{ background: "var(--border)", opacity: 0.4 }} />
+                <Link
+                  href="/tasks"
+                  className="text-xs font-medium"
+                  style={{ color: "var(--accent, #3b82f6)" }}
                 >
-                  <Link href="/tasks" className="block">
-                    <TaskCard
-                      task={task}
-                      onToggle={() => toggleTodayTask(task)}
-                      compact
-                    />
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
+                  {tTasks("see_all")} →
+                </Link>
+              </div>
+              <div className="flex flex-col gap-2 lg:overflow-y-auto lg:pr-0.5 lg:max-h-[min(620px,60vh)]">
+                {todayTasks.map((task, index) => (
+                  <motion.div
+                    key={task.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+                  >
+                    <Link href="/tasks" className="block">
+                      <TaskCard
+                        task={task}
+                        onToggle={() => toggleTodayTask(task)}
+                        compact
+                      />
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
       </div>
 
       <HabitFormDialog
