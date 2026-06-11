@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  BarChart, Bar, Cell, XAxis, YAxis, ResponsiveContainer, Tooltip,
+  AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, ReferenceLine,
 } from "recharts";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
@@ -93,7 +93,13 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
         {isMounted && weekTrends.length > 0 ? (
           <div style={{ height: 160 }}>
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weekTrends} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+              <AreaChart data={weekTrends} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="weeklyTrendFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.25} />
+                    <stop offset="100%" stopColor="#FFFFFF" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
                 <XAxis
                   dataKey="weekLabel"
                   tick={{ fill: "#8888AA", fontSize: 10 }}
@@ -108,7 +114,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
                   unit="%"
                 />
                 <Tooltip
-                  cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                  cursor={{ stroke: "rgba(255,255,255,0.15)", strokeWidth: 1 }}
                   contentStyle={{
                     background: "#1C1C1C",
                     border: "1px solid rgba(255,255,255,0.08)",
@@ -119,12 +125,24 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
                   labelStyle={{ color: "#888888" }}
                   formatter={(value: number) => [`${value}%`, t("completed_label")]}
                 />
-                <Bar dataKey="completionRate" radius={[6, 6, 0, 0]} maxBarSize={32}>
-                  {weekTrends.map((entry, i) => (
-                    <Cell key={i} fill={getBarFill(entry.completionRate)} />
-                  ))}
-                </Bar>
-              </BarChart>
+                <ReferenceLine
+                  y={weekTrends.reduce((sum, w) => sum + w.completionRate, 0) / weekTrends.length}
+                  stroke="rgba(255,255,255,0.3)"
+                  strokeDasharray="4 4"
+                  strokeWidth={1}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="completionRate"
+                  stroke="#FFFFFF"
+                  strokeWidth={2.5}
+                  fill="url(#weeklyTrendFill)"
+                  dot={{ r: 3, fill: "#FFFFFF", strokeWidth: 0 }}
+                  activeDot={{ r: 5, fill: "#FFFFFF" }}
+                  animationDuration={1200}
+                  animationEasing="ease-out"
+                />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         ) : (
@@ -408,14 +426,6 @@ function EmptyChart() {
       <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("no_data")}</p>
     </div>
   );
-}
-
-function getBarFill(rate: number): string {
-  if (rate >= 100) return "#4CAF82";
-  if (rate >= 75)  return "#A3CF8A";
-  if (rate >= 50)  return "#F5A623";
-  if (rate > 0)   return "#FF8A65";
-  return "var(--border)";
 }
 
 function StatsSkeleton() {
