@@ -152,8 +152,8 @@ export default function TodayView({ userId }: Props) {
     <>
       {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
       <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-7xl">
-        {/* Header — 3 columnas: fecha | Hoy+racha | + */}
-        <div className="flex items-center mb-8">
+        {/* Header — 3 columnas: fecha | Hoy+racha | + (móvil; en desktop vive dentro de la columna de hábitos) */}
+        <div className="flex items-center mb-8 lg:hidden">
           {/* Izquierda: fecha */}
           <div className="flex-1">
             <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
@@ -174,21 +174,45 @@ export default function TodayView({ userId }: Props) {
             )}
           </div>
 
-          {/* Derecha: botón + */}
+          {/* Derecha: botón + (solo ícono, móvil) */}
           <div className="flex-1 flex justify-end">
-            {/* Móvil: solo ícono */}
             <button
               onClick={() => setCreateOpen(true)}
-              className="lg:hidden w-10 h-10 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
+              className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
               style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
               aria-label={t("new_habit")}
             >
               <Plus size={22} strokeWidth={2.5} />
             </button>
-            {/* Desktop: pill con texto */}
+          </div>
+        </div>
+
+        <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:gap-4 lg:items-start">
+        {/* Columna izquierda: progreso + hábitos */}
+        <div className="flex flex-col gap-3 min-w-0">
+
+        {/* Header — desktop, dentro de la columna de hábitos */}
+        <div className="hidden lg:flex items-center mb-1">
+          <div className="flex-1">
+            <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+              {format(today, "d MMMM", { locale: dateFnsLocale }).replace(/^\w/, (c) => c.toUpperCase())}
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
+              {t("today_label")}
+            </span>
+            {maxStreak > 0 && (
+              <>
+                <span className="text-base leading-none">🔥</span>
+                <span className="text-sm font-bold" style={{ color: "#FF9500" }}>{maxStreak}</span>
+              </>
+            )}
+          </div>
+          <div className="flex-1 flex justify-end">
             <button
               onClick={() => setCreateOpen(true)}
-              className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full transition-opacity active:opacity-70"
+              className="flex items-center gap-2 px-4 py-2 rounded-full transition-opacity active:opacity-70"
               style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
             >
               <Plus size={18} strokeWidth={2.5} />
@@ -196,10 +220,6 @@ export default function TodayView({ userId }: Props) {
             </button>
           </div>
         </div>
-
-        <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
-        {/* Columna izquierda: progreso + hábitos */}
-        <div className="flex flex-col gap-3 min-w-0">
 
         {/* Progress ring — mobile (horizontal, compacto) */}
         {totalCount > 0 && (
