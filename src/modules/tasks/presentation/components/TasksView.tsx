@@ -123,7 +123,7 @@ export default function TasksView({ userId }: Props) {
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={tab}
             initial={{ opacity: 0, y: 8 }}
