@@ -52,7 +52,7 @@ export function useFocusSession(userId: UUID) {
       taskTitle: task.title,
       durationMin: task.focusDurationMin,
       startedAt: new Date().toISOString(),
-      pausedAt: null,
+      pausedAt: new Date().toISOString(), // nace pausada: el usuario debe presionar Play para iniciar
       accumulatedSec: 0,
       continuedPastGoal: false,
     };

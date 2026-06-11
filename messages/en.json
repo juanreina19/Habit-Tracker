@@ -257,6 +257,7 @@
     "continue_session": "Continue session",
     "status_running": "Focus in progress",
     "status_paused": "Paused",
+    "status_ready": "Ready to start",
     "pause": "Pause",
     "resume": "Resume",
     "finish": "Finish",

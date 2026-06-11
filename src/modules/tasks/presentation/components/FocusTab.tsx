@@ -8,13 +8,15 @@ import type { UUID } from "@/shared/types/database.types";
 import { useFocusSession } from "../hooks/useFocusSession";
 import { FocusTaskPicker } from "./FocusTaskPicker";
 import { FocusTimer } from "./FocusTimer";
+import { TaskCard } from "./TaskCard";
 
 interface Props {
   userId: UUID;
   tasks: TaskWithStatus[];
+  toggleTask: (task: TaskWithStatus) => void;
 }
 
-export function FocusTab({ userId, tasks }: Props) {
+export function FocusTab({ userId, tasks, toggleTask }: Props) {
   const t = useTranslations("focus");
   const focus = useFocusSession(userId);
   const active = focus.active;
@@ -47,16 +49,23 @@ export function FocusTab({ userId, tasks }: Props) {
     };
 
     return (
-      <FocusTimer
-        session={active}
-        taskTitle={task.title}
-        onPause={focus.pause}
-        onResume={focus.resume}
-        onContinueWorking={focus.continueWorking}
-        onFinish={handleFinish}
-        onRestart={handleRestart}
-        isFinishing={focus.isFinishing}
-      />
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+        <div className="lg:flex-1">
+          <FocusTimer
+            session={active}
+            taskTitle={task.title}
+            onPause={focus.pause}
+            onResume={focus.resume}
+            onContinueWorking={focus.continueWorking}
+            onFinish={handleFinish}
+            onRestart={handleRestart}
+            isFinishing={focus.isFinishing}
+          />
+        </div>
+        <div className="lg:w-80 lg:flex-shrink-0">
+          <TaskCard task={task} onToggle={() => toggleTask(task)} />
+        </div>
+      </div>
     );
   }
 

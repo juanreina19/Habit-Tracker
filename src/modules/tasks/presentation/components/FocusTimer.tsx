@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { Play, Pause, Check, CheckCircle2, type LucideIcon } from "lucide-react";
 import type { ActiveFocusSession } from "../lib/focusSessionStorage";
 import { getElapsedSec } from "../lib/focusSessionStorage";
 
@@ -23,6 +24,80 @@ function formatClock(totalSec: number): string {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function FocusRing({
+  percentage,
+  full,
+  accent,
+  children,
+}: {
+  percentage: number;
+  full?: boolean;
+  accent?: boolean;
+  children: React.ReactNode;
+}) {
+  const size = 260;
+  const radius = (size - 12) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const clamped = Math.min(100, Math.max(0, percentage));
+  const offset = full ? 0 : circumference - (clamped / 100) * circumference;
+
+  return (
+    <div className="relative mx-auto" style={{ width: "min(100%, 280px)", aspectRatio: "1 / 1" }}>
+      <svg viewBox={`0 0 ${size} ${size}`} className="-rotate-90 w-full h-full">
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--border)" strokeWidth={6} />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={accent ? "var(--accent)" : "var(--text-primary)"}
+          strokeWidth={6}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-4 text-center">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function IconButton({
+  icon: Icon,
+  onClick,
+  label,
+  primary,
+  disabled,
+  size = 56,
+}: {
+  icon: LucideIcon;
+  onClick: () => void;
+  label: string;
+  primary?: boolean;
+  disabled?: boolean;
+  size?: number;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className="rounded-full flex items-center justify-center transition-opacity active:opacity-70 disabled:opacity-50"
+      style={{
+        width: size,
+        height: size,
+        background: primary ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
+        color: primary ? "var(--btn-primary-text)" : "var(--text-secondary)",
+      }}
+    >
+      <Icon size={Math.round(size * 0.42)} strokeWidth={2} />
+    </button>
+  );
 }
 
 export function FocusTimer({
@@ -89,9 +164,15 @@ export function FocusTimer({
   // ── Fase: Sesión completada (prompt) ──
   if (reachedGoal && !session.continuedPastGoal) {
     return (
-      <div className="rounded-[20px] p-8 text-center flex flex-col gap-4" style={{ background: "var(--surface)" }}>
-        <p className="text-2xl">{t("session_completed_title")}</p>
-        <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
+      <div
+        className="rounded-[20px] p-6 lg:p-10 flex flex-col items-center gap-5 text-center"
+        style={{ background: "var(--surface)" }}
+      >
+        <FocusRing percentage={100} full accent>
+          <CheckCircle2 size={56} style={{ color: "var(--accent)" }} />
+          <span className="text-sm font-semibold mt-1">{t("session_completed_title")}</span>
+        </FocusRing>
+        <p className="text-sm font-medium truncate max-w-full" style={{ color: "var(--text-primary)" }}>
           {taskTitle}
         </p>
         {actionError && (
@@ -99,7 +180,7 @@ export function FocusTimer({
             {actionError}
           </p>
         )}
-        <div className="flex flex-col gap-3 mt-2">
+        <div className="flex flex-col gap-3 w-full max-w-xs">
           <button
             onClick={handleFinish}
             disabled={isFinishing}
@@ -125,86 +206,83 @@ export function FocusTimer({
   if (reachedGoal && session.continuedPastGoal) {
     const overtimeSec = elapsedSec - goalSec;
     return (
-      <div className="rounded-[20px] p-8 text-center flex flex-col gap-4" style={{ background: "var(--surface)" }}>
-        <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
+      <div
+        className="rounded-[20px] p-6 lg:p-10 flex flex-col items-center gap-5 text-center"
+        style={{ background: "var(--surface)" }}
+      >
+        <p className="text-sm font-medium truncate max-w-full" style={{ color: "var(--text-primary)" }}>
           {taskTitle}
         </p>
-        <p className="text-4xl font-bold tabular-nums" style={{ color: "var(--accent)" }}>
-          +{formatClock(overtimeSec)}
-        </p>
-        <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-          {isPaused ? t("status_paused") : t("status_running")}
-        </p>
+        <FocusRing percentage={100} full accent>
+          <span className="text-6xl lg:text-7xl font-bold tabular-nums" style={{ color: "var(--accent)" }}>
+            +{formatClock(overtimeSec)}
+          </span>
+          <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+            {isPaused ? t("status_paused") : t("status_running")}
+          </span>
+        </FocusRing>
         {actionError && (
           <p className="text-xs" style={{ color: "var(--danger)" }}>
             {actionError}
           </p>
         )}
-        <div className="flex flex-col gap-3 mt-2">
-          <div className="flex gap-3">
-            <button
-              onClick={isPaused ? onResume : onPause}
-              className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
-              style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-            >
-              {isPaused ? t("resume") : t("pause")}
-            </button>
-            <button
-              onClick={handleFinish}
-              disabled={isFinishing}
-              className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
-              style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-            >
-              {t("finish")}
-            </button>
-          </div>
-          <button
-            onClick={handleRestart}
-            disabled={isFinishing}
-            className="py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-50"
-            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-          >
-            {t("register_and_restart")}
-          </button>
+        <div className="flex items-center gap-4 mt-1">
+          <IconButton
+            icon={isPaused ? Play : Pause}
+            onClick={isPaused ? onResume : onPause}
+            label={isPaused ? t("resume") : t("pause")}
+            primary
+            size={72}
+          />
+          <IconButton icon={Check} onClick={handleFinish} label={t("finish")} disabled={isFinishing} size={56} />
         </div>
+        <button
+          onClick={handleRestart}
+          disabled={isFinishing}
+          className="py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-50 w-full max-w-xs"
+          style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
+        >
+          {t("register_and_restart")}
+        </button>
       </div>
     );
   }
 
-  // ── Fase: Corriendo / Pausado ──
+  // ── Fase: Corriendo / Pausado / No iniciado ──
   const remainingSec = goalSec - elapsedSec;
+  const percentage = (elapsedSec / goalSec) * 100;
+  const notStarted = isPaused && Math.floor(elapsedSec) === 0;
+
   return (
-    <div className="rounded-[20px] p-8 text-center flex flex-col gap-4" style={{ background: "var(--surface)" }}>
-      <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
+    <div
+      className="rounded-[20px] p-6 lg:p-10 flex flex-col items-center gap-5"
+      style={{ background: "var(--surface)" }}
+    >
+      <p className="text-sm font-medium truncate max-w-full" style={{ color: "var(--text-primary)" }}>
         {taskTitle}
       </p>
-      <p className="text-5xl font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>
-        {formatClock(remainingSec)}
-      </p>
-      <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-        {isPaused ? t("status_paused") : t("status_running")}
-      </p>
+      <FocusRing percentage={percentage}>
+        <span className="text-6xl lg:text-7xl font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>
+          {formatClock(remainingSec)}
+        </span>
+        <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+          {notStarted ? t("status_ready") : isPaused ? t("status_paused") : t("status_running")}
+        </span>
+      </FocusRing>
       {actionError && (
         <p className="text-xs" style={{ color: "var(--danger)" }}>
           {actionError}
         </p>
       )}
-      <div className="flex gap-3 mt-2">
-        <button
+      <div className="flex items-center gap-4 mt-1">
+        <IconButton
+          icon={isPaused ? Play : Pause}
           onClick={isPaused ? onResume : onPause}
-          className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
-          style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-        >
-          {isPaused ? t("resume") : t("pause")}
-        </button>
-        <button
-          onClick={handleFinish}
-          disabled={isFinishing}
-          className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
-          style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-        >
-          {t("finish")}
-        </button>
+          label={notStarted ? t("start_session") : isPaused ? t("resume") : t("pause")}
+          primary
+          size={72}
+        />
+        <IconButton icon={Check} onClick={handleFinish} label={t("finish")} disabled={isFinishing} size={56} />
       </div>
     </div>
   );
