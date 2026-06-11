@@ -508,15 +508,16 @@ function ProgressRing({ percentage, size }: { percentage: number; size: number }
   return (
     <svg width={size} height={size} className="-rotate-90">
       <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--border)" strokeWidth={4} />
-      <circle
+      <motion.circle
         cx={size / 2} cy={size / 2} r={radius}
         fill="none"
         stroke={percentage === 100 ? "var(--accent)" : "var(--text-primary)"}
         strokeWidth={4}
         strokeLinecap="round"
         strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        style={{ transition: "stroke-dashoffset 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
+        initial={{ strokeDashoffset: circumference }}
+        animate={{ strokeDashoffset: offset }}
+        transition={{ duration: 1, ease: "easeOut" }}
       />
       <text
         x={size / 2} y={size / 2}
