@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
@@ -73,7 +74,13 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
       </div>
 
       {/* Avatar + name */}
-      <div className="rounded-[20px] p-6 mb-5 flex items-center gap-4" style={{ background: "var(--surface)" }}>
+      <motion.div
+        className="rounded-[20px] p-6 mb-5 flex items-center gap-4"
+        style={{ background: "var(--surface)" }}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0 * 0.05, ease: "easeOut" }}
+      >
         <div className="flex-shrink-0">
           {avatarUrl ? (
             <Image
@@ -99,17 +106,28 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
           )}
           <p className="text-sm truncate" style={{ color: "var(--text-secondary)" }}>{email}</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Global stats */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <motion.div
+        className="grid grid-cols-3 gap-3 mb-6"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 1 * 0.05, ease: "easeOut" }}
+      >
         <StatCard label="Completados" value={stats ? stats.totalCompleted.toString() : "—"} unit="total" />
         <StatCard label="Mejor racha" value={stats ? stats.bestStreak.toString() : "—"} unit="días" highlight={(stats?.bestStreak ?? 0) >= 7} />
         <StatCard label="Activos" value={stats ? stats.activeHabits.toString() : "—"} unit="hábitos" />
-      </div>
+      </motion.div>
 
       {/* Actions */}
-      <div className="rounded-[20px] overflow-hidden mb-4" style={{ background: "var(--surface)" }}>
+      <motion.div
+        className="rounded-[20px] overflow-hidden mb-4"
+        style={{ background: "var(--surface)" }}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 2 * 0.05, ease: "easeOut" }}
+      >
         <button
           onClick={handleSignOut}
           disabled={isSigningOut}
@@ -120,9 +138,15 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
           </span>
           <span style={{ color: "var(--text-secondary)", fontSize: 18 }}>→</span>
         </button>
-      </div>
+      </motion.div>
 
-      <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--surface)" }}>
+      <motion.div
+        className="rounded-[20px] overflow-hidden"
+        style={{ background: "var(--surface)" }}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 3 * 0.05, ease: "easeOut" }}
+      >
         {!showDeleteConfirm ? (
           <button
             onClick={() => setShowDeleteConfirm(true)}
@@ -154,7 +178,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
             </div>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

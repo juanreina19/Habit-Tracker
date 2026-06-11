@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useWeekly } from "../hooks/useWeekly";
@@ -124,8 +125,15 @@ export default function WeeklyView({ userId, userCreatedAt, embedded = false }: 
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              {data.habits.map((hp) => (
-                <HabitWeekRow key={hp.habit.id} progress={hp} />
+              {data.habits.map((hp, index) => (
+                <motion.div
+                  key={hp.habit.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+                >
+                  <HabitWeekRow progress={hp} />
+                </motion.div>
               ))}
             </div>
           )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Bell, BellOff, User, Sun, Moon, Languages } from "lucide-react";
@@ -44,10 +45,21 @@ export default function SettingsView({ userId: _userId }: Props) {
       </div>
 
       {/* Notifications */}
-      <NotificationsSection />
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0 * 0.05, ease: "easeOut" }}
+      >
+        <NotificationsSection />
+      </motion.div>
 
       {/* Language */}
-      <div className="mt-8">
+      <motion.div
+        className="mt-8"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 1 * 0.05, ease: "easeOut" }}
+      >
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("language")}
         </p>
@@ -77,10 +89,15 @@ export default function SettingsView({ userId: _userId }: Props) {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Account */}
-      <div className="mt-8">
+      <motion.div
+        className="mt-8"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 2 * 0.05, ease: "easeOut" }}
+      >
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("account")}
         </p>
@@ -95,7 +112,7 @@ export default function SettingsView({ userId: _userId }: Props) {
           <div style={{ height: 1, background: "var(--border)" }} />
           <SignOutButton />
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -245,17 +245,23 @@ export default function TodayView({ userId }: Props) {
                   <div className="flex-1 h-px" style={{ background: "var(--border)", opacity: 0.4 }} />
                 </div>
                 <div className="flex flex-col gap-3">
-                  {groupHabits.map((habit) => {
+                  {groupHabits.map((habit, index) => {
                     const locked = isHabitLocked(habit);
                     return (
-                      <HabitRow
+                      <motion.div
                         key={habit.id}
-                        habit={habit}
-                        locked={locked}
-                        onToggle={() => !locked && handleToggle(habit)}
-                        onFreeze={canFreeze(habit) ? () => handleFreeze(habit.id) : undefined}
-                        freezeLabel={t("save_streak")}
-                      />
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+                      >
+                        <HabitRow
+                          habit={habit}
+                          locked={locked}
+                          onToggle={() => !locked && handleToggle(habit)}
+                          onFreeze={canFreeze(habit) ? () => handleFreeze(habit.id) : undefined}
+                          freezeLabel={t("save_streak")}
+                        />
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -281,14 +287,21 @@ export default function TodayView({ userId }: Props) {
               </Link>
             </div>
             <div className="flex flex-col gap-2">
-              {todayTasks.map((task) => (
-                <Link key={task.id} href="/tasks" className="block">
-                  <TaskCard
-                    task={task}
-                    onToggle={() => toggleTodayTask(task)}
-                    compact
-                  />
-                </Link>
+              {todayTasks.map((task, index) => (
+                <motion.div
+                  key={task.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+                >
+                  <Link href="/tasks" className="block">
+                    <TaskCard
+                      task={task}
+                      onToggle={() => toggleTodayTask(task)}
+                      compact
+                    />
+                  </Link>
+                </motion.div>
               ))}
             </div>
           </div>

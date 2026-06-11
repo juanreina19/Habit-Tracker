@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   BarChart, Bar, Cell, XAxis, YAxis, ResponsiveContainer, Tooltip,
 } from "recharts";
@@ -62,9 +63,20 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <StatCard label={t("active")} value={activeHabitsCount.toString()} unit={t("habits_unit")} />
-        <StatCard label={t("streak")} value={bestCurrentStreak.toString()} unit={t("days_unit")} highlight={bestCurrentStreak >= 7} />
-        <StatCard label={t("this_month")} value={`${monthlyRate}%`} unit={t("completed_unit")} highlight={monthlyRate >= 80} />
+        {[
+          <StatCard key="active" label={t("active")} value={activeHabitsCount.toString()} unit={t("habits_unit")} />,
+          <StatCard key="streak" label={t("streak")} value={bestCurrentStreak.toString()} unit={t("days_unit")} highlight={bestCurrentStreak >= 7} />,
+          <StatCard key="month" label={t("this_month")} value={`${monthlyRate}%`} unit={t("completed_unit")} highlight={monthlyRate >= 80} />,
+        ].map((card, index) => (
+          <motion.div
+            key={card.key}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+          >
+            {card}
+          </motion.div>
+        ))}
       </div>
 
       {/* Yearly heatmap */}
@@ -124,8 +136,15 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
       {habitStats.length > 0 && (
         <Section title={t("per_habit")}>
           <div className="flex flex-col gap-3">
-            {habitStats.map((hs) => (
-              <HabitStatRow key={hs.habit.id} stat={hs} />
+            {habitStats.map((hs, index) => (
+              <motion.div
+                key={hs.habit.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+              >
+                <HabitStatRow stat={hs} />
+              </motion.div>
             ))}
           </div>
         </Section>
@@ -134,16 +153,22 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
       {/* Achievements */}
       <Section title={t("achievements")}>
         <div className="grid grid-cols-2 gap-3">
-          {allAchievements.map((achievement) => {
+          {allAchievements.map((achievement, index) => {
             const userAchievement = userAchievements.find(
               (ua) => ua.achievementId === achievement.id
             );
             return (
-              <AchievementCard
+              <motion.div
                 key={achievement.id}
-                achievement={achievement}
-                userAchievement={userAchievement}
-              />
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+              >
+                <AchievementCard
+                  achievement={achievement}
+                  userAchievement={userAchievement}
+                />
+              </motion.div>
             );
           })}
         </div>

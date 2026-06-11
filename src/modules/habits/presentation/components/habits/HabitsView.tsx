@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Reorder, useDragControls } from "framer-motion";
+import { motion, Reorder, useDragControls } from "framer-motion";
 import { Pencil, Trash2, GripVertical } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
@@ -112,27 +112,36 @@ export default function HabitsView({ userId }: Props) {
 
       {isLoading ? (
         <HabitsSkeleton />
-      ) : tab === "habits" ? (
-        <HabitsTab
-          habits={habits}
-          categories={categories}
-          onAdd={() => setHabitDialog({ open: true, habit: null })}
-          onEdit={(h) => setHabitDialog({ open: true, habit: h })}
-          onDelete={(h) => setConfirmDelete({ type: "habit", id: h.id, name: h.name })}
-          onReorder={reorderHabits}
-        />
       ) : (
-        <CategoriesTab
-          categories={categories}
-          habitCount={habits.reduce<Record<string, number>>((acc, h) => {
-            if (h.categoryId) acc[h.categoryId] = (acc[h.categoryId] ?? 0) + 1;
-            return acc;
-          }, {})}
-          onAdd={() => setCatDialog({ open: true, category: null })}
-          onEdit={(c) => setCatDialog({ open: true, category: c })}
-          onDelete={(c) => setConfirmDelete({ type: "category", id: c.id, name: c.name })}
-          onReorder={reorderCategories}
-        />
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+        >
+          {tab === "habits" ? (
+            <HabitsTab
+              habits={habits}
+              categories={categories}
+              onAdd={() => setHabitDialog({ open: true, habit: null })}
+              onEdit={(h) => setHabitDialog({ open: true, habit: h })}
+              onDelete={(h) => setConfirmDelete({ type: "habit", id: h.id, name: h.name })}
+              onReorder={reorderHabits}
+            />
+          ) : (
+            <CategoriesTab
+              categories={categories}
+              habitCount={habits.reduce<Record<string, number>>((acc, h) => {
+                if (h.categoryId) acc[h.categoryId] = (acc[h.categoryId] ?? 0) + 1;
+                return acc;
+              }, {})}
+              onAdd={() => setCatDialog({ open: true, category: null })}
+              onEdit={(c) => setCatDialog({ open: true, category: c })}
+              onDelete={(c) => setConfirmDelete({ type: "category", id: c.id, name: c.name })}
+              onReorder={reorderCategories}
+            />
+          )}
+        </motion.div>
       )}
 
       <HabitFormDialog

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import WeeklyView from "./WeeklyView";
 import MonthlyView from "./MonthlyView";
@@ -44,10 +45,17 @@ export default function CalendarView({ userId, userCreatedAt }: Props) {
         </div>
       </div>
 
-      {mode === "weekly"
-        ? <WeeklyView userId={userId} userCreatedAt={userCreatedAt} embedded />
-        : <MonthlyView userId={userId} userCreatedAt={userCreatedAt} embedded />
-      }
+      <motion.div
+        key={mode}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+      >
+        {mode === "weekly"
+          ? <WeeklyView userId={userId} userCreatedAt={userCreatedAt} embedded />
+          : <MonthlyView userId={userId} userCreatedAt={userCreatedAt} embedded />
+        }
+      </motion.div>
     </div>
   );
 }
