@@ -438,16 +438,23 @@ function TaskSection({ title, tasks, toggleTask, onEdit, onDelete, emptyState, s
 
       {tasks.length === 0 && emptyState ? emptyState : (
         <div className="flex flex-col gap-2">
-          <AnimatePresence initial={false}>
-            {tasks.map((task) => (
-              <TaskCard
+          <AnimatePresence>
+            {tasks.map((task, index) => (
+              <motion.div
                 key={task.id}
-                task={task}
-                onToggle={() => toggleTask(task)}
-                onEdit={() => onEdit(task)}
-                onDelete={() => onDelete(task)}
-                sessionCount={sessionCounts.get(task.id)}
-              />
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+              >
+                <TaskCard
+                  task={task}
+                  onToggle={() => toggleTask(task)}
+                  onEdit={() => onEdit(task)}
+                  onDelete={() => onDelete(task)}
+                  sessionCount={sessionCounts.get(task.id)}
+                />
+              </motion.div>
             ))}
           </AnimatePresence>
         </div>
@@ -491,15 +498,21 @@ function CollapsibleTaskSection({ title, tasks, toggleTask, onEdit, onDelete, sh
             className="overflow-hidden"
           >
             <div className="flex flex-col gap-2 pb-1">
-              {tasks.map((task) => (
-                <TaskCard
+              {tasks.map((task, index) => (
+                <motion.div
                   key={task.id}
-                  task={task}
-                  onToggle={() => toggleTask(task)}
-                  onEdit={() => onEdit(task)}
-                  onDelete={() => onDelete(task)}
-                  sessionCount={sessionCounts.get(task.id)}
-                />
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+                >
+                  <TaskCard
+                    task={task}
+                    onToggle={() => toggleTask(task)}
+                    onEdit={() => onEdit(task)}
+                    onDelete={() => onDelete(task)}
+                    sessionCount={sessionCounts.get(task.id)}
+                  />
+                </motion.div>
               ))}
             </div>
           </motion.div>
@@ -535,16 +548,23 @@ function TaskColumn({ title, tasks, toggleTask, onEdit, onDelete, emptyState, se
 
       <div className="flex flex-col gap-2 overflow-y-auto pr-0.5" style={{ maxHeight: "min(620px, 60vh)" }}>
         {tasks.length === 0 ? emptyState : (
-          <AnimatePresence initial={false}>
-            {tasks.map((task) => (
-              <TaskCard
+          <AnimatePresence>
+            {tasks.map((task, index) => (
+              <motion.div
                 key={task.id}
-                task={task}
-                onToggle={() => toggleTask(task)}
-                onEdit={() => onEdit(task)}
-                onDelete={() => onDelete(task)}
-                sessionCount={sessionCounts.get(task.id)}
-              />
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.04, ease: "easeOut" }}
+              >
+                <TaskCard
+                  task={task}
+                  onToggle={() => toggleTask(task)}
+                  onEdit={() => onEdit(task)}
+                  onDelete={() => onDelete(task)}
+                  sessionCount={sessionCounts.get(task.id)}
+                />
+              </motion.div>
             ))}
           </AnimatePresence>
         )}
