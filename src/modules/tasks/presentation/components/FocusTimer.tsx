@@ -250,7 +250,9 @@ export function FocusTimer({
 
   // ── Fase: Corriendo / Pausado / No iniciado ──
   const remainingSec = goalSec - elapsedSec;
-  const percentage = (elapsedSec / goalSec) * 100;
+  // El anillo arranca completo (blanco) y se va vaciando en sentido antihorario
+  // a medida que transcurre el tiempo, reflejando el tiempo RESTANTE.
+  const percentage = (remainingSec / goalSec) * 100;
   const notStarted = isPaused && Math.floor(elapsedSec) === 0;
 
   return (
