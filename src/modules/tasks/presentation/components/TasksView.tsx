@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus, ChevronDown, ChevronRight } from "lucide-react";
+import { Plus, ChevronDown, ChevronRight, ListFilter, Check } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { useTasks } from "../hooks/useTasks";
@@ -284,16 +285,7 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete, sessionCounts }: AllTabPr
   return (
     <>
       {/* Filtros */}
-      <div className="flex flex-col gap-2 mb-5">
-        <FilterRow
-          label={t("filter_priority")}
-          options={[
-            { value: "all", label: t("filter_all") },
-            ...PRIORITIES.map((p) => ({ value: p, label: t(`priority_${p}`) })),
-          ]}
-          value={priorityFilter}
-          onChange={(v) => setPriorityFilter(v as TaskPriority | "all")}
-        />
+      <div className="flex items-center justify-between gap-2 flex-wrap mb-5">
         <FilterRow
           label={t("filter_type")}
           options={[
@@ -304,6 +296,7 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete, sessionCounts }: AllTabPr
           value={typeFilter}
           onChange={(v) => setTypeFilter(v as TypeFilter)}
         />
+        <PriorityFilterMenu value={priorityFilter} onChange={setPriorityFilter} />
       </div>
 
       {/* Mobile — secciones apiladas */}
@@ -406,6 +399,58 @@ function FilterRow({ label, options, value, onChange }: FilterRowProps) {
         ))}
       </div>
     </div>
+  );
+}
+
+// ─── Filtro de prioridad — botón con menú desplegable ─────────────────────────
+
+function PriorityFilterMenu({ value, onChange }: {
+  value: TaskPriority | "all";
+  onChange: (value: TaskPriority | "all") => void;
+}) {
+  const t = useTranslations("tasks");
+  const isActive = value !== "all";
+  const options: { value: TaskPriority | "all"; label: string }[] = [
+    { value: "all", label: t("filter_all") },
+    ...PRIORITIES.map((p) => ({ value: p, label: t(`priority_${p}`) })),
+  ];
+
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button
+          type="button"
+          aria-label={t("filter_priority")}
+          className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors active:opacity-60"
+          style={{
+            background: isActive ? "var(--btn-primary-bg)" : "var(--surface)",
+            color: isActive ? "var(--btn-primary-text)" : "var(--text-secondary)",
+          }}
+        >
+          <ListFilter size={15} strokeWidth={2} />
+        </button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          className="z-50 min-w-[148px] rounded-[14px] p-1.5 shadow-xl outline-none"
+          style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+          align="end"
+          sideOffset={4}
+        >
+          {options.map((opt) => (
+            <DropdownMenu.Item
+              key={opt.value}
+              className="task-menu-item flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-[10px] text-sm cursor-pointer outline-none"
+              style={{ color: value === opt.value ? "var(--text-primary)" : "var(--text-secondary)" }}
+              onSelect={() => onChange(opt.value)}
+            >
+              {opt.label}
+              {value === opt.value && <Check size={14} strokeWidth={2} />}
+            </DropdownMenu.Item>
+          ))}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 }
 
