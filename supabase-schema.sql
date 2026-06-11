@@ -559,3 +559,6 @@ create policy "Users manage own active_focus_sessions"
   on active_focus_sessions for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- Privilegio a nivel de tabla para el rol de la API (RLS sigue filtrando por fila).
+grant select, insert, update, delete on active_focus_sessions to authenticated;

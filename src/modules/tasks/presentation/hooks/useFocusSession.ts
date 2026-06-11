@@ -91,7 +91,8 @@ export function useFocusSession(userId: UUID) {
       if (!prev || prev.pausedAt !== null) return prev;
       const next: ActiveFocusSession = {
         ...prev,
-        accumulatedSec: getElapsedSec(prev),
+        // accumulated_sec es `int` en la DB: redondear, getElapsedSec() devuelve segundos con decimales.
+        accumulatedSec: Math.floor(getElapsedSec(prev)),
         pausedAt: new Date().toISOString(),
       };
       getActiveRepo().update(userId, { accumulatedSec: next.accumulatedSec, pausedAt: next.pausedAt }).catch(() => {});
