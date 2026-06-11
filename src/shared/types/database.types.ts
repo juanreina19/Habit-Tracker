@@ -121,6 +121,51 @@ export interface DbFocusSession {
   created_at: ISOTimestamp;
 }
 
+export type TaskWebhookEventType =
+  | "task.created"
+  | "task.updated"
+  | "task.completed"
+  | "task.uncompleted"
+  | "task.deleted";
+
+export interface DbWebhookEndpoint {
+  id: UUID;
+  user_id: UUID;
+  url: string;
+  description: string | null;
+  secret: string;
+  event_types: TaskWebhookEventType[];
+  is_active: boolean;
+  created_at: ISOTimestamp;
+  last_triggered_at: ISOTimestamp | null;
+  last_status: "success" | "failed" | null;
+  consecutive_failures: number;
+}
+
+export interface DbWebhookEvent {
+  id: UUID;
+  user_id: UUID;
+  event_type: TaskWebhookEventType;
+  task_id: UUID;
+  payload: Record<string, unknown>;
+  created_at: ISOTimestamp;
+  dispatch_status: "pending" | "delivered" | "failed";
+}
+
+export interface DbWebhookDelivery {
+  id: UUID;
+  event_id: UUID;
+  endpoint_id: UUID;
+  user_id: UUID;
+  status: "pending" | "success" | "failed";
+  attempt_count: number;
+  last_attempt_at: ISOTimestamp | null;
+  next_attempt_at: ISOTimestamp;
+  response_status: number | null;
+  response_body: string | null;
+  created_at: ISOTimestamp;
+}
+
 // ─── Helper para Supabase client tipado ──────────────────────────────────────
 
 export interface Database {
@@ -175,6 +220,21 @@ export interface Database {
         Row: DbFocusSession;
         Insert: Omit<DbFocusSession, "id" | "created_at">;
         Update: never;  // append-only, igual que task_completions
+      };
+      webhook_endpoints: {
+        Row: DbWebhookEndpoint;
+        Insert: Omit<DbWebhookEndpoint, "id" | "created_at" | "last_triggered_at" | "last_status" | "consecutive_failures">;
+        Update: Partial<Omit<DbWebhookEndpoint, "id" | "user_id" | "created_at">>;
+      };
+      webhook_events: {
+        Row: DbWebhookEvent;
+        Insert: never;   // escrito solo por triggers (security definer)
+        Update: never;   // dispatch_status lo actualiza el cron vía service role
+      };
+      webhook_deliveries: {
+        Row: DbWebhookDelivery;
+        Insert: never;   // creado por DispatchPendingWebhooksUseCase vía service role
+        Update: never;   // actualizado por DispatchPendingWebhooksUseCase vía service role
       };
     };
   };
