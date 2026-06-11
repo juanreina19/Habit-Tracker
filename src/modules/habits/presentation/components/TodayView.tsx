@@ -408,7 +408,6 @@ function HabitRow({
         cursor: locked ? "not-allowed" : "pointer",
         userSelect: "none",
         WebkitUserSelect: "none",
-        willChange: "transform",
       }}
       whileTap={locked ? {} : { scale: 0.98 }}
       transition={{ type: "spring", stiffness: 500, damping: 35 }}

@@ -113,7 +113,6 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, se
         cursor: "default",
         userSelect: "none",
         WebkitUserSelect: "none",
-        willChange: "transform",
       }}
     >
       {/* Fila 1 — prioridad (izq) + badge de estado (der). Altura fija para que
