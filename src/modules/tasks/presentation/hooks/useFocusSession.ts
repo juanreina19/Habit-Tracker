@@ -59,7 +59,18 @@ export function useFocusSession(userId: UUID) {
       .on("postgres_changes", { event: "*", schema: "public", table: "active_focus_sessions" }, refetch)
       .subscribe();
 
-    return () => { clearTimeout(debounce); client.removeChannel(ch); };
+    // En segundo plano (móvil bloqueado/pestaña no visible) el websocket de Realtime se
+    // suspende y se pierden eventos. Al volver a primer plano, refrescamos para ponernos al día.
+    const onVisible = () => {
+      if (document.visibilityState === "visible") loadActiveRef.current();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      clearTimeout(debounce);
+      client.removeChannel(ch);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [userId]);
 
   const start = useCallback(async (task: TaskWithStatus) => {
