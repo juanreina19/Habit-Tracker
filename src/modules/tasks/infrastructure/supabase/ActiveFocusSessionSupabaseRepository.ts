@@ -1,6 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { IActiveFocusSessionRepository } from "../../domain/repositories/IActiveFocusSessionRepository";
 import type { ActiveFocusSession } from "../../domain/entities/ActiveFocusSession";
+import { normalizePhase } from "../../domain/entities/ActiveFocusSession";
+import {
+  DEFAULT_SESSIONS_GOAL,
+  DEFAULT_SHORT_BREAK_MIN,
+  DEFAULT_LONG_BREAK_MIN,
+  DEFAULT_LONG_BREAK_INTERVAL,
+  DEFAULT_AUTO_START_NEXT,
+} from "../../domain/entities/Task";
 import type { UUID, DbActiveFocusSession } from "@/shared/types/database.types";
 
 /** Código de Postgres para violación de constraint UNIQUE/PK. */
@@ -20,6 +28,14 @@ export class ActiveFocusSessionSupabaseRepository implements IActiveFocusSession
       pausedAt:          row.paused_at,
       accumulatedSec:    row.accumulated_sec,
       continuedPastGoal: row.continued_past_goal,
+      phase:             normalizePhase(row.phase),
+      sessionIndex:      row.session_index ?? 1,
+      sessionsGoal:      row.sessions_goal ?? DEFAULT_SESSIONS_GOAL,
+      shortBreakMin:     row.short_break_min ?? DEFAULT_SHORT_BREAK_MIN,
+      longBreakMin:      row.long_break_min ?? DEFAULT_LONG_BREAK_MIN,
+      longBreakInterval: row.long_break_interval ?? DEFAULT_LONG_BREAK_INTERVAL,
+      autoStartNext:     row.auto_start_next ?? DEFAULT_AUTO_START_NEXT,
+      focusDurationMin:  row.focus_duration_min ?? row.duration_min,
     };
   }
 
@@ -47,6 +63,14 @@ export class ActiveFocusSessionSupabaseRepository implements IActiveFocusSession
         paused_at:           session.pausedAt,
         accumulated_sec:     session.accumulatedSec,
         continued_past_goal: session.continuedPastGoal,
+        phase:               session.phase,
+        session_index:       session.sessionIndex,
+        sessions_goal:       session.sessionsGoal,
+        short_break_min:     session.shortBreakMin,
+        long_break_min:      session.longBreakMin,
+        long_break_interval: session.longBreakInterval,
+        auto_start_next:     session.autoStartNext,
+        focus_duration_min:  session.focusDurationMin,
       })
       .select()
       .single();
@@ -65,13 +89,19 @@ export class ActiveFocusSessionSupabaseRepository implements IActiveFocusSession
 
   async update(
     userId: UUID,
-    patch: Partial<Pick<ActiveFocusSession, "startedAt" | "pausedAt" | "accumulatedSec" | "continuedPastGoal">>
+    patch: Partial<Pick<ActiveFocusSession,
+      "startedAt" | "pausedAt" | "accumulatedSec" | "continuedPastGoal" |
+      "phase" | "sessionIndex" | "durationMin"
+    >>
   ): Promise<void> {
     const update: Partial<DbActiveFocusSession> = { updated_at: new Date().toISOString() };
     if (patch.startedAt !== undefined) update.started_at = patch.startedAt;
     if (patch.pausedAt !== undefined) update.paused_at = patch.pausedAt;
     if (patch.accumulatedSec !== undefined) update.accumulated_sec = patch.accumulatedSec;
     if (patch.continuedPastGoal !== undefined) update.continued_past_goal = patch.continuedPastGoal;
+    if (patch.phase !== undefined) update.phase = patch.phase;
+    if (patch.sessionIndex !== undefined) update.session_index = patch.sessionIndex;
+    if (patch.durationMin !== undefined) update.duration_min = patch.durationMin;
 
     const { error } = await this.client
       .from("active_focus_sessions")

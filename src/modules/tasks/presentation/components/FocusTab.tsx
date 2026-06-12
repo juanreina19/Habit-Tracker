@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import type { TaskWithStatus } from "../../domain/entities/Task";
+import type { Task, TaskWithStatus, UpdateTaskInput } from "../../domain/entities/Task";
 import { isTaskDone } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 import { useFocusSession } from "../hooks/useFocusSession";
@@ -14,9 +14,10 @@ interface Props {
   userId: UUID;
   tasks: TaskWithStatus[];
   toggleTask: (task: TaskWithStatus) => void;
+  updateTask: (task: Task, input: UpdateTaskInput) => Promise<void>;
 }
 
-export function FocusTab({ userId, tasks, toggleTask }: Props) {
+export function FocusTab({ userId, tasks, toggleTask, updateTask }: Props) {
   const t = useTranslations("focus");
   const focus = useFocusSession(userId);
   const active = focus.active;
@@ -62,6 +63,8 @@ export function FocusTab({ userId, tasks, toggleTask }: Props) {
           <FocusTimer
             session={active}
             taskTitle={task.title}
+            task={task}
+            onSaveConfig={(input) => updateTask(task, input)}
             onPause={focus.pause}
             onResume={focus.resume}
             onContinueWorking={focus.continueWorking}

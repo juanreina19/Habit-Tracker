@@ -99,6 +99,11 @@ export interface DbTask {
   created_at: ISOTimestamp;
   icon: string | null;               // "lucide:Name"; null = sin icono
   focus_duration_min: number | null;
+  sessions_goal: number | null;
+  short_break_min: number | null;
+  long_break_min: number | null;
+  long_break_interval: number | null;
+  auto_start_next: boolean | null;
 }
 
 export interface DbTaskCompletion {
@@ -131,6 +136,14 @@ export interface DbActiveFocusSession {
   paused_at: ISOTimestamp | null;
   accumulated_sec: number;
   continued_past_goal: boolean;
+  phase: 'focus' | 'short_break' | 'long_break' | null;
+  session_index: number | null;
+  sessions_goal: number | null;
+  short_break_min: number | null;
+  long_break_min: number | null;
+  long_break_interval: number | null;
+  auto_start_next: boolean | null;
+  focus_duration_min: number | null;
   updated_at: ISOTimestamp;
 }
 

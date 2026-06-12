@@ -24,6 +24,11 @@ export class TaskSupabaseRepository implements ITaskRepository {
       createdAt:      row.created_at,
       icon:           row.icon ?? null,
       focusDurationMin: row.focus_duration_min ?? null,
+      sessionsGoal:      row.sessions_goal ?? null,
+      shortBreakMin:     row.short_break_min ?? null,
+      longBreakMin:      row.long_break_min ?? null,
+      longBreakInterval: row.long_break_interval ?? null,
+      autoStartNext:     row.auto_start_next ?? null,
     };
   }
 
@@ -154,6 +159,11 @@ export class TaskSupabaseRepository implements ITaskRepository {
     if ("endTime" in input)                    patch.end_time = input.endTime ?? null;
     if ("icon" in input)                       patch.icon = input.icon ?? null;
     if ("focusDurationMin" in input)           patch.focus_duration_min = input.focusDurationMin ?? null;
+    if ("sessionsGoal" in input)               patch.sessions_goal = input.sessionsGoal ?? null;
+    if ("shortBreakMin" in input)              patch.short_break_min = input.shortBreakMin ?? null;
+    if ("longBreakMin" in input)               patch.long_break_min = input.longBreakMin ?? null;
+    if ("longBreakInterval" in input)          patch.long_break_interval = input.longBreakInterval ?? null;
+    if ("autoStartNext" in input)              patch.auto_start_next = input.autoStartNext ?? null;
 
     const { data, error } = await this.client
       .from("tasks")

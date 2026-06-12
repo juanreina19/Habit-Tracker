@@ -267,6 +267,27 @@
     "register_session": "Register session",
     "continue_working": "Keep working",
     "register_and_restart": "Register and start another session",
-    "finish_error": "Couldn't record the session. Please try again."
+    "finish_error": "Couldn't record the session. Please try again.",
+    "phase_focus": "Focus",
+    "phase_short_break": "Short break",
+    "phase_long_break": "Long break",
+    "pomodoro_progress": "Pomodoro {current}/{total}",
+    "settings_label": "Session settings",
+    "session_settings_title": "Pomodoro settings",
+    "sessions_goal_label": "Sessions",
+    "sessions_goal_hint": "How many focus sessions for this task",
+    "short_break_label": "Short break",
+    "long_break_label": "Long break",
+    "long_break_interval_label": "Long break every",
+    "long_break_interval_unit": "sessions",
+    "auto_start_next_label": "Auto-start next phase",
+    "auto_start_next_hint": "Skip the Play button between focus and breaks",
+    "settings_applies_next_cycle": "Changes apply to your next Pomodoro cycle",
+    "save": "Save",
+    "cancel": "Cancel",
+    "on": "On",
+    "off": "Off",
+    "validation_out_of_range": "Value must be between {min} and {max}",
+    "settings_save_error": "Couldn't save the settings. Please try again."
   }
 }

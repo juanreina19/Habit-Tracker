@@ -16,6 +16,11 @@ export interface Task {
   createdAt:      ISOTimestamp;
   icon:           string | null;     // "lucide:Name"; null = sin icono
   focusDurationMin: number | null;   // null = sin Focus Mode; número > 0 = minutos recomendados de sesión
+  sessionsGoal:      number | null;  // null = 1 sesión (comportamiento actual)
+  shortBreakMin:     number | null;  // null = 5 min
+  longBreakMin:      number | null;  // null = 15 min
+  longBreakInterval: number | null;  // null = cada 4 sesiones
+  autoStartNext:     boolean | null; // null/false = no auto-iniciar siguiente fase
 }
 
 /** Read model enriquecido para presentación y queries. */
@@ -71,4 +76,23 @@ export interface UpdateTaskInput {
   completedAt?:    ISOTimestamp | null;  // gestionado exclusivamente por ToggleTaskUseCase
   icon?:           string | null;        // "lucide:Name"
   focusDurationMin?: number | null;
+  sessionsGoal?:      number | null;
+  shortBreakMin?:     number | null;
+  longBreakMin?:      number | null;
+  longBreakInterval?: number | null;
+  autoStartNext?:     boolean | null;
 }
+
+// ─── Pomodoro: defaults y helpers de resolución (NULL = usar default) ────────
+
+export const DEFAULT_SESSIONS_GOAL = 1;
+export const DEFAULT_SHORT_BREAK_MIN = 5;
+export const DEFAULT_LONG_BREAK_MIN = 15;
+export const DEFAULT_LONG_BREAK_INTERVAL = 4;
+export const DEFAULT_AUTO_START_NEXT = false;
+
+export const resolveSessionsGoal      = (t: Task): number  => t.sessionsGoal ?? DEFAULT_SESSIONS_GOAL;
+export const resolveShortBreakMin     = (t: Task): number  => t.shortBreakMin ?? DEFAULT_SHORT_BREAK_MIN;
+export const resolveLongBreakMin      = (t: Task): number  => t.longBreakMin ?? DEFAULT_LONG_BREAK_MIN;
+export const resolveLongBreakInterval = (t: Task): number  => t.longBreakInterval ?? DEFAULT_LONG_BREAK_INTERVAL;
+export const resolveAutoStartNext     = (t: Task): boolean => t.autoStartNext ?? DEFAULT_AUTO_START_NEXT;

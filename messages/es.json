@@ -267,6 +267,27 @@
     "register_session": "Registrar sesión",
     "continue_working": "Continuar trabajando",
     "register_and_restart": "Registrar y comenzar otra sesión",
-    "finish_error": "No se pudo registrar la sesión. Inténtalo de nuevo."
+    "finish_error": "No se pudo registrar la sesión. Inténtalo de nuevo.",
+    "phase_focus": "Enfoque",
+    "phase_short_break": "Descanso corto",
+    "phase_long_break": "Descanso largo",
+    "pomodoro_progress": "Pomodoro {current}/{total}",
+    "settings_label": "Ajustes de la sesión",
+    "session_settings_title": "Ajustes del Pomodoro",
+    "sessions_goal_label": "Sesiones",
+    "sessions_goal_hint": "Cuántas sesiones de enfoque para esta tarea",
+    "short_break_label": "Descanso corto",
+    "long_break_label": "Descanso largo",
+    "long_break_interval_label": "Descanso largo cada",
+    "long_break_interval_unit": "sesiones",
+    "auto_start_next_label": "Iniciar siguiente fase automáticamente",
+    "auto_start_next_hint": "Salta el botón de Play entre enfoque y descansos",
+    "settings_applies_next_cycle": "Los cambios se aplican al próximo ciclo de Pomodoro",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "on": "Activado",
+    "off": "Desactivado",
+    "validation_out_of_range": "El valor debe estar entre {min} y {max}",
+    "settings_save_error": "No se pudieron guardar los ajustes. Inténtalo de nuevo."
   }
 }

@@ -201,6 +201,29 @@ alter table tasks
       or (focus_duration_min > 0 and focus_duration_min <= 480)
     );
 
+-- ─── TAREAS — FASE 4: FOCUS MODE (CICLO POMODORO) ────────────
+-- Migración aditiva: filas existentes quedan en NULL = usar defaults de la app
+-- (1 sesión, descansos 5/15 min, intervalo 4, sin auto-inicio) — comportamiento actual intacto.
+
+alter table tasks
+  add column if not exists sessions_goal int
+    check (sessions_goal is null or sessions_goal between 1 and 12);
+
+alter table tasks
+  add column if not exists short_break_min int
+    check (short_break_min is null or short_break_min between 1 and 60);
+
+alter table tasks
+  add column if not exists long_break_min int
+    check (long_break_min is null or long_break_min between 1 and 120);
+
+alter table tasks
+  add column if not exists long_break_interval int
+    check (long_break_interval is null or long_break_interval between 1 and 12);
+
+alter table tasks
+  add column if not exists auto_start_next boolean;  -- NULL/false = comportamiento actual
+
 -- ─── COMPLETACIONES DE TAREAS RECURRENTES ────────────────────
 -- Equivale a habit_logs pero para tareas recurrentes.
 -- Tareas únicas siguen usando completed_at en tasks.
@@ -552,6 +575,38 @@ create table if not exists active_focus_sessions (
   continued_past_goal  boolean     not null default false,
   updated_at           timestamptz not null default now()
 );
+
+-- ─── SESIÓN ACTIVA — CICLO POMODORO MULTI-FASE ───────────────
+-- Aditivo. Filas pre-migración quedan con estas columnas en NULL; el mapper de la
+-- app las trata como phase='focus', session_index=1, defaults de descansos/auto-inicio,
+-- y focus_duration_min = duration_min (para filas viejas, duration_min YA es el foco).
+-- Los 6 valores se "snapshotean" en start() para que editar la config a mitad de
+-- ciclo no afecte el ciclo en curso.
+
+alter table active_focus_sessions
+  add column if not exists phase text
+    check (phase is null or phase in ('focus', 'short_break', 'long_break'));
+
+alter table active_focus_sessions
+  add column if not exists session_index int check (session_index is null or session_index >= 1);
+
+alter table active_focus_sessions
+  add column if not exists sessions_goal int check (sessions_goal is null or sessions_goal between 1 and 12);
+
+alter table active_focus_sessions
+  add column if not exists short_break_min int check (short_break_min is null or short_break_min between 1 and 60);
+
+alter table active_focus_sessions
+  add column if not exists long_break_min int check (long_break_min is null or long_break_min between 1 and 120);
+
+alter table active_focus_sessions
+  add column if not exists long_break_interval int check (long_break_interval is null or long_break_interval between 1 and 12);
+
+alter table active_focus_sessions
+  add column if not exists auto_start_next boolean;
+
+alter table active_focus_sessions
+  add column if not exists focus_duration_min int check (focus_duration_min is null or focus_duration_min > 0);
 
 alter table active_focus_sessions enable row level security;
 

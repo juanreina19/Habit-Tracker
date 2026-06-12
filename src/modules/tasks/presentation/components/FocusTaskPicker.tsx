@@ -56,6 +56,7 @@ export function FocusTaskPicker({ tasks, hasPendingTasks, onSelect }: Props) {
           </span>
           <span className="flex-shrink-0 text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
             {task.focusDurationMin ?? 0} {t("duration_unit")}
+            {(task.sessionsGoal ?? 1) > 1 && ` · ${task.sessionsGoal}x`}
           </span>
         </button>
       ))}

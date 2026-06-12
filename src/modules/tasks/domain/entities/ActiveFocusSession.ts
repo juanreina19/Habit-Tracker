@@ -10,6 +10,14 @@ export const MAX_SESSION_SEC = 24 * 60 * 60; // 24h
 /** Una sesión pausada hace más de esto se considera abandonada al releer. */
 const STALE_PAUSED_MS = 7 * 24 * 60 * 60 * 1000; // 7 días
 
+/** Fase del ciclo Pomodoro. */
+export type FocusPhase = 'focus' | 'short_break' | 'long_break';
+
+/** Normaliza un valor de `phase` proveniente de la DB (puede ser null en filas pre-migración). */
+export function normalizePhase(phase: string | null): FocusPhase {
+  return phase === 'short_break' || phase === 'long_break' ? phase : 'focus';
+}
+
 /**
  * Sesión de Focus Mode "en curso", sincronizada entre dispositivos vía
  * la tabla active_focus_sessions (una fila por usuario).
@@ -19,11 +27,19 @@ export interface ActiveFocusSession {
   clientSessionId: string;     // uuid generado por start(); dedup de notificaciones
   taskId: string;
   taskTitle: string;           // snapshot — por si la tarea se borra/renombra
-  durationMin: number;         // snapshot de task.focusDurationMin AL INICIAR la sesión
+  durationMin: number;         // duración de la FASE ACTUAL (foco o descanso) en minutos
   startedAt: ISOTimestamp;      // inicio del segmento "corriendo" actual
   pausedAt: ISOTimestamp | null; // ISOTimestamp si está pausado, null si corre
   accumulatedSec: number;       // segundos acumulados ANTES del segmento actual
   continuedPastGoal: boolean;   // true = el usuario ya eligió "Continuar trabajando"
+  phase: FocusPhase;             // fase actual del ciclo
+  sessionIndex: number;          // 1-based: pomodoro actual dentro del ciclo
+  sessionsGoal: number;          // snapshot al iniciar
+  shortBreakMin: number;         // snapshot al iniciar
+  longBreakMin: number;          // snapshot al iniciar
+  longBreakInterval: number;     // snapshot al iniciar
+  autoStartNext: boolean;        // snapshot al iniciar
+  focusDurationMin: number;      // snapshot de task.focusDurationMin, inmutable durante el ciclo
 }
 
 /** True si la sesión está pausada hace más de 7 días (se trata como abandonada, sin registrar). */

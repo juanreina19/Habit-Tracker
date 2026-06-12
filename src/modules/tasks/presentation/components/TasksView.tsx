@@ -137,7 +137,7 @@ export default function TasksView({ userId }: Props) {
           {tab === "all" && (
             <AllTab tasks={tasks} toggleTask={toggleTask} onEdit={openEdit} onDelete={openDelete} sessionCounts={sessionCounts} />
           )}
-          {tab === "focus" && <FocusTab userId={userId} tasks={tasks} toggleTask={toggleTask} />}
+          {tab === "focus" && <FocusTab userId={userId} tasks={tasks} toggleTask={toggleTask} updateTask={updateTask} />}
         </motion.div>
       </div>
 

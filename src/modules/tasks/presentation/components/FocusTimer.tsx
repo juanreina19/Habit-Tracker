@@ -2,21 +2,77 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Play, Pause, Check, CheckCircle2, type LucideIcon } from "lucide-react";
-import type { ActiveFocusSession } from "../../domain/entities/ActiveFocusSession";
+import { Play, Pause, Check, CheckCircle2, Settings, type LucideIcon } from "lucide-react";
+import type { ActiveFocusSession, FocusPhase } from "../../domain/entities/ActiveFocusSession";
 import { getElapsedSec } from "../../domain/entities/ActiveFocusSession";
+import type { Task, UpdateTaskInput } from "../../domain/entities/Task";
+import { FocusSessionSettingsDialog } from "./FocusSessionSettingsDialog";
 
 const NOTIFIED_KEY = "focus_last_notified_session";
 
 interface Props {
   session: ActiveFocusSession;
   taskTitle: string;
+  task: Task;
+  onSaveConfig: (input: UpdateTaskInput) => Promise<void>;
   onPause: () => void;
   onResume: () => void;
   onContinueWorking: () => void;
   onFinish: () => Promise<void> | void;
   onRestart: () => Promise<void> | void;
   isFinishing: boolean;
+}
+
+const PHASE_LABEL_KEY: Record<FocusPhase, "phase_focus" | "phase_short_break" | "phase_long_break"> = {
+  focus: "phase_focus",
+  short_break: "phase_short_break",
+  long_break: "phase_long_break",
+};
+
+function FocusPhaseHeader({
+  session,
+  task,
+  onSaveConfig,
+}: {
+  session: ActiveFocusSession;
+  task: Task;
+  onSaveConfig: (input: UpdateTaskInput) => Promise<void>;
+}) {
+  const t = useTranslations("focus");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  return (
+    <div className="flex items-center justify-between w-full">
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+          {t(PHASE_LABEL_KEY[session.phase])}
+        </span>
+        {session.sessionsGoal > 1 && (
+          <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+            {t("pomodoro_progress", { current: session.sessionIndex, total: session.sessionsGoal })}
+          </span>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => setSettingsOpen(true)}
+        aria-label={t("settings_label")}
+        className="w-8 h-8 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
+        style={{ color: "var(--text-secondary)" }}
+      >
+        <Settings size={18} strokeWidth={2} />
+      </button>
+
+      {settingsOpen && (
+        <FocusSessionSettingsDialog
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          task={task}
+          onSave={onSaveConfig}
+        />
+      )}
+    </div>
+  );
 }
 
 function formatClock(totalSec: number): string {
@@ -103,6 +159,8 @@ function IconButton({
 export function FocusTimer({
   session,
   taskTitle,
+  task,
+  onSaveConfig,
   onPause,
   onResume,
   onContinueWorking,
@@ -123,10 +181,11 @@ export function FocusTimer({
   const goalSec = session.durationMin * 60;
   const reachedGoal = elapsedSec >= goalSec;
   const isPaused = session.pausedAt !== null;
+  const isFinalFocusGoal = session.phase === 'focus' && session.sessionIndex >= session.sessionsGoal;
 
   const notifiedRef = useRef(false);
   useEffect(() => {
-    if (reachedGoal) {
+    if (reachedGoal && isFinalFocusGoal) {
       if (!notifiedRef.current) {
         notifiedRef.current = true;
         const alreadyNotified = localStorage.getItem(NOTIFIED_KEY) === session.clientSessionId;
@@ -141,7 +200,7 @@ export function FocusTimer({
     } else {
       notifiedRef.current = false;
     }
-  }, [reachedGoal, taskTitle, session.clientSessionId, t]);
+  }, [reachedGoal, isFinalFocusGoal, taskTitle, session.clientSessionId, t]);
 
   const handleFinish = async () => {
     setActionError(null);
@@ -162,12 +221,13 @@ export function FocusTimer({
   };
 
   // ── Fase: Sesión completada (prompt) ──
-  if (reachedGoal && !session.continuedPastGoal) {
+  if (reachedGoal && !session.continuedPastGoal && isFinalFocusGoal) {
     return (
       <div
         className="rounded-[20px] p-6 lg:p-10 flex flex-col items-center gap-5 text-center"
         style={{ background: "var(--surface)" }}
       >
+        <FocusPhaseHeader session={session} task={task} onSaveConfig={onSaveConfig} />
         <FocusRing percentage={100} full accent>
           <CheckCircle2 size={56} style={{ color: "var(--accent)" }} />
           <span className="text-sm font-semibold mt-1">{t("session_completed_title")}</span>
@@ -203,13 +263,14 @@ export function FocusTimer({
   }
 
   // ── Fase: Tiempo extra ──
-  if (reachedGoal && session.continuedPastGoal) {
+  if (reachedGoal && session.continuedPastGoal && isFinalFocusGoal) {
     const overtimeSec = elapsedSec - goalSec;
     return (
       <div
         className="rounded-[20px] p-6 lg:p-10 flex flex-col items-center gap-5 text-center"
         style={{ background: "var(--surface)" }}
       >
+        <FocusPhaseHeader session={session} task={task} onSaveConfig={onSaveConfig} />
         <p className="text-sm font-medium truncate max-w-full" style={{ color: "var(--text-primary)" }}>
           {taskTitle}
         </p>
@@ -260,6 +321,7 @@ export function FocusTimer({
       className="rounded-[20px] p-6 lg:p-10 flex flex-col items-center gap-5"
       style={{ background: "var(--surface)" }}
     >
+      <FocusPhaseHeader session={session} task={task} onSaveConfig={onSaveConfig} />
       <p className="text-sm font-medium truncate max-w-full" style={{ color: "var(--text-primary)" }}>
         {taskTitle}
       </p>
