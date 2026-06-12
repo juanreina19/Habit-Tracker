@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Play, Pause, Check, CheckCircle2, Settings, type LucideIcon } from "lucide-react";
+import { Play, Pause, Check, CheckCircle2, Settings, Flame, Coffee, Moon, type LucideIcon } from "lucide-react";
 import type { ActiveFocusSession, FocusPhase } from "../../domain/entities/ActiveFocusSession";
 import { getElapsedSec } from "../../domain/entities/ActiveFocusSession";
 import type { Task, UpdateTaskInput } from "../../domain/entities/Task";
@@ -29,6 +29,20 @@ const PHASE_LABEL_KEY: Record<FocusPhase, "phase_focus" | "phase_short_break" | 
   long_break: "phase_long_break",
 };
 
+/** Color de acento por fase: foco usa el verde de la app; los descansos tienen su propio color.
+ *  Hex literal (no var()) porque se usa también para fondos con alpha (`${color}15`). */
+const PHASE_COLOR: Record<FocusPhase, string> = {
+  focus: "#4CAF82",
+  short_break: "#4A9EFF",
+  long_break: "#B26BFF",
+};
+
+const PHASE_ICON: Record<FocusPhase, LucideIcon> = {
+  focus: Flame,
+  short_break: Coffee,
+  long_break: Moon,
+};
+
 function FocusPhaseHeader({
   session,
   task,
@@ -40,11 +54,17 @@ function FocusPhaseHeader({
 }) {
   const t = useTranslations("focus");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const phaseColor = PHASE_COLOR[session.phase];
+  const PhaseIcon = PHASE_ICON[session.phase];
 
   return (
     <div className="flex items-center justify-between w-full">
       <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+        <span
+          className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full"
+          style={{ color: phaseColor, background: `${phaseColor}15` }}
+        >
+          <PhaseIcon size={13} strokeWidth={2.5} />
           {t(PHASE_LABEL_KEY[session.phase])}
         </span>
         {session.sessionsGoal > 1 && (
@@ -85,12 +105,12 @@ function formatClock(totalSec: number): string {
 function FocusRing({
   percentage,
   full,
-  accent,
+  color,
   children,
 }: {
   percentage: number;
   full?: boolean;
-  accent?: boolean;
+  color?: string;
   children: React.ReactNode;
 }) {
   const size = 260;
@@ -108,7 +128,7 @@ function FocusRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke={accent ? "var(--accent)" : "var(--text-primary)"}
+          stroke={color ?? "var(--text-primary)"}
           strokeWidth={6}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -228,7 +248,7 @@ export function FocusTimer({
         style={{ background: "var(--surface)" }}
       >
         <FocusPhaseHeader session={session} task={task} onSaveConfig={onSaveConfig} />
-        <FocusRing percentage={100} full accent>
+        <FocusRing percentage={100} full color={PHASE_COLOR.focus}>
           <CheckCircle2 size={56} style={{ color: "var(--accent)" }} />
           <span className="text-sm font-semibold mt-1">{t("session_completed_title")}</span>
         </FocusRing>
@@ -274,7 +294,7 @@ export function FocusTimer({
         <p className="text-sm font-medium truncate max-w-full" style={{ color: "var(--text-primary)" }}>
           {taskTitle}
         </p>
-        <FocusRing percentage={100} full accent>
+        <FocusRing percentage={100} full color={PHASE_COLOR.focus}>
           <span className="text-6xl lg:text-7xl font-bold tabular-nums" style={{ color: "var(--accent)" }}>
             +{formatClock(overtimeSec)}
           </span>
@@ -315,6 +335,9 @@ export function FocusTimer({
   // a medida que transcurre el tiempo, reflejando el tiempo RESTANTE.
   const percentage = (remainingSec / goalSec) * 100;
   const notStarted = isPaused && Math.floor(elapsedSec) === 0;
+  // En descansos, el anillo y el reloj usan el color de la fase para distinguir
+  // descanso corto de descanso largo a simple vista.
+  const timerColor = session.phase === "focus" ? "var(--text-primary)" : PHASE_COLOR[session.phase];
 
   return (
     <div
@@ -325,8 +348,8 @@ export function FocusTimer({
       <p className="text-sm font-medium truncate max-w-full" style={{ color: "var(--text-primary)" }}>
         {taskTitle}
       </p>
-      <FocusRing percentage={percentage}>
-        <span className="text-6xl lg:text-7xl font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>
+      <FocusRing percentage={percentage} color={timerColor}>
+        <span className="text-6xl lg:text-7xl font-bold tabular-nums" style={{ color: timerColor }}>
           {formatClock(remainingSec)}
         </span>
         <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
