@@ -289,8 +289,6 @@
     "settings_applies_live": "Los cambios se aplican de inmediato a la sesión en curso",
     "save": "Guardar",
     "cancel": "Cancelar",
-    "on": "Activado",
-    "off": "Desactivado",
     "validation_out_of_range": "El valor debe estar entre {min} y {max}",
     "settings_save_error": "No se pudieron guardar los ajustes. Inténtalo de nuevo."
   }

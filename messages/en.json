@@ -289,8 +289,6 @@
     "settings_applies_live": "Changes apply immediately to the current session",
     "save": "Save",
     "cancel": "Cancel",
-    "on": "On",
-    "off": "Off",
     "validation_out_of_range": "Value must be between {min} and {max}",
     "settings_save_error": "Couldn't save the settings. Please try again."
   }

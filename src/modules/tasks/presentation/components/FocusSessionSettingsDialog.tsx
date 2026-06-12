@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
+import { Info } from "lucide-react";
 import type { Task, UpdateTaskInput } from "../../domain/entities/Task";
 import {
   resolveSessionsGoal,
@@ -77,6 +78,60 @@ function NumberField({
         )}
       </div>
     </div>
+  );
+}
+
+function InfoTooltip({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("click", onClickOutside);
+    return () => document.removeEventListener("click", onClickOutside);
+  }, [open]);
+
+  return (
+    <span ref={ref} className="relative inline-flex">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-label={text}
+        className="flex items-center justify-center"
+        style={{ color: "var(--text-secondary)" }}
+      >
+        <Info size={14} strokeWidth={2} />
+      </button>
+      {open && (
+        <span
+          className="absolute z-10 left-1/2 -translate-x-1/2 top-full mt-2 w-48 rounded-[10px] p-2 text-center text-xs font-normal normal-case shadow-lg"
+          style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+        >
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
+
+function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onChange}
+      aria-label={label}
+      aria-pressed={checked}
+      className="flex-shrink-0 w-12 h-7 rounded-full relative transition-colors"
+      style={{ background: checked ? "#4CAF82" : "var(--border)" }}
+    >
+      <span
+        className="absolute top-1 w-5 h-5 rounded-full bg-white transition-all"
+        style={{ left: checked ? "calc(100% - 24px)" : "4px" }}
+      />
+    </button>
   );
 }
 
@@ -174,48 +229,32 @@ export function FocusSessionSettingsDialog({ open, onClose, task, onSave }: Prop
               unit={t("long_break_interval_unit")}
             />
 
-            <div>
-              <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
                 <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
                   {t("auto_start_short_break_label")}
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setAutoStartShortBreak((p) => !p)}
-                  className="text-xs font-medium px-3 py-1 rounded-full transition-all"
-                  style={{
-                    background: autoStartShortBreak ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                    color:      autoStartShortBreak ? "var(--btn-primary-text)" : "var(--text-secondary)",
-                  }}
-                >
-                  {autoStartShortBreak ? t("on") : t("off")}
-                </button>
+                <InfoTooltip text={t("auto_start_short_break_hint")} />
               </div>
-              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                {t("auto_start_short_break_hint")}
-              </p>
+              <ToggleSwitch
+                checked={autoStartShortBreak}
+                onChange={() => setAutoStartShortBreak((p) => !p)}
+                label={t("auto_start_short_break_label")}
+              />
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
                 <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
                   {t("auto_start_long_break_label")}
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setAutoStartLongBreak((p) => !p)}
-                  className="text-xs font-medium px-3 py-1 rounded-full transition-all"
-                  style={{
-                    background: autoStartLongBreak ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                    color:      autoStartLongBreak ? "var(--btn-primary-text)" : "var(--text-secondary)",
-                  }}
-                >
-                  {autoStartLongBreak ? t("on") : t("off")}
-                </button>
+                <InfoTooltip text={t("auto_start_long_break_hint")} />
               </div>
-              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                {t("auto_start_long_break_hint")}
-              </p>
+              <ToggleSwitch
+                checked={autoStartLongBreak}
+                onChange={() => setAutoStartLongBreak((p) => !p)}
+                label={t("auto_start_long_break_label")}
+              />
             </div>
 
             <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
