@@ -5,6 +5,8 @@ import { createClient } from "@/shared/lib/supabase/client";
 import { FocusSessionSupabaseRepository } from "../../infrastructure/supabase/FocusSessionSupabaseRepository";
 import { ActiveFocusSessionSupabaseRepository } from "../../infrastructure/supabase/ActiveFocusSessionSupabaseRepository";
 import { RecordFocusSessionUseCase } from "../../domain/use-cases/RecordFocusSessionUseCase";
+import { GetFocusSessionCountsUseCase } from "../../domain/use-cases/GetFocusSessionCountsUseCase";
+import { getStartOfLocalDay } from "../lib/focusSessionStorage";
 import type { TaskWithStatus, UpdateTaskInput } from "../../domain/entities/Task";
 import {
   resolveSessionsGoal,
@@ -91,6 +93,19 @@ export function useFocusSession(userId: UUID) {
     if (task.focusDurationMin === null) return;
     if (activeRef.current !== null) return; // ya hay una sesión activa (propia o de otro dispositivo)
 
+    const sessionsGoal = resolveSessionsGoal(task);
+
+    // Si ya se completaron sesiones hoy para esta tarea, el ciclo arranca en el
+    // número que corresponde (ej. 3 completadas hoy → "4/4"), sin superar la meta.
+    let sessionIndex = 1;
+    try {
+      const counts = await new GetFocusSessionCountsUseCase(getRepo()).execute([task.id], getStartOfLocalDay());
+      const completedToday = counts.get(task.id) ?? 0;
+      sessionIndex = Math.min(completedToday + 1, sessionsGoal);
+    } catch {
+      // Si falla la consulta, se inicia en 1 como antes.
+    }
+
     const session: ActiveFocusSession = {
       userId,
       clientSessionId: crypto.randomUUID(),
@@ -102,8 +117,8 @@ export function useFocusSession(userId: UUID) {
       accumulatedSec: 0,
       continuedPastGoal: false,
       phase: 'focus',
-      sessionIndex: 1,
-      sessionsGoal: resolveSessionsGoal(task),
+      sessionIndex,
+      sessionsGoal,
       shortBreakMin: resolveShortBreakMin(task),
       longBreakMin: resolveLongBreakMin(task),
       longBreakInterval: resolveLongBreakInterval(task),
@@ -118,7 +133,7 @@ export function useFocusSession(userId: UUID) {
     } catch {
       // Si falla la persistencia, Realtime/loadActive en el próximo intento reflejará el estado real.
     }
-  }, [userId, getActiveRepo]);
+  }, [userId, getActiveRepo, getRepo]);
 
   const pause = useCallback(() => {
     setActive((prev) => {
@@ -240,6 +255,17 @@ export function useFocusSession(userId: UUID) {
         accumulatedSec: 0,
         startedAt: now,
         pausedAt: autoStart ? null : now,
+      };
+    } else if (current.sessionIndex >= current.sessionsGoal) {
+      // Era el descanso posterior a la última sesión de foco del ciclo: ya se alcanzó la meta,
+      // no se inicia una sesión extra — se muestra "Sesión completada" para la última sesión.
+      next = {
+        ...current,
+        phase: 'focus',
+        durationMin: current.focusDurationMin,
+        accumulatedSec: current.focusDurationMin * 60,
+        startedAt: now,
+        pausedAt: now,
       };
     } else {
       const autoStart = current.phase === 'long_break' ? current.autoStartLongBreak : current.autoStartShortBreak;
