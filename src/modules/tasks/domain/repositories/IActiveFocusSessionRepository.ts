@@ -11,12 +11,14 @@ export interface IActiveFocusSessionRepository {
    */
   start(userId: UUID, session: ActiveFocusSession): Promise<ActiveFocusSession>;
 
-  /** Actualiza campos de la sesión activa (pausa, reanudación, continuar, avance de fase). */
+  /** Actualiza campos de la sesión activa (pausa, reanudación, continuar, avance de fase, ajustes en vivo). */
   update(
     userId: UUID,
     patch: Partial<Pick<ActiveFocusSession,
       "startedAt" | "pausedAt" | "accumulatedSec" | "continuedPastGoal" |
-      "phase" | "sessionIndex" | "durationMin"
+      "phase" | "sessionIndex" | "durationMin" |
+      "sessionsGoal" | "shortBreakMin" | "longBreakMin" | "longBreakInterval" |
+      "autoStartShortBreak" | "autoStartLongBreak"
     >>
   ): Promise<void>;
 

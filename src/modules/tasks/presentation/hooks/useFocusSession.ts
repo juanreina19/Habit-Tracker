@@ -5,13 +5,20 @@ import { createClient } from "@/shared/lib/supabase/client";
 import { FocusSessionSupabaseRepository } from "../../infrastructure/supabase/FocusSessionSupabaseRepository";
 import { ActiveFocusSessionSupabaseRepository } from "../../infrastructure/supabase/ActiveFocusSessionSupabaseRepository";
 import { RecordFocusSessionUseCase } from "../../domain/use-cases/RecordFocusSessionUseCase";
-import type { TaskWithStatus } from "../../domain/entities/Task";
+import type { TaskWithStatus, UpdateTaskInput } from "../../domain/entities/Task";
 import {
   resolveSessionsGoal,
   resolveShortBreakMin,
   resolveLongBreakMin,
   resolveLongBreakInterval,
-  resolveAutoStartNext,
+  resolveAutoStartShortBreak,
+  resolveAutoStartLongBreak,
+  DEFAULT_SESSIONS_GOAL,
+  DEFAULT_SHORT_BREAK_MIN,
+  DEFAULT_LONG_BREAK_MIN,
+  DEFAULT_LONG_BREAK_INTERVAL,
+  DEFAULT_AUTO_START_SHORT_BREAK,
+  DEFAULT_AUTO_START_LONG_BREAK,
 } from "../../domain/entities/Task";
 import type { FocusSessionStatus } from "../../domain/entities/FocusSession";
 import type { UUID } from "@/shared/types/database.types";
@@ -100,7 +107,8 @@ export function useFocusSession(userId: UUID) {
       shortBreakMin: resolveShortBreakMin(task),
       longBreakMin: resolveLongBreakMin(task),
       longBreakInterval: resolveLongBreakInterval(task),
-      autoStartNext: resolveAutoStartNext(task),
+      autoStartShortBreak: resolveAutoStartShortBreak(task),
+      autoStartLongBreak: resolveAutoStartLongBreak(task),
       focusDurationMin: task.focusDurationMin,
     };
 
@@ -149,6 +157,38 @@ export function useFocusSession(userId: UUID) {
     getActiveRepo().clear(userId).catch(() => {});
   }, [userId, getActiveRepo]);
 
+  /** Aplica cambios de configuración Pomodoro a la sesión activa en curso, sin pausarla ni reiniciarla. */
+  const updateActiveConfig = useCallback((input: UpdateTaskInput) => {
+    setActive((prev) => {
+      if (!prev) return prev;
+
+      const patch: Partial<Pick<ActiveFocusSession,
+        "sessionsGoal" | "shortBreakMin" | "longBreakMin" | "longBreakInterval" |
+        "autoStartShortBreak" | "autoStartLongBreak" | "durationMin"
+      >> = {};
+
+      if ("sessionsGoal" in input) patch.sessionsGoal = input.sessionsGoal ?? DEFAULT_SESSIONS_GOAL;
+      if ("shortBreakMin" in input) patch.shortBreakMin = input.shortBreakMin ?? DEFAULT_SHORT_BREAK_MIN;
+      if ("longBreakMin" in input) patch.longBreakMin = input.longBreakMin ?? DEFAULT_LONG_BREAK_MIN;
+      if ("longBreakInterval" in input) patch.longBreakInterval = input.longBreakInterval ?? DEFAULT_LONG_BREAK_INTERVAL;
+      if ("autoStartShortBreak" in input) patch.autoStartShortBreak = input.autoStartShortBreak ?? DEFAULT_AUTO_START_SHORT_BREAK;
+      if ("autoStartLongBreak" in input) patch.autoStartLongBreak = input.autoStartLongBreak ?? DEFAULT_AUTO_START_LONG_BREAK;
+
+      if (Object.keys(patch).length === 0) return prev;
+
+      // Si la fase actual es justo el descanso cuya duración cambió, reflejarlo de inmediato en el timer en curso.
+      if (prev.phase === 'short_break' && patch.shortBreakMin !== undefined) {
+        patch.durationMin = patch.shortBreakMin;
+      } else if (prev.phase === 'long_break' && patch.longBreakMin !== undefined) {
+        patch.durationMin = patch.longBreakMin;
+      }
+
+      const next: ActiveFocusSession = { ...prev, ...patch };
+      getActiveRepo().update(userId, patch).catch(() => {});
+      return next;
+    });
+  }, [userId, getActiveRepo]);
+
   /** Avanza a la siguiente fase del ciclo (foco→descanso o descanso→foco). Idempotente. */
   const advancePhase = useCallback(async () => {
     // Releer la fuente de verdad: si otro dispositivo ya avanzó esta sesión, solo sincronizamos.
@@ -192,15 +232,17 @@ export function useFocusSession(userId: UUID) {
 
     if (current.phase === 'focus') {
       const isLongBreak = current.sessionIndex % current.longBreakInterval === 0;
+      const autoStart = isLongBreak ? current.autoStartLongBreak : current.autoStartShortBreak;
       next = {
         ...current,
         phase: isLongBreak ? 'long_break' : 'short_break',
         durationMin: isLongBreak ? current.longBreakMin : current.shortBreakMin,
         accumulatedSec: 0,
         startedAt: now,
-        pausedAt: current.autoStartNext ? null : now,
+        pausedAt: autoStart ? null : now,
       };
     } else {
+      const autoStart = current.phase === 'long_break' ? current.autoStartLongBreak : current.autoStartShortBreak;
       next = {
         ...current,
         phase: 'focus',
@@ -208,7 +250,7 @@ export function useFocusSession(userId: UUID) {
         durationMin: current.focusDurationMin,
         accumulatedSec: 0,
         startedAt: now,
-        pausedAt: current.autoStartNext ? null : now,
+        pausedAt: autoStart ? null : now,
       };
     }
 
@@ -295,5 +337,5 @@ export function useFocusSession(userId: UUID) {
     }
   }, [userId, getRepo, getActiveRepo]);
 
-  return { active, loading, start, pause, resume, continueWorking, finish, discard, isFinishing, advancePhase };
+  return { active, loading, start, pause, resume, continueWorking, finish, discard, isFinishing, advancePhase, updateActiveConfig };
 }

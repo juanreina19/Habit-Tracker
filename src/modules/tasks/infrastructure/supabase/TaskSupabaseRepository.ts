@@ -28,7 +28,8 @@ export class TaskSupabaseRepository implements ITaskRepository {
       shortBreakMin:     row.short_break_min ?? null,
       longBreakMin:      row.long_break_min ?? null,
       longBreakInterval: row.long_break_interval ?? null,
-      autoStartNext:     row.auto_start_next ?? null,
+      autoStartShortBreak: row.auto_start_short_break ?? null,
+      autoStartLongBreak:  row.auto_start_long_break ?? null,
     };
   }
 
@@ -163,7 +164,8 @@ export class TaskSupabaseRepository implements ITaskRepository {
     if ("shortBreakMin" in input)              patch.short_break_min = input.shortBreakMin ?? null;
     if ("longBreakMin" in input)               patch.long_break_min = input.longBreakMin ?? null;
     if ("longBreakInterval" in input)          patch.long_break_interval = input.longBreakInterval ?? null;
-    if ("autoStartNext" in input)              patch.auto_start_next = input.autoStartNext ?? null;
+    if ("autoStartShortBreak" in input)        patch.auto_start_short_break = input.autoStartShortBreak ?? null;
+    if ("autoStartLongBreak" in input)         patch.auto_start_long_break = input.autoStartLongBreak ?? null;
 
     const { data, error } = await this.client
       .from("tasks")

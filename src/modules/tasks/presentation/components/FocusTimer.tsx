@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Play, Pause, Check, CheckCircle2, Settings, Flame, Coffee, Moon, type LucideIcon } from "lucide-react";
+import { Play, Pause, Check, CheckCircle2, Settings, Flame, Coffee, Moon, SkipForward, type LucideIcon } from "lucide-react";
 import type { ActiveFocusSession, FocusPhase } from "../../domain/entities/ActiveFocusSession";
 import { getElapsedSec } from "../../domain/entities/ActiveFocusSession";
 import type { Task, UpdateTaskInput } from "../../domain/entities/Task";
@@ -20,6 +20,7 @@ interface Props {
   onContinueWorking: () => void;
   onFinish: () => Promise<void> | void;
   onRestart: () => Promise<void> | void;
+  onSkip: () => Promise<void> | void;
   isFinishing: boolean;
 }
 
@@ -186,11 +187,13 @@ export function FocusTimer({
   onContinueWorking,
   onFinish,
   onRestart,
+  onSkip,
   isFinishing,
 }: Props) {
   const t = useTranslations("focus");
   const [, forceTick] = useState(0);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [isSkipping, setIsSkipping] = useState(false);
 
   useEffect(() => {
     const id = setInterval(() => forceTick((n) => n + 1), 1000);
@@ -237,6 +240,18 @@ export function FocusTimer({
       await onRestart();
     } catch {
       setActionError(t("finish_error"));
+    }
+  };
+
+  const handleSkip = async () => {
+    setActionError(null);
+    setIsSkipping(true);
+    try {
+      await onSkip();
+    } catch {
+      setActionError(t("skip_error"));
+    } finally {
+      setIsSkipping(false);
     }
   };
 
@@ -370,6 +385,7 @@ export function FocusTimer({
           size={72}
         />
         <IconButton icon={Check} onClick={handleFinish} label={t("finish")} disabled={isFinishing} size={56} />
+        <IconButton icon={SkipForward} onClick={handleSkip} label={t("skip_phase")} disabled={isSkipping} size={56} />
       </div>
     </div>
   );

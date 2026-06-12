@@ -103,7 +103,8 @@ export interface DbTask {
   short_break_min: number | null;
   long_break_min: number | null;
   long_break_interval: number | null;
-  auto_start_next: boolean | null;
+  auto_start_short_break: boolean | null;
+  auto_start_long_break: boolean | null;
 }
 
 export interface DbTaskCompletion {
@@ -142,7 +143,8 @@ export interface DbActiveFocusSession {
   short_break_min: number | null;
   long_break_min: number | null;
   long_break_interval: number | null;
-  auto_start_next: boolean | null;
+  auto_start_short_break: boolean | null;
+  auto_start_long_break: boolean | null;
   focus_duration_min: number | null;
   updated_at: ISOTimestamp;
 }

@@ -64,12 +64,16 @@ export function FocusTab({ userId, tasks, toggleTask, updateTask }: Props) {
             session={active}
             taskTitle={task.title}
             task={task}
-            onSaveConfig={(input) => updateTask(task, input)}
+            onSaveConfig={async (input) => {
+              await updateTask(task, input);
+              focus.updateActiveConfig(input);
+            }}
             onPause={focus.pause}
             onResume={focus.resume}
             onContinueWorking={focus.continueWorking}
             onFinish={handleFinish}
             onRestart={handleRestart}
+            onSkip={focus.advancePhase}
             isFinishing={focus.isFinishing}
           />
         </div>

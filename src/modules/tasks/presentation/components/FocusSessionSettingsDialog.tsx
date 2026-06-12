@@ -9,7 +9,8 @@ import {
   resolveShortBreakMin,
   resolveLongBreakMin,
   resolveLongBreakInterval,
-  resolveAutoStartNext,
+  resolveAutoStartShortBreak,
+  resolveAutoStartLongBreak,
 } from "../../domain/entities/Task";
 
 interface Props {
@@ -85,7 +86,8 @@ export function FocusSessionSettingsDialog({ open, onClose, task, onSave }: Prop
   const [shortBreakMin, setShortBreakMin] = useState(String(resolveShortBreakMin(task)));
   const [longBreakMin, setLongBreakMin] = useState(String(resolveLongBreakMin(task)));
   const [longBreakInterval, setLongBreakInterval] = useState(String(resolveLongBreakInterval(task)));
-  const [autoStartNext, setAutoStartNext] = useState(resolveAutoStartNext(task));
+  const [autoStartShortBreak, setAutoStartShortBreak] = useState(resolveAutoStartShortBreak(task));
+  const [autoStartLongBreak, setAutoStartLongBreak] = useState(resolveAutoStartLongBreak(task));
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -109,7 +111,7 @@ export function FocusSessionSettingsDialog({ open, onClose, task, onSave }: Prop
     setError("");
     setIsSaving(true);
     try {
-      await onSave({ ...values, autoStartNext });
+      await onSave({ ...values, autoStartShortBreak, autoStartLongBreak });
       onClose();
     } catch {
       setError(t("settings_save_error"));
@@ -175,27 +177,49 @@ export function FocusSessionSettingsDialog({ open, onClose, task, onSave }: Prop
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-                  {t("auto_start_next_label")}
+                  {t("auto_start_short_break_label")}
                 </label>
                 <button
                   type="button"
-                  onClick={() => setAutoStartNext((p) => !p)}
+                  onClick={() => setAutoStartShortBreak((p) => !p)}
                   className="text-xs font-medium px-3 py-1 rounded-full transition-all"
                   style={{
-                    background: autoStartNext ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                    color:      autoStartNext ? "var(--btn-primary-text)" : "var(--text-secondary)",
+                    background: autoStartShortBreak ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
+                    color:      autoStartShortBreak ? "var(--btn-primary-text)" : "var(--text-secondary)",
                   }}
                 >
-                  {autoStartNext ? t("on") : t("off")}
+                  {autoStartShortBreak ? t("on") : t("off")}
                 </button>
               </div>
               <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                {t("auto_start_next_hint")}
+                {t("auto_start_short_break_hint")}
+              </p>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+                  {t("auto_start_long_break_label")}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setAutoStartLongBreak((p) => !p)}
+                  className="text-xs font-medium px-3 py-1 rounded-full transition-all"
+                  style={{
+                    background: autoStartLongBreak ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
+                    color:      autoStartLongBreak ? "var(--btn-primary-text)" : "var(--text-secondary)",
+                  }}
+                >
+                  {autoStartLongBreak ? t("on") : t("off")}
+                </button>
+              </div>
+              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                {t("auto_start_long_break_hint")}
               </p>
             </div>
 
             <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-              {t("settings_applies_next_cycle")}
+              {t("settings_applies_live")}
             </p>
 
             {error && (

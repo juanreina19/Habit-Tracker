@@ -38,7 +38,8 @@ export interface ActiveFocusSession {
   shortBreakMin: number;         // snapshot al iniciar
   longBreakMin: number;          // snapshot al iniciar
   longBreakInterval: number;     // snapshot al iniciar
-  autoStartNext: boolean;        // snapshot al iniciar
+  autoStartShortBreak: boolean;  // snapshot, sincronizado en vivo vía updateActiveConfig()
+  autoStartLongBreak: boolean;   // snapshot, sincronizado en vivo vía updateActiveConfig()
   focusDurationMin: number;      // snapshot de task.focusDurationMin, inmutable durante el ciclo
 }
 

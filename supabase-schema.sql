@@ -221,8 +221,13 @@ alter table tasks
   add column if not exists long_break_interval int
     check (long_break_interval is null or long_break_interval between 1 and 12);
 
+alter table tasks drop column if exists auto_start_next;
+
 alter table tasks
-  add column if not exists auto_start_next boolean;  -- NULL/false = comportamiento actual
+  add column if not exists auto_start_short_break boolean;  -- NULL/false = comportamiento actual
+
+alter table tasks
+  add column if not exists auto_start_long_break boolean;  -- NULL/false = comportamiento actual
 
 -- ─── COMPLETACIONES DE TAREAS RECURRENTES ────────────────────
 -- Equivale a habit_logs pero para tareas recurrentes.
@@ -580,8 +585,8 @@ create table if not exists active_focus_sessions (
 -- Aditivo. Filas pre-migración quedan con estas columnas en NULL; el mapper de la
 -- app las trata como phase='focus', session_index=1, defaults de descansos/auto-inicio,
 -- y focus_duration_min = duration_min (para filas viejas, duration_min YA es el foco).
--- Los 6 valores se "snapshotean" en start() para que editar la config a mitad de
--- ciclo no afecte el ciclo en curso.
+-- Estos valores se "snapshotean" en start() y se mantienen sincronizados en vivo
+-- mediante updateActiveConfig() cuando el usuario cambia los ajustes a mitad de ciclo.
 
 alter table active_focus_sessions
   add column if not exists phase text
@@ -602,8 +607,13 @@ alter table active_focus_sessions
 alter table active_focus_sessions
   add column if not exists long_break_interval int check (long_break_interval is null or long_break_interval between 1 and 12);
 
+alter table active_focus_sessions drop column if exists auto_start_next;
+
 alter table active_focus_sessions
-  add column if not exists auto_start_next boolean;
+  add column if not exists auto_start_short_break boolean;
+
+alter table active_focus_sessions
+  add column if not exists auto_start_long_break boolean;
 
 alter table active_focus_sessions
   add column if not exists focus_duration_min int check (focus_duration_min is null or focus_duration_min > 0);
