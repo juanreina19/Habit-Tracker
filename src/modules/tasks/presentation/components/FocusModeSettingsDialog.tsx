@@ -4,25 +4,18 @@ import { useState, useRef, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
 import { Info } from "lucide-react";
-import type { Task, UpdateTaskInput } from "../../domain/entities/Task";
-import {
-  resolveSessionsGoal,
-  resolveShortBreakMin,
-  resolveLongBreakMin,
-  resolveLongBreakInterval,
-  resolveAutoStartShortBreak,
-  resolveAutoStartLongBreak,
-} from "../../domain/entities/Task";
+import type { FocusModeSession } from "../../domain/entities/FocusModeSession";
+import type { FocusModeSettingsInput } from "../hooks/useFocusMode";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  task: Task;
-  onSave: (input: UpdateTaskInput) => Promise<void>;
+  session: FocusModeSession;
+  onSave: (patch: FocusModeSettingsInput) => void;
 }
 
 const RANGES = {
-  sessionsGoal: { min: 1, max: 12 },
+  focusDurationMin: { min: 1, max: 480 },
   shortBreakMin: { min: 1, max: 60 },
   longBreakMin: { min: 1, max: 120 },
   longBreakInterval: { min: 1, max: 12 },
@@ -30,7 +23,6 @@ const RANGES = {
 
 function NumberField({
   label,
-  hint,
   value,
   onChange,
   min,
@@ -38,7 +30,6 @@ function NumberField({
   unit,
 }: {
   label: string;
-  hint?: string;
   value: string;
   onChange: (value: string) => void;
   min: number;
@@ -50,11 +41,6 @@ function NumberField({
       <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
         {label}
       </label>
-      {hint && (
-        <p className="text-xs mt-0.5 mb-1.5" style={{ color: "var(--text-secondary)" }}>
-          {hint}
-        </p>
-      )}
       <div className="flex items-center gap-2 mt-1.5">
         <input
           type="number"
@@ -135,20 +121,19 @@ function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange
   );
 }
 
-export function FocusSessionSettingsDialog({ open, onClose, task, onSave }: Props) {
+export function FocusModeSettingsDialog({ open, onClose, session, onSave }: Props) {
   const t = useTranslations("focus");
-  const [sessionsGoal, setSessionsGoal] = useState(String(resolveSessionsGoal(task)));
-  const [shortBreakMin, setShortBreakMin] = useState(String(resolveShortBreakMin(task)));
-  const [longBreakMin, setLongBreakMin] = useState(String(resolveLongBreakMin(task)));
-  const [longBreakInterval, setLongBreakInterval] = useState(String(resolveLongBreakInterval(task)));
-  const [autoStartShortBreak, setAutoStartShortBreak] = useState(resolveAutoStartShortBreak(task));
-  const [autoStartLongBreak, setAutoStartLongBreak] = useState(resolveAutoStartLongBreak(task));
+  const [focusDurationMin, setFocusDurationMin] = useState(String(session.focusDurationMin));
+  const [shortBreakMin, setShortBreakMin] = useState(String(session.shortBreakMin));
+  const [longBreakMin, setLongBreakMin] = useState(String(session.longBreakMin));
+  const [longBreakInterval, setLongBreakInterval] = useState(String(session.longBreakInterval));
+  const [autoStartShortBreak, setAutoStartShortBreak] = useState(session.autoStartShortBreak);
+  const [autoStartLongBreak, setAutoStartLongBreak] = useState(session.autoStartLongBreak);
   const [error, setError] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = async () => {
+  const handleSave = () => {
     const values: Record<keyof typeof RANGES, number> = {
-      sessionsGoal: Number(sessionsGoal),
+      focusDurationMin: Number(focusDurationMin),
       shortBreakMin: Number(shortBreakMin),
       longBreakMin: Number(longBreakMin),
       longBreakInterval: Number(longBreakInterval),
@@ -164,27 +149,20 @@ export function FocusSessionSettingsDialog({ open, onClose, task, onSave }: Prop
     }
 
     setError("");
-    setIsSaving(true);
-    try {
-      await onSave({ ...values, autoStartShortBreak, autoStartLongBreak });
-      onClose();
-    } catch {
-      setError(t("settings_save_error"));
-    } finally {
-      setIsSaving(false);
-    }
+    onSave({ ...values, autoStartShortBreak, autoStartLongBreak });
+    onClose();
   };
 
   return (
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay
-          className="fixed inset-0 z-40"
+          className="fixed inset-0 z-[110]"
           style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-[24px] outline-none overflow-hidden"
+          className="fixed z-[120] left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-[24px] outline-none overflow-hidden"
           style={{ background: "var(--surface)", maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto p-6 flex flex-col gap-4" style={{ maxHeight: "90dvh" }}>
@@ -193,12 +171,12 @@ export function FocusSessionSettingsDialog({ open, onClose, task, onSave }: Prop
             </Dialog.Title>
 
             <NumberField
-              label={t("sessions_goal_label")}
-              hint={t("sessions_goal_hint")}
-              value={sessionsGoal}
-              onChange={setSessionsGoal}
-              min={RANGES.sessionsGoal.min}
-              max={RANGES.sessionsGoal.max}
+              label={t("focus_duration_label")}
+              value={focusDurationMin}
+              onChange={setFocusDurationMin}
+              min={RANGES.focusDurationMin.min}
+              max={RANGES.focusDurationMin.max}
+              unit={t("duration_unit")}
             />
 
             <div className="grid grid-cols-2 gap-3">
@@ -277,8 +255,7 @@ export function FocusSessionSettingsDialog({ open, onClose, task, onSave }: Prop
               </button>
               <button
                 onClick={handleSave}
-                disabled={isSaving}
-                className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70"
                 style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
               >
                 {t("save")}

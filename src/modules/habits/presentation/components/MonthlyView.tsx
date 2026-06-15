@@ -149,7 +149,7 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
 
   if (embedded) return inner;
   return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10">
       {inner}
     </div>
   );

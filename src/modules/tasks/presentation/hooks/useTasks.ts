@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { TaskSupabaseRepository } from "../../infrastructure/supabase/TaskSupabaseRepository";
+import { SubtaskSupabaseRepository } from "../../infrastructure/supabase/SubtaskSupabaseRepository";
 import { GetTasksUseCase } from "../../domain/use-cases/GetTasksUseCase";
 import { CreateTaskUseCase } from "../../domain/use-cases/CreateTaskUseCase";
 import { UpdateTaskUseCase } from "../../domain/use-cases/UpdateTaskUseCase";
 import { ToggleTaskUseCase } from "../../domain/use-cases/ToggleTaskUseCase";
 import { DeleteTaskUseCase } from "../../domain/use-cases/DeleteTaskUseCase";
+import { GetSubtaskCountsUseCase } from "../../domain/use-cases/GetSubtaskCountsUseCase";
 import { isRecurring } from "../../domain/entities/Task";
 import type { Task, TaskWithStatus, CreateTaskInput, UpdateTaskInput } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
@@ -19,6 +21,7 @@ export function useTasks(userId: UUID) {
   const [error, setError] = useState<string | null>(null);
 
   const getRepo = useCallback(() => new TaskSupabaseRepository(createClient()), []);
+  const getSubtaskRepo = useCallback(() => new SubtaskSupabaseRepository(createClient()), []);
 
   // Generación del fetch — descarta resultados de fetches obsoletos que resuelven fuera de orden
   // (evita que una respuesta vieja pise el estado de una más reciente).
@@ -34,9 +37,13 @@ export function useTasks(userId: UUID) {
     setError(null);
     try {
       const data = await new GetTasksUseCase(getRepo()).execute(userId, today());
+      const counts = await new GetSubtaskCountsUseCase(getSubtaskRepo()).execute(data.map((t) => t.id));
       if (fetchGeneration.current !== generation) return;
       if (pendingToggles.current.size > 0) return;
-      setTasks(data);
+      setTasks(data.map((t) => {
+        const count = counts.get(t.id);
+        return count ? { ...t, subtaskTotal: count.total, subtaskCompleted: count.completed } : t;
+      }));
     } catch (err) {
       if (fetchGeneration.current === generation) {
         setError(err instanceof Error ? err.message : "Error al cargar tareas");
@@ -44,7 +51,7 @@ export function useTasks(userId: UUID) {
     } finally {
       if (fetchGeneration.current === generation) setIsLoading(false);
     }
-  }, [userId, getRepo]);
+  }, [userId, getRepo, getSubtaskRepo]);
 
   const fetchRef = useRef(fetch);
   useEffect(() => { fetchRef.current = fetch; });
@@ -67,6 +74,7 @@ export function useTasks(userId: UUID) {
     const ch = client.channel(`tasks-all-${userId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, refetch)
       .on("postgres_changes", { event: "*", schema: "public", table: "task_completions" }, refetch)
+      .on("postgres_changes", { event: "*", schema: "public", table: "subtasks" }, refetch)
       .subscribe();
 
     return () => { clearTimeout(debounce); client.removeChannel(ch); };

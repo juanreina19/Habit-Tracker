@@ -6,6 +6,8 @@ import {
   Moon, Coffee, Bed, Sun,
   Brain, BookOpen, Pencil, Lightbulb, Target,
   Home, Music, Star, Smile, Zap, Code,
+  Briefcase, Calendar, CheckSquare, ClipboardList, Mail, Laptop, FileText, Rocket,
+  ShoppingCart, Car, Plane, Gift, Camera, Palette, Gamepad2, TreePine,
   type LucideProps,
 } from "lucide-react";
 import type { FC } from "react";
@@ -18,6 +20,8 @@ export const LUCIDE_ICON_MAP: Record<string, IconComp> = {
   Moon, Coffee, Bed, Sun,
   Brain, BookOpen, Pencil, Lightbulb, Target,
   Home, Music, Star, Smile, Zap, Code,
+  Briefcase, Calendar, CheckSquare, ClipboardList, Mail, Laptop, FileText, Rocket,
+  ShoppingCart, Car, Plane, Gift, Camera, Palette, Gamepad2, TreePine,
 };
 
 export const LUCIDE_CATEGORIES = [
@@ -26,6 +30,8 @@ export const LUCIDE_CATEGORIES = [
   { label: "Descanso", icons: ["Moon", "Coffee", "Bed", "Sun"] },
   { label: "Mente",    icons: ["Brain", "BookOpen", "Pencil", "Lightbulb", "Target"] },
   { label: "Vida",     icons: ["Home", "Music", "Star", "Smile", "Zap", "Code"] },
+  { label: "Trabajo",  icons: ["Briefcase", "Calendar", "CheckSquare", "ClipboardList", "Mail", "Laptop", "FileText", "Rocket"] },
+  { label: "Extra",    icons: ["ShoppingCart", "Car", "Plane", "Gift", "Camera", "Palette", "Gamepad2", "TreePine"] },
 ];
 
 interface Props {

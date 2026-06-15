@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
-import { Clock, CalendarDays, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Clock, CalendarDays, ListChecks, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
@@ -75,16 +75,24 @@ function TimeBadge({ startTime, endTime }: { startTime: string; endTime?: string
   );
 }
 
+function SubtaskBadge({ completed, total }: { completed: number; total: number }) {
+  return (
+    <span className="flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+      <ListChecks size={11} strokeWidth={2} />
+      <span className="text-xs">{completed}/{total}</span>
+    </span>
+  );
+}
+
 interface Props {
   task: TaskWithStatus;
   onToggle: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
   compact?: boolean;
-  sessionCount?: number;
 }
 
-export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, sessionCount }: Props) {
+export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: Props) {
   const t = useTranslations("tasks");
   const done = isTaskDone(task);
   const recurring = isRecurring(task);
@@ -173,10 +181,8 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, se
               {task.startTime && (
                 <TimeBadge startTime={task.startTime} endTime={task.endTime} />
               )}
-              {!!sessionCount && (
-                <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                  🍅 {sessionCount}
-                </span>
+              {!!task.subtaskTotal && (
+                <SubtaskBadge completed={task.subtaskCompleted ?? 0} total={task.subtaskTotal} />
               )}
             </div>
           )}

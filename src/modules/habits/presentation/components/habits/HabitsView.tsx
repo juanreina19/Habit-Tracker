@@ -86,7 +86,7 @@ export default function HabitsView({ userId }: Props) {
   const isLoading = habitsLoading || catsLoading;
 
   return (
-    <div className="px-5 pt-14 pb-8 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+    <div className="px-5 pt-14 pb-8 lg:pt-8 lg:px-10">
       {/* Header */}
       <div className="mb-6">
         <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>{t("manage")}</p>

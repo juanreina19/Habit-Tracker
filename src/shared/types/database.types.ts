@@ -98,13 +98,6 @@ export interface DbTask {
   completed_at: ISOTimestamp | null;
   created_at: ISOTimestamp;
   icon: string | null;               // "lucide:Name"; null = sin icono
-  focus_duration_min: number | null;
-  sessions_goal: number | null;
-  short_break_min: number | null;
-  long_break_min: number | null;
-  long_break_interval: number | null;
-  auto_start_short_break: boolean | null;
-  auto_start_long_break: boolean | null;
 }
 
 export interface DbTaskCompletion {
@@ -115,37 +108,32 @@ export interface DbTaskCompletion {
   created_at: ISOTimestamp;
 }
 
-export interface DbFocusSession {
+export interface DbSubtask {
   id: UUID;
   task_id: UUID;
   user_id: UUID;
-  duration_min: number;
-  started_at: ISOTimestamp;
-  ended_at: ISOTimestamp;
-  elapsed_sec: number;
-  status: "completed" | "abandoned";
+  title: string;
+  is_completed: boolean;
+  order: number;
   created_at: ISOTimestamp;
 }
 
-export interface DbActiveFocusSession {
+export interface DbFocusModeSession {
   user_id: UUID;
   client_session_id: string;
-  task_id: UUID;
-  task_title: string;
+  task_ids: UUID[];
+  phase: 'focus' | 'short_break' | 'long_break' | null;
+  session_index: number | null;
+  focus_duration_min: number;
+  short_break_min: number;
+  long_break_min: number;
+  long_break_interval: number;
+  auto_start_short_break: boolean;
+  auto_start_long_break: boolean;
   duration_min: number;
   started_at: ISOTimestamp;
   paused_at: ISOTimestamp | null;
   accumulated_sec: number;
-  continued_past_goal: boolean;
-  phase: 'focus' | 'short_break' | 'long_break' | null;
-  session_index: number | null;
-  sessions_goal: number | null;
-  short_break_min: number | null;
-  long_break_min: number | null;
-  long_break_interval: number | null;
-  auto_start_short_break: boolean | null;
-  auto_start_long_break: boolean | null;
-  focus_duration_min: number | null;
   updated_at: ISOTimestamp;
 }
 
@@ -244,15 +232,15 @@ export interface Database {
         Insert: Omit<DbTaskCompletion, "id" | "created_at">;
         Update: never;
       };
-      focus_sessions: {
-        Row: DbFocusSession;
-        Insert: Omit<DbFocusSession, "id" | "created_at">;
-        Update: never;  // append-only, igual que task_completions
+      focus_mode_sessions: {
+        Row: DbFocusModeSession;
+        Insert: DbFocusModeSession; // user_id es PK, no autogenerado
+        Update: Partial<Omit<DbFocusModeSession, "user_id">>;
       };
-      active_focus_sessions: {
-        Row: DbActiveFocusSession;
-        Insert: DbActiveFocusSession; // user_id es PK, no autogenerado
-        Update: Partial<Omit<DbActiveFocusSession, "user_id">>;
+      subtasks: {
+        Row: DbSubtask;
+        Insert: Omit<DbSubtask, "id" | "created_at">;
+        Update: Partial<Omit<DbSubtask, "id" | "task_id" | "user_id" | "created_at">>;
       };
       webhook_endpoints: {
         Row: DbWebhookEndpoint;
@@ -268,6 +256,12 @@ export interface Database {
         Row: DbWebhookDelivery;
         Insert: never;   // creado por DispatchPendingWebhooksUseCase vía service role
         Update: never;   // actualizado por DispatchPendingWebhooksUseCase vía service role
+      };
+    };
+    Functions: {
+      count_subtasks_by_task: {
+        Args: { p_task_ids: UUID[] };
+        Returns: { task_id: UUID; total: number; completed: number }[];
       };
     };
   };

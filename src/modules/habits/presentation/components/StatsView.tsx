@@ -54,7 +54,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
     habitStats, weekTrends, userAchievements, allAchievements } = data;
 
   return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10">
       {/* Header */}
       <div className="mb-6">
         <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
@@ -437,7 +437,7 @@ function EmptyChart() {
 
 function StatsSkeleton() {
   return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl animate-pulse">
+    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10 animate-pulse">
       <div className="mb-6">
         <div className="h-4 w-24 rounded-full mb-2" style={{ background: "var(--surface)" }} />
         <div className="h-8 w-40 rounded-full" style={{ background: "var(--surface)" }} />

@@ -199,7 +199,7 @@ export function WeekTab({ userId, tasks }: Props) {
         </>
       )}
 
-      <TaskDetailDialog open={!!detailEntry} onClose={() => setDetailEntry(null)} entry={detailEntry} />
+      <TaskDetailDialog open={!!detailEntry} onClose={() => setDetailEntry(null)} entry={detailEntry} userId={userId} />
     </div>
   );
 }

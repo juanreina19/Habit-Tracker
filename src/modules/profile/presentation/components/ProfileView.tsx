@@ -57,7 +57,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
     : email[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10">
       {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <button

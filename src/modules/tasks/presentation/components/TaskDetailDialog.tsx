@@ -9,8 +9,11 @@ import { useLocale } from "@/shared/i18n/useLocale";
 import { PRIORITY_COLORS } from "../constants/taskColors";
 import { isRecurring, formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
+import { useSubtasks } from "../hooks/useSubtasks";
+import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
 import type { DayTaskStatus } from "../../domain/use-cases/GetWeekTasksUseCase";
 import type { Task } from "../../domain/entities/Task";
+import type { UUID } from "@/shared/types/database.types";
 
 export interface TaskDetailEntry {
   task: Task;
@@ -22,6 +25,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   entry: TaskDetailEntry | null;
+  userId: UUID;
 }
 
 function parseLocalDate(iso: string): Date {
@@ -33,11 +37,12 @@ function parseLocalDate(iso: string): Date {
 // "Fecha" y "Estado" se derivan exclusivamente de `entry.dateISO`/`entry.status`
 // — nunca de `task.dueDate` (null en recurrentes) ni `task.isCompletedToday`
 // (atado a "hoy"), por la misma disciplina que ya rige WeekDayCard.
-export function TaskDetailDialog({ open, onClose, entry }: Props) {
+export function TaskDetailDialog({ open, onClose, entry, userId }: Props) {
   const t = useTranslations("tasks");
   const tDays = useTranslations("dayLabels");
   const { locale } = useLocale();
   const dateFnsLocale = locale === "en" ? enUS : es;
+  const { subtasks, toggleSubtask } = useSubtasks(userId, entry?.task.id ?? null);
 
   if (!entry) return null;
   const { task, status, dateISO } = entry;
@@ -125,6 +130,32 @@ export function TaskDetailDialog({ open, onClose, entry }: Props) {
                 <DetailRow label={t("status_label")}>
                   <span className="font-medium" style={{ color: statusColor }}>{statusLabel}</span>
                 </DetailRow>
+
+                {subtasks.length > 0 && (
+                  <DetailRow label={t("subtasks_label")}>
+                    <div className="flex flex-col gap-2">
+                      {subtasks.map((s) => (
+                        <div key={s.id} className="flex items-center gap-2">
+                          <TaskCheckbox
+                            done={s.isCompleted}
+                            size={TASK_CHECKBOX_SIZE.week}
+                            onToggle={() => toggleSubtask(s)}
+                            ariaLabel={s.title}
+                          />
+                          <span
+                            className="flex-1 text-sm"
+                            style={{
+                              color: s.isCompleted ? "var(--text-muted)" : "var(--text-primary)",
+                              textDecoration: s.isCompleted ? "line-through" : "none",
+                            }}
+                          >
+                            {s.title}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </DetailRow>
+                )}
 
                 <p className="text-xs pt-1" style={{ color: "var(--text-muted)" }}>
                   {createdLabel}

@@ -190,44 +190,19 @@ alter table tasks
 create index if not exists idx_tasks_recurrence_days
   on tasks using gin (recurrence_days);
 
--- ─── TAREAS — FASE 3: FOCUS MODE (DURACIÓN CONFIGURABLE) ─────
--- Migración aditiva: tareas existentes quedan con focus_duration_min = NULL
--- (no participan en Focus Mode hasta que el usuario lo configure).
+-- ─── TAREAS — FOCUS MODE POR TAREA (ELIMINADO) ───────────────
+-- El Focus Mode pasó a ser global (ver focus_mode_sessions más abajo);
+-- ya no se configura por tarea ni se persiste historial de sesiones.
 
 alter table tasks
-  add column if not exists focus_duration_min int
-    check (
-      focus_duration_min is null
-      or (focus_duration_min > 0 and focus_duration_min <= 480)
-    );
-
--- ─── TAREAS — FASE 4: FOCUS MODE (CICLO POMODORO) ────────────
--- Migración aditiva: filas existentes quedan en NULL = usar defaults de la app
--- (1 sesión, descansos 5/15 min, intervalo 4, sin auto-inicio) — comportamiento actual intacto.
-
-alter table tasks
-  add column if not exists sessions_goal int
-    check (sessions_goal is null or sessions_goal between 1 and 12);
-
-alter table tasks
-  add column if not exists short_break_min int
-    check (short_break_min is null or short_break_min between 1 and 60);
-
-alter table tasks
-  add column if not exists long_break_min int
-    check (long_break_min is null or long_break_min between 1 and 120);
-
-alter table tasks
-  add column if not exists long_break_interval int
-    check (long_break_interval is null or long_break_interval between 1 and 12);
-
-alter table tasks drop column if exists auto_start_next;
-
-alter table tasks
-  add column if not exists auto_start_short_break boolean;  -- NULL/false = comportamiento actual
-
-alter table tasks
-  add column if not exists auto_start_long_break boolean;  -- NULL/false = comportamiento actual
+  drop column if exists focus_duration_min,
+  drop column if exists sessions_goal,
+  drop column if exists short_break_min,
+  drop column if exists long_break_min,
+  drop column if exists long_break_interval,
+  drop column if exists auto_start_short_break,
+  drop column if exists auto_start_long_break,
+  drop column if exists auto_start_next;
 
 -- ─── COMPLETACIONES DE TAREAS RECURRENTES ────────────────────
 -- Equivale a habit_logs pero para tareas recurrentes.
@@ -255,86 +230,13 @@ create index if not exists idx_task_completions_task_date
 create index if not exists idx_task_completions_user_date
   on task_completions(user_id, completed_date);
 
--- ─── SESIONES DE ENFOQUE (POMODORO) ──────────────────────────
--- Cada fila = una sesión finalizada (completa o terminada antes de tiempo).
--- duration_min es la duración configurada en la tarea AL MOMENTO de iniciar la sesión.
--- elapsed_sec puede superar duration_min*60 si el usuario continuó trabajando ("tiempo extra").
--- El timer en curso vive en localStorage, no en DB.
+-- ─── SESIONES DE ENFOQUE (POMODORO) — ELIMINADO ──────────────
+-- Ya no se registra historial de sesiones finalizadas; el Focus Mode global
+-- no persiste sesiones, solo el estado de la sesión activa (ver
+-- focus_mode_sessions más abajo).
 
-create table if not exists focus_sessions (
-  id            uuid        primary key default gen_random_uuid(),
-  task_id       uuid        not null references tasks(id) on delete cascade,
-  user_id       uuid        not null references auth.users(id) on delete cascade,
-  duration_min  int         not null check (duration_min > 0),
-  started_at    timestamptz not null,
-  ended_at      timestamptz not null,
-  elapsed_sec   int         not null check (elapsed_sec >= 0),
-  status        text        not null default 'completed'
-                  check (status in ('completed', 'abandoned')),
-  created_at    timestamptz not null default now(),
-  check (ended_at >= started_at)
-);
-
-alter table focus_sessions enable row level security;
-
-create policy "Users manage own focus_sessions"
-  on focus_sessions for all
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
-
--- Para el badge "🍅 N sesiones" por tarea
-create index if not exists idx_focus_sessions_task_id
-  on focus_sessions(task_id);
-
--- Para futuras vistas de stats/metas semanales (sin re-arquitectura)
-create index if not exists idx_focus_sessions_user_started
-  on focus_sessions(user_id, started_at desc);
-
--- Para historial por tarea (futuro): listar sesiones de una tarea específica
-create index if not exists idx_focus_sessions_user_task
-  on focus_sessions(user_id, task_id);
-
--- Índice específico para count_focus_sessions_by_task (badge "🍅 N"): cubre
--- user_id + status + ended_at (filtro de "hoy") + task_id (agrupación). No es
--- urgente para el volumen de un MVP, pero deja la RPC preparada para crecer
--- sin necesitar una migración de índices después.
-create index if not exists idx_focus_sessions_badge
-  on focus_sessions(user_id, status, ended_at, task_id);
-
--- RPC usada por countByTask(): un solo round-trip para contar sesiones COMPLETADAS
--- por tarea, cuya `ended_at` cae dentro de "hoy" (>= p_since) — el badge "🍅 N"
--- representa SESIONES COMPLETADAS HOY (no el total histórico), alineando desde
--- el inicio el significado de N con la futura meta diaria "🍅 N/M":
--- N no cambiará de significado al agregar M, solo se le agrega el denominador.
--- Se filtra por `ended_at` (no `started_at`): una sesión iniciada 23:50 y
--- finalizada 00:15 del día siguiente cuenta para el día en que TERMINÓ, que es
--- cuando el usuario la ve registrada y el badge se actualiza.
--- Las abandonadas no cuentan para el badge, pero se conservan para estadísticas
--- futuras.
--- p_since es un timestamptz calculado por el cliente como el inicio del día en
--- su hora local (getStartOfLocalDay()). No es un dato sensible: pasarlo desde
--- el cliente solo afecta qué rango de SUS PROPIAS sesiones (auth.uid()) se
--- cuenta, sin implicaciones de seguridad.
--- security invoker (declarado explícitamente, aunque sea el default) + auth.uid():
--- no recibe userId del cliente, usa directamente el usuario autenticado — alineado
--- con RLS. Hacerlo explícito evita que alguien la recree en el futuro como
--- SECURITY DEFINER por error y facilita la auditoría.
--- Diseñada para listas de tamaño humano (las tareas visibles en pantalla, <200);
--- no es un endpoint analítico de propósito general.
-create or replace function count_focus_sessions_by_task(p_task_ids uuid[], p_since timestamptz)
-returns table (task_id uuid, total bigint)
-language sql
-stable
-security invoker
-as $$
-  select task_id, count(*) as total
-  from focus_sessions
-  where user_id = auth.uid()
-    and task_id = any(p_task_ids)
-    and status = 'completed'
-    and ended_at >= p_since
-  group by task_id;
-$$;
+drop function if exists count_focus_sessions_by_task(uuid[], timestamptz);
+drop table if exists focus_sessions;
 
 
 -- ============================================================
@@ -457,7 +359,7 @@ declare
   v_changes jsonb := '{}'::jsonb;
   v_field text;
   v_tracked_fields text[] := array['title','description','priority','due_date',
-    'recurrence_days','start_time','end_time','icon','focus_duration_min'];
+    'recurrence_days','start_time','end_time','icon'];
 begin
   if TG_OP = 'INSERT' then
     insert into webhook_events (user_id, event_type, task_id, payload)
@@ -561,69 +463,85 @@ create trigger trg_task_completions_webhook_event
   after insert or delete on task_completions
   for each row execute function fn_task_completions_webhook_event();
 
--- ─── SESIÓN DE ENFOQUE ACTIVA (CROSS-DEVICE) ─────────────────
--- Una fila por usuario = el "timer en curso" de Focus Mode, sincronizado
--- entre dispositivos vía Realtime. user_id como PK garantiza una sola
--- sesión activa global por usuario (insert falla con 23505 si ya hay una;
--- el cliente "perdedor" de una carrera adopta la fila existente).
--- Las sesiones FINALIZADAS siguen registrándose en focus_sessions.
+-- ─── SESIÓN DE ENFOQUE ACTIVA POR TAREA — ELIMINADO ──────────
+-- Reemplazado por focus_mode_sessions (Focus Mode global, sin tarea asociada
+-- a la sesión y sin historial).
 
-create table if not exists active_focus_sessions (
-  user_id              uuid        primary key references auth.users(id) on delete cascade,
-  client_session_id    uuid        not null,
-  task_id              uuid        not null references tasks(id) on delete cascade,
-  task_title           text        not null,
-  duration_min         int         not null check (duration_min > 0),
-  started_at           timestamptz not null,
-  paused_at            timestamptz,
-  accumulated_sec      int         not null default 0 check (accumulated_sec >= 0),
-  continued_past_goal  boolean     not null default false,
-  updated_at           timestamptz not null default now()
+drop table if exists active_focus_sessions;
+
+-- ─── FOCUS MODE GLOBAL — SESIÓN ACTIVA (CROSS-DEVICE) ────────
+-- Una fila por usuario = el "timer en curso" del Focus Mode global,
+-- sincronizado entre dispositivos vía Realtime. user_id como PK garantiza
+-- una sola sesión activa por usuario (insert falla con 23505 si ya hay una;
+-- el cliente "perdedor" de una carrera adopta la fila existente).
+-- Ciclo Pomodoro indefinido (sin meta): focus -> short_break/long_break -> focus...
+-- según session_index % long_break_interval. No se persiste historial.
+
+create table if not exists focus_mode_sessions (
+  user_id                 uuid primary key references auth.users(id) on delete cascade,
+  client_session_id       uuid not null,
+  task_ids                uuid[] not null default '{}',
+  phase                   text not null default 'focus'
+                            check (phase in ('focus','short_break','long_break')),
+  session_index           int not null default 1 check (session_index >= 1),
+  focus_duration_min      int not null check (focus_duration_min > 0),
+  short_break_min         int not null check (short_break_min > 0),
+  long_break_min          int not null check (long_break_min > 0),
+  long_break_interval     int not null check (long_break_interval >= 1),
+  auto_start_short_break  boolean not null default false,
+  auto_start_long_break   boolean not null default false,
+  duration_min            int not null check (duration_min > 0),
+  started_at              timestamptz not null,
+  paused_at               timestamptz,
+  accumulated_sec         int not null default 0 check (accumulated_sec >= 0),
+  updated_at              timestamptz not null default now()
 );
 
--- ─── SESIÓN ACTIVA — CICLO POMODORO MULTI-FASE ───────────────
--- Aditivo. Filas pre-migración quedan con estas columnas en NULL; el mapper de la
--- app las trata como phase='focus', session_index=1, defaults de descansos/auto-inicio,
--- y focus_duration_min = duration_min (para filas viejas, duration_min YA es el foco).
--- Estos valores se "snapshotean" en start() y se mantienen sincronizados en vivo
--- mediante updateActiveConfig() cuando el usuario cambia los ajustes a mitad de ciclo.
+alter table focus_mode_sessions enable row level security;
 
-alter table active_focus_sessions
-  add column if not exists phase text
-    check (phase is null or phase in ('focus', 'short_break', 'long_break'));
-
-alter table active_focus_sessions
-  add column if not exists session_index int check (session_index is null or session_index >= 1);
-
-alter table active_focus_sessions
-  add column if not exists sessions_goal int check (sessions_goal is null or sessions_goal between 1 and 12);
-
-alter table active_focus_sessions
-  add column if not exists short_break_min int check (short_break_min is null or short_break_min between 1 and 60);
-
-alter table active_focus_sessions
-  add column if not exists long_break_min int check (long_break_min is null or long_break_min between 1 and 120);
-
-alter table active_focus_sessions
-  add column if not exists long_break_interval int check (long_break_interval is null or long_break_interval between 1 and 12);
-
-alter table active_focus_sessions drop column if exists auto_start_next;
-
-alter table active_focus_sessions
-  add column if not exists auto_start_short_break boolean;
-
-alter table active_focus_sessions
-  add column if not exists auto_start_long_break boolean;
-
-alter table active_focus_sessions
-  add column if not exists focus_duration_min int check (focus_duration_min is null or focus_duration_min > 0);
-
-alter table active_focus_sessions enable row level security;
-
-create policy "Users manage own active_focus_sessions"
-  on active_focus_sessions for all
+create policy "Users manage own focus_mode_sessions"
+  on focus_mode_sessions for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
 
 -- Privilegio a nivel de tabla para el rol de la API (RLS sigue filtrando por fila).
-grant select, insert, update, delete on active_focus_sessions to authenticated;
+grant select, insert, update, delete on focus_mode_sessions to authenticated;
+
+-- ─── SUBTAREAS ────────────────────────────────────────────────
+-- Subtareas opcionales de una tarea, sin meta de progreso global:
+-- "order" define el orden manual de la lista.
+
+create table if not exists subtasks (
+  id            uuid primary key default gen_random_uuid(),
+  task_id       uuid not null references tasks(id) on delete cascade,
+  user_id       uuid not null references auth.users(id) on delete cascade,
+  title         text not null check (char_length(trim(title)) > 0),
+  is_completed  boolean not null default false,
+  "order"       int not null default 0,
+  created_at    timestamptz not null default now()
+);
+
+alter table subtasks enable row level security;
+
+create policy "Users manage own subtasks"
+  on subtasks for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create index if not exists idx_subtasks_task_id on subtasks(task_id);
+
+grant select, insert, update, delete on subtasks to authenticated;
+
+-- RPC: conteo de subtareas totales/completadas por tarea, filtrado por el
+-- usuario autenticado (security invoker -> respeta RLS de subtasks).
+create or replace function count_subtasks_by_task(p_task_ids uuid[])
+returns table (task_id uuid, total bigint, completed bigint)
+language sql
+stable
+security invoker
+as $$
+  select task_id, count(*) as total, count(*) filter (where is_completed) as completed
+  from subtasks
+  where user_id = auth.uid() and task_id = any(p_task_ids)
+  group by task_id;
+$$;

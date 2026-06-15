@@ -4,21 +4,24 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
+import { Plus, Trash2 } from "lucide-react";
 import { formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
 import type { Task, CreateTaskInput, UpdateTaskInput, TaskPriority } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
-import { PRIORITY_COLORS, TASK_ICON_SET } from "../constants/taskColors";
-import { HabitIcon } from "@/shared/components/ui/HabitIcon";
+import { PRIORITY_COLORS } from "../constants/taskColors";
+import { IconPicker } from "@/shared/components/ui/IconPicker";
+import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
+import { useSubtasks } from "../hooks/useSubtasks";
 
 const PRIORITIES: TaskPriority[] = ["low", "medium", "high", "urgent"];
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
-const FOCUS_PRESETS = [15, 20, 25, 50];
 
 interface Props {
   open: boolean;
   onClose: () => void;
   task?: Task | null;
+  userId: UUID;
   defaultConfirmDelete?: boolean;
   onCreate: (input: CreateTaskInput) => Promise<void>;
   onUpdate: (task: Task, input: UpdateTaskInput) => Promise<void>;
@@ -26,11 +29,12 @@ interface Props {
 }
 
 export function TaskFormDialog({
-  open, onClose, task, defaultConfirmDelete = false,
+  open, onClose, task, userId, defaultConfirmDelete = false,
   onCreate, onUpdate, onDelete,
 }: Props) {
   const t = useTranslations("tasks");
   const tDays = useTranslations("dayLabels");
+  const tCat = useTranslations("iconCategories");
   const isEdit = !!task;
 
   const [title, setTitle]             = useState("");
@@ -51,17 +55,13 @@ export function TaskFormDialog({
 
   const [icon, setIcon]               = useState<string | null>(null);
 
-  // Focus Mode
-  const [focusEnabled, setFocusEnabled]         = useState(false);
-  const [focusDurationMin, setFocusDurationMin] = useState<number>(25);
-  const [isCustomFocus, setIsCustomFocus]       = useState(false);
-  const [customFocusMin, setCustomFocusMin]     = useState("");
-  const [focusError, setFocusError]             = useState("");
-
   const [titleError, setTitleError]   = useState("");
   const [isSaving, setIsSaving]       = useState(false);
   const [isDeleting, setIsDeleting]   = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+  const { subtasks, createSubtask, toggleSubtask, deleteSubtask } = useSubtasks(userId, task?.id ?? null);
 
   useEffect(() => {
     if (open) {
@@ -81,28 +81,13 @@ export function TaskFormDialog({
 
       setIcon(task?.icon ?? null);
 
-      const fdm = task?.focusDurationMin ?? null;
-      setFocusEnabled(fdm !== null);
-      if (fdm !== null && FOCUS_PRESETS.includes(fdm)) {
-        setFocusDurationMin(fdm);
-        setIsCustomFocus(false);
-        setCustomFocusMin("");
-      } else if (fdm !== null) {
-        setIsCustomFocus(true);
-        setCustomFocusMin(String(fdm));
-      } else {
-        setFocusDurationMin(25);
-        setIsCustomFocus(false);
-        setCustomFocusMin("");
-      }
-      setFocusError("");
-
       setTitleError("");
       setDaysError("");
       setTimeError("");
       setIsSaving(false);
       setIsDeleting(false);
       setConfirmDelete(defaultConfirmDelete);
+      setNewSubtaskTitle("");
     }
   }, [open, task, defaultConfirmDelete]);
 
@@ -123,20 +108,6 @@ export function TaskFormDialog({
       setTimeError(t("time_end_error")); return;
     }
 
-    let finalFocusDuration: number | null = null;
-    if (focusEnabled) {
-      if (isCustomFocus) {
-        const n = Number(customFocusMin);
-        // 480 = 8h, mismo límite que el check constraint de focus_duration_min
-        if (!customFocusMin || !Number.isInteger(n) || n <= 0 || n > 480) {
-          setFocusError(t("focus_duration_error")); return;
-        }
-        finalFocusDuration = n;
-      } else {
-        finalFocusDuration = focusDurationMin;
-      }
-    }
-
     setIsSaving(true);
     try {
       const input = {
@@ -148,7 +119,6 @@ export function TaskFormDialog({
         startTime:       hasSchedule && startTime ? startTime : null,
         endTime:         hasSchedule && startTime && endTime ? endTime : null,
         icon:            icon ?? null,
-        focusDurationMin: finalFocusDuration,
       } as const;
 
       if (isEdit && task) {
@@ -163,7 +133,6 @@ export function TaskFormDialog({
           startTime:       input.startTime ?? undefined,
           endTime:         input.endTime ?? undefined,
           icon:            input.icon ?? undefined,
-          focusDurationMin: input.focusDurationMin,
         });
       }
       onClose();
@@ -470,122 +439,96 @@ export function TaskFormDialog({
                     <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                       {t("icon_label")}
                     </label>
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setIcon(null)}
-                        className="w-9 h-9 rounded-[10px] flex items-center justify-center text-sm font-medium transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-                        style={{
-                          border:      icon === null ? "2px solid var(--accent)" : "2px solid transparent",
-                          background:  icon === null ? "var(--accent-soft)" : "var(--surface-elevated)",
-                          color:       "var(--text-secondary)",
-                        }}
-                      >
-                        {t("icon_none")}
-                      </button>
-                      {TASK_ICON_SET.map((iconKey) => (
-                        <button
-                          key={iconKey}
-                          type="button"
-                          onClick={() => setIcon(iconKey)}
-                          className="w-9 h-9 rounded-[10px] flex items-center justify-center transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-                          style={{
-                            border:     icon === iconKey ? "2px solid var(--accent)" : "2px solid transparent",
-                            background: icon === iconKey ? "var(--accent-soft)" : "var(--surface-elevated)",
-                            color:      icon === iconKey ? "var(--accent)" : "var(--text-secondary)",
-                          }}
-                        >
-                          <HabitIcon icon={iconKey} size={20} />
-                        </button>
-                      ))}
-                    </div>
+                    <IconPicker
+                      value={icon}
+                      onChange={setIcon}
+                      allowNone
+                      noneLabel={t("icon_none")}
+                      categoryLabel={(key) => tCat(key as Parameters<typeof tCat>[0])}
+                    />
                   </div>
 
-                  {/* Focus Mode */}
+                  {/* Subtareas */}
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-                        {t("focus_mode_label")}
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => { setFocusEnabled(p => !p); setFocusError(""); }}
-                        className="text-xs font-medium px-3 py-1 rounded-full transition-all"
-                        style={{
-                          background: focusEnabled ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                          color:      focusEnabled ? "var(--btn-primary-text)" : "var(--text-secondary)",
-                        }}
-                      >
-                        {t("focus_mode_toggle")}
-                      </button>
-                    </div>
-
-                    <AnimatePresence>
-                      {focusEnabled && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="grid grid-cols-5 gap-2">
-                            {FOCUS_PRESETS.map((min) => (
-                              <button
-                                key={min}
-                                type="button"
-                                onClick={() => { setFocusDurationMin(min); setIsCustomFocus(false); setFocusError(""); }}
-                                className="py-2.5 rounded-[12px] text-xs font-semibold transition-all"
-                                style={{
-                                  background: !isCustomFocus && focusDurationMin === min ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                                  color:      !isCustomFocus && focusDurationMin === min ? "var(--btn-primary-text)" : "var(--text-secondary)",
-                                }}
-                              >
-                                {min}
-                              </button>
-                            ))}
-                            <button
-                              type="button"
-                              onClick={() => { setIsCustomFocus(true); setFocusError(""); }}
-                              className="py-2.5 rounded-[12px] text-xs font-semibold transition-all"
+                    <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                      {t("subtasks_label")}
+                    </label>
+                    {isEdit ? (
+                      <div className="flex flex-col gap-2">
+                        {subtasks.map((s) => (
+                          <div key={s.id} className="flex items-center gap-2">
+                            <TaskCheckbox
+                              done={s.isCompleted}
+                              size={TASK_CHECKBOX_SIZE.week}
+                              onToggle={() => toggleSubtask(s)}
+                              ariaLabel={s.title}
+                            />
+                            <span
+                              className="flex-1 text-sm"
                               style={{
-                                background: isCustomFocus ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                                color:      isCustomFocus ? "var(--btn-primary-text)" : "var(--text-secondary)",
+                                color: s.isCompleted ? "var(--text-muted)" : "var(--text-primary)",
+                                textDecoration: s.isCompleted ? "line-through" : "none",
                               }}
                             >
-                              {t("focus_duration_custom")}
+                              {s.title}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => deleteSubtask(s.id)}
+                              aria-label={t("delete_subtask")}
+                              className="p-1.5 rounded-[8px] transition-opacity active:opacity-70"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              <Trash2 size={16} />
                             </button>
                           </div>
-
-                          <AnimatePresence>
-                            {isCustomFocus && (
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="overflow-hidden mt-2"
-                              >
-                                <input
-                                  type="number"
-                                  min={1}
-                                  value={customFocusMin}
-                                  onChange={(e) => { setCustomFocusMin(e.target.value); setFocusError(""); }}
-                                  placeholder={t("focus_duration_custom_placeholder")}
-                                  className="w-full rounded-[12px] px-3 py-3 text-sm outline-none"
-                                  style={{
-                                    background: "var(--surface-elevated)",
-                                    color: "var(--text-primary)",
-                                    border: `1.5px solid ${focusError ? "#ef4444" : "transparent"}`,
-                                    WebkitAppearance: "none",
-                                    appearance: "none",
-                                  }}
-                                />
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                          {focusError && <p className="text-xs mt-1.5" style={{ color: "#ef4444" }}>{focusError}</p>}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                        ))}
+                        {subtasks.length === 0 && (
+                          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                            {t("subtasks_empty")}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                          <input
+                            type="text"
+                            value={newSubtaskTitle}
+                            onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                const value = newSubtaskTitle.trim();
+                                if (value) {
+                                  createSubtask({ title: value });
+                                  setNewSubtaskTitle("");
+                                }
+                              }
+                            }}
+                            placeholder={t("subtask_placeholder")}
+                            className="flex-1 rounded-[12px] px-3 py-2.5 text-sm outline-none"
+                            style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const value = newSubtaskTitle.trim();
+                              if (value) {
+                                createSubtask({ title: value });
+                                setNewSubtaskTitle("");
+                              }
+                            }}
+                            aria-label={t("add_subtask")}
+                            className="w-9 h-9 rounded-[10px] flex items-center justify-center transition-opacity active:opacity-70"
+                            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
+                          >
+                            <Plus size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                        {t("subtasks_hint_new_task")}
+                      </p>
+                    )}
                   </div>
 
                   {/* Actions */}

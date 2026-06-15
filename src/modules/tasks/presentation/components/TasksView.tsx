@@ -8,12 +8,14 @@ import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { useTasks } from "../hooks/useTasks";
 import { useTodayTasks } from "../hooks/useTodayTasks";
-import { useFocusSessionCounts } from "../hooks/useFocusSessionCounts";
+import { useFocusMode } from "../hooks/useFocusMode";
 import { TaskCard } from "./TaskCard";
 import { TaskEmptyState } from "./TaskEmptyState";
 import { TaskFormDialog } from "./TaskFormDialog";
 import { WeekTab } from "./WeekTab";
-import { FocusTab } from "./FocusTab";
+import { FocusModeButton } from "./FocusModeButton";
+import { FocusModeTaskPickerDialog } from "./FocusModeTaskPickerDialog";
+import { FocusModeOverlay } from "./FocusModeOverlay";
 import { isTaskDone, isRecurring } from "../../domain/entities/Task";
 import type { TaskWithStatus, TaskPriority, CreateTaskInput, UpdateTaskInput } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
@@ -42,8 +44,8 @@ function sortByPriority(tasks: TaskWithStatus[]): TaskWithStatus[] {
   return [...tasks].sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2));
 }
 
-type Tab = "today" | "week" | "all" | "focus";
-const TABS: Tab[] = ["today", "week", "all", "focus"];
+type Tab = "today" | "week" | "all";
+const TABS: Tab[] = ["today", "week", "all"];
 
 interface Props {
   userId: UUID;
@@ -52,12 +54,13 @@ interface Props {
 export default function TasksView({ userId }: Props) {
   const t = useTranslations("tasks");
   const { tasks, isLoading, createTask, updateTask, toggleTask, deleteTask } = useTasks(userId);
-  const sessionCounts = useFocusSessionCounts(tasks.map((tk) => tk.id));
+  const focusMode = useFocusMode(userId);
 
   const [tab, setTab] = useState<Tab>("today");
   const [dialogOpen, setDialogOpen]               = useState(false);
   const [selectedTask, setSelectedTask]           = useState<TaskWithStatus | null>(null);
   const [dialogStartAtDelete, setDialogStartAtDelete] = useState(false);
+  const [focusPickerOpen, setFocusPickerOpen]     = useState(false);
 
   const openCreate = () => {
     setSelectedTask(null);
@@ -81,7 +84,7 @@ export default function TasksView({ userId }: Props) {
 
   return (
     <>
-      <div className="px-5 pt-14 pb-6 mx-auto lg:pt-8 lg:px-10 max-w-lg lg:max-w-7xl">
+      <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10">
         {/* Header */}
         <div className="flex items-center mb-6">
           <div className="flex-1">
@@ -131,13 +134,12 @@ export default function TasksView({ userId }: Props) {
           transition={{ duration: 0.25, ease: "easeOut" }}
         >
           {tab === "today" && (
-            <TodayTab userId={userId} onEdit={openEdit} onDelete={openDelete} sessionCounts={sessionCounts} />
+            <TodayTab userId={userId} onEdit={openEdit} onDelete={openDelete} />
           )}
           {tab === "week" && <WeekTab userId={userId} tasks={tasks} />}
           {tab === "all" && (
-            <AllTab tasks={tasks} toggleTask={toggleTask} onEdit={openEdit} onDelete={openDelete} sessionCounts={sessionCounts} />
+            <AllTab tasks={tasks} toggleTask={toggleTask} onEdit={openEdit} onDelete={openDelete} />
           )}
-          {tab === "focus" && <FocusTab userId={userId} tasks={tasks} toggleTask={toggleTask} updateTask={updateTask} />}
         </motion.div>
       </div>
 
@@ -145,11 +147,34 @@ export default function TasksView({ userId }: Props) {
         open={dialogOpen}
         onClose={() => { setDialogOpen(false); setDialogStartAtDelete(false); }}
         task={selectedTask}
+        userId={userId}
         defaultConfirmDelete={dialogStartAtDelete}
         onCreate={async (input: CreateTaskInput) => { await createTask(input); }}
         onUpdate={async (task, input: UpdateTaskInput) => { await updateTask(task, input); }}
         onDelete={async (id) => { await deleteTask(id); }}
       />
+
+      {!focusMode.active && <FocusModeButton onClick={() => setFocusPickerOpen(true)} />}
+
+      <FocusModeTaskPickerDialog
+        open={focusPickerOpen}
+        onClose={() => setFocusPickerOpen(false)}
+        userId={userId}
+        onStart={(taskIds) => { focusMode.start(taskIds); }}
+      />
+
+      {focusMode.active && (
+        <FocusModeOverlay
+          session={focusMode.active}
+          tasks={tasks.filter((tk) => focusMode.active!.taskIds.includes(tk.id))}
+          toggleTask={toggleTask}
+          onPause={focusMode.pause}
+          onResume={focusMode.resume}
+          onSkip={focusMode.advancePhase}
+          onClose={focusMode.discard}
+          onUpdateConfig={focusMode.updateActiveConfig}
+        />
+      )}
     </>
   );
 }
@@ -162,10 +187,9 @@ interface TodayTabProps {
   userId: UUID;
   onEdit: (task: TaskWithStatus) => void;
   onDelete: (task: TaskWithStatus) => void;
-  sessionCounts: Map<UUID, number>;
 }
 
-function TodayTab({ userId, onEdit, onDelete, sessionCounts }: TodayTabProps) {
+function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
   const t = useTranslations("tasks");
   const { tasks, toggleTask } = useTodayTasks(userId);
   const [showOverdue, setShowOverdue] = useState(false);
@@ -190,7 +214,6 @@ function TodayTab({ userId, onEdit, onDelete, sessionCounts }: TodayTabProps) {
             onDelete={onDelete}
             show={showOverdue}
             onToggleShow={() => setShowOverdue((p) => !p)}
-            sessionCounts={sessionCounts}
           />
         )}
         <TaskSection
@@ -200,7 +223,6 @@ function TodayTab({ userId, onEdit, onDelete, sessionCounts }: TodayTabProps) {
           onEdit={onEdit}
           onDelete={onDelete}
           emptyState={<TaskEmptyState />}
-          sessionCounts={sessionCounts}
         />
         <CollapsibleTaskSection
           title={`${t("completed")} (${done.length})`}
@@ -210,7 +232,6 @@ function TodayTab({ userId, onEdit, onDelete, sessionCounts }: TodayTabProps) {
           onDelete={onDelete}
           show={showDone}
           onToggleShow={() => setShowDone((p) => !p)}
-          sessionCounts={sessionCounts}
         />
       </div>
 
@@ -223,7 +244,6 @@ function TodayTab({ userId, onEdit, onDelete, sessionCounts }: TodayTabProps) {
           onEdit={onEdit}
           onDelete={onDelete}
           emptyState={<EmptyColumnPlaceholder text="—" />}
-          sessionCounts={sessionCounts}
         />
         <TaskColumn
           title={`${t("tab_today")} (${todayTasks.length})`}
@@ -232,7 +252,6 @@ function TodayTab({ userId, onEdit, onDelete, sessionCounts }: TodayTabProps) {
           onEdit={onEdit}
           onDelete={onDelete}
           emptyState={<TaskEmptyState />}
-          sessionCounts={sessionCounts}
         />
         <TaskColumn
           title={`${t("completed")} (${done.length})`}
@@ -241,7 +260,6 @@ function TodayTab({ userId, onEdit, onDelete, sessionCounts }: TodayTabProps) {
           onEdit={onEdit}
           onDelete={onDelete}
           emptyState={<EmptyColumnPlaceholder text={t("no_completed")} />}
-          sessionCounts={sessionCounts}
         />
       </div>
     </>
@@ -257,12 +275,11 @@ interface AllTabProps {
   toggleTask: (task: TaskWithStatus) => void;
   onEdit: (task: TaskWithStatus) => void;
   onDelete: (task: TaskWithStatus) => void;
-  sessionCounts: Map<UUID, number>;
 }
 
 type TypeFilter = "all" | "once" | "recurring";
 
-function AllTab({ tasks, toggleTask, onEdit, onDelete, sessionCounts }: AllTabProps) {
+function AllTab({ tasks, toggleTask, onEdit, onDelete }: AllTabProps) {
   const t = useTranslations("tasks");
   const [showDone, setShowDone]           = useState(true);
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">("all");
@@ -308,7 +325,6 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete, sessionCounts }: AllTabPr
             toggleTask={toggleTask}
             onEdit={onEdit}
             onDelete={onDelete}
-            sessionCounts={sessionCounts}
           />
         )}
 
@@ -319,7 +335,6 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete, sessionCounts }: AllTabPr
           onEdit={onEdit}
           onDelete={onDelete}
           emptyState={<TaskEmptyState />}
-          sessionCounts={sessionCounts}
         />
 
         <CollapsibleTaskSection
@@ -330,7 +345,6 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete, sessionCounts }: AllTabPr
           onDelete={onDelete}
           show={showDone}
           onToggleShow={() => setShowDone((p) => !p)}
-          sessionCounts={sessionCounts}
         />
       </div>
 
@@ -343,7 +357,6 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete, sessionCounts }: AllTabPr
           onEdit={onEdit}
           onDelete={onDelete}
           emptyState={<EmptyColumnPlaceholder text="—" />}
-          sessionCounts={sessionCounts}
         />
         <TaskColumn
           title={`${t("pending")} (${pending.length})`}
@@ -352,7 +365,6 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete, sessionCounts }: AllTabPr
           onEdit={onEdit}
           onDelete={onDelete}
           emptyState={<TaskEmptyState />}
-          sessionCounts={sessionCounts}
         />
         <TaskColumn
           title={`${t("completed")} (${done.length})`}
@@ -361,7 +373,6 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete, sessionCounts }: AllTabPr
           onEdit={onEdit}
           onDelete={onDelete}
           emptyState={<EmptyColumnPlaceholder text={t("no_completed")} />}
-          sessionCounts={sessionCounts}
         />
       </div>
     </>
@@ -465,10 +476,9 @@ interface TaskSectionProps {
   onEdit: (task: TaskWithStatus) => void;
   onDelete: (task: TaskWithStatus) => void;
   emptyState?: React.ReactNode;
-  sessionCounts: Map<UUID, number>;
 }
 
-function TaskSection({ title, tasks, toggleTask, onEdit, onDelete, emptyState, sessionCounts }: TaskSectionProps) {
+function TaskSection({ title, tasks, toggleTask, onEdit, onDelete, emptyState }: TaskSectionProps) {
   return (
     <div className="mb-3">
       <div className="flex items-center gap-2 mb-3">
@@ -494,7 +504,6 @@ function TaskSection({ title, tasks, toggleTask, onEdit, onDelete, emptyState, s
                   onToggle={() => toggleTask(task)}
                   onEdit={() => onEdit(task)}
                   onDelete={() => onDelete(task)}
-                  sessionCount={sessionCounts.get(task.id)}
                 />
               </motion.div>
             ))}
@@ -513,10 +522,9 @@ interface CollapsibleTaskSectionProps {
   onDelete: (task: TaskWithStatus) => void;
   show: boolean;
   onToggleShow: () => void;
-  sessionCounts: Map<UUID, number>;
 }
 
-function CollapsibleTaskSection({ title, tasks, toggleTask, onEdit, onDelete, show, onToggleShow, sessionCounts }: CollapsibleTaskSectionProps) {
+function CollapsibleTaskSection({ title, tasks, toggleTask, onEdit, onDelete, show, onToggleShow }: CollapsibleTaskSectionProps) {
   if (tasks.length === 0) return null;
 
   return (
@@ -552,7 +560,6 @@ function CollapsibleTaskSection({ title, tasks, toggleTask, onEdit, onDelete, sh
                     onToggle={() => toggleTask(task)}
                     onEdit={() => onEdit(task)}
                     onDelete={() => onDelete(task)}
-                    sessionCount={sessionCounts.get(task.id)}
                   />
                 </motion.div>
               ))}
@@ -575,10 +582,9 @@ interface TaskColumnProps {
   onEdit: (task: TaskWithStatus) => void;
   onDelete: (task: TaskWithStatus) => void;
   emptyState: React.ReactNode;
-  sessionCounts: Map<UUID, number>;
 }
 
-function TaskColumn({ title, tasks, toggleTask, onEdit, onDelete, emptyState, sessionCounts }: TaskColumnProps) {
+function TaskColumn({ title, tasks, toggleTask, onEdit, onDelete, emptyState }: TaskColumnProps) {
   return (
     <div className="flex flex-col gap-2.5 min-w-0">
       <div className="flex items-center gap-2">
@@ -604,7 +610,6 @@ function TaskColumn({ title, tasks, toggleTask, onEdit, onDelete, emptyState, se
                   onToggle={() => toggleTask(task)}
                   onEdit={() => onEdit(task)}
                   onDelete={() => onDelete(task)}
-                  sessionCount={sessionCounts.get(task.id)}
                 />
               </motion.div>
             ))}
@@ -625,7 +630,7 @@ function EmptyColumnPlaceholder({ text }: { text: string }) {
 
 function TasksSkeleton() {
   return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10">
       <div className="h-7 w-24 rounded-lg mb-8 animate-pulse" style={{ background: "var(--surface)" }} />
       <div className="flex flex-col gap-2">
         {[1, 2, 3].map((i) => (

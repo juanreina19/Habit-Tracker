@@ -7,7 +7,8 @@ import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
 import { HABIT_EMOJIS } from "@/shared/components/ui/EmojiPicker";
-import { HabitIcon, LUCIDE_ICON_MAP, LUCIDE_CATEGORIES } from "@/shared/components/ui/HabitIcon";
+import { HabitIcon } from "@/shared/components/ui/HabitIcon";
+import { IconPicker } from "@/shared/components/ui/IconPicker";
 import type { Habit } from "../../../domain/entities/Habit";
 import type { CreateHabitInput, UpdateHabitInput } from "../../../domain/repositories/IHabitRepository";
 import type { Category } from "@/modules/categories/domain/entities/Category";
@@ -395,36 +396,12 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                     )}
 
                     {iconTab === "svg" && (
-                      <div className="flex flex-col gap-5 pb-4">
-                        {LUCIDE_CATEGORIES.map(({ label, icons }) => (
-                          <div key={label}>
-                            <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--text-secondary)" }}>
-                              {tCat(label as Parameters<typeof tCat>[0])}
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {icons.map((iconName) => {
-                                const IconComp = LUCIDE_ICON_MAP[iconName];
-                                const iconValue = `lucide:${iconName}`;
-                                const isSelected = icon === iconValue;
-                                return (
-                                  <button
-                                    key={iconName}
-                                    type="button"
-                                    onClick={() => { setIcon(isSelected ? null : iconValue); navigate(homeScene(), -1); }}
-                                    className="w-12 h-12 rounded-[12px] flex items-center justify-center transition-all active:scale-90"
-                                    style={{
-                                      background: isSelected ? "var(--surface-elevated)" : "transparent",
-                                      border: `1.5px solid ${isSelected ? "var(--btn-primary-bg)" : "var(--border)"}`,
-                                      color: isSelected ? "var(--text-primary)" : "var(--text-secondary)",
-                                    }}
-                                  >
-                                    <IconComp size={22} />
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        ))}
+                      <div className="pb-4">
+                        <IconPicker
+                          value={icon}
+                          onChange={(next) => { setIcon(next); navigate(homeScene(), -1); }}
+                          categoryLabel={(key) => tCat(key as Parameters<typeof tCat>[0])}
+                        />
                       </div>
                     )}
                   </div>

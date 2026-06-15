@@ -151,7 +151,7 @@ export default function TodayView({ userId }: Props) {
   return (
     <>
       {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
-      <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-7xl">
+      <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10">
         {/* Header — 3 columnas: fecha | Hoy+racha | + (móvil; en desktop vive dentro de la columna de hábitos) */}
         <div className="flex items-center mb-8 lg:hidden">
           {/* Izquierda: fecha */}
@@ -535,7 +535,7 @@ function ProgressRing({ percentage, size }: { percentage: number; size: number }
 
 function TodayViewSkeleton() {
   return (
-    <div className="px-5 pt-14 pb-6 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl animate-pulse">
+    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10 animate-pulse">
       <div className="mb-8">
         <div className="h-4 w-20 rounded-full mb-2" style={{ background: "var(--surface)" }} />
         <div className="h-8 w-48 rounded-full" style={{ background: "var(--surface)" }} />

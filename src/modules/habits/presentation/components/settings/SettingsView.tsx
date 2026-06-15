@@ -22,7 +22,7 @@ export default function SettingsView({ userId: _userId }: Props) {
   const t = useTranslations("settings");
 
   return (
-    <div className="px-5 pt-14 pb-8 max-w-lg mx-auto lg:pt-8 lg:px-10 lg:max-w-3xl">
+    <div className="px-5 pt-14 pb-8 lg:pt-8 lg:px-10">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-semibold" style={{ color: "var(--text-primary)" }}>{t("title")}</h1>

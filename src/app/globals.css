@@ -31,6 +31,10 @@
   --sidebar-active-bg:    rgba(255, 255, 255, 0.10);
   --sidebar-hover-bg:     rgba(255, 255, 255, 0.05);
   --sidebar-active-color: #FFFFFF;
+
+  /* Tooltip — colores invertidos respecto al tema activo */
+  --tooltip-bg:   #FFFFFF;
+  --tooltip-text: #0A0A0A;
 }
 
 .light {
@@ -53,6 +57,10 @@
   --sidebar-active-bg:    rgba(0, 0, 0, 0.08);
   --sidebar-hover-bg:     rgba(0, 0, 0, 0.04);
   --sidebar-active-color: #000000;
+
+  /* Tooltip — colores invertidos respecto al tema activo */
+  --tooltip-bg:   #1C1C1E;
+  --tooltip-text: #FFFFFF;
 }
 
 * {
@@ -104,3 +112,17 @@ button, a, [role="button"] {
   background: var(--sidebar-active-bg);
   color: var(--sidebar-active-color) !important;
 }
+
+/* Tooltips del sidebar — colores invertidos respecto al tema activo */
+.tooltip-content {
+  background: var(--tooltip-bg);
+  color: var(--tooltip-text);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 60;
+}
+.tooltip-arrow { fill: var(--tooltip-bg); }

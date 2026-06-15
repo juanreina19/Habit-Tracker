@@ -19,7 +19,7 @@ export default async function DashboardLayout({
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
         <Sidebar />
         <main
-          className="lg:ml-[220px]"
+          className="lg:ml-[72px]"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 100px)" }}
         >
           {children}
