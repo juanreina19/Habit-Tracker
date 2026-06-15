@@ -1,12 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { X, Play, Pause, Settings, SkipForward, Flame, Coffee, Moon, type LucideIcon } from "lucide-react";
 import type { FocusModeSession, FocusPhase } from "../../domain/entities/FocusModeSession";
 import { getElapsedSec } from "../../domain/entities/FocusModeSession";
 import type { TaskWithStatus } from "../../domain/entities/Task";
 import { isTaskDone } from "../../domain/entities/Task";
+import { PRIORITY_COLORS } from "../constants/taskColors";
+import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
 import { FocusModeSettingsDialog } from "./FocusModeSettingsDialog";
 import type { FocusModeSettingsInput } from "../hooks/useFocusMode";
@@ -71,7 +74,7 @@ function FocusRing({
   const offset = circumference - (clamped / 100) * circumference;
 
   return (
-    <div className="relative mx-auto" style={{ width: "min(100%, 280px)", aspectRatio: "1 / 1" }}>
+    <div className="relative mx-auto w-full max-w-[280px] lg:max-w-[360px]" style={{ aspectRatio: "1 / 1" }}>
       <svg viewBox={`0 0 ${size} ${size}`} className="-rotate-90 w-full h-full">
         <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--border)" strokeWidth={6} />
         <circle
@@ -173,8 +176,15 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
   };
 
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto" style={{ background: "var(--bg)" }}>
-      <div className="flex flex-col items-center px-5 py-8 lg:py-12 gap-6 max-w-lg w-full mx-auto min-h-full">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.97 }}
+      transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+      className="fixed inset-0 z-[100] overflow-y-auto"
+      style={{ background: "var(--bg)" }}
+    >
+      <div className="flex flex-col px-5 py-8 lg:py-10 lg:px-12 gap-6 lg:gap-12 max-w-lg lg:max-w-5xl w-full mx-auto min-h-full lg:justify-center">
         {/* Header */}
         <div className="flex items-center justify-between w-full">
           <span
@@ -206,66 +216,80 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
           </div>
         </div>
 
-        {/* Timer */}
-        <FocusRing percentage={percentage} color={timerColor}>
-          <span className="text-6xl lg:text-7xl font-bold tabular-nums" style={{ color: timerColor }}>
-            {formatClock(remainingSec)}
-          </span>
-          <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            {notStarted ? t("status_ready") : isPaused ? t("status_paused") : t("status_running")}
-          </span>
-        </FocusRing>
+        {/* Cuerpo: timer + tareas (lado a lado en escritorio) */}
+        <div className="flex flex-col items-center gap-6 w-full lg:flex-row lg:items-center lg:justify-center lg:gap-20">
+          {/* Timer */}
+          <div className="flex flex-col items-center gap-6 w-full lg:w-auto lg:flex-shrink-0">
+            <FocusRing percentage={percentage} color={timerColor}>
+              <span className="text-6xl lg:text-8xl font-bold tabular-nums" style={{ color: timerColor }}>
+                {formatClock(remainingSec)}
+              </span>
+              <span className="text-xs lg:text-sm" style={{ color: "var(--text-secondary)" }}>
+                {notStarted ? t("status_ready") : isPaused ? t("status_paused") : t("status_running")}
+              </span>
+            </FocusRing>
 
-        {skipError && (
-          <p className="text-xs" style={{ color: "var(--danger)" }}>
-            {t("skip_error")}
-          </p>
-        )}
+            {skipError && (
+              <p className="text-xs" style={{ color: "var(--danger)" }}>
+                {t("skip_error")}
+              </p>
+            )}
 
-        {/* Controles */}
-        <div className="flex items-center gap-4">
-          <IconButton
-            icon={isPaused ? Play : Pause}
-            onClick={isPaused ? onResume : onPause}
-            label={notStarted ? t("start_session") : isPaused ? t("resume") : t("pause")}
-            primary
-            size={72}
-          />
-          <IconButton icon={SkipForward} onClick={handleSkip} label={t("skip_phase")} disabled={isSkipping} size={56} />
-        </div>
-
-        {/* Tareas seleccionadas */}
-        {tasks.length > 0 && (
-          <div className="flex flex-col gap-2 w-full mt-2">
-            {tasks.map((task) => {
-              const done = isTaskDone(task);
-              return (
-                <div
-                  key={task.id}
-                  className="flex items-center gap-3 rounded-[16px] p-4"
-                  style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-                >
-                  <TaskCheckbox
-                    done={done}
-                    size={TASK_CHECKBOX_SIZE.card}
-                    animated
-                    onToggle={() => toggleTask(task)}
-                    ariaLabel={task.title}
-                  />
-                  <span
-                    className="text-sm font-medium truncate"
-                    style={{
-                      color: done ? "var(--text-secondary)" : "var(--text-primary)",
-                      textDecoration: done ? "line-through" : "none",
-                    }}
-                  >
-                    {task.title}
-                  </span>
-                </div>
-              );
-            })}
+            {/* Controles */}
+            <div className="flex items-center gap-4">
+              <IconButton
+                icon={isPaused ? Play : Pause}
+                onClick={isPaused ? onResume : onPause}
+                label={notStarted ? t("start_session") : isPaused ? t("resume") : t("pause")}
+                primary
+                size={72}
+              />
+              <IconButton icon={SkipForward} onClick={handleSkip} label={t("skip_phase")} disabled={isSkipping} size={56} />
+            </div>
           </div>
-        )}
+
+          {/* Tareas seleccionadas */}
+          {tasks.length > 0 && (
+            <div className="flex flex-col gap-2 w-full lg:w-[380px] lg:flex-shrink-0">
+              {tasks.map((task) => {
+                const done = isTaskDone(task);
+                return (
+                  <div
+                    key={task.id}
+                    className="flex items-center gap-3 rounded-[16px] p-4"
+                    style={{ background: "var(--surface-elevated)" }}
+                  >
+                    <TaskCheckbox
+                      done={done}
+                      size={TASK_CHECKBOX_SIZE.card}
+                      animated
+                      onToggle={() => toggleTask(task)}
+                      ariaLabel={task.title}
+                    />
+                    <span
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ background: PRIORITY_COLORS[task.priority] }}
+                    />
+                    {task.icon && (
+                      <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
+                        <HabitIcon icon={task.icon} size={18} />
+                      </span>
+                    )}
+                    <span
+                      className="flex-1 min-w-0 text-sm font-medium truncate"
+                      style={{
+                        color: done ? "var(--text-secondary)" : "var(--text-primary)",
+                        textDecoration: done ? "line-through" : "none",
+                      }}
+                    >
+                      {task.title}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {settingsOpen && (
@@ -276,6 +300,6 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
           onSave={onUpdateConfig}
         />
       )}
-    </div>
+    </motion.div>
   );
 }

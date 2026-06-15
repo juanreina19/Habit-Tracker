@@ -114,7 +114,6 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                 animate="center"
                 exit="exit"
                 transition={slideTransition}
-                style={{ willChange: "transform, opacity" }}
                 className="p-6"
               >
                 {/* ── Wizard header (create mode) ────────────── */}

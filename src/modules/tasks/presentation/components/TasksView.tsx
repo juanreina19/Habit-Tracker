@@ -163,18 +163,21 @@ export default function TasksView({ userId }: Props) {
         onStart={(taskIds) => { focusMode.start(taskIds); }}
       />
 
-      {focusMode.active && (
-        <FocusModeOverlay
-          session={focusMode.active}
-          tasks={tasks.filter((tk) => focusMode.active!.taskIds.includes(tk.id))}
-          toggleTask={toggleTask}
-          onPause={focusMode.pause}
-          onResume={focusMode.resume}
-          onSkip={focusMode.advancePhase}
-          onClose={focusMode.discard}
-          onUpdateConfig={focusMode.updateActiveConfig}
-        />
-      )}
+      <AnimatePresence>
+        {focusMode.active && (
+          <FocusModeOverlay
+            key="focus-overlay"
+            session={focusMode.active}
+            tasks={tasks.filter((tk) => focusMode.active!.taskIds.includes(tk.id))}
+            toggleTask={toggleTask}
+            onPause={focusMode.pause}
+            onResume={focusMode.resume}
+            onSkip={focusMode.advancePhase}
+            onClose={focusMode.discard}
+            onUpdateConfig={focusMode.updateActiveConfig}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

@@ -219,6 +219,8 @@
     "close": "Close",
     "icon_label": "Icon",
     "icon_none": "—",
+    "no_icon": "No icon",
+    "select_icon": "Choose icon",
     "subtasks_label": "Subtasks",
     "add_subtask": "Add subtask",
     "subtask_placeholder": "New subtask",

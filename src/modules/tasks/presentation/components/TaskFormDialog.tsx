@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ChevronRight } from "lucide-react";
 import { formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
 import type { Task, CreateTaskInput, UpdateTaskInput, TaskPriority } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 import { PRIORITY_COLORS } from "../constants/taskColors";
-import { IconPicker } from "@/shared/components/ui/IconPicker";
+import { HabitIcon } from "@/shared/components/ui/HabitIcon";
+import { IconPickerDialog } from "@/shared/components/ui/IconPickerDialog";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
 import { useSubtasks } from "../hooks/useSubtasks";
 
@@ -54,6 +55,7 @@ export function TaskFormDialog({
   const [timeError, setTimeError]     = useState("");
 
   const [icon, setIcon]               = useState<string | null>(null);
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
 
   const [titleError, setTitleError]   = useState("");
   const [isSaving, setIsSaving]       = useState(false);
@@ -439,11 +441,37 @@ export function TaskFormDialog({
                     <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                       {t("icon_label")}
                     </label>
-                    <IconPicker
+                    <button
+                      type="button"
+                      onClick={() => setIconPickerOpen(true)}
+                      className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
+                      style={{ background: "var(--surface-elevated)" }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-9 h-9 rounded-[12px] flex items-center justify-center flex-shrink-0"
+                          style={{ background: "var(--border)" }}
+                        >
+                          {icon ? (
+                            <HabitIcon icon={icon} size={20} color="var(--text-primary)" />
+                          ) : (
+                            <span className="text-sm" style={{ color: "var(--text-muted)" }}>—</span>
+                          )}
+                        </div>
+                        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                          {icon ? icon.replace(/^lucide:/, "") : t("no_icon")}
+                        </p>
+                      </div>
+                      <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
+                    </button>
+                    <IconPickerDialog
+                      open={iconPickerOpen}
+                      onClose={() => setIconPickerOpen(false)}
                       value={icon}
                       onChange={setIcon}
                       allowNone
                       noneLabel={t("icon_none")}
+                      title={t("select_icon")}
                       categoryLabel={(key) => tCat(key as Parameters<typeof tCat>[0])}
                     />
                   </div>

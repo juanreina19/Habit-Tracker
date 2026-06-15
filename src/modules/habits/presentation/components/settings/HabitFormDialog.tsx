@@ -176,7 +176,6 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                 animate="center"
                 exit="exit"
                 transition={slideTransition}
-                style={{ willChange: "transform, opacity" }}
                 className="p-6"
               >
 
