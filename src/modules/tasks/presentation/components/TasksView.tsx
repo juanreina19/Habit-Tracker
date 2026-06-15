@@ -175,6 +175,7 @@ export default function TasksView({ userId }: Props) {
             onSkip={focusMode.advancePhase}
             onClose={focusMode.discard}
             onUpdateConfig={focusMode.updateActiveConfig}
+            onReset={focusMode.resetTimer}
           />
         )}
       </AnimatePresence>

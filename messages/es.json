@@ -254,7 +254,8 @@
   "focus": {
     "loading": "Cargando...",
     "open_picker": "Abrir Focus Mode",
-    "picker_title": "¿En qué te vas a enfocar?",
+    "picker_heading": "Arma tu flujo",
+    "picker_subtitle": "Elige las tareas en las que te enfocarás ahora",
     "picker_empty_today": "No tienes tareas pendientes para hoy.",
     "close_session": "Cerrar Focus Mode",
     "duration_unit": "min",
@@ -284,6 +285,10 @@
     "auto_start_long_break_label": "Descanso largo automático",
     "auto_start_long_break_hint": "Salta el botón de Play al entrar y salir del descanso largo",
     "settings_applies_live": "Los cambios se aplican de inmediato a la sesión en curso",
+    "tasks_pending_count": "{count, plural, =0 {Sin tareas pendientes} one {# tarea pendiente} other {# tareas pendientes}}",
+    "reset_session": "Reiniciar cronómetro",
+    "start_flow": "Iniciar flujo · {count}",
+    "close": "Cerrar",
     "save": "Guardar",
     "cancel": "Cancelar",
     "validation_out_of_range": "El valor debe estar entre {min} y {max}"

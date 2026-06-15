@@ -19,7 +19,7 @@ export function FocusModeButton({ onClick }: Props) {
       style={{
         background: "#000000",
         color: "#FFFFFF",
-        boxShadow: "0 8px 24px -6px rgba(0,0,0,0.45)",
+        boxShadow: "var(--focus-btn-ring), 0 8px 24px -6px rgba(0,0,0,0.45)",
       }}
     >
       <Zap size={24} strokeWidth={2.5} fill="currentColor" />

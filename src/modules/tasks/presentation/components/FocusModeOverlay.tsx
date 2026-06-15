@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { X, Play, Pause, Settings, SkipForward, Flame, Coffee, Moon, type LucideIcon } from "lucide-react";
+import { X, Play, Pause, Settings, SkipForward, RotateCcw, Clock, Flame, Coffee, Moon, type LucideIcon } from "lucide-react";
 import type { FocusModeSession, FocusPhase } from "../../domain/entities/FocusModeSession";
 import { getElapsedSec } from "../../domain/entities/FocusModeSession";
 import type { TaskWithStatus } from "../../domain/entities/Task";
-import { isTaskDone } from "../../domain/entities/Task";
+import { isTaskDone, formatTaskTime } from "../../domain/entities/Task";
 import { PRIORITY_COLORS } from "../constants/taskColors";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
@@ -23,6 +23,7 @@ interface Props {
   onSkip: () => Promise<void> | void;
   onClose: () => void;
   onUpdateConfig: (patch: FocusModeSettingsInput) => void;
+  onReset: () => void;
 }
 
 const PHASE_LABEL_KEY: Record<FocusPhase, "phase_focus" | "phase_short_break" | "phase_long_break"> = {
@@ -74,7 +75,7 @@ function FocusRing({
   const offset = circumference - (clamped / 100) * circumference;
 
   return (
-    <div className="relative mx-auto w-full max-w-[280px] lg:max-w-[360px]" style={{ aspectRatio: "1 / 1" }}>
+    <div className="relative mx-auto w-full max-w-[280px] lg:max-w-[420px]" style={{ aspectRatio: "1 / 1" }}>
       <svg viewBox={`0 0 ${size} ${size}`} className="-rotate-90 w-full h-full">
         <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--border)" strokeWidth={6} />
         <circle
@@ -130,7 +131,7 @@ function IconButton({
   );
 }
 
-export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume, onSkip, onClose, onUpdateConfig }: Props) {
+export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume, onSkip, onClose, onUpdateConfig, onReset }: Props) {
   const t = useTranslations("focus");
   const [, forceTick] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -184,7 +185,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
       className="fixed inset-0 z-[100] overflow-y-auto"
       style={{ background: "var(--bg)" }}
     >
-      <div className="flex flex-col px-5 py-8 lg:py-10 lg:px-12 gap-6 lg:gap-12 max-w-lg lg:max-w-5xl w-full mx-auto min-h-full lg:justify-center">
+      <div className="flex flex-col px-5 py-8 lg:py-10 lg:px-12 xl:px-24 gap-6 lg:gap-10 max-w-lg lg:max-w-7xl w-full mx-auto min-h-full lg:justify-center">
         {/* Header */}
         <div className="flex items-center justify-between w-full">
           <span
@@ -217,7 +218,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
         </div>
 
         {/* Cuerpo: timer + tareas (lado a lado en escritorio) */}
-        <div className="flex flex-col items-center gap-6 w-full lg:flex-row lg:items-center lg:justify-center lg:gap-20">
+        <div className="flex flex-col items-center gap-6 w-full lg:flex-row lg:items-start lg:justify-center lg:gap-20">
           {/* Timer */}
           <div className="flex flex-col items-center gap-6 w-full lg:w-auto lg:flex-shrink-0">
             <FocusRing percentage={percentage} color={timerColor}>
@@ -237,6 +238,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
 
             {/* Controles */}
             <div className="flex items-center gap-4">
+              <IconButton icon={RotateCcw} onClick={onReset} label={t("reset_session")} size={56} />
               <IconButton
                 icon={isPaused ? Play : Pause}
                 onClick={isPaused ? onResume : onPause}
@@ -249,46 +251,59 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
           </div>
 
           {/* Tareas seleccionadas */}
-          {tasks.length > 0 && (
-            <div className="flex flex-col gap-2 w-full lg:w-[380px] lg:flex-shrink-0">
-              {tasks.map((task) => {
-                const done = isTaskDone(task);
-                return (
-                  <div
-                    key={task.id}
-                    className="flex items-center gap-3 rounded-[16px] p-4"
-                    style={{ background: "var(--surface-elevated)" }}
-                  >
-                    <TaskCheckbox
-                      done={done}
-                      size={TASK_CHECKBOX_SIZE.card}
-                      animated
-                      onToggle={() => toggleTask(task)}
-                      ariaLabel={task.title}
-                    />
-                    <span
-                      className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ background: PRIORITY_COLORS[task.priority] }}
-                    />
-                    {task.icon && (
-                      <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
-                        <HabitIcon icon={task.icon} size={18} />
-                      </span>
-                    )}
-                    <span
-                      className="flex-1 min-w-0 text-sm font-medium truncate"
-                      style={{
-                        color: done ? "var(--text-secondary)" : "var(--text-primary)",
-                        textDecoration: done ? "line-through" : "none",
-                      }}
+          {tasks.length > 0 && (() => {
+            const pendingCount = tasks.filter((tk) => !isTaskDone(tk)).length;
+            return (
+              <div className="flex flex-col gap-2 w-full lg:w-[380px] lg:flex-shrink-0">
+                <h3 className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--text-secondary)" }}>
+                  {t("tasks_pending_count", { count: pendingCount })}
+                </h3>
+                {tasks.map((task) => {
+                  const done = isTaskDone(task);
+                  return (
+                    <div
+                      key={task.id}
+                      className="flex items-center gap-3 rounded-[16px] p-4"
+                      style={{ background: "var(--surface-elevated)" }}
                     >
-                      {task.title}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                      <TaskCheckbox
+                        done={done}
+                        size={TASK_CHECKBOX_SIZE.card}
+                        animated
+                        variant="focus"
+                        onToggle={() => toggleTask(task)}
+                        ariaLabel={task.title}
+                      />
+                      <span
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ background: PRIORITY_COLORS[task.priority] }}
+                      />
+                      {task.icon && (
+                        <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
+                          <HabitIcon icon={task.icon} size={18} />
+                        </span>
+                      )}
+                      <span
+                        className="flex-1 min-w-0 text-sm font-medium truncate"
+                        style={{
+                          color: done ? "var(--text-secondary)" : "var(--text-primary)",
+                          textDecoration: done ? "line-through" : "none",
+                        }}
+                      >
+                        {task.title}
+                      </span>
+                      {task.startTime && (
+                        <span className="flex items-center gap-1 flex-shrink-0 text-xs" style={{ color: "var(--text-secondary)" }}>
+                          <Clock size={13} />
+                          {formatTaskTime(task.startTime)}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
       </div>
 

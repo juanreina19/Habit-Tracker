@@ -231,5 +231,14 @@ export function useFocusMode(userId: UUID) {
     return () => clearInterval(id);
   }, [advancePhase]);
 
-  return { active, loading, start, pause, resume, discard, advancePhase, updateActiveConfig };
+  const resetTimer = useCallback(() => {
+    setActive((prev) => {
+      if (!prev) return prev;
+      const next: FocusModeSession = { ...prev, accumulatedSec: 0, startedAt: new Date().toISOString() };
+      getRepo().update(userId, { accumulatedSec: 0, startedAt: next.startedAt }).catch(() => {});
+      return next;
+    });
+  }, [userId, getRepo]);
+
+  return { active, loading, start, pause, resume, discard, advancePhase, updateActiveConfig, resetTimer };
 }

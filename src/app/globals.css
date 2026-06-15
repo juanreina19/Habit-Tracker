@@ -35,6 +35,9 @@
   /* Tooltip — colores invertidos respecto al tema activo */
   --tooltip-bg:   #FFFFFF;
   --tooltip-text: #0A0A0A;
+
+  /* Focus Mode button — ring sutil, solo visible en tema oscuro */
+  --focus-btn-ring: 0 0 0 1px rgba(255, 255, 255, 0.14);
 }
 
 .light {
@@ -61,6 +64,9 @@
   /* Tooltip — colores invertidos respecto al tema activo */
   --tooltip-bg:   #1C1C1E;
   --tooltip-text: #FFFFFF;
+
+  /* Focus Mode button — sin ring en tema claro */
+  --focus-btn-ring: 0 0 0 1px rgba(0, 0, 0, 0);
 }
 
 * {

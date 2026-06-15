@@ -254,7 +254,8 @@
   "focus": {
     "loading": "Loading...",
     "open_picker": "Open Focus Mode",
-    "picker_title": "What will you focus on?",
+    "picker_heading": "Build your flow",
+    "picker_subtitle": "Choose the tasks you'll focus on now",
     "picker_empty_today": "You have no pending tasks for today.",
     "close_session": "Close Focus Mode",
     "duration_unit": "min",
@@ -284,6 +285,10 @@
     "auto_start_long_break_label": "Auto-start long break",
     "auto_start_long_break_hint": "Skip the Play button entering and leaving the long break",
     "settings_applies_live": "Changes apply immediately to the current session",
+    "tasks_pending_count": "{count, plural, =0 {No pending tasks} one {# pending task} other {# pending tasks}}",
+    "reset_session": "Reset timer",
+    "start_flow": "Start flow · {count}",
+    "close": "Close",
     "save": "Save",
     "cancel": "Cancel",
     "validation_out_of_range": "Value must be between {min} and {max}"
