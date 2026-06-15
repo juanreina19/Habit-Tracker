@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useId } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { TaskSupabaseRepository } from "../../infrastructure/supabase/TaskSupabaseRepository";
 import { GetTodayTasksUseCase } from "../../domain/use-cases/GetTodayTasksUseCase";
@@ -14,6 +14,11 @@ export function useTodayTasks(userId: UUID) {
   const [tasks, setTasks] = useState<TaskWithStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Sufijo único por instancia: useTodayTasks puede montarse más de una vez en simultáneo
+  // (p.ej. TodayTab + FocusModeTaskPickerDialog), y el cliente Supabase reutiliza el mismo
+  // canal para topics iguales — un segundo subscribe() sobre el mismo canal lanza
+  // "tried to subscribe multiple times" y tumba toda la app sin error boundary.
+  const instanceId = useId();
 
   const getRepo = useCallback(() => new TaskSupabaseRepository(createClient()), []);
 
@@ -61,13 +66,13 @@ export function useTodayTasks(userId: UUID) {
     // Sin filtro user_id: igual que en useHabits.ts, el filtrado por usuario en postgres_changes
     // requiere RLS específico para Realtime que no está configurado. Recibimos cambios de todos
     // los usuarios pero el refetch ya está RLS-scoped (TaskSupabaseRepository filtra por user_id).
-    const ch = client.channel(`tasks-today-${userId}`)
+    const ch = client.channel(`tasks-today-${userId}-${instanceId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, refetch)
       .on("postgres_changes", { event: "*", schema: "public", table: "task_completions" }, refetch)
       .subscribe();
 
     return () => { clearTimeout(debounce); client.removeChannel(ch); };
-  }, [userId]);
+  }, [userId, instanceId]);
 
   const toggleTask = useCallback(async (task: TaskWithStatus): Promise<void> => {
     if (pendingToggles.current.has(task.id)) return; // ignora doble-tap mientras el primero resuelve
