@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Settings2 } from "lucide-react";
+import { Settings2, Flame } from "lucide-react";
 import { DashboardColumn } from "./DashboardColumn";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
@@ -113,8 +113,9 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
                   </span>
                 )}
                 {streak > 0 && (
-                  <span className="text-[10px] font-semibold" style={{ color: "var(--accent)" }}>
-                    🔥{streak}
+                  <span className="flex items-center gap-0.5 text-[10px] font-semibold" style={{ color: "var(--accent)" }}>
+                    <Flame size={10} fill="currentColor" />
+                    {streak}
                   </span>
                 )}
               </div>

@@ -9,6 +9,7 @@ import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 
 const NAV_ROUTES = [
   { href: "/",         key: "dashboard", Icon: LayoutDashboard },
+  { href: "/today",    key: "today",     Icon: Sun },
   { href: "/calendar", key: "calendar",  Icon: CalendarRange },
   { href: "/tasks",    key: "tasks",     Icon: ListTodo },
   { href: "/stats",    key: "stats",     Icon: BarChart2 },

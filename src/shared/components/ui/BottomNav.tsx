@@ -4,11 +4,12 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { LayoutDashboard, CalendarRange, ListTodo, BarChart2, Settings2 } from "lucide-react";
+import { LayoutDashboard, Sun, CalendarRange, ListTodo, BarChart2, Settings2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils/cn";
 
 const NAV_ROUTES = [
   { href: "/",         key: "dashboard", Icon: LayoutDashboard },
+  { href: "/today",    key: "today",     Icon: Sun },
   { href: "/calendar", key: "calendar",  Icon: CalendarRange },
   { href: "/tasks",    key: "tasks",     Icon: ListTodo },
   { href: "/stats",    key: "stats",     Icon: BarChart2 },
