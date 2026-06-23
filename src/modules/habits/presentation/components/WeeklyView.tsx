@@ -70,7 +70,7 @@ export default function WeeklyView({ userId, userCreatedAt, embedded = false }: 
       {/* Global summary banner */}
       {!isLoading && data && (
         <div
-          className="rounded-[20px] p-5 mb-6 flex items-center gap-5"
+          className="rounded-xl p-5 mb-6 flex items-center gap-5"
           style={{ background: "var(--surface)" }}
         >
           <GlobalRing percentage={data.globalRate} />
@@ -116,7 +116,7 @@ export default function WeeklyView({ userId, userCreatedAt, embedded = false }: 
 
           {/* Habit rows */}
           {data.habits.length === 0 ? (
-            <div className="rounded-[20px] p-10 text-center" style={{ background: "var(--surface)" }}>
+            <div className="rounded-xl p-10 text-center" style={{ background: "var(--surface)" }}>
               <p className="text-4xl mb-3">📅</p>
               <p className="font-medium" style={{ color: "var(--text-primary)" }}>{t("no_habits_title")}</p>
               <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
@@ -158,11 +158,11 @@ function HabitWeekRow({ progress }: { progress: WeeklyHabitProgress }) {
 
   return (
     <div
-      className="rounded-[16px] px-4 py-3 flex items-center gap-3"
+      className="rounded-lg px-4 py-3 flex items-center gap-3"
       style={{ background: "var(--surface)" }}
     >
       <div
-        className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0"
+        className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"
         style={{ background: accentColor + "20", color: accentColor }}
       >
         <HabitIcon icon={habit.icon ?? "🎯"} size={18} />
@@ -251,9 +251,9 @@ function GlobalRing({ percentage }: { percentage: number }) {
 function WeeklySkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="rounded-[20px] h-24 mb-6" style={{ background: "var(--surface)" }} />
+      <div className="rounded-xl h-24 mb-6" style={{ background: "var(--surface)" }} />
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="rounded-[16px] h-14 mb-2" style={{ background: "var(--surface)" }} />
+        <div key={i} className="rounded-lg h-14 mb-2" style={{ background: "var(--surface)" }} />
       ))}
     </div>
   );

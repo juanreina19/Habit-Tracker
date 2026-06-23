@@ -12,13 +12,14 @@ import { refreshTodayHabitsInStore } from "../../hooks/useHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { HabitFormDialog } from "../settings/HabitFormDialog";
 import { CategoryFormDialog } from "@/modules/categories/presentation/components/CategoryFormDialog";
+import CalendarView from "../CalendarView";
 import type { Habit } from "../../../domain/entities/Habit";
 import type { CreateHabitInput, UpdateHabitInput } from "../../../domain/repositories/IHabitRepository";
 import type { Category } from "@/modules/categories/domain/entities/Category";
 import type { CreateCategoryInput, UpdateCategoryInput } from "@/modules/categories/domain/repositories/ICategoryRepository";
 import type { UUID } from "@/shared/types/database.types";
 
-type Tab = "habits" | "categories";
+type Tab = "habits" | "categories" | "history";
 
 interface Props {
   userId: UUID;
@@ -94,18 +95,18 @@ export default function HabitsView({ userId }: Props) {
       </div>
 
       {/* Tabs */}
-      <div className="flex rounded-[14px] p-1 mb-6" style={{ background: "var(--surface)" }}>
-        {(["habits", "categories"] as Tab[]).map((tabKey) => (
+      <div className="flex rounded-lg p-1 mb-6" style={{ background: "var(--surface)" }}>
+        {(["habits", "categories", "history"] as Tab[]).map((tabKey) => (
           <button
             key={tabKey}
             onClick={() => setTab(tabKey)}
-            className="flex-1 py-2.5 rounded-[10px] text-sm font-medium transition-all"
+            className="flex-1 py-2.5 rounded-md text-sm font-medium transition-all"
             style={{
               background: tab === tabKey ? "var(--surface-elevated)" : "transparent",
               color: tab === tabKey ? "var(--text-primary)" : "var(--text-secondary)",
             }}
           >
-            {tabKey === "habits" ? t("tab_habits") : t("tab_categories")}
+            {tabKey === "habits" ? t("tab_habits") : tabKey === "categories" ? t("tab_categories") : t("tab_history")}
           </button>
         ))}
       </div>
@@ -119,7 +120,7 @@ export default function HabitsView({ userId }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, ease: "easeOut" }}
         >
-          {tab === "habits" ? (
+          {tab === "habits" && (
             <HabitsTab
               habits={habits}
               categories={categories}
@@ -128,7 +129,8 @@ export default function HabitsView({ userId }: Props) {
               onDelete={(h) => setConfirmDelete({ type: "habit", id: h.id, name: h.name })}
               onReorder={reorderHabits}
             />
-          ) : (
+          )}
+          {tab === "categories" && (
             <CategoriesTab
               categories={categories}
               habitCount={habits.reduce<Record<string, number>>((acc, h) => {
@@ -140,6 +142,9 @@ export default function HabitsView({ userId }: Props) {
               onDelete={(c) => setConfirmDelete({ type: "category", id: c.id, name: c.name })}
               onReorder={reorderCategories}
             />
+          )}
+          {tab === "history" && (
+            <CalendarView userId={userId} userCreatedAt="" />
           )}
         </motion.div>
       )}
@@ -204,7 +209,7 @@ function HabitsTab({
         </p>
         <button
           onClick={onAdd}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-[12px] text-sm font-semibold transition-opacity active:opacity-70"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-semibold transition-opacity active:opacity-70"
           style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
         >
           <span className="text-base leading-none">+</span> {t("new_habit")}
@@ -259,7 +264,7 @@ function HabitReorderItem({
       value={habit}
       dragControls={dragControls}
       dragListener={false}
-      className="rounded-[16px] p-4 flex items-center gap-3 touch-none"
+      className="rounded-lg p-4 flex items-center gap-3 touch-none"
       style={{ background: "var(--surface)" }}
     >
       <div
@@ -270,7 +275,7 @@ function HabitReorderItem({
         <GripVertical size={18} />
       </div>
       <div
-        className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0"
+        className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
         style={{ background: accentColor + "25", color: accentColor }}
       >
         <HabitIcon icon={habit.icon ?? cat?.icon ?? "🎯"} size={20} />
@@ -280,7 +285,7 @@ function HabitReorderItem({
           <p className="font-medium truncate" style={{ color: "var(--text-primary)" }}>{habit.name}</p>
           {cat && (
             <span
-              className="text-[10px] font-medium px-1.5 py-0.5 rounded-[6px] flex-shrink-0 whitespace-nowrap"
+              className="text-[10px] font-medium px-1.5 py-0.5 rounded-sm flex-shrink-0 whitespace-nowrap"
               style={{ background: (cat.color ?? "#8888AA") + "22", color: cat.color ?? "#8888AA" }}
             >
               {cat.name}
@@ -340,7 +345,7 @@ function CategoriesTab({
         </p>
         <button
           onClick={onAdd}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-[12px] text-sm font-semibold transition-opacity active:opacity-70"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-semibold transition-opacity active:opacity-70"
           style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
         >
           <span className="text-base leading-none">+</span> {t("new_category")}
@@ -389,7 +394,7 @@ function CategoryReorderItem({
       value={cat}
       dragControls={dragControls}
       dragListener={false}
-      className="rounded-[16px] p-4 flex items-center gap-3 touch-none"
+      className="rounded-lg p-4 flex items-center gap-3 touch-none"
       style={{ background: "var(--surface)" }}
     >
       <div
@@ -400,7 +405,7 @@ function CategoryReorderItem({
         <GripVertical size={18} />
       </div>
       <div
-        className="w-10 h-10 rounded-[10px] flex items-center justify-center flex-shrink-0 text-lg"
+        className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0 text-lg"
         style={{ background: (cat.color ?? "#8888AA") + "25" }}
       >
         {cat.icon ?? "📁"}
@@ -438,7 +443,7 @@ function IconButton({
     <button
       onClick={onClick}
       aria-label={label}
-      className="w-8 h-8 rounded-[8px] flex items-center justify-center transition-opacity active:opacity-60"
+      className="w-8 h-8 rounded-sm flex items-center justify-center transition-opacity active:opacity-60"
       style={{
         background: danger ? "#FF525215" : "var(--surface-elevated)",
         color: danger ? "#FF5252" : "var(--text-secondary)",
@@ -451,7 +456,7 @@ function IconButton({
 
 function EmptyState({ message, hint }: { message: string; hint: string }) {
   return (
-    <div className="rounded-[20px] p-10 text-center" style={{ background: "var(--surface)" }}>
+    <div className="rounded-xl p-10 text-center" style={{ background: "var(--surface)" }}>
       <p className="text-4xl mb-3">✨</p>
       <p className="font-medium" style={{ color: "var(--text-primary)" }}>{message}</p>
       <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{hint}</p>
@@ -482,7 +487,7 @@ function DeleteConfirmDialog({
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
     >
       <div
-        className="w-full max-w-sm rounded-[24px] p-6"
+        className="w-full max-w-sm rounded-xl p-6"
         style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
       >
         <p className="text-lg font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
@@ -494,7 +499,7 @@ function DeleteConfirmDialog({
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 py-3 rounded-[14px] text-sm font-medium"
+            className="flex-1 py-3 rounded-lg text-sm font-medium"
             style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
           >
             {t("delete_cancel")}
@@ -502,7 +507,7 @@ function DeleteConfirmDialog({
           <button
             onClick={handleConfirm}
             disabled={isDeleting}
-            className="flex-1 py-3 rounded-[14px] text-sm font-semibold disabled:opacity-50"
+            className="flex-1 py-3 rounded-lg text-sm font-semibold disabled:opacity-50"
             style={{ background: "#FF5252", color: "#FFFFFF" }}
           >
             {t("delete_confirm_btn")}
@@ -517,7 +522,7 @@ function HabitsSkeleton() {
   return (
     <div className="animate-pulse flex flex-col gap-2">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="rounded-[16px] h-16" style={{ background: "var(--surface)" }} />
+        <div key={i} className="rounded-lg h-16" style={{ background: "var(--surface)" }} />
       ))}
     </div>
   );

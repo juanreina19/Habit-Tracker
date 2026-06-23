@@ -22,10 +22,10 @@ const config: Config = {
         danger: "#FF5252",
       },
       borderRadius: {
-        "ios": "14px",
-        "ios-sm": "10px",
-        "ios-lg": "20px",
-        "ios-xl": "28px",
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
+        xl: "var(--radius-xl)",
       },
       fontFamily: {
         sans: ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "Segoe UI", "sans-serif"],

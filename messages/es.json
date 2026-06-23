@@ -1,12 +1,11 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "today": "Hoy",
-    "calendar": "Calendario",
-    "tasks": "Tareas",
+    "home": "Inicio",
+    "planner": "Planificador",
     "habits": "Hábitos",
-    "stats": "Stats",
-    "settings": "Ajustes"
+    "studies": "Estudios",
+    "settings": "Ajustes",
+    "quick_add": "Crear"
   },
   "today": {
     "date_prefix": "Hoy, ",
@@ -109,7 +108,10 @@
     "my_profile": "Mi perfil",
     "sign_out": "Cerrar sesión",
     "signing_out": "Cerrando sesión…",
-    "language": "Idioma"
+    "language": "Idioma",
+    "statistics": "Estadísticas",
+    "view_statistics": "Ver estadísticas",
+    "statistics_desc": "Rachas, tasas de completado, logros"
   },
   "stats": {
     "title": "Estadísticas",
@@ -149,7 +151,8 @@
     "delete_category_title": "¿Eliminar categoría?",
     "delete_confirm": "¿Estás seguro? Se eliminará \"{name}\".",
     "delete_cancel": "Cancelar",
-    "delete_confirm_btn": "Eliminar"
+    "delete_confirm_btn": "Eliminar",
+    "tab_history": "Historial"
   },
   "tasks": {
     "title": "Tareas",
@@ -170,12 +173,13 @@
     "title_placeholder": "¿Qué hay que hacer?",
     "title_error": "El título es obligatorio",
     "description_label": "Descripción",
-    "description_placeholder": "Detalles opcionales",
+    "description_placeholder": "Detalles, enlaces o notas (opcional)...",
     "priority_label": "Prioridad",
     "due_date_label": "Fecha límite",
     "cancel": "Cancelar",
     "save": "Guardar",
     "saving": "Guardando…",
+    "add_task": "Agregar tarea",
     "delete": "Eliminar tarea",
     "delete_confirm": "¿Eliminar esta tarea? Esta acción no se puede deshacer.",
     "delete_confirm_btn": "Eliminar",
@@ -230,7 +234,9 @@
     "subtask_placeholder": "Nueva subtarea",
     "subtasks_empty": "Sin subtareas",
     "delete_subtask": "Eliminar subtarea",
-    "subtasks_hint_new_task": "Podrás añadir subtareas después de guardar la tarea."
+    "subtasks_hint_new_task": "Podrás añadir subtareas después de guardar la tarea.",
+    "important": "Importante",
+    "mark_important": "Marcar como importante"
   },
   "calendar": {
     "subtitle": "Vista",
@@ -313,6 +319,75 @@
     "streak": "Racha",
     "done": "Hecho",
     "collapse": "Colapsar",
-    "expand": "Expandir"
+    "expand": "Expandir",
+    "motivational_summary": "Tienes {habits} hábitos y {tasks} tareas para hoy",
+    "tab_focus": "Enfoque",
+    "tab_board": "Tablero",
+    "tab_eisenhower": "Eisenhower",
+    "tab_kanban": "Kanban",
+    "eisenhower_do": "Hacer primero",
+    "eisenhower_schedule": "Programar",
+    "eisenhower_delegate": "Delegar",
+    "eisenhower_eliminate": "Eliminar",
+    "kanban_todo": "Por hacer",
+    "kanban_in_progress": "En progreso",
+    "kanban_done": "Hecho",
+    "agenda": "Agenda",
+    "urgency": "Urgencia",
+    "overdue_tasks": "Vencidas",
+    "add_task_placeholder": "Agregar tarea...",
+    "coming_soon": "Próximamente",
+    "no_urgent": "Sin tareas urgentes"
+  },
+  "quickAdd": {
+    "new_task": "Nueva tarea",
+    "new_habit": "Nuevo hábito"
+  },
+  "planner": {
+    "title": "Planificador",
+    "subtitle": "Organiza tu día asignando horarios a tus tareas",
+    "pending": "Pendientes",
+    "no_pending": "¡Todas las tareas programadas!",
+    "drop_hint": "Arrastra tareas aquí para programarlas",
+    "today": "Hoy",
+    "new_task": "Nueva tarea",
+    "assign_time": "Asignar hora",
+    "unschedule": "Quitar hora",
+    "scheduled": "Programadas",
+    "no_tasks": "Sin tareas para este día"
+  },
+  "studies": {
+    "title": "Estudios",
+    "subtitle": "Un hub de materias para seguir temas, sesiones y consistencia.",
+    "add_subject": "Nueva materia",
+    "edit_subject": "Editar materia",
+    "subject_name": "Nombre de la materia",
+    "subject_name_placeholder": "Ej: Matemáticas",
+    "add_topic": "Nuevo tema",
+    "edit_topic": "Editar tema",
+    "topic_title": "Título del tema",
+    "log_session": "Registrar sesión",
+    "duration_min": "Duración (min)",
+    "select_subject": "Seleccionar materia",
+    "select_topic": "Seleccionar tema (opcional)",
+    "stats_hours": "Horas",
+    "stats_sessions": "Sesiones",
+    "stats_streak": "Racha",
+    "stats_monthly": "Frecuencia mensual",
+    "recent_sessions": "Sesiones recientes",
+    "no_subjects": "Sin materias aún",
+    "no_subjects_hint": "Crea tu primera materia para comenzar a registrar sesiones de estudio.",
+    "no_sessions": "Sin sesiones registradas aún.",
+    "delete_subject_confirm": "¿Eliminar esta materia y todos sus temas?",
+    "delete_topic_confirm": "¿Eliminar este tema?",
+    "schedule": "Horario",
+    "subjects": "Materias",
+    "no_study_today": "Sin estudio este día",
+    "activity": "Actividad",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "delete": "Eliminar",
+    "coming_soon": "Próximamente"
   }
 }

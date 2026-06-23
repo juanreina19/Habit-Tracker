@@ -107,6 +107,7 @@ export function useTasks(userId: UUID) {
       ...task,
       isCompletedToday: nowDone,
       completedAt: isRecurring(task) ? task.completedAt : (nowDone ? new Date().toISOString() : null),
+      status: isRecurring(task) ? task.status : (nowDone ? 'done' : 'todo'),
     };
     pendingToggles.current.add(task.id);
     setTasks((prev) => prev.map((t) => (t.id === task.id ? optimistic : t)));

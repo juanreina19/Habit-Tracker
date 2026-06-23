@@ -224,7 +224,7 @@ export default function TodayView({ userId }: Props) {
         {/* Progress ring — mobile (horizontal, compacto) */}
         {totalCount > 0 && (
           <div
-            className="lg:hidden rounded-[20px] p-5 flex items-center gap-5"
+            className="lg:hidden rounded-xl p-5 flex items-center gap-5"
             style={{ background: "var(--surface)" }}
           >
             <ProgressRing percentage={completionPercentage} size={72} />
@@ -245,7 +245,7 @@ export default function TodayView({ userId }: Props) {
         {/* Progress ring — desktop (vertical, anillo grande) */}
         {totalCount > 0 && (
           <div
-            className="hidden lg:flex flex-col items-center text-center rounded-[20px] p-6"
+            className="hidden lg:flex flex-col items-center text-center rounded-xl p-6"
             style={{ background: "var(--surface)" }}
           >
             <ProgressRing percentage={completionPercentage} size={120} />
@@ -264,7 +264,7 @@ export default function TodayView({ userId }: Props) {
         {/* Habit list grouped by time of day */}
         <div className="flex flex-col gap-3 lg:overflow-y-auto lg:pr-0.5 lg:max-h-[min(620px,60vh)]">
           {totalCount === 0 && (
-            <div className="rounded-[20px] p-8 text-center" style={{ background: "var(--surface)" }}>
+            <div className="rounded-xl p-8 text-center" style={{ background: "var(--surface)" }}>
               <p className="text-4xl mb-3">✨</p>
               <p className="font-medium" style={{ color: "var(--text-primary)" }}>{t("no_habits_title")}</p>
               <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{t("no_habits_hint")}</p>
@@ -400,7 +400,7 @@ function HabitRow({
         if (!locked && info.offset.x > 60 && Math.abs(info.velocity.x) > 0) onToggle();
       }}
       onClick={locked ? undefined : onToggle}
-      className="w-full text-left rounded-[16px] p-4 flex items-center gap-4 relative overflow-hidden"
+      className="w-full text-left rounded-lg p-4 flex items-center gap-4 relative overflow-hidden"
       style={{
         background: habit.isCompletedToday ? `${accentColor}28` : "var(--surface)",
         border: `1px solid ${habit.isCompletedToday ? `${accentColor}58` : locked ? "transparent" : `${accentColor}22`}`,
@@ -489,7 +489,7 @@ function HabitRow({
       {onFreeze && (
         <button
           onClick={(e) => { e.stopPropagation(); onFreeze(); }}
-          className="flex-shrink-0 px-2.5 py-1.5 rounded-[10px] text-xs font-medium transition-opacity active:opacity-60"
+          className="flex-shrink-0 px-2.5 py-1.5 rounded-md text-xs font-medium transition-opacity active:opacity-60"
           style={{ background: "rgba(100,160,255,0.12)", color: "#88AAFF" }}
         >
           {freezeLabel}
@@ -540,9 +540,9 @@ function TodayViewSkeleton() {
         <div className="h-4 w-20 rounded-full mb-2" style={{ background: "var(--surface)" }} />
         <div className="h-8 w-48 rounded-full" style={{ background: "var(--surface)" }} />
       </div>
-      <div className="rounded-[20px] h-24 mb-6" style={{ background: "var(--surface)" }} />
+      <div className="rounded-xl h-24 mb-6" style={{ background: "var(--surface)" }} />
       {[1, 2, 3].map((i) => (
-        <div key={i} className="rounded-[16px] h-16 mb-3" style={{ background: "var(--surface)" }} />
+        <div key={i} className="rounded-lg h-16 mb-3" style={{ background: "var(--surface)" }} />
       ))}
     </div>
   );

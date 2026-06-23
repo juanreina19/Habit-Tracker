@@ -14,8 +14,11 @@ export class ToggleTaskUseCase {
         await this.repo.addCompletion(task.id, task.userId, date);
       }
     } else {
-      const completedAt = task.isCompletedToday ? null : new Date().toISOString();
-      await this.repo.update(task.id, { completedAt });
+      if (task.isCompletedToday) {
+        await this.repo.update(task.id, { completedAt: null, status: 'todo' });
+      } else {
+        await this.repo.update(task.id, { completedAt: new Date().toISOString(), status: 'done' });
+      }
     }
   }
 }

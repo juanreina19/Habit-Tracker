@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Star } from "lucide-react";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import { isTaskDone, formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import { PRIORITY_COLORS } from "@/modules/tasks/presentation/constants/taskColors";
@@ -38,7 +38,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
 
   return (
     <div
-      className="group rounded-[14px] p-3 transition-all cursor-pointer"
+      className="group rounded-lg p-3 transition-all cursor-pointer"
       style={{
         background: "var(--surface-elevated)",
         border: overdue ? "1px solid rgba(239,68,68,0.3)" : "1px solid transparent",
@@ -67,6 +67,11 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
           {task.title}
         </span>
 
+        {/* Importance star */}
+        {task.isImportant && (
+          <Star size={12} fill="#F59E0B" stroke="#F59E0B" className="flex-shrink-0" />
+        )}
+
         {/* Priority dot */}
         <span
           className="w-1.5 h-1.5 rounded-full flex-shrink-0"
@@ -88,7 +93,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
           <button
             type="button"
             onClick={onEdit}
-            className="p-1 rounded-[6px] transition-opacity active:opacity-70"
+            className="p-1 rounded-sm transition-opacity active:opacity-70"
             style={{ color: "var(--text-muted)" }}
           >
             <Pencil size={12} />
@@ -96,7 +101,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
           <button
             type="button"
             onClick={onDelete}
-            className="p-1 rounded-[6px] transition-opacity active:opacity-70"
+            className="p-1 rounded-sm transition-opacity active:opacity-70"
             style={{ color: "var(--text-muted)" }}
           >
             <Trash2 size={12} />

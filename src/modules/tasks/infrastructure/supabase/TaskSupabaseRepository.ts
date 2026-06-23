@@ -24,6 +24,8 @@ export class TaskSupabaseRepository implements ITaskRepository {
       completedAt:    row.completed_at,
       createdAt:      row.created_at,
       icon:           row.icon ?? null,
+      isImportant:    row.is_important ?? false,
+      status:         row.status ?? 'todo',
     };
   }
 
@@ -134,6 +136,8 @@ export class TaskSupabaseRepository implements ITaskRepository {
         end_time:        input.endTime ?? null,
         completed_at:    null,
         icon:            input.icon ?? null,
+        is_important:    input.isImportant ?? false,
+        status:          input.status ?? 'todo',
       })
       .select()
       .single();
@@ -154,6 +158,8 @@ export class TaskSupabaseRepository implements ITaskRepository {
     if ("endTime" in input)                    patch.end_time = input.endTime ?? null;
     if ("icon" in input)                       patch.icon = input.icon ?? null;
     if ("categoryId" in input)                patch.category_id = input.categoryId ?? null;
+    if ("isImportant" in input)               patch.is_important = input.isImportant ?? false;
+    if ("status" in input)                    patch.status = input.status ?? 'todo';
 
     const { data, error } = await this.client
       .from("tasks")

@@ -1,0 +1,122 @@
+"use client";
+
+import { useMemo } from "react";
+import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
+import { TaskCardDashboard } from "./TaskCardDashboard";
+import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
+import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
+
+interface Props {
+  tasks: TaskWithStatus[];
+  onToggleTask: (task: TaskWithStatus) => void;
+  onEditTask: (task: TaskWithStatus) => void;
+  onDeleteTask: (task: TaskWithStatus) => void;
+}
+
+interface Quadrant {
+  key: string;
+  i18nKey: string;
+  color: string;
+  borderColor: string;
+  tasks: TaskWithStatus[];
+}
+
+export function EisenhowerTab({ tasks, onToggleTask, onEditTask, onDeleteTask }: Props) {
+  const t = useTranslations("dashboard");
+
+  const quadrants = useMemo<Quadrant[]>(() => {
+    const pending = tasks.filter((t) => !isTaskDone(t));
+
+    const isUrgent = (task: TaskWithStatus) =>
+      task.priority === "urgent" || task.priority === "high";
+
+    return [
+      {
+        key: "do",
+        i18nKey: "eisenhower_do",
+        color: "#ef4444",
+        borderColor: "rgba(239,68,68,0.5)",
+        tasks: pending.filter((t) => isUrgent(t) && t.isImportant),
+      },
+      {
+        key: "schedule",
+        i18nKey: "eisenhower_schedule",
+        color: "#3b82f6",
+        borderColor: "rgba(59,130,246,0.5)",
+        tasks: pending.filter((t) => !isUrgent(t) && t.isImportant),
+      },
+      {
+        key: "delegate",
+        i18nKey: "eisenhower_delegate",
+        color: "#f59e0b",
+        borderColor: "rgba(245,158,11,0.5)",
+        tasks: pending.filter((t) => isUrgent(t) && !t.isImportant),
+      },
+      {
+        key: "eliminate",
+        i18nKey: "eisenhower_eliminate",
+        color: "#888888",
+        borderColor: "rgba(136,136,136,0.4)",
+        tasks: pending.filter((t) => !isUrgent(t) && !t.isImportant),
+      },
+    ];
+  }, [tasks]);
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      {quadrants.map((q, i) => (
+        <motion.div
+          key={q.key}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: i * 0.05 }}
+          className="rounded-lg overflow-hidden"
+          style={{ background: "var(--surface)" }}
+        >
+          <div className="h-[3px]" style={{ background: q.color }} />
+          <div className="p-3">
+            <div className="flex items-center justify-between mb-2.5">
+              <span
+                className="text-xs font-semibold uppercase tracking-wider"
+                style={{ color: q.color }}
+              >
+                {t(q.i18nKey as Parameters<typeof t>[0])}
+              </span>
+              <span
+                className="text-[10px] font-semibold px-1.5 py-0.5 rounded-sm"
+                style={{ background: `${q.color}15`, color: q.color }}
+              >
+                {q.tasks.length}
+              </span>
+            </div>
+
+            <div
+              className="flex flex-col gap-1.5 overflow-y-auto pr-0.5"
+              style={{ maxHeight: "min(280px, 35vh)" }}
+            >
+              {q.tasks.length === 0 ? (
+                <p
+                  className="text-xs text-center py-4"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  —
+                </p>
+              ) : (
+                q.tasks.map((task) => (
+                  <TaskCardDashboard
+                    key={task.id}
+                    task={task}
+                    onToggle={() => onToggleTask(task)}
+                    onEdit={() => onEditTask(task)}
+                    onDelete={() => onDeleteTask(task)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}

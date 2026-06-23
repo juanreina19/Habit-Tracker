@@ -28,12 +28,12 @@ export default function CalendarView({ userId, userCreatedAt }: Props) {
             {t("title")}
           </h1>
         </div>
-        <div className="flex rounded-[12px] p-1" style={{ background: "var(--surface)" }}>
+        <div className="flex rounded-md p-1" style={{ background: "var(--surface)" }}>
           {(["weekly", "monthly"] as Mode[]).map((m) => (
             <button
               key={m}
               onClick={() => setMode(m)}
-              className="px-4 py-2 rounded-[9px] text-sm font-medium transition-all"
+              className="px-4 py-2 rounded-md text-sm font-medium transition-all"
               style={{
                 background: mode === m ? "var(--surface-elevated)" : "transparent",
                 color: mode === m ? "var(--text-primary)" : "var(--text-secondary)",

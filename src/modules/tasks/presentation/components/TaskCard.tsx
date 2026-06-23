@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
-import { Clock, CalendarDays, ListChecks, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Clock, CalendarDays, ListChecks, MoreVertical, Pencil, Trash2, Star } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
@@ -113,7 +113,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
       } : undefined}
       whileTap={!compact ? { scale: 0.98 } : {}}
       transition={{ type: "spring", stiffness: 500, damping: 35 }}
-      className="flex flex-col gap-2 rounded-[16px] p-4 select-none"
+      className="flex flex-col gap-2 rounded-lg p-4 select-none"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -134,6 +134,9 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
           <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
             {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
           </span>
+          {task.isImportant && (
+            <Star size={12} fill="#F59E0B" stroke="#F59E0B" />
+          )}
         </div>
         {isLate && (
           <span
@@ -205,14 +208,14 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
             <DropdownMenu.Content
-              className="z-50 min-w-[148px] rounded-[14px] p-1.5 shadow-xl outline-none"
+              className="z-50 min-w-[148px] rounded-lg p-1.5 shadow-xl outline-none"
               style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
               align="end"
               sideOffset={4}
             >
               {onEdit && (
                 <DropdownMenu.Item
-                  className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-sm cursor-pointer outline-none"
+                  className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm cursor-pointer outline-none"
                   style={{ color: "var(--text-primary)" }}
                   onSelect={onEdit}
                 >
@@ -225,7 +228,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
               )}
               {onDelete && (
                 <DropdownMenu.Item
-                  className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-[10px] text-sm cursor-pointer outline-none"
+                  className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm cursor-pointer outline-none"
                   style={{ color: "#ef4444" }}
                   onSelect={onDelete}
                 >

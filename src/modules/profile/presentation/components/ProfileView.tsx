@@ -75,7 +75,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
 
       {/* Avatar + name */}
       <motion.div
-        className="rounded-[20px] p-6 mb-5 flex items-center gap-4"
+        className="rounded-xl p-6 mb-5 flex items-center gap-4"
         style={{ background: "var(--surface)" }}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -122,7 +122,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
 
       {/* Actions */}
       <motion.div
-        className="rounded-[20px] overflow-hidden mb-4"
+        className="rounded-xl overflow-hidden mb-4"
         style={{ background: "var(--surface)" }}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -141,7 +141,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
       </motion.div>
 
       <motion.div
-        className="rounded-[20px] overflow-hidden"
+        className="rounded-xl overflow-hidden"
         style={{ background: "var(--surface)" }}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -163,14 +163,14 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 py-2.5 rounded-[12px] text-sm font-medium"
+                className="flex-1 py-2.5 rounded-md text-sm font-medium"
                 style={{ background: "var(--border)", color: "var(--text-secondary)" }}
               >
                 Cancelar
               </button>
               <button
                 onClick={handleSignOut}
-                className="flex-1 py-2.5 rounded-[12px] text-sm font-medium"
+                className="flex-1 py-2.5 rounded-md text-sm font-medium"
                 style={{ background: "rgba(255,82,82,0.15)", color: "#FF5252" }}
               >
                 Eliminar
@@ -187,7 +187,7 @@ function StatCard({ label, value, unit, highlight = false }: {
   label: string; value: string; unit: string; highlight?: boolean;
 }) {
   return (
-    <div className="rounded-[16px] p-3 flex flex-col gap-1" style={{ background: "var(--surface)" }}>
+    <div className="rounded-lg p-3 flex flex-col gap-1" style={{ background: "var(--surface)" }}>
       <p className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>{label}</p>
       <p className="text-xl font-bold leading-none" style={{ color: highlight ? "var(--accent)" : "var(--text-primary)" }}>
         {value}

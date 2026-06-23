@@ -48,7 +48,7 @@ function NumberField({
           max={max}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-[12px] px-3 py-3 text-sm outline-none"
+          className="w-full rounded-md px-3 py-3 text-sm outline-none"
           style={{
             background: "var(--surface-elevated)",
             color: "var(--text-primary)",
@@ -93,7 +93,7 @@ function InfoTooltip({ text }: { text: string }) {
       </button>
       {open && (
         <span
-          className="absolute z-10 left-1/2 -translate-x-1/2 top-full mt-2 w-48 rounded-[10px] p-2 text-center text-xs font-normal normal-case shadow-lg"
+          className="absolute z-10 left-1/2 -translate-x-1/2 top-full mt-2 w-48 rounded-md p-2 text-center text-xs font-normal normal-case shadow-lg"
           style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
         >
           {text}
@@ -162,7 +162,7 @@ export function FocusModeSettingsDialog({ open, onClose, session, onSave }: Prop
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-[120] left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-[24px] outline-none overflow-hidden"
+          className="fixed z-[120] left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
           style={{ background: "var(--surface)", maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto p-6 flex flex-col gap-4" style={{ maxHeight: "90dvh" }}>
@@ -248,14 +248,14 @@ export function FocusModeSettingsDialog({ open, onClose, session, onSave }: Prop
             <div className="flex gap-3 mt-1">
               <button
                 onClick={onClose}
-                className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
+                className="flex-1 py-3 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
                 style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
               >
                 {t("cancel")}
               </button>
               <button
                 onClick={handleSave}
-                className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70"
+                className="flex-1 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70"
                 style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
               >
                 {t("save")}

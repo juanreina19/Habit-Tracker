@@ -4,22 +4,39 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Bell, BellOff, User, Sun, Moon, Languages } from "lucide-react";
+import { Bell, BellOff, User, Sun, Moon, Languages, BarChart2 } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 import { useLocale, type Locale } from "@/shared/i18n/useLocale";
 import { useBrowserNotifications } from "@/shared/hooks/useBrowserNotifications";
 import { createClient } from "@/shared/lib/supabase/client";
+import StatsView from "../StatsView";
 import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
   userId: UUID;
 }
 
-export default function SettingsView({ userId: _userId }: Props) {
+export default function SettingsView({ userId }: Props) {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const { locale, setLocale } = useLocale();
   const t = useTranslations("settings");
+  const [showStats, setShowStats] = useState(false);
+
+  if (showStats) {
+    return (
+      <div className="px-5 pt-14 pb-8 lg:pt-8 lg:px-10">
+        <button
+          onClick={() => setShowStats(false)}
+          className="text-sm font-medium mb-4 flex items-center gap-1"
+          style={{ color: "var(--accent)" }}
+        >
+          ← {t("title")}
+        </button>
+        <StatsView userId={userId} userCreatedAt={new Date().toISOString()} />
+      </div>
+    );
+  }
 
   return (
     <div className="px-5 pt-14 pb-8 lg:pt-8 lg:px-10">
@@ -44,6 +61,40 @@ export default function SettingsView({ userId: _userId }: Props) {
         </div>
       </div>
 
+      {/* Statistics */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      >
+        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
+          {t("statistics") || "Statistics"}
+        </p>
+        <button
+          onClick={() => setShowStats(true)}
+          className="w-full rounded-xl overflow-hidden mb-8 text-left transition-opacity active:opacity-70"
+          style={{ background: "var(--surface)" }}
+        >
+          <div className="px-5 py-4 flex items-center gap-4">
+            <div
+              className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"
+              style={{ background: "rgba(76,207,130,0.15)" }}
+            >
+              <BarChart2 size={18} color="#4CAF82" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>
+                {t("view_statistics") || "View Statistics"}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                {t("statistics_desc") || "Streaks, completion rates, achievements"}
+              </p>
+            </div>
+            <span style={{ color: "var(--text-secondary)", fontSize: 18 }}>→</span>
+          </div>
+        </button>
+      </motion.div>
+
       {/* Notifications */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -63,7 +114,7 @@ export default function SettingsView({ userId: _userId }: Props) {
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("language")}
         </p>
-        <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--surface)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)" }}>
           {(["es", "en"] as Locale[]).map((l, idx) => (
             <div key={l}>
               {idx > 0 && <div style={{ height: 1, background: "var(--border)" }} />}
@@ -72,7 +123,7 @@ export default function SettingsView({ userId: _userId }: Props) {
                 className="w-full px-5 py-4 flex items-center gap-4 transition-opacity active:opacity-60"
               >
                 <div
-                  className="w-8 h-8 rounded-[10px] flex items-center justify-center flex-shrink-0"
+                  className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
                   style={{ background: locale === l ? "rgba(76,207,130,0.15)" : "var(--surface-elevated)" }}
                 >
                   <Languages size={16} color={locale === l ? "#4CAF82" : "var(--text-muted)"} />
@@ -101,7 +152,7 @@ export default function SettingsView({ userId: _userId }: Props) {
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("account")}
         </p>
-        <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--surface)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)" }}>
           <button
             onClick={() => router.push("/profile")}
             className="w-full px-5 py-4 flex items-center justify-between transition-opacity active:opacity-60"
@@ -159,10 +210,10 @@ function NotificationsSection() {
       <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
         {t("notifications")}
       </p>
-      <div className="rounded-[20px] overflow-hidden" style={{ background: "var(--surface)" }}>
+      <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)" }}>
         <div className="flex items-center gap-4 p-4">
           <div
-            className="w-9 h-9 rounded-[10px] flex items-center justify-center flex-shrink-0"
+            className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"
             style={{ background: isEnabled ? "rgba(76,207,130,0.15)" : "var(--surface-elevated)" }}
           >
             {isEnabled
@@ -212,7 +263,7 @@ function NotificationsSection() {
               type="time"
               value={reminderTime}
               onChange={(e) => setReminderTime(e.target.value)}
-              className="rounded-[10px] px-3 py-1.5 text-sm font-medium outline-none"
+              className="rounded-md px-3 py-1.5 text-sm font-medium outline-none"
               style={{
                 background: "var(--surface-elevated)",
                 color: "var(--text-primary)",

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
-import { Plus, Trash2, ChevronRight } from "lucide-react";
+import { Plus, Trash2, ChevronRight, Star } from "lucide-react";
 import { formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
 import type { Task, CreateTaskInput, UpdateTaskInput, TaskPriority } from "../../domain/entities/Task";
@@ -55,6 +55,7 @@ export function TaskFormDialog({
   const [endTime, setEndTime]         = useState("");
   const [timeError, setTimeError]     = useState("");
 
+  const [isImportant, setIsImportant]  = useState(false);
   const [categoryId, setCategoryId]   = useState<string | null>(null);
   const [icon, setIcon]               = useState<string | null>(null);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
@@ -85,6 +86,7 @@ export function TaskFormDialog({
       setStartTime(task?.startTime ? formatTaskTime(task.startTime) : "");
       setEndTime(task?.endTime ? formatTaskTime(task.endTime) : "");
 
+      setIsImportant(task?.isImportant ?? false);
       setCategoryId(task?.categoryId ?? null);
       setIcon(task?.icon ?? null);
 
@@ -127,6 +129,7 @@ export function TaskFormDialog({
         startTime:       hasSchedule && startTime ? startTime : null,
         endTime:         hasSchedule && startTime && endTime ? endTime : null,
         icon:            icon ?? null,
+        isImportant,
       } as const;
 
       if (isEdit && task) {
@@ -142,6 +145,7 @@ export function TaskFormDialog({
           startTime:       input.startTime ?? undefined,
           endTime:         input.endTime ?? undefined,
           icon:            input.icon ?? undefined,
+          isImportant:     input.isImportant,
         });
       }
       onClose();
@@ -171,11 +175,11 @@ export function TaskFormDialog({
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-[24px] outline-none overflow-hidden"
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
           style={{ background: "var(--surface)", maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto p-6" style={{ maxHeight: "90dvh" }}>
-            <Dialog.Title className="text-lg font-semibold mb-5" style={{ color: "var(--text-primary)" }}>
+            <Dialog.Title className="sr-only">
               {isEdit ? t("edit_title") : t("new_title")}
             </Dialog.Title>
 
@@ -194,7 +198,7 @@ export function TaskFormDialog({
                   <div className="flex gap-3">
                     <button
                       onClick={onClose}
-                      className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
+                      className="flex-1 py-3 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
                       style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
                     >
                       {t("delete_cancel")}
@@ -202,7 +206,7 @@ export function TaskFormDialog({
                     <button
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                      className="flex-1 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
                       style={{ background: "#ef4444", color: "#ffffff" }}
                     >
                       {isDeleting ? "…" : t("delete_confirm_btn")}
@@ -217,90 +221,76 @@ export function TaskFormDialog({
                   exit={{ opacity: 0 }}
                   className="flex flex-col gap-5"
                 >
-                  {/* Title */}
+                  {/* Title — large, inline-editable feel */}
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                      {t("title_label")}
-                    </label>
                     <input
                       type="text"
                       value={title}
                       onChange={(e) => { setTitle(e.target.value); setTitleError(""); }}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !isEdit && title.trim()) { e.preventDefault(); handleSave(); } }}
                       placeholder={t("title_placeholder")}
                       autoFocus
-                      className="w-full rounded-[12px] px-3 py-3 text-sm outline-none"
+                      className="w-full text-2xl font-semibold outline-none bg-transparent"
                       style={{
-                        background: "var(--surface-elevated)",
                         color: "var(--text-primary)",
-                        border: `1.5px solid ${titleError ? "#ef4444" : "transparent"}`,
+                        borderBottom: titleError ? "2px solid #ef4444" : "none",
                       }}
                     />
                     {titleError && <p className="text-xs mt-1" style={{ color: "#ef4444" }}>{titleError}</p>}
                   </div>
 
-                  {/* Description */}
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                      {t("description_label")}
-                    </label>
-                    <textarea
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder={t("description_placeholder")}
-                      rows={2}
-                      className="w-full rounded-[12px] px-3 py-3 text-sm outline-none resize-none"
-                      style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
-                    />
-                  </div>
+                  {/* Description — open notes area */}
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder={t("description_placeholder")}
+                    rows={2}
+                    className="w-full text-sm outline-none resize-none bg-transparent"
+                    style={{ color: "var(--text-secondary)" }}
+                  />
 
-                  {/* Priority */}
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                      {t("priority_label")}
-                    </label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {PRIORITIES.map((p) => (
-                        <button
-                          key={p}
-                          type="button"
-                          onClick={() => setPriority(p)}
-                          className="py-2.5 rounded-[12px] text-xs font-semibold transition-all"
-                          style={{
-                            background: priority === p ? PRIORITY_COLORS[p] + "1A" : "var(--surface-elevated)",
-                            color:      priority === p ? PRIORITY_COLORS[p] : "var(--text-secondary)",
-                            border:     `1.5px solid ${priority === p ? PRIORITY_COLORS[p] : "transparent"}`,
-                          }}
-                        >
-                          {t(`priority_${p}` as `priority_${TaskPriority}`)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {/* Metadata pills row */}
+                  <div className="flex flex-wrap gap-2 py-1" style={{ borderTop: "1px solid var(--border)" }}>
+                    {/* Priority pills */}
+                    {PRIORITIES.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => setPriority(p)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                        style={{
+                          background: priority === p ? PRIORITY_COLORS[p] + "1A" : "var(--surface-elevated)",
+                          color:      priority === p ? PRIORITY_COLORS[p] : "var(--text-secondary)",
+                        }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[p] }} />
+                        {t(`priority_${p}` as `priority_${TaskPriority}`)}
+                      </button>
+                    ))}
 
-                  {/* Categoría */}
-                  {categories.length > 0 && (
-                    <div>
-                      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                        {t("category_label")}
-                      </label>
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setCategoryId(null)}
-                          className="px-3 py-2 rounded-[10px] text-xs font-medium transition-all"
-                          style={{
-                            background: categoryId === null ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                            color:      categoryId === null ? "var(--btn-primary-text)" : "var(--text-secondary)",
-                          }}
-                        >
-                          {t("no_category")}
-                        </button>
+                    {/* Importance pill */}
+                    <button
+                      type="button"
+                      onClick={() => setIsImportant((p) => !p)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                      style={{
+                        background: isImportant ? "rgba(245,158,11,0.12)" : "var(--surface-elevated)",
+                        color: isImportant ? "#F59E0B" : "var(--text-secondary)",
+                      }}
+                    >
+                      <Star size={12} fill={isImportant ? "#F59E0B" : "none"} strokeWidth={isImportant ? 0 : 1.5} />
+                      {isImportant ? t("important") : t("mark_important")}
+                    </button>
+
+                    {/* Category pills */}
+                    {categories.length > 0 && (
+                      <>
                         {categories.map((cat) => (
                           <button
                             key={cat.id}
                             type="button"
-                            onClick={() => setCategoryId(cat.id)}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-xs font-medium transition-all"
+                            onClick={() => setCategoryId(categoryId === cat.id ? null : cat.id)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
                             style={{
                               background: categoryId === cat.id
                                 ? (cat.color ? cat.color + "1A" : "var(--btn-primary-bg)")
@@ -308,18 +298,17 @@ export function TaskFormDialog({
                               color: categoryId === cat.id
                                 ? (cat.color ?? "var(--btn-primary-text)")
                                 : "var(--text-secondary)",
-                              border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "var(--text-primary)") : "transparent"}`,
                             }}
                           >
                             {cat.color && (
-                              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: cat.color }} />
+                              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: cat.color }} />
                             )}
                             {cat.name}
                           </button>
                         ))}
-                      </div>
-                    </div>
-                  )}
+                      </>
+                    )}
+                  </div>
 
                   {/* Recurrencia */}
                   <div>
@@ -330,7 +319,7 @@ export function TaskFormDialog({
                       <button
                         type="button"
                         onClick={() => setIsRecurring(false)}
-                        className="py-2.5 rounded-[12px] text-sm font-medium transition-all"
+                        className="py-2.5 rounded-md text-sm font-medium transition-all"
                         style={{
                           background: !isRecurring ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
                           color:      !isRecurring ? "var(--btn-primary-text)" : "var(--text-secondary)",
@@ -341,7 +330,7 @@ export function TaskFormDialog({
                       <button
                         type="button"
                         onClick={() => setIsRecurring(true)}
-                        className="py-2.5 rounded-[12px] text-sm font-medium transition-all"
+                        className="py-2.5 rounded-md text-sm font-medium transition-all"
                         style={{
                           background: isRecurring ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
                           color:      isRecurring ? "var(--btn-primary-text)" : "var(--text-secondary)",
@@ -367,7 +356,7 @@ export function TaskFormDialog({
                                   key={day}
                                   type="button"
                                   onClick={() => toggleDay(day)}
-                                  className="flex-1 py-2.5 rounded-[10px] text-xs font-semibold transition-all duration-200 active:scale-95 hover:brightness-110"
+                                  className="flex-1 py-2.5 rounded-md text-xs font-semibold transition-all duration-200 active:scale-95 hover:brightness-110"
                                   style={{
                                     background: on ? "var(--accent)" : "var(--surface-elevated)",
                                     color:      on ? "#ffffff" : "var(--text-secondary)",
@@ -403,7 +392,7 @@ export function TaskFormDialog({
                           value={dueDate}
                           min={today()}
                           onChange={(e) => setDueDate(e.target.value)}
-                          className="w-full rounded-[12px] px-3 py-3 text-sm outline-none"
+                          className="w-full rounded-md px-3 py-3 text-sm outline-none"
                           style={{
                             background: "var(--surface-elevated)",
                             color: dueDate ? "var(--text-primary)" : "var(--text-muted)",
@@ -452,7 +441,7 @@ export function TaskFormDialog({
                                 type="time"
                                 value={startTime}
                                 onChange={(e) => { setStartTime(e.target.value); setTimeError(""); }}
-                                className="w-full rounded-[12px] px-3 py-3 text-sm outline-none"
+                                className="w-full rounded-md px-3 py-3 text-sm outline-none"
                                 style={{
                                   background: "var(--surface-elevated)",
                                   color: "var(--text-primary)",
@@ -470,7 +459,7 @@ export function TaskFormDialog({
                                 type="time"
                                 value={endTime}
                                 onChange={(e) => { setEndTime(e.target.value); setTimeError(""); }}
-                                className="w-full rounded-[12px] px-3 py-3 text-sm outline-none"
+                                className="w-full rounded-md px-3 py-3 text-sm outline-none"
                                 style={{
                                   background: "var(--surface-elevated)",
                                   color: "var(--text-primary)",
@@ -495,12 +484,12 @@ export function TaskFormDialog({
                     <button
                       type="button"
                       onClick={() => setIconPickerOpen(true)}
-                      className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
+                      className="w-full flex items-center justify-between px-4 py-4 rounded-lg transition-opacity active:opacity-70"
                       style={{ background: "var(--surface-elevated)" }}
                     >
                       <div className="flex items-center gap-3">
                         <div
-                          className="w-9 h-9 rounded-[12px] flex items-center justify-center flex-shrink-0"
+                          className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"
                           style={{ background: "var(--border)" }}
                         >
                           {icon ? (
@@ -529,9 +518,35 @@ export function TaskFormDialog({
 
                   {/* Subtareas */}
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                      {t("subtasks_label")}
-                    </label>
+                    {isEdit && subtasks.length > 0 && (
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+                          {t("subtasks_label")}
+                        </span>
+                        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                          {subtasks.filter(s => s.isCompleted).length}/{subtasks.length}
+                        </span>
+                        <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{
+                              width: `${(subtasks.filter(s => s.isCompleted).length / subtasks.length) * 100}%`,
+                              background: "var(--accent)",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {isEdit && subtasks.length === 0 && (
+                      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                        {t("subtasks_label")}
+                      </label>
+                    )}
+                    {!isEdit && (
+                      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                        {t("subtasks_label")}
+                      </label>
+                    )}
                     {isEdit ? (
                       <div className="flex flex-col gap-2">
                         {subtasks.map((s) => (
@@ -555,7 +570,7 @@ export function TaskFormDialog({
                               type="button"
                               onClick={() => deleteSubtask(s.id)}
                               aria-label={t("delete_subtask")}
-                              className="p-1.5 rounded-[8px] transition-opacity active:opacity-70"
+                              className="p-1.5 rounded-sm transition-opacity active:opacity-70"
                               style={{ color: "var(--text-muted)" }}
                             >
                               <Trash2 size={16} />
@@ -583,7 +598,7 @@ export function TaskFormDialog({
                               }
                             }}
                             placeholder={t("subtask_placeholder")}
-                            className="flex-1 rounded-[12px] px-3 py-2.5 text-sm outline-none"
+                            className="flex-1 rounded-md px-3 py-2.5 text-sm outline-none"
                             style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
                           />
                           <button
@@ -596,7 +611,7 @@ export function TaskFormDialog({
                               }
                             }}
                             aria-label={t("add_subtask")}
-                            className="w-9 h-9 rounded-[10px] flex items-center justify-center transition-opacity active:opacity-70"
+                            className="w-9 h-9 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
                             style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
                           >
                             <Plus size={18} />
@@ -611,22 +626,40 @@ export function TaskFormDialog({
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-3 mt-1">
-                    <button
-                      onClick={onClose}
-                      className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
-                      style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-                    >
-                      {t("cancel")}
-                    </button>
-                    <button
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
-                      style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-                    >
-                      {isSaving ? t("saving") : t("save")}
-                    </button>
+                  <div className="flex items-center gap-3 mt-1 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
+                    {!isEdit && (
+                      <p className="flex-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                        Press <strong>Enter</strong> to create
+                      </p>
+                    )}
+                    {isEdit && (
+                      <button
+                        onClick={() => setConfirmDelete(true)}
+                        className="p-2.5 rounded-lg transition-opacity active:opacity-70"
+                        style={{ color: "var(--danger)" }}
+                        aria-label={t("delete")}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+                    <div className="flex gap-2 ml-auto">
+                      <button
+                        onClick={onClose}
+                        className="px-4 py-2.5 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
+                        style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
+                      >
+                        {t("cancel")}
+                      </button>
+                      <button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                        style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+                      >
+                        {isSaving ? t("saving") : isEdit ? t("save") : t("add_task")}
+                        {!isEdit && <span>→</span>}
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               )}

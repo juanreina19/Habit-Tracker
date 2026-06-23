@@ -110,7 +110,7 @@ export function WeekTab({ userId, tasks }: Props) {
       {isLoading || !data ? (
         <WeekSkeleton />
       ) : data.entries.length === 0 ? (
-        <div className="rounded-[16px] py-10 text-center text-sm" style={{ background: "var(--surface)", color: "var(--text-secondary)" }}>
+        <div className="rounded-lg py-10 text-center text-sm" style={{ background: "var(--surface)", color: "var(--text-secondary)" }}>
           {t("week_empty")}
         </div>
       ) : (
@@ -124,7 +124,7 @@ export function WeekTab({ userId, tasks }: Props) {
               return (
                 <div key={iso} className="flex flex-col gap-2.5 min-w-0">
                   <div
-                    className="flex items-center justify-center rounded-[10px] py-2"
+                    className="flex items-center justify-center rounded-md py-2"
                     style={{ background: isToday ? "var(--accent)" : "var(--surface)" }}
                   >
                     <span
@@ -139,7 +139,7 @@ export function WeekTab({ userId, tasks }: Props) {
                       vacío (mismo patrón que Google/Notion Calendar para semanas). */}
                   <div className="flex flex-col gap-2 overflow-y-auto pr-0.5" style={{ maxHeight: "min(620px, 60vh)" }}>
                     {dayEntries.length === 0 ? (
-                      <div className="rounded-[12px] py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
+                      <div className="rounded-md py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
                         —
                       </div>
                     ) : (
@@ -177,7 +177,7 @@ export function WeekTab({ userId, tasks }: Props) {
                   </div>
                   <div className="flex flex-col gap-2">
                     {dayEntries.length === 0 ? (
-                      <div className="rounded-[16px] py-8 text-center text-sm" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
+                      <div className="rounded-lg py-8 text-center text-sm" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
                         —
                       </div>
                     ) : (
@@ -226,7 +226,7 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
       // fila 1 sola ≈ 24px padding + 28px (botón ojo, w-7/h-7) = 52px; fila 1 + fila 2
       // (horario) ≈ 52px + 6px gap + 16px (text-xs/Clock) = 74px. 76px deja que la
       // variante de 1 fila crezca hasta igualar visualmente a la de 2 filas.
-      className="flex flex-col gap-1.5 rounded-[14px] px-3.5 py-3 min-h-[76px] justify-center"
+      className="flex flex-col gap-1.5 rounded-lg px-3.5 py-3 min-h-[76px] justify-center"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -302,7 +302,7 @@ function WeekSkeleton() {
       {[1, 2, 3, 4, 5, 6, 7].map((i) => (
         <div key={i} className="flex flex-col gap-2">
           <div className="h-5 w-10 rounded animate-pulse" style={{ background: "var(--surface)" }} />
-          <div className="h-16 rounded-[12px] animate-pulse" style={{ background: "var(--surface)" }} />
+          <div className="h-16 rounded-md animate-pulse" style={{ background: "var(--surface)" }} />
         </div>
       ))}
     </div>

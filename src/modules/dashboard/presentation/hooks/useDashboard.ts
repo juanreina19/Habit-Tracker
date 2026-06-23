@@ -8,7 +8,7 @@ import { useHabits } from "@/modules/habits/presentation/hooks/useHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { useFocusMode } from "@/modules/tasks/presentation/hooks/useFocusMode";
 import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
-import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
+import type { TaskWithStatus, TaskStatus } from "@/modules/tasks/domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 
 export function useDashboard(userId: UUID) {
@@ -39,11 +39,17 @@ export function useDashboard(userId: UUID) {
     return { overdue, tasksByCategory, uncategorized };
   }, [tasks, categories, todayStr]);
 
+  const updateTaskStatus = (taskId: UUID, status: TaskStatus) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (task) updateTask(task, { status });
+  };
+
   return {
     ...derived,
     categories,
     habits,
     todayTasks,
+    tasks,
     focusMode,
     isLoading: tasksLoading || categoriesLoading,
     habitsProgress: { completed: completedCount, total: totalCount },
@@ -54,5 +60,6 @@ export function useDashboard(userId: UUID) {
     createTask,
     updateTask,
     deleteTask,
+    updateTaskStatus,
   };
 }

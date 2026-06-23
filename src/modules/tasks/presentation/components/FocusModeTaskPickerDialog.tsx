@@ -51,7 +51,7 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-[24px] outline-none overflow-hidden"
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
           style={{ background: "var(--surface)", maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto p-6 flex flex-col gap-4" style={{ maxHeight: "90dvh" }}>
@@ -89,7 +89,7 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
                       key={task.id}
                       type="button"
                       onClick={() => toggle(task.id)}
-                      className="flex items-center gap-3 rounded-[16px] p-4 text-left transition-opacity active:opacity-70"
+                      className="flex items-center gap-3 rounded-lg p-4 text-left transition-opacity active:opacity-70"
                       style={{
                         background: "var(--surface-elevated)",
                         border: `1.5px solid ${checked ? "var(--accent)" : "transparent"}`,
@@ -122,7 +122,7 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
 
             <button
               onClick={handleStart}
-              className="w-full py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 flex items-center justify-center gap-2"
               style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
             >
               <Zap size={16} fill="currentColor" />

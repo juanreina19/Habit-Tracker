@@ -1,6 +1,7 @@
 import type { UUID, ISODate, ISOTimestamp } from "@/shared/types/database.types";
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type TaskStatus = 'todo' | 'in_progress' | 'done';
 
 export interface Task {
   id:             UUID;
@@ -16,6 +17,8 @@ export interface Task {
   completedAt:    ISOTimestamp | null;  // solo para tareas únicas
   createdAt:      ISOTimestamp;
   icon:           string | null;     // "lucide:Name"; null = sin icono
+  isImportant:    boolean;
+  status:         TaskStatus;
 }
 
 /** Read model enriquecido para presentación y queries. */
@@ -60,6 +63,8 @@ export interface CreateTaskInput {
   startTime?:      string;         // "HH:MM"
   endTime?:        string;         // "HH:MM"
   icon?:           string | null;  // "lucide:Name"
+  isImportant?:    boolean;
+  status?:         TaskStatus;
 }
 
 export interface UpdateTaskInput {
@@ -73,4 +78,6 @@ export interface UpdateTaskInput {
   endTime?:        string | null;
   completedAt?:    ISOTimestamp | null;  // gestionado exclusivamente por ToggleTaskUseCase
   icon?:           string | null;        // "lucide:Name"
+  isImportant?:    boolean;
+  status?:         TaskStatus;
 }

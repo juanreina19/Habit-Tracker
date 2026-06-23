@@ -45,7 +45,7 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
         <button
           type="button"
           onClick={() => router.push("/habits")}
-          className="w-6 h-6 rounded-[8px] flex items-center justify-center transition-opacity active:opacity-70"
+          className="w-6 h-6 rounded-sm flex items-center justify-center transition-opacity active:opacity-70"
           style={{ color: "var(--text-muted)" }}
           aria-label={t("manage_habits")}
         >
@@ -54,7 +54,7 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
       }
     >
       {todayHabits.length === 0 ? (
-        <div className="rounded-[12px] py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
+        <div className="rounded-md py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
           —
         </div>
       ) : (
@@ -69,7 +69,7 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
               key={habit.id}
               type="button"
               onClick={() => done ? onUncheck(habit.id) : onComplete(habit.id)}
-              className="flex items-center gap-2.5 rounded-[14px] p-3 text-left transition-opacity active:opacity-70 w-full"
+              className="flex items-center gap-2.5 rounded-lg p-3 text-left transition-opacity active:opacity-70 w-full"
               style={{ background: "var(--surface-elevated)" }}
             >
               {/* Checkbox */}
