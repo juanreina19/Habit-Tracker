@@ -1,12 +1,11 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "today": "Today",
-    "calendar": "Calendar",
-    "tasks": "Tasks",
+    "home": "Home",
+    "planner": "Planner",
     "habits": "Habits",
-    "stats": "Stats",
-    "settings": "Settings"
+    "studies": "Studies",
+    "settings": "Settings",
+    "quick_add": "Quick add"
   },
   "today": {
     "date_prefix": "Today, ",
@@ -109,7 +108,10 @@
     "my_profile": "My profile",
     "sign_out": "Sign out",
     "signing_out": "Signing out…",
-    "language": "Language"
+    "language": "Language",
+    "statistics": "Statistics",
+    "view_statistics": "View Statistics",
+    "statistics_desc": "Streaks, completion rates, achievements"
   },
   "stats": {
     "title": "Statistics",
@@ -149,7 +151,8 @@
     "delete_category_title": "Delete category?",
     "delete_confirm": "Are you sure? \"{name}\" will be deleted.",
     "delete_cancel": "Cancel",
-    "delete_confirm_btn": "Delete"
+    "delete_confirm_btn": "Delete",
+    "tab_history": "History"
   },
   "tasks": {
     "title": "Tasks",
@@ -170,12 +173,13 @@
     "title_placeholder": "What needs to be done?",
     "title_error": "Title is required",
     "description_label": "Description",
-    "description_placeholder": "Optional details",
+    "description_placeholder": "Details, links or notes (optional)...",
     "priority_label": "Priority",
     "due_date_label": "Due date",
     "cancel": "Cancel",
     "save": "Save",
     "saving": "Saving…",
+    "add_task": "Add Task",
     "delete": "Delete task",
     "delete_confirm": "Delete this task? This action cannot be undone.",
     "delete_confirm_btn": "Delete",
@@ -230,7 +234,9 @@
     "subtask_placeholder": "New subtask",
     "subtasks_empty": "No subtasks",
     "delete_subtask": "Delete subtask",
-    "subtasks_hint_new_task": "You'll be able to add subtasks after saving the task."
+    "subtasks_hint_new_task": "You'll be able to add subtasks after saving the task.",
+    "important": "Important",
+    "mark_important": "Mark as important"
   },
   "calendar": {
     "subtitle": "View",
@@ -313,6 +319,75 @@
     "streak": "Streak",
     "done": "Done",
     "collapse": "Collapse",
-    "expand": "Expand"
+    "expand": "Expand",
+    "motivational_summary": "You have {habits} habits and {tasks} tasks for today",
+    "tab_focus": "Focus",
+    "tab_board": "Board",
+    "tab_eisenhower": "Eisenhower",
+    "tab_kanban": "Kanban",
+    "eisenhower_do": "Do First",
+    "eisenhower_schedule": "Schedule",
+    "eisenhower_delegate": "Delegate",
+    "eisenhower_eliminate": "Eliminate",
+    "kanban_todo": "To Do",
+    "kanban_in_progress": "In Progress",
+    "kanban_done": "Done",
+    "agenda": "Agenda",
+    "urgency": "Urgency",
+    "overdue_tasks": "Overdue",
+    "add_task_placeholder": "Add task...",
+    "coming_soon": "Coming soon",
+    "no_urgent": "No urgent tasks"
+  },
+  "quickAdd": {
+    "new_task": "New task",
+    "new_habit": "New habit"
+  },
+  "planner": {
+    "title": "Planner",
+    "subtitle": "Organize your day by assigning times to your tasks",
+    "pending": "Pending",
+    "no_pending": "All tasks scheduled!",
+    "drop_hint": "Drag tasks here to schedule",
+    "today": "Today",
+    "new_task": "New task",
+    "assign_time": "Assign time",
+    "unschedule": "Remove time",
+    "scheduled": "Scheduled",
+    "no_tasks": "No tasks for this day"
+  },
+  "studies": {
+    "title": "Studies",
+    "subtitle": "A subject hub to track topics, sessions and consistency.",
+    "add_subject": "New subject",
+    "edit_subject": "Edit subject",
+    "subject_name": "Subject name",
+    "subject_name_placeholder": "E.g. Mathematics",
+    "add_topic": "New topic",
+    "edit_topic": "Edit topic",
+    "topic_title": "Topic title",
+    "log_session": "Log session",
+    "duration_min": "Duration (min)",
+    "select_subject": "Select subject",
+    "select_topic": "Select topic (optional)",
+    "stats_hours": "Hours",
+    "stats_sessions": "Sessions",
+    "stats_streak": "Streak",
+    "stats_monthly": "Monthly frequency",
+    "recent_sessions": "Recent sessions",
+    "no_subjects": "No subjects yet",
+    "no_subjects_hint": "Create your first subject to start tracking study sessions.",
+    "no_sessions": "No logged sessions yet.",
+    "delete_subject_confirm": "Delete this subject and all its topics?",
+    "delete_topic_confirm": "Delete this topic?",
+    "schedule": "Schedule",
+    "subjects": "Subjects",
+    "no_study_today": "No study on this day",
+    "activity": "Activity",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving…",
+    "delete": "Delete",
+    "coming_soon": "Coming soon"
   }
 }

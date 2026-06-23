@@ -4,16 +4,14 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { LayoutDashboard, Sun, CalendarRange, ListTodo, BarChart2, Settings2 } from "lucide-react";
+import { Home, CalendarRange, Sparkles, Settings2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils/cn";
 
 const NAV_ROUTES = [
-  { href: "/",         key: "dashboard", Icon: LayoutDashboard },
-  { href: "/today",    key: "today",     Icon: Sun },
-  { href: "/calendar", key: "calendar",  Icon: CalendarRange },
-  { href: "/tasks",    key: "tasks",     Icon: ListTodo },
-  { href: "/stats",    key: "stats",     Icon: BarChart2 },
-  { href: "/settings", key: "settings",  Icon: Settings2 },
+  { href: "/",         key: "home",     Icon: Home },
+  { href: "/planner",  key: "planner",  Icon: CalendarRange },
+  { href: "/habits",   key: "habits",   Icon: Sparkles },
+  { href: "/settings", key: "settings", Icon: Settings2 },
 ];
 
 export default function BottomNav() {
@@ -46,13 +44,13 @@ export default function BottomNav() {
     >
       <div className="flex items-center justify-around px-2 py-2.5">
         {NAV_ROUTES.map(({ href, key, Icon }) => {
-          const isActive = href === "/" ? pathname === "/" : pathname === href;
+          const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-[16px] transition-all min-w-[52px]",
+                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all min-w-[52px]",
                 isActive ? "opacity-100" : "opacity-35 active:opacity-60"
               )}
             >

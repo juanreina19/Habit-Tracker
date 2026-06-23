@@ -263,7 +263,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
                   return (
                     <div
                       key={task.id}
-                      className="flex items-center gap-3 rounded-[16px] p-4"
+                      className="flex items-center gap-3 rounded-lg p-4"
                       style={{ background: "var(--surface-elevated)" }}
                     >
                       <TaskCheckbox

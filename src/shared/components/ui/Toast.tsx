@@ -59,7 +59,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             open={toast.open}
             onOpenChange={(open) => { if (!open) dismiss(toast.id); }}
             duration={toast.duration ?? 3000}
-            className="flex items-center gap-3 px-4 py-3 rounded-[16px] shadow-lg"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg"
             style={{
               background: "#1C1C1C",
               border: "1px solid rgba(255,255,255,0.08)",
@@ -82,7 +82,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   toast.onAction?.();
                   dismiss(toast.id);
                 }}
-                className="text-sm font-semibold px-3 py-1 rounded-[10px] transition-opacity active:opacity-70 flex-shrink-0"
+                className="text-sm font-semibold px-3 py-1 rounded-md transition-opacity active:opacity-70 flex-shrink-0"
                 style={{ color: "#4CAF82", background: "rgba(76,207,130,0.12)" }}
               >
                 {toast.actionLabel}

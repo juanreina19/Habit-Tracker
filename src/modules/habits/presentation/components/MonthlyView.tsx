@@ -92,7 +92,7 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
         /* Summary banner — shown when no day is selected */
         !isLoading && data && (
           <div
-            className="rounded-[20px] px-5 py-4 mb-5 flex items-center justify-between"
+            className="rounded-xl px-5 py-4 mb-5 flex items-center justify-between"
             style={{ background: "var(--surface)" }}
           >
             <div>
@@ -186,7 +186,7 @@ function CalendarGrid({
   }
 
   return (
-    <div className="rounded-[20px] p-4" style={{ background: "var(--surface)" }}>
+    <div className="rounded-xl p-4" style={{ background: "var(--surface)" }}>
       {/* Day-of-week labels */}
       <div className="grid grid-cols-7 mb-2">
         {weekDays.map((d, i) => (
@@ -262,7 +262,7 @@ function DayCell({ day, userCreatedAt, isSelected, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="aspect-square rounded-[10px] flex flex-col items-center justify-center relative active:scale-95 transition-transform"
+      className="aspect-square rounded-md flex flex-col items-center justify-center relative active:scale-95 transition-transform"
       style={{
         background: bg,
         outline: isSelected
@@ -314,7 +314,7 @@ function DayDetail({ day, userCreatedAt, onClose, t, dateFnsLocale }: {
 
   return (
     <div
-      className="rounded-[20px] px-5 py-4 mb-5 flex items-center justify-between"
+      className="rounded-xl px-5 py-4 mb-5 flex items-center justify-between"
       style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
     >
       <div>
@@ -375,7 +375,7 @@ function getDotColor(rate: number): string {
 
 function MonthlySkeleton({ weekDays }: { weekDays: string[] }) {
   return (
-    <div className="rounded-[20px] p-4 animate-pulse" style={{ background: "var(--surface)" }}>
+    <div className="rounded-xl p-4 animate-pulse" style={{ background: "var(--surface)" }}>
       <div className="grid grid-cols-7 mb-2">
         {weekDays.map((d, i) => (
           <div key={i} className="h-5 rounded-full mx-1" style={{ background: "var(--surface-elevated)" }} />
@@ -384,7 +384,7 @@ function MonthlySkeleton({ weekDays }: { weekDays: string[] }) {
       {[1, 2, 3, 4, 5].map((i) => (
         <div key={i} className="grid grid-cols-7 gap-1.5 mb-1.5">
           {Array(7).fill(null).map((_, j) => (
-            <div key={j} className="aspect-square rounded-[10px]" style={{ background: "var(--surface-elevated)" }} />
+            <div key={j} className="aspect-square rounded-md" style={{ background: "var(--surface-elevated)" }} />
           ))}
         </div>
       ))}

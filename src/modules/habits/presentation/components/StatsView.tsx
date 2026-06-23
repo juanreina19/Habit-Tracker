@@ -86,7 +86,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
       {/* Yearly heatmap */}
       <Section title={t("activity_year", { year: currentYear })}>
         {heatmapLoading ? (
-          <div className="h-20 rounded-[10px] animate-pulse" style={{ background: "#1A1A1A" }} />
+          <div className="h-20 rounded-md animate-pulse" style={{ background: "#1A1A1A" }} />
         ) : (
           <YearlyHeatmap days={heatmapDays} year={currentYear} />
         )}
@@ -210,7 +210,7 @@ function StatCard({ label, value, unit, highlight = false }: {
   label: string; value: string; unit: string; highlight?: boolean;
 }) {
   return (
-    <div className="rounded-[16px] p-3 flex flex-col gap-1" style={{ background: "var(--surface)" }}>
+    <div className="rounded-lg p-3 flex flex-col gap-1" style={{ background: "var(--surface)" }}>
       <p className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>{label}</p>
       <p
         className="text-xl font-bold leading-none"
@@ -229,7 +229,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
         {title}
       </p>
-      <div className="rounded-[20px] p-4" style={{ background: "var(--surface)" }}>
+      <div className="rounded-xl p-4" style={{ background: "var(--surface)" }}>
         {children}
       </div>
     </div>
@@ -244,7 +244,7 @@ function HabitStatRow({ stat, index = 0 }: { stat: HabitStat; index?: number }) 
   return (
     <div className="flex items-center gap-3">
       <div
-        className="w-8 h-8 rounded-[8px] flex items-center justify-center flex-shrink-0"
+        className="w-8 h-8 rounded-sm flex items-center justify-center flex-shrink-0"
         style={{ background: accent + "20", color: accent }}
       >
         <HabitIcon icon={habit.icon ?? "🎯"} size={16} />
@@ -288,7 +288,7 @@ function AchievementCard({ achievement, userAchievement }: {
 
   return (
     <div
-      className="rounded-[16px] p-3 flex flex-col gap-1.5"
+      className="rounded-lg p-3 flex flex-col gap-1.5"
       style={{
         background: isUnlocked ? "rgba(76,207,130,0.08)" : "var(--surface-elevated)",
         border: isUnlocked ? "1px solid rgba(76,207,130,0.2)" : "1px solid var(--border)",
@@ -367,7 +367,7 @@ function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
   return (
     <div>
       {selected && (
-        <div className="mb-3 rounded-[10px] px-3 py-2 flex items-center justify-between"
+        <div className="mb-3 rounded-md px-3 py-2 flex items-center justify-between"
           style={{ background: "var(--surface-elevated)" }}>
           <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
             {format(selected.date, "EEEE d MMMM", { locale: dateFnsLocale }).replace(/^\w/, c => c.toUpperCase())}
@@ -408,7 +408,7 @@ function YearlyHeatmap({ days, year }: { days: DayProgress[]; year: number }) {
                   <button
                     key={di}
                     onClick={() => day && setSelected(prev => prev?.date.getTime() === day.date.getTime() ? null : day)}
-                    className="rounded-[2px] flex-shrink-0"
+                    className="rounded-sm flex-shrink-0"
                     style={{
                       width: 8, height: 8,
                       background: day ? heatmapColor(day.completionRate, day.isFuture) : "transparent",
@@ -444,14 +444,14 @@ function StatsSkeleton() {
       </div>
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-[16px] h-20" style={{ background: "var(--surface)" }} />
+          <div key={i} className="rounded-lg h-20" style={{ background: "var(--surface)" }} />
         ))}
       </div>
-      <div className="rounded-[20px] h-48 mb-6" style={{ background: "var(--surface)" }} />
-      <div className="rounded-[20px] h-40 mb-6" style={{ background: "var(--surface)" }} />
+      <div className="rounded-xl h-48 mb-6" style={{ background: "var(--surface)" }} />
+      <div className="rounded-xl h-40 mb-6" style={{ background: "var(--surface)" }} />
       <div className="grid grid-cols-2 gap-3">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="rounded-[16px] h-24" style={{ background: "var(--surface)" }} />
+          <div key={i} className="rounded-lg h-24" style={{ background: "var(--surface)" }} />
         ))}
       </div>
     </div>

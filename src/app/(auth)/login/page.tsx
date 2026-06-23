@@ -23,7 +23,7 @@ export default function LoginPage() {
 
       <div className="w-full max-w-sm flex flex-col items-center gap-10">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-20 h-20 rounded-[24px] flex items-center justify-center text-4xl"
+          <div className="w-20 h-20 rounded-xl flex items-center justify-center text-4xl"
             style={{ background: "#111111", border: "1px solid #2A2A2A" }}>
             🔥
           </div>
@@ -37,13 +37,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="w-full rounded-[20px] p-6 flex flex-col gap-4"
+        <div className="w-full rounded-xl p-6 flex flex-col gap-4"
           style={{ background: "#111111" }}>
 
           <button
             onClick={handleGoogleSignIn}
             disabled={isLoading}
-            className="w-full py-4 rounded-[14px] flex items-center justify-center gap-3 font-medium text-sm transition-opacity active:opacity-70 disabled:opacity-50"
+            className="w-full py-4 rounded-lg flex items-center justify-center gap-3 font-medium text-sm transition-opacity active:opacity-70 disabled:opacity-50"
             style={{ background: "#FFFFFF", color: "#000000" }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">

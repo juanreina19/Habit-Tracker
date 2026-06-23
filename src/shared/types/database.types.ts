@@ -99,6 +99,8 @@ export interface DbTask {
   completed_at: ISOTimestamp | null;
   created_at: ISOTimestamp;
   icon: string | null;               // "lucide:Name"; null = sin icono
+  is_important: boolean;
+  status: 'todo' | 'in_progress' | 'done';
 }
 
 export interface DbTaskCompletion {
@@ -183,6 +185,36 @@ export interface DbWebhookDelivery {
   created_at: ISOTimestamp;
 }
 
+// ─── Studies ─────────────────────────────────────────────────────────────────
+
+export interface DbSubject {
+  id: UUID;
+  user_id: UUID;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  created_at: ISOTimestamp;
+}
+
+export interface DbTopic {
+  id: UUID;
+  subject_id: UUID;
+  user_id: UUID;
+  title: string;
+  order: number;
+  created_at: ISOTimestamp;
+}
+
+export interface DbStudySession {
+  id: UUID;
+  subject_id: UUID;
+  topic_id: UUID | null;
+  user_id: UUID;
+  duration_min: number;
+  started_at: ISOTimestamp;
+  created_at: ISOTimestamp;
+}
+
 // ─── Helper para Supabase client tipado ──────────────────────────────────────
 
 export interface Database {
@@ -257,6 +289,21 @@ export interface Database {
         Row: DbWebhookDelivery;
         Insert: never;   // creado por DispatchPendingWebhooksUseCase vía service role
         Update: never;   // actualizado por DispatchPendingWebhooksUseCase vía service role
+      };
+      subjects: {
+        Row: DbSubject;
+        Insert: Omit<DbSubject, "id" | "created_at">;
+        Update: Partial<Omit<DbSubject, "id" | "user_id" | "created_at">>;
+      };
+      topics: {
+        Row: DbTopic;
+        Insert: Omit<DbTopic, "id" | "created_at">;
+        Update: Partial<Omit<DbTopic, "id" | "subject_id" | "user_id" | "created_at">>;
+      };
+      study_sessions: {
+        Row: DbStudySession;
+        Insert: Omit<DbStudySession, "id" | "created_at">;
+        Update: never;
       };
     };
     Functions: {

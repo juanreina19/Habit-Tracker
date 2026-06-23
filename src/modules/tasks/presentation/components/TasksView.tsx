@@ -111,12 +111,12 @@ export default function TasksView({ userId }: Props) {
         </div>
 
         {/* Segmented control — Hoy / Semana / Todas */}
-        <div className="flex rounded-[12px] p-1 mb-6" style={{ background: "var(--surface)" }}>
+        <div className="flex rounded-md p-1 mb-6" style={{ background: "var(--surface)" }}>
           {TABS.map((tabKey) => (
             <button
               key={tabKey}
               onClick={() => setTab(tabKey)}
-              className="flex-1 px-4 py-2 rounded-[9px] text-sm font-medium transition-all"
+              className="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all"
               style={{
                 background: tab === tabKey ? "var(--surface-elevated)" : "transparent",
                 color: tab === tabKey ? "var(--text-primary)" : "var(--text-secondary)",
@@ -447,7 +447,7 @@ function PriorityFilterMenu({ value, onChange }: {
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          className="z-50 min-w-[148px] rounded-[14px] p-1.5 shadow-xl outline-none"
+          className="z-50 min-w-[148px] rounded-lg p-1.5 shadow-xl outline-none"
           style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
           align="end"
           sideOffset={4}
@@ -455,7 +455,7 @@ function PriorityFilterMenu({ value, onChange }: {
           {options.map((opt) => (
             <DropdownMenu.Item
               key={opt.value}
-              className="task-menu-item flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-[10px] text-sm cursor-pointer outline-none"
+              className="task-menu-item flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-md text-sm cursor-pointer outline-none"
               style={{ color: value === opt.value ? "var(--text-primary)" : "var(--text-secondary)" }}
               onSelect={() => onChange(opt.value)}
             >
@@ -626,7 +626,7 @@ function TaskColumn({ title, tasks, toggleTask, onEdit, onDelete, emptyState }: 
 
 function EmptyColumnPlaceholder({ text }: { text: string }) {
   return (
-    <div className="rounded-[12px] py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
+    <div className="rounded-md py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
       {text}
     </div>
   );
@@ -638,7 +638,7 @@ function TasksSkeleton() {
       <div className="h-7 w-24 rounded-lg mb-8 animate-pulse" style={{ background: "var(--surface)" }} />
       <div className="flex flex-col gap-2">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-16 rounded-[16px] animate-pulse" style={{ background: "var(--surface)" }} />
+          <div key={i} className="h-16 rounded-lg animate-pulse" style={{ background: "var(--surface)" }} />
         ))}
       </div>
     </div>

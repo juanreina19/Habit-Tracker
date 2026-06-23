@@ -101,7 +101,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-[24px] outline-none overflow-hidden"
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
           style={{ background: "var(--surface)", maxHeight: "85dvh" }}
         >
           <div className="overflow-y-auto" style={{ maxHeight: "85dvh" }}>
@@ -176,7 +176,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                       onChange={(e) => { setName(e.target.value); setNameError(""); }}
                       placeholder={t("name_placeholder")}
                       maxLength={50}
-                      className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+                      className="w-full rounded-md px-4 py-3 text-sm outline-none"
                       style={{
                         background: "var(--surface-elevated)",
                         color: "var(--text-primary)",
@@ -205,7 +205,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                         onChange={(e) => { setName(e.target.value); setNameError(""); }}
                         placeholder={t("name_placeholder")}
                         maxLength={50}
-                        className="w-full rounded-[12px] px-4 py-3 text-sm outline-none"
+                        className="w-full rounded-md px-4 py-3 text-sm outline-none"
                         style={{
                           background: "var(--surface-elevated)",
                           color: "var(--text-primary)",
@@ -221,7 +221,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                       <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
+                        className="flex-1 py-3 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
                         style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
                       >
                         {t("cancel")}
@@ -230,7 +230,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                         type="button"
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                        className="flex-1 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
                         {isSaving ? t("saving") : t("save")}
@@ -284,7 +284,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                         key={emoji}
                         type="button"
                         onClick={() => { setIcon(icon === emoji ? null : emoji); navigate(homeScene(), -1); }}
-                        className="w-12 h-12 rounded-[12px] flex items-center justify-center text-2xl transition-all active:scale-90"
+                        className="w-12 h-12 rounded-md flex items-center justify-center text-2xl transition-all active:scale-90"
                         style={{
                           background: icon === emoji ? "var(--surface-elevated)" : "transparent",
                           border: `1.5px solid ${icon === emoji ? "var(--btn-primary-bg)" : "var(--border)"}`,
@@ -303,7 +303,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                       <button
                         type="button"
                         onClick={onClose}
-                        className="flex-1 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
+                        className="flex-1 py-3 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
                         style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
                       >
                         {t("cancel")}
@@ -312,7 +312,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                       <button
                         type="button"
                         onClick={goBack}
-                        className="flex items-center justify-center gap-1 px-5 py-3 rounded-[14px] text-sm font-medium transition-opacity active:opacity-70"
+                        className="flex items-center justify-center gap-1 px-5 py-3 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
                         style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
                       >
                         <ChevronLeft size={15} /> {t("previous")}
@@ -323,7 +323,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                       <button
                         type="button"
                         onClick={goNext}
-                        className="flex-1 flex items-center justify-center gap-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70"
+                        className="flex-1 flex items-center justify-center gap-1 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
                         {t("next")} <ChevronRight size={15} />
@@ -333,7 +333,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                         type="button"
                         onClick={handleSave}
                         disabled={isSaving}
-                        className="flex-1 py-3 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                        className="flex-1 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
                         {isSaving ? t("saving") : t("save")}
@@ -367,7 +367,7 @@ function AppearanceRows({ color, icon, navigate, t }: {
       <button
         type="button"
         onClick={() => navigate("color", 1)}
-        className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
+        className="w-full flex items-center justify-between px-4 py-4 rounded-lg transition-opacity active:opacity-70"
         style={{ background: "var(--surface-elevated)" }}
       >
         <div className="flex items-center gap-3">
@@ -392,12 +392,12 @@ function AppearanceRows({ color, icon, navigate, t }: {
       <button
         type="button"
         onClick={() => navigate("icon", 1)}
-        className="w-full flex items-center justify-between px-4 py-4 rounded-[14px] transition-opacity active:opacity-70"
+        className="w-full flex items-center justify-between px-4 py-4 rounded-lg transition-opacity active:opacity-70"
         style={{ background: "var(--surface-elevated)" }}
       >
         <div className="flex items-center gap-3">
           <div
-            className="w-9 h-9 rounded-[12px] flex items-center justify-center flex-shrink-0 text-2xl"
+            className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0 text-2xl"
             style={{ background: icon ? (color ?? "#4CAF82") + "25" : "var(--border)" }}
           >
             {icon ?? <span className="text-sm" style={{ color: "var(--text-muted)" }}>—</span>}

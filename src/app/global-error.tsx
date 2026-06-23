@@ -24,7 +24,7 @@ export default function GlobalError({
           </p>
           <button
             onClick={reset}
-            className="mt-2 py-3 px-6 rounded-[14px] text-sm font-semibold transition-opacity active:opacity-70"
+            className="mt-2 py-3 px-6 rounded-lg text-sm font-semibold transition-opacity active:opacity-70"
             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
           >
             Reintentar

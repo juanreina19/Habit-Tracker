@@ -26,7 +26,7 @@ export function DashboardTasksColumn({ category, tasks, onToggle, onEdit, onDele
       onAdd={onAdd}
     >
       {tasks.length === 0 ? (
-        <div className="rounded-[12px] py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
+        <div className="rounded-md py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
           {t("empty_column")}
         </div>
       ) : (

@@ -1,19 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { LayoutDashboard, CalendarRange, ListTodo, BarChart2, Settings2, Sun, Moon } from "lucide-react";
+import { Home, CalendarRange, Sparkles, BookOpen, Settings2, Plus, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
+import { QuickAddMenu } from "@/shared/components/ui/QuickAddMenu";
 
 const NAV_ROUTES = [
-  { href: "/",         key: "dashboard", Icon: LayoutDashboard },
-  { href: "/today",    key: "today",     Icon: Sun },
-  { href: "/calendar", key: "calendar",  Icon: CalendarRange },
-  { href: "/tasks",    key: "tasks",     Icon: ListTodo },
-  { href: "/stats",    key: "stats",     Icon: BarChart2 },
-  { href: "/settings", key: "settings",  Icon: Settings2 },
+  { href: "/",         key: "home",     Icon: Home },
+  { href: "/planner",  key: "planner",  Icon: CalendarRange },
+  { href: "/habits",   key: "habits",   Icon: Sparkles },
+  { href: "/studies",  key: "studies",  Icon: BookOpen },
+  { href: "/settings", key: "settings", Icon: Settings2 },
 ];
 
 export default function Sidebar() {
@@ -21,6 +22,7 @@ export default function Sidebar() {
   const { theme, toggleTheme } = useTheme();
   const t = useTranslations("nav");
   const ts = useTranslations("settings");
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
 
   return (
     <TooltipProvider>
@@ -38,12 +40,12 @@ export default function Sidebar() {
         {/* Nav items */}
         <nav className="flex-1 px-2.5 py-4 flex flex-col gap-1">
           {NAV_ROUTES.map(({ href, key, Icon }) => {
-            const isActive = href === "/" ? pathname === "/" : pathname === href;
+            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
               <Tooltip key={href} label={t(key as Parameters<typeof t>[0])}>
                 <Link
                   href={href}
-                  className={`sidebar-link flex items-center justify-center py-2.5 rounded-[12px] ${isActive ? "sidebar-active" : ""}`}
+                  className={`sidebar-link flex items-center justify-center py-2.5 rounded-md ${isActive ? "sidebar-active" : ""}`}
                   style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
                 >
                   <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
@@ -51,6 +53,20 @@ export default function Sidebar() {
               </Tooltip>
             );
           })}
+
+          {/* Quick-Add */}
+          <div className="relative mt-2">
+            <Tooltip label={t("quick_add")}>
+              <button
+                onClick={() => setQuickAddOpen((o) => !o)}
+                className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-all"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                <Plus size={20} strokeWidth={1.5} />
+              </button>
+            </Tooltip>
+            <QuickAddMenu open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
+          </div>
         </nav>
 
         {/* Theme toggle */}
@@ -58,7 +74,7 @@ export default function Sidebar() {
           <Tooltip label={theme === "dark" ? ts("theme_light") : ts("theme_dark")}>
             <button
               onClick={toggleTheme}
-              className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-[12px] transition-all"
+              className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-all"
               style={{ color: "var(--text-secondary)" }}
             >
               {theme === "dark" ? <Sun size={20} strokeWidth={1.5} /> : <Moon size={20} strokeWidth={1.5} />}
