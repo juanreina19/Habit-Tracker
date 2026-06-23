@@ -13,6 +13,7 @@ export class TaskSupabaseRepository implements ITaskRepository {
     return {
       id:             row.id,
       userId:         row.user_id,
+      categoryId:     row.category_id ?? null,
       title:          row.title,
       description:    row.description,
       priority:       row.priority,
@@ -123,6 +124,7 @@ export class TaskSupabaseRepository implements ITaskRepository {
       .from("tasks")
       .insert({
         user_id:         userId,
+        category_id:     input.categoryId ?? null,
         title:           input.title.trim(),
         description:     input.description ?? null,
         priority:        input.priority ?? "medium",
@@ -151,6 +153,7 @@ export class TaskSupabaseRepository implements ITaskRepository {
     if ("startTime" in input)                  patch.start_time = input.startTime ?? null;
     if ("endTime" in input)                    patch.end_time = input.endTime ?? null;
     if ("icon" in input)                       patch.icon = input.icon ?? null;
+    if ("categoryId" in input)                patch.category_id = input.categoryId ?? null;
 
     const { data, error } = await this.client
       .from("tasks")

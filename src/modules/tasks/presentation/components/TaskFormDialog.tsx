@@ -14,6 +14,7 @@ import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { IconPickerDialog } from "@/shared/components/ui/IconPickerDialog";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
 import { useSubtasks } from "../hooks/useSubtasks";
+import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 
 const PRIORITIES: TaskPriority[] = ["low", "medium", "high", "urgent"];
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
@@ -54,8 +55,11 @@ export function TaskFormDialog({
   const [endTime, setEndTime]         = useState("");
   const [timeError, setTimeError]     = useState("");
 
+  const [categoryId, setCategoryId]   = useState<string | null>(null);
   const [icon, setIcon]               = useState<string | null>(null);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
+
+  const { categories } = useCategories(userId);
 
   const [titleError, setTitleError]   = useState("");
   const [isSaving, setIsSaving]       = useState(false);
@@ -81,6 +85,7 @@ export function TaskFormDialog({
       setStartTime(task?.startTime ? formatTaskTime(task.startTime) : "");
       setEndTime(task?.endTime ? formatTaskTime(task.endTime) : "");
 
+      setCategoryId(task?.categoryId ?? null);
       setIcon(task?.icon ?? null);
 
       setTitleError("");
@@ -116,6 +121,7 @@ export function TaskFormDialog({
         title:           trimmed,
         description:     description.trim() || null,
         priority,
+        categoryId:      categoryId ?? null,
         dueDate:         isRecurring ? null : (dueDate || null),
         recurrenceDays:  isRecurring ? recurrenceDays : null,
         startTime:       hasSchedule && startTime ? startTime : null,
@@ -130,6 +136,7 @@ export function TaskFormDialog({
           title:           input.title,
           description:     input.description ?? undefined,
           priority,
+          categoryId:      input.categoryId ?? undefined,
           dueDate:         input.dueDate ?? undefined,
           recurrenceDays:  input.recurrenceDays ?? undefined,
           startTime:       input.startTime ?? undefined,
@@ -269,6 +276,50 @@ export function TaskFormDialog({
                       ))}
                     </div>
                   </div>
+
+                  {/* Categoría */}
+                  {categories.length > 0 && (
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                        {t("category_label")}
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCategoryId(null)}
+                          className="px-3 py-2 rounded-[10px] text-xs font-medium transition-all"
+                          style={{
+                            background: categoryId === null ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
+                            color:      categoryId === null ? "var(--btn-primary-text)" : "var(--text-secondary)",
+                          }}
+                        >
+                          {t("no_category")}
+                        </button>
+                        {categories.map((cat) => (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setCategoryId(cat.id)}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-xs font-medium transition-all"
+                            style={{
+                              background: categoryId === cat.id
+                                ? (cat.color ? cat.color + "1A" : "var(--btn-primary-bg)")
+                                : "var(--surface-elevated)",
+                              color: categoryId === cat.id
+                                ? (cat.color ?? "var(--btn-primary-text)")
+                                : "var(--text-secondary)",
+                              border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "var(--text-primary)") : "transparent"}`,
+                            }}
+                          >
+                            {cat.color && (
+                              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: cat.color }} />
+                            )}
+                            {cat.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Recurrencia */}
                   <div>

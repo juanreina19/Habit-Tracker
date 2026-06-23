@@ -5,6 +5,7 @@ export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export interface Task {
   id:             UUID;
   userId:         UUID;
+  categoryId:     UUID | null;
   title:          string;
   description:    string | null;
   priority:       TaskPriority;
@@ -53,6 +54,7 @@ export interface CreateTaskInput {
   title:           string;
   description?:    string;
   priority?:       TaskPriority;   // default: 'medium'
+  categoryId?:     UUID | null;
   dueDate?:        ISODate;        // solo para tareas únicas
   recurrenceDays?: number[];       // undefined/[] = única
   startTime?:      string;         // "HH:MM"
@@ -64,6 +66,7 @@ export interface UpdateTaskInput {
   title?:          string;
   description?:    string | null;
   priority?:       TaskPriority;
+  categoryId?:     UUID | null;
   dueDate?:        ISODate | null;
   recurrenceDays?: number[] | null;
   startTime?:      string | null;

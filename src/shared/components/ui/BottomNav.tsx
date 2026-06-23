@@ -4,15 +4,15 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Sun, CalendarRange, ListTodo, BarChart2, Settings2 } from "lucide-react";
+import { LayoutDashboard, CalendarRange, ListTodo, BarChart2, Settings2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils/cn";
 
 const NAV_ROUTES = [
-  { href: "/today",    key: "today",    Icon: Sun },
-  { href: "/calendar", key: "calendar", Icon: CalendarRange },
-  { href: "/habits",   key: "habits",   Icon: ListTodo },
-  { href: "/stats",    key: "stats",    Icon: BarChart2 },
-  { href: "/settings", key: "settings", Icon: Settings2 },
+  { href: "/",         key: "dashboard", Icon: LayoutDashboard },
+  { href: "/calendar", key: "calendar",  Icon: CalendarRange },
+  { href: "/tasks",    key: "tasks",     Icon: ListTodo },
+  { href: "/stats",    key: "stats",     Icon: BarChart2 },
+  { href: "/settings", key: "settings",  Icon: Settings2 },
 ];
 
 export default function BottomNav() {
@@ -45,7 +45,7 @@ export default function BottomNav() {
     >
       <div className="flex items-center justify-around px-2 py-2.5">
         {NAV_ROUTES.map(({ href, key, Icon }) => {
-          const isActive = pathname === href;
+          const isActive = href === "/" ? pathname === "/" : pathname === href;
           return (
             <Link
               key={href}

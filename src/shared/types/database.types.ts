@@ -88,6 +88,7 @@ export interface DbPushSubscription {
 export interface DbTask {
   id: UUID;
   user_id: UUID;
+  category_id: UUID | null;
   title: string;
   description: string | null;
   priority: 'low' | 'medium' | 'high' | 'urgent';

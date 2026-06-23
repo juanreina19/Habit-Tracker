@@ -1,7 +1,9 @@
 {
   "nav": {
+    "dashboard": "Dashboard",
     "today": "Today",
     "calendar": "Calendar",
+    "tasks": "Tasks",
     "habits": "Habits",
     "stats": "Stats",
     "settings": "Settings"
@@ -217,6 +219,8 @@
     "status_completed": "Completed",
     "created_on": "Created on {date}",
     "close": "Close",
+    "category_label": "Category",
+    "no_category": "No category",
     "icon_label": "Icon",
     "icon_none": "—",
     "no_icon": "No icon",
@@ -292,5 +296,23 @@
     "save": "Save",
     "cancel": "Cancel",
     "validation_out_of_range": "Value must be between {min} and {max}"
+  },
+  "dashboard": {
+    "greeting_morning": "Good morning",
+    "greeting_afternoon": "Good afternoon",
+    "greeting_evening": "Good evening",
+    "habits_progress": "{completed}/{total} habits",
+    "focus_active": "Focus active",
+    "new_task": "New task",
+    "overdue": "Overdue",
+    "habits": "Habits",
+    "uncategorized": "No category",
+    "manage_habits": "Manage habits",
+    "timeline": "Timeline",
+    "empty_column": "No tasks",
+    "streak": "Streak",
+    "done": "Done",
+    "collapse": "Collapse",
+    "expand": "Expand"
   }
 }

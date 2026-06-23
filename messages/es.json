@@ -1,7 +1,9 @@
 {
   "nav": {
+    "dashboard": "Dashboard",
     "today": "Hoy",
     "calendar": "Calendario",
+    "tasks": "Tareas",
     "habits": "Hábitos",
     "stats": "Stats",
     "settings": "Ajustes"
@@ -217,6 +219,8 @@
     "status_completed": "Completada",
     "created_on": "Creada el {date}",
     "close": "Cerrar",
+    "category_label": "Categoría",
+    "no_category": "Sin categoría",
     "icon_label": "Ícono",
     "icon_none": "—",
     "no_icon": "Sin ícono",
@@ -292,5 +296,23 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "validation_out_of_range": "El valor debe estar entre {min} y {max}"
+  },
+  "dashboard": {
+    "greeting_morning": "Buenos días",
+    "greeting_afternoon": "Buenas tardes",
+    "greeting_evening": "Buenas noches",
+    "habits_progress": "{completed}/{total} hábitos",
+    "focus_active": "Enfoque activo",
+    "new_task": "Nueva tarea",
+    "overdue": "Atrasadas",
+    "habits": "Hábitos",
+    "uncategorized": "Sin categoría",
+    "manage_habits": "Gestionar hábitos",
+    "timeline": "Línea de tiempo",
+    "empty_column": "Sin tareas",
+    "streak": "Racha",
+    "done": "Hecho",
+    "collapse": "Colapsar",
+    "expand": "Expandir"
   }
 }

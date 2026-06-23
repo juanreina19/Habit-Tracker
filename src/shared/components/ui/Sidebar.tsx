@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Sun, CalendarRange, ListTodo, BarChart2, Settings2, Moon } from "lucide-react";
+import { LayoutDashboard, CalendarRange, ListTodo, BarChart2, Settings2, Sun, Moon } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 
 const NAV_ROUTES = [
-  { href: "/today",    key: "today",    Icon: Sun },
-  { href: "/calendar", key: "calendar", Icon: CalendarRange },
-  { href: "/habits",   key: "habits",   Icon: ListTodo },
-  { href: "/stats",    key: "stats",    Icon: BarChart2 },
-  { href: "/settings", key: "settings", Icon: Settings2 },
+  { href: "/",         key: "dashboard", Icon: LayoutDashboard },
+  { href: "/calendar", key: "calendar",  Icon: CalendarRange },
+  { href: "/tasks",    key: "tasks",     Icon: ListTodo },
+  { href: "/stats",    key: "stats",     Icon: BarChart2 },
+  { href: "/settings", key: "settings",  Icon: Settings2 },
 ];
 
 export default function Sidebar() {
@@ -37,7 +37,7 @@ export default function Sidebar() {
         {/* Nav items */}
         <nav className="flex-1 px-2.5 py-4 flex flex-col gap-1">
           {NAV_ROUTES.map(({ href, key, Icon }) => {
-            const isActive = pathname === href;
+            const isActive = href === "/" ? pathname === "/" : pathname === href;
             return (
               <Tooltip key={href} label={t(key as Parameters<typeof t>[0])}>
                 <Link
