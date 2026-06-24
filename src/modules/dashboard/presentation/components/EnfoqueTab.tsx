@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
+import { SectionHeader } from "@/shared/components/ui/SectionHeader";
 import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
@@ -99,24 +100,35 @@ export function EnfoqueTab({
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, delay: i * 0.03 }}
+              className="flex items-start gap-2"
             >
-              {item.type === "task" && item.task && (
-                <TaskCardDashboard
-                  task={item.task}
-                  onToggle={() => onToggleTask(item.task!)}
-                  onEdit={() => onEditTask(item.task!)}
-                  onDelete={() => onDeleteTask(item.task!)}
-                />
-              )}
-              {item.type === "habit" && item.habit && (
-                <HabitAgendaRow
-                  habit={item.habit}
-                  onToggle={() => {
-                    if (item.habit!.isCompletedToday) onUncheckHabit(item.habit!.id);
-                    else onCompleteHabit(item.habit!.id);
-                  }}
-                />
-              )}
+              {/* Time gutter */}
+              <span
+                className="w-10 flex-shrink-0 text-[10px] tabular-nums font-medium pt-2.5 text-right"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {item.time ?? ""}
+              </span>
+
+              <div className="flex-1 min-w-0">
+                {item.type === "task" && item.task && (
+                  <TaskCardDashboard
+                    task={item.task}
+                    onToggle={() => onToggleTask(item.task!)}
+                    onEdit={() => onEditTask(item.task!)}
+                    onDelete={() => onDeleteTask(item.task!)}
+                  />
+                )}
+                {item.type === "habit" && item.habit && (
+                  <HabitAgendaRow
+                    habit={item.habit}
+                    onToggle={() => {
+                      if (item.habit!.isCompletedToday) onUncheckHabit(item.habit!.id);
+                      else onCompleteHabit(item.habit!.id);
+                    }}
+                  />
+                )}
+              </div>
             </motion.div>
           ))}
           {agendaItems.length === 0 && (
@@ -184,16 +196,6 @@ export function EnfoqueTab({
   );
 }
 
-function SectionHeader({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-        {label}
-      </span>
-      <div className="flex-1 h-px" style={{ background: "var(--border)", opacity: 0.4 }} />
-    </div>
-  );
-}
 
 function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle: () => void }) {
   const accentColor = habit.color ?? "#4CAF82";

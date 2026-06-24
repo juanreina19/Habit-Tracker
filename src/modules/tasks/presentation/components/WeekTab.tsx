@@ -301,8 +301,8 @@ function WeekSkeleton() {
     <div className="hidden lg:grid lg:grid-cols-7 lg:gap-3">
       {[1, 2, 3, 4, 5, 6, 7].map((i) => (
         <div key={i} className="flex flex-col gap-2">
-          <div className="h-5 w-10 rounded animate-pulse" style={{ background: "var(--surface)" }} />
-          <div className="h-16 rounded-md animate-pulse" style={{ background: "var(--surface)" }} />
+          <div className="h-5 w-10 rounded skeleton-shimmer" style={{ background: "var(--surface)" }} />
+          <div className="h-16 rounded-md skeleton-shimmer" style={{ background: "var(--surface)" }} />
         </div>
       ))}
     </div>

@@ -31,14 +31,14 @@ export function HomeTabBar({ active, onChange }: Props) {
             key={tab}
             type="button"
             onClick={() => onChange(tab)}
-            className="relative px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-colors"
+            className="relative px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] transition-colors"
             style={{ color: isActive ? "var(--text-primary)" : "var(--text-muted)" }}
           >
             {t(TAB_KEYS[tab] as Parameters<typeof t>[0])}
             {isActive && (
               <motion.div
                 layoutId="home-tab-indicator"
-                className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full"
+                className="absolute bottom-0 left-3 right-3 h-[1.5px] rounded-full"
                 style={{ background: "var(--accent)" }}
                 transition={{ type: "spring", stiffness: 500, damping: 35 }}
               />

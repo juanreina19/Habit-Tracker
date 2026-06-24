@@ -635,10 +635,10 @@ function EmptyColumnPlaceholder({ text }: { text: string }) {
 function TasksSkeleton() {
   return (
     <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10">
-      <div className="h-7 w-24 rounded-lg mb-8 animate-pulse" style={{ background: "var(--surface)" }} />
+      <div className="h-7 w-24 rounded-lg mb-8 skeleton-shimmer" style={{ background: "var(--surface)" }} />
       <div className="flex flex-col gap-2">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-16 rounded-lg animate-pulse" style={{ background: "var(--surface)" }} />
+          <div key={i} className="h-16 rounded-lg skeleton-shimmer" style={{ background: "var(--surface)" }} />
         ))}
       </div>
     </div>

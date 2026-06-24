@@ -56,7 +56,7 @@ export default function BottomNav() {
             >
               <Icon size={22} strokeWidth={isActive ? 2 : 1.5} />
               <span
-                className="text-[10px] font-medium tracking-wide"
+                className="text-[9px] font-medium tracking-wide"
                 style={{ color: isActive ? "var(--text-primary)" : "var(--text-secondary)" }}
               >
                 {t(key as Parameters<typeof t>[0])}

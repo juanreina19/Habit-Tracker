@@ -250,7 +250,7 @@ function GlobalRing({ percentage }: { percentage: number }) {
 
 function WeeklySkeleton() {
   return (
-    <div className="animate-pulse">
+    <div className="skeleton-shimmer">
       <div className="rounded-xl h-24 mb-6" style={{ background: "var(--surface)" }} />
       {[1, 2, 3, 4].map((i) => (
         <div key={i} className="rounded-lg h-14 mb-2" style={{ background: "var(--surface)" }} />

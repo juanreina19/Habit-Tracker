@@ -38,7 +38,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
 
   return (
     <div
-      className="group rounded-lg p-3 transition-all cursor-pointer"
+      className="group rounded-lg p-2.5 transition-all cursor-pointer"
       style={{
         background: "var(--surface-elevated)",
         border: overdue ? "1px solid rgba(239,68,68,0.3)" : "1px solid transparent",
@@ -49,7 +49,13 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
       }}
     >
       {/* Compact row */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2">
+        {/* Priority dot — first for visual scanning */}
+        <span
+          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+          style={{ background: PRIORITY_COLORS[task.priority] }}
+        />
+
         <TaskCheckbox
           done={done}
           size={TASK_CHECKBOX_SIZE.card}
@@ -72,11 +78,12 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
           <Star size={12} fill="#F59E0B" stroke="#F59E0B" className="flex-shrink-0" />
         )}
 
-        {/* Priority dot */}
-        <span
-          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-          style={{ background: PRIORITY_COLORS[task.priority] }}
-        />
+        {/* Subtask count inline */}
+        {hasSubtasks && !expanded && (
+          <span className="text-[10px] tabular-nums font-medium flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+            {task.subtaskCompleted}/{task.subtaskTotal}
+          </span>
+        )}
 
         {/* Date */}
         {task.dueDate && (

@@ -375,7 +375,7 @@ function getDotColor(rate: number): string {
 
 function MonthlySkeleton({ weekDays }: { weekDays: string[] }) {
   return (
-    <div className="rounded-xl p-4 animate-pulse" style={{ background: "var(--surface)" }}>
+    <div className="rounded-xl p-4 skeleton-shimmer" style={{ background: "var(--surface)" }}>
       <div className="grid grid-cols-7 mb-2">
         {weekDays.map((d, i) => (
           <div key={i} className="h-5 rounded-full mx-1" style={{ background: "var(--surface-elevated)" }} />

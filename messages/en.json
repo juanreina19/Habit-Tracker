@@ -341,7 +341,8 @@
   },
   "quickAdd": {
     "new_task": "New task",
-    "new_habit": "New habit"
+    "new_habit": "New habit",
+    "new_study": "Study session"
   },
   "planner": {
     "title": "Planner",
@@ -374,6 +375,7 @@
     "stats_sessions": "Sessions",
     "stats_streak": "Streak",
     "stats_monthly": "Monthly frequency",
+    "monthly_frequency": "Monthly frequency",
     "recent_sessions": "Recent sessions",
     "no_subjects": "No subjects yet",
     "no_subjects_hint": "Create your first subject to start tracking study sessions.",
