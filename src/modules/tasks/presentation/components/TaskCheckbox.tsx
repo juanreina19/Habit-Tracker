@@ -16,7 +16,7 @@ interface TaskCheckboxProps {
 export function TaskCheckbox({ done, size = TASK_CHECKBOX_SIZE.card, animated = false, onToggle, ariaLabel, variant = "default" }: TaskCheckboxProps) {
   const px = size;
   const checkScale = px <= 18 ? 10 : 12;
-  const checkStroke = variant === "focus" ? "#000000" : "white";
+  const checkStroke = "#000000";
 
   const inner = done ? (
     animated ? (
@@ -26,11 +26,11 @@ export function TaskCheckbox({ done, size = TASK_CHECKBOX_SIZE.card, animated = 
         transition={{ type: "spring", stiffness: 500, damping: 25 }}
         width={checkScale} height={checkScale} viewBox="0 0 12 12" fill="none"
       >
-        <path d="M2 6l3 3 5-5" stroke={checkStroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 6l3 3 5-5" stroke={checkStroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       </motion.svg>
     ) : (
       <svg width={checkScale} height={checkScale} viewBox="0 0 12 12" fill="none">
-        <path d="M2 6l3 3 5-5" stroke={checkStroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 6l3 3 5-5" stroke={checkStroke} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   ) : null;
@@ -39,8 +39,8 @@ export function TaskCheckbox({ done, size = TASK_CHECKBOX_SIZE.card, animated = 
     width:       px,
     height:      px,
     borderRadius: variant === "focus" ? "50%" : 6,
-    border:      "2px solid var(--border)",
-    background:  done ? (variant === "focus" ? "#FFFFFF" : "var(--accent)") : "transparent",
+    border:      done ? "2px solid #FFFFFF" : "2px solid var(--border)",
+    background:  done ? "#FFFFFF" : "transparent",
     flexShrink:  0,
     display:     "flex",
     alignItems:  "center",

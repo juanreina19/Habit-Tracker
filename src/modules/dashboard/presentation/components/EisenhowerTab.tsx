@@ -71,23 +71,19 @@ export function EisenhowerTab({ tasks, onToggleTask, onEditTask, onDeleteTask }:
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: i * 0.05 }}
-          className="rounded-lg overflow-hidden"
-          style={{ background: "var(--surface)" }}
+          className="rounded-lg"
+          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
         >
-          <div className="h-[3px]" style={{ background: q.color }} />
           <div className="p-3">
             <div className="flex items-center justify-between mb-2.5">
-              <span
-                className="text-xs font-semibold uppercase tracking-wider"
-                style={{ color: q.color }}
-              >
-                {t(q.i18nKey as Parameters<typeof t>[0])}
-              </span>
-              <span
-                className="text-[10px] font-semibold px-1.5 py-0.5 rounded-sm"
-                style={{ background: `${q.color}15`, color: q.color }}
-              >
-                {q.tasks.length}
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full" style={{ background: q.color }} />
+                <span
+                  className="text-[11px] font-semibold uppercase tracking-wider"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {t(q.i18nKey as Parameters<typeof t>[0])}
+                </span>
               </span>
             </div>
 

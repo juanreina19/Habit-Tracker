@@ -198,7 +198,7 @@ export function EnfoqueTab({
 
 
 function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle: () => void }) {
-  const accentColor = habit.color ?? "#4CAF82";
+  const done = habit.isCompletedToday;
 
   return (
     <button
@@ -206,20 +206,20 @@ function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle:
       onClick={onToggle}
       className="w-full text-left rounded-lg p-3 flex items-center gap-3 transition-all active:scale-[0.98]"
       style={{
-        background: habit.isCompletedToday ? `${accentColor}18` : "var(--surface)",
-        border: `1px solid ${habit.isCompletedToday ? `${accentColor}40` : "transparent"}`,
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
       }}
     >
       <div
         className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
         style={{
-          background: habit.isCompletedToday ? accentColor : "transparent",
-          border: `2px solid ${habit.isCompletedToday ? accentColor : "var(--border)"}`,
+          background: done ? "#FFFFFF" : "transparent",
+          border: done ? "2px solid #FFFFFF" : "2px solid var(--border)",
         }}
       >
-        {habit.isCompletedToday && (
+        {done && (
           <svg width="10" height="8" viewBox="0 0 12 10" fill="none">
-            <path d="M1 5l3.5 3.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </div>
@@ -227,8 +227,8 @@ function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle:
         <p
           className="text-sm font-medium truncate"
           style={{
-            color: habit.isCompletedToday ? "var(--text-secondary)" : "var(--text-primary)",
-            textDecoration: habit.isCompletedToday ? "line-through" : "none",
+            color: done ? "var(--text-secondary)" : "var(--text-primary)",
+            textDecoration: done ? "line-through" : "none",
           }}
         >
           {habit.name}
