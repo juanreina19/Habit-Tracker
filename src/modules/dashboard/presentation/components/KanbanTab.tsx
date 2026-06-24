@@ -66,20 +66,22 @@ export function KanbanTab({ tasks, onToggleTask, onEditTask, onDeleteTask, onUpd
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: i * 0.05 }}
           className="min-w-[260px] lg:min-w-0 flex-shrink-0 lg:flex-shrink flex flex-col rounded-lg"
-          style={{ background: "var(--surface)" }}
+          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
         >
-          <div className="h-[3px]" style={{ background: col.color }} />
           <div className="p-3">
             <div className="flex items-center justify-between mb-2.5">
-              <span
-                className="text-xs font-semibold uppercase tracking-wider"
-                style={{ color: col.color }}
-              >
-                {t(col.i18nKey as Parameters<typeof t>[0])}
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full" style={{ background: col.color }} />
+                <span
+                  className="text-[11px] font-semibold uppercase tracking-wider"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {t(col.i18nKey as Parameters<typeof t>[0])}
+                </span>
               </span>
               <span
                 className="text-[10px] font-semibold px-1.5 py-0.5 rounded-sm"
-                style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
+                style={{ color: "var(--text-muted)" }}
               >
                 {col.tasks.length}
               </span>

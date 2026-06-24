@@ -135,7 +135,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
             {t(`priority_${task.priority}` as `priority_${TaskPriority}`)}
           </span>
           {task.isImportant && (
-            <Star size={12} fill="#F59E0B" stroke="#F59E0B" />
+            <Star size={12} fill="var(--text-secondary)" stroke="var(--text-secondary)" />
           )}
         </div>
         {isLate && (

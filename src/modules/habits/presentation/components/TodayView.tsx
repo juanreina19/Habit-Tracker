@@ -386,8 +386,8 @@ function HabitRow({
   freezeLabel: string;
 }) {
   const t = useTranslations("today");
-  const accentColor = habit.color ?? "#4CAF82";
   const expired = locked && !habit.isCompletedToday;
+  const done = habit.isCompletedToday;
 
   return (
     <motion.div
@@ -402,8 +402,8 @@ function HabitRow({
       onClick={locked ? undefined : onToggle}
       className="w-full text-left rounded-lg p-4 flex items-center gap-4 relative overflow-hidden"
       style={{
-        background: habit.isCompletedToday ? `${accentColor}28` : "var(--surface)",
-        border: `1px solid ${habit.isCompletedToday ? `${accentColor}58` : locked ? "transparent" : `${accentColor}22`}`,
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
         opacity: locked ? 0.5 : 1,
         cursor: locked ? "not-allowed" : "pointer",
         userSelect: "none",
@@ -416,14 +416,14 @@ function HabitRow({
       <motion.div
         className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
         animate={{
-          backgroundColor: habit.isCompletedToday ? accentColor : "transparent",
-          borderColor: habit.isCompletedToday ? accentColor : "var(--border)",
+          backgroundColor: done ? "#FFFFFF" : "transparent",
+          borderColor: done ? "#FFFFFF" : "var(--border)",
         }}
         transition={{ duration: 0.2 }}
         style={{ border: "2px solid" }}
       >
         <AnimatePresence mode="wait">
-          {habit.isCompletedToday && (
+          {done && (
             <motion.svg
               key="check"
               width="12" height="10" viewBox="0 0 12 10" fill="none"
@@ -432,7 +432,7 @@ function HabitRow({
               exit={{ scale: 0, opacity: 0 }}
               transition={{ type: "spring", stiffness: 500, damping: 25 }}
             >
-              <path d="M1 5l3.5 3.5L11 1" stroke="white" strokeWidth="2"
+              <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="2.5"
                 strokeLinecap="round" strokeLinejoin="round" />
             </motion.svg>
           )}
@@ -441,7 +441,7 @@ function HabitRow({
 
       {/* Icon */}
       {habit.icon && (
-        <span className="flex-shrink-0" style={{ color: accentColor }}>
+        <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
           <HabitIcon icon={habit.icon} size={22} />
         </span>
       )}

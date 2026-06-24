@@ -249,272 +249,239 @@ export function TaskFormDialog({
                     style={{ color: "var(--text-secondary)" }}
                   />
 
-                  {/* Metadata pills row */}
-                  <div className="flex flex-wrap gap-1.5 py-1.5" style={{ borderTop: "1px solid var(--border)" }}>
-                    {/* Priority pills */}
-                    {PRIORITIES.map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => setPriority(p)}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
-                        style={{
-                          background: priority === p ? PRIORITY_COLORS[p] + "1A" : "var(--surface-elevated)",
-                          color:      priority === p ? PRIORITY_COLORS[p] : "var(--text-secondary)",
-                        }}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[p] }} />
-                        {t(`priority_${p}` as `priority_${TaskPriority}`)}
-                      </button>
-                    ))}
+                  {/* Metadata pills row — compact dark capsules */}
+                  <div className="flex flex-wrap gap-1.5 py-2" style={{ borderTop: "1px solid var(--border)" }}>
+                    {/* Category pill */}
+                    {categories.length > 0 && (
+                      <div className="relative group/cat">
+                        <button
+                          type="button"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                          style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: categories.find(c => c.id === categoryId)?.color ?? "var(--text-muted)" }} />
+                          <span style={{ color: "var(--text-muted)" }}>IN</span>
+                          {categories.find(c => c.id === categoryId)?.name ?? "—"}
+                        </button>
+                        <div
+                          className="absolute left-0 top-full mt-1 z-10 rounded-lg p-1 min-w-[140px] hidden group-focus-within/cat:block"
+                          style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setCategoryId(null)}
+                            className="w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors"
+                            style={{ color: !categoryId ? "var(--text-primary)" : "var(--text-secondary)" }}
+                          >
+                            —
+                          </button>
+                          {categories.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => setCategoryId(cat.id)}
+                              className="w-full text-left px-3 py-1.5 rounded-md text-xs flex items-center gap-2 transition-colors"
+                              style={{ color: categoryId === cat.id ? "var(--text-primary)" : "var(--text-secondary)" }}
+                            >
+                              {cat.color && <span className="w-1.5 h-1.5 rounded-full" style={{ background: cat.color }} />}
+                              {cat.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                    {/* Importance pill */}
+                    {/* Date pill */}
                     <button
                       type="button"
-                      onClick={() => setIsImportant((p) => !p)}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
-                      style={{
-                        background: isImportant ? "rgba(245,158,11,0.12)" : "var(--surface-elevated)",
-                        color: isImportant ? "#F59E0B" : "var(--text-secondary)",
+                      onClick={() => {
+                        const input = document.getElementById("task-date-input");
+                        if (input) (input as HTMLInputElement).showPicker?.();
                       }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                      style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
                     >
-                      <Star size={11} fill={isImportant ? "#F59E0B" : "none"} strokeWidth={isImportant ? 0 : 1.5} />
-                      {isImportant ? t("important") : t("mark_important")}
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: dueDate ? "var(--accent)" : "var(--text-muted)" }} />
+                      <span style={{ color: "var(--text-muted)" }}>DATE</span>
+                      {dueDate || t("form_free")}
                     </button>
 
-                    {/* Category pills */}
-                    {categories.length > 0 && (
-                      <>
-                        {categories.map((cat) => (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => setCategoryId(categoryId === cat.id ? null : cat.id)}
-                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
-                            style={{
-                              background: categoryId === cat.id
-                                ? (cat.color ? cat.color + "1A" : "var(--btn-primary-bg)")
-                                : "var(--surface-elevated)",
-                              color: categoryId === cat.id
-                                ? (cat.color ?? "var(--btn-primary-text)")
-                                : "var(--text-secondary)",
-                            }}
-                          >
-                            {cat.color && (
-                              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: cat.color }} />
-                            )}
-                            {cat.name}
-                          </button>
-                        ))}
-                      </>
+                    {/* Repeat pill */}
+                    <button
+                      type="button"
+                      onClick={() => setIsRecurring(prev => !prev)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                      style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: isRecurring ? "#3b82f6" : "var(--text-muted)" }} />
+                      <span style={{ color: "var(--text-muted)" }}>REPEAT</span>
+                      {isRecurring ? t("recurrence_repeat") : t("recurrence_once")}
+                    </button>
+
+                    {/* Time pill */}
+                    <button
+                      type="button"
+                      onClick={() => { setHasSchedule(p => !p); setTimeError(""); }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                      style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: hasSchedule && startTime ? "#8b5cf6" : "var(--text-muted)" }} />
+                      <span style={{ color: "var(--text-muted)" }}>TIME</span>
+                      {hasSchedule && startTime ? startTime : t("form_free")}
+                    </button>
+
+                    {/* Priority pill — cycles through on click */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const idx = PRIORITIES.indexOf(priority);
+                        setPriority(PRIORITIES[(idx + 1) % PRIORITIES.length]);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                      style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[priority] }} />
+                      {t(`priority_${priority}` as `priority_${TaskPriority}`)}
+                    </button>
+
+                    {/* Importance pill */}
+                    {isImportant && (
+                      <button
+                        type="button"
+                        onClick={() => setIsImportant(false)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                      >
+                        <Star size={10} fill="var(--text-primary)" strokeWidth={0} />
+                        {t("important")}
+                      </button>
                     )}
                   </div>
 
-                  {/* Recurrencia */}
-                  <div>
-                    <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                      {t("recurrence_label")}
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsRecurring(false)}
-                        className="py-2.5 rounded-md text-sm font-medium transition-all"
-                        style={{
-                          background: !isRecurring ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                          color:      !isRecurring ? "var(--btn-primary-text)" : "var(--text-secondary)",
-                        }}
-                      >
-                        {t("recurrence_once")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsRecurring(true)}
-                        className="py-2.5 rounded-md text-sm font-medium transition-all"
-                        style={{
-                          background: isRecurring ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                          color:      isRecurring ? "var(--btn-primary-text)" : "var(--text-secondary)",
-                        }}
-                      >
-                        {t("recurrence_repeat")}
-                      </button>
-                    </div>
+                  {/* Hidden date input for native picker */}
+                  <input
+                    id="task-date-input"
+                    type="date"
+                    value={dueDate}
+                    min={today()}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    className="sr-only"
+                    tabIndex={-1}
+                  />
 
-                    <AnimatePresence>
-                      {isRecurring && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="flex gap-2 mt-3">
-                            {ALL_DAYS.map((day) => {
-                              const on = recurrenceDays.includes(day);
-                              return (
-                                <button
-                                  key={day}
-                                  type="button"
-                                  onClick={() => toggleDay(day)}
-                                  className="flex-1 py-2.5 rounded-md text-xs font-semibold transition-all duration-200 active:scale-95 hover:brightness-110"
-                                  style={{
-                                    background: on ? "var(--accent)" : "var(--surface-elevated)",
-                                    color:      on ? "#ffffff" : "var(--text-secondary)",
-                                    border:     on ? "2px solid #3d9468" : "2px solid transparent",
-                                    boxShadow:  on ? "0 2px 10px -3px rgba(76,175,130,0.55)" : "none",
-                                  }}
-                                >
-                                  {tDays(`d${day}` as Parameters<typeof tDays>[0])}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          {daysError && <p className="text-xs mt-1.5" style={{ color: "#ef4444" }}>{daysError}</p>}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Due date — solo para tareas únicas */}
+                  {/* Recurrence days — shown when recurring is active */}
                   <AnimatePresence>
-                    {!isRecurring && (
+                    {isRecurring && (
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden"
                       >
-                        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                          {t("due_date_label")}
-                        </label>
-                        <input
-                          type="date"
-                          value={dueDate}
-                          min={today()}
-                          onChange={(e) => setDueDate(e.target.value)}
-                          className="w-full rounded-md px-3 py-3 text-sm outline-none"
-                          style={{
-                            background: "var(--surface-elevated)",
-                            color: dueDate ? "var(--text-primary)" : "var(--text-muted)",
-                            border: "1.5px solid transparent",
-                            WebkitAppearance: "none",
-                            appearance: "none",
-                          }}
-                        />
+                        <div className="flex gap-2">
+                          {ALL_DAYS.map((day) => {
+                            const on = recurrenceDays.includes(day);
+                            return (
+                              <button
+                                key={day}
+                                type="button"
+                                onClick={() => toggleDay(day)}
+                                className="flex-1 py-2 rounded-md text-xs font-semibold transition-all duration-200 active:scale-95"
+                                style={{
+                                  background: on ? "var(--text-primary)" : "var(--surface-elevated)",
+                                  color:      on ? "var(--bg)" : "var(--text-secondary)",
+                                }}
+                              >
+                                {tDays(`d${day}` as Parameters<typeof tDays>[0])}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {daysError && <p className="text-xs mt-1.5" style={{ color: "#ef4444" }}>{daysError}</p>}
                       </motion.div>
                     )}
                   </AnimatePresence>
 
-                  {/* Horario */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text-secondary)" }}>
-                        {t("schedule_label")}
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => { setHasSchedule(p => !p); setTimeError(""); }}
-                        className="text-xs font-medium px-3 py-1 rounded-full transition-all"
-                        style={{
-                          background: hasSchedule ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                          color:      hasSchedule ? "var(--btn-primary-text)" : "var(--text-secondary)",
-                        }}
+                  {/* Time inputs — shown when schedule is active */}
+                  <AnimatePresence>
+                    {hasSchedule && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
                       >
-                        {t("schedule_toggle")}
-                      </button>
-                    </div>
-
-                    <AnimatePresence>
-                      {hasSchedule && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="flex flex-col gap-3">
-                            <div>
-                              <label className="text-xs mb-1 block" style={{ color: "var(--text-muted)" }}>
-                                {t("start_time_label")}
-                              </label>
-                              <input
-                                type="time"
-                                value={startTime}
-                                onChange={(e) => { setStartTime(e.target.value); setTimeError(""); }}
-                                className="w-full rounded-md px-3 py-3 text-sm outline-none"
-                                style={{
-                                  background: "var(--surface-elevated)",
-                                  color: "var(--text-primary)",
-                                  border: `1.5px solid ${timeError ? "#ef4444" : "transparent"}`,
-                                  WebkitAppearance: "none",
-                                  appearance: "none",
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs mb-1 block" style={{ color: "var(--text-muted)" }}>
-                                {t("end_time_label")}
-                              </label>
-                              <input
-                                type="time"
-                                value={endTime}
-                                onChange={(e) => { setEndTime(e.target.value); setTimeError(""); }}
-                                className="w-full rounded-md px-3 py-3 text-sm outline-none"
-                                style={{
-                                  background: "var(--surface-elevated)",
-                                  color: "var(--text-primary)",
-                                  border: `1.5px solid ${timeError ? "#ef4444" : "transparent"}`,
-                                  WebkitAppearance: "none",
-                                  appearance: "none",
-                                }}
-                              />
-                            </div>
+                        <div className="flex gap-3">
+                          <div className="flex-1">
+                            <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>
+                              {t("start_time_label")}
+                            </label>
+                            <input
+                              type="time"
+                              value={startTime}
+                              onChange={(e) => { setStartTime(e.target.value); setTimeError(""); }}
+                              className="w-full rounded-md px-3 py-2.5 text-sm outline-none"
+                              style={{
+                                background: "var(--surface-elevated)",
+                                color: "var(--text-primary)",
+                                border: `1.5px solid ${timeError ? "#ef4444" : "transparent"}`,
+                              }}
+                            />
                           </div>
-                          {timeError && <p className="text-xs mt-1.5" style={{ color: "#ef4444" }}>{timeError}</p>}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Icono */}
-                  <div>
-                    <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                      {t("icon_label")}
-                    </label>
-                    <button
-                      type="button"
-                      onClick={() => setIconPickerOpen(true)}
-                      className="w-full flex items-center justify-between px-4 py-4 rounded-lg transition-opacity active:opacity-70"
-                      style={{ background: "var(--surface-elevated)" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"
-                          style={{ background: "var(--border)" }}
-                        >
-                          {icon ? (
-                            <HabitIcon icon={icon} size={20} color="var(--text-primary)" />
-                          ) : (
-                            <span className="text-sm" style={{ color: "var(--text-muted)" }}>—</span>
-                          )}
+                          <div className="flex-1">
+                            <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>
+                              {t("end_time_label")}
+                            </label>
+                            <input
+                              type="time"
+                              value={endTime}
+                              onChange={(e) => { setEndTime(e.target.value); setTimeError(""); }}
+                              className="w-full rounded-md px-3 py-2.5 text-sm outline-none"
+                              style={{
+                                background: "var(--surface-elevated)",
+                                color: "var(--text-primary)",
+                                border: `1.5px solid ${timeError ? "#ef4444" : "transparent"}`,
+                              }}
+                            />
+                          </div>
                         </div>
-                        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                          {icon ? icon.replace(/^lucide:/, "") : t("no_icon")}
-                        </p>
-                      </div>
-                      <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
-                    </button>
-                    <IconPickerDialog
-                      open={iconPickerOpen}
-                      onClose={() => setIconPickerOpen(false)}
-                      value={icon}
-                      onChange={setIcon}
-                      allowNone
-                      noneLabel={t("icon_none")}
-                      title={t("select_icon")}
-                      categoryLabel={(key) => tCat(key as Parameters<typeof tCat>[0])}
-                    />
-                  </div>
+                        {timeError && <p className="text-xs mt-1.5" style={{ color: "#ef4444" }}>{timeError}</p>}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Icon — compact row */}
+                  <button
+                    type="button"
+                    onClick={() => setIconPickerOpen(true)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-opacity active:opacity-70 w-full"
+                    style={{ background: "var(--surface-elevated)" }}
+                  >
+                    <div
+                      className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+                      style={{ background: "var(--border)" }}
+                    >
+                      {icon ? (
+                        <HabitIcon icon={icon} size={16} color="var(--text-primary)" />
+                      ) : (
+                        <span className="text-xs" style={{ color: "var(--text-muted)" }}>—</span>
+                      )}
+                    </div>
+                    <span className="text-sm font-medium flex-1 text-left" style={{ color: "var(--text-primary)" }}>
+                      {icon ? icon.replace(/^lucide:/, "") : t("no_icon")}
+                    </span>
+                    <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
+                  </button>
+                  <IconPickerDialog
+                    open={iconPickerOpen}
+                    onClose={() => setIconPickerOpen(false)}
+                    value={icon}
+                    onChange={setIcon}
+                    allowNone
+                    noneLabel={t("icon_none")}
+                    title={t("select_icon")}
+                    categoryLabel={(key) => tCat(key as Parameters<typeof tCat>[0])}
+                  />
 
                   {/* Subtareas */}
                   <div>

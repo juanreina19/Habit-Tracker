@@ -40,8 +40,8 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
     <div
       className="group rounded-lg p-2.5 transition-all cursor-pointer"
       style={{
-        background: "var(--surface-elevated)",
-        border: overdue ? "1px solid rgba(239,68,68,0.3)" : "1px solid transparent",
+        background: "var(--surface)",
+        border: overdue ? "1px solid rgba(239,68,68,0.3)" : "1px solid var(--border)",
       }}
       onClick={(e) => {
         if ((e.target as HTMLElement).closest("button")) return;
@@ -75,7 +75,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
 
         {/* Importance star */}
         {task.isImportant && (
-          <Star size={12} fill="#F59E0B" stroke="#F59E0B" className="flex-shrink-0" />
+          <Star size={12} fill="var(--text-secondary)" stroke="var(--text-secondary)" className="flex-shrink-0" />
         )}
 
         {/* Subtask count inline */}

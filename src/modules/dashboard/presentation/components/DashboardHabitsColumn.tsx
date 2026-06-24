@@ -76,20 +76,20 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
               <span
                 className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
                 style={{
-                  background: done ? accentColor : "transparent",
-                  border: `2px solid ${done ? accentColor : "var(--border)"}`,
+                  background: done ? "#FFFFFF" : "transparent",
+                  border: done ? "2px solid #FFFFFF" : "2px solid var(--border)",
                 }}
               >
                 {done && (
                   <svg width={10} height={10} viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M2 6l3 3 5-5" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </span>
 
               {/* Icon */}
               {habit.icon && (
-                <span className="flex-shrink-0" style={{ color: done ? "var(--text-muted)" : accentColor }}>
+                <span className="flex-shrink-0" style={{ color: done ? "var(--text-muted)" : "var(--text-secondary)" }}>
                   <HabitIcon icon={habit.icon} size={16} />
                 </span>
               )}

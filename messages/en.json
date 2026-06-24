@@ -236,7 +236,8 @@
     "delete_subtask": "Delete subtask",
     "subtasks_hint_new_task": "You'll be able to add subtasks after saving the task.",
     "important": "Important",
-    "mark_important": "Mark as important"
+    "mark_important": "Mark as important",
+    "form_free": "Free"
   },
   "calendar": {
     "subtitle": "View",
