@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { format } from "date-fns";
+import { format, subMonths, eachMonthOfInterval } from "date-fns";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
 import type { StudySession } from "../../domain/entities/StudySession";
 import type { Subject } from "../../domain/entities/Subject";
 
@@ -28,40 +30,83 @@ export function StudyStatsPanel({ stats, sessions, subjects }: Props) {
   const subjectMap = new Map(subjects.map((s) => [s.id, s]));
   const recentSessions = sessions.slice(0, 5);
 
+  const monthlyData = useMemo(() => {
+    const now = new Date();
+    const months = eachMonthOfInterval({ start: subMonths(now, 5), end: now });
+    return months.map((month) => {
+      const key = format(month, "yyyy-MM");
+      const count = sessions.filter((s) => s.startedAt.startsWith(key)).length;
+      return { month: format(month, "MMM"), sessions: count };
+    });
+  }, [sessions]);
+
   return (
     <div className="flex flex-col gap-4">
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: t("stats_hours"), value: stats.totalHours.toString() },
+          { label: t("stats_hours"), value: stats.totalHours.toFixed(1) },
           { label: t("stats_sessions"), value: stats.totalSessions.toString() },
           { label: t("stats_streak"), value: stats.streak.toString() },
         ].map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-lg p-4 text-center"
-            style={{ background: "var(--surface)" }}
-          >
-            <p className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+          <div key={stat.label} className="text-center">
+            <p className="text-3xl font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>
               {stat.value}
             </p>
-            <p className="text-xs mt-1 uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+            <p className="text-[11px] mt-1 uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>
               {stat.label}
             </p>
           </div>
         ))}
       </div>
 
+      {/* Monthly frequency */}
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-secondary)" }}>
+          {t("monthly_frequency")}
+        </p>
+        <div className="h-24">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={monthlyData}>
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis hide />
+              <Tooltip
+                contentStyle={{
+                  background: "var(--surface-elevated)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 8,
+                  fontSize: 12,
+                  color: "var(--text-primary)",
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="sessions"
+                stroke="var(--accent)"
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       {/* Activity heatmap */}
       <div className="rounded-lg p-4" style={{ background: "var(--surface)" }}>
-        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("activity")}
         </p>
         <div className="grid gap-[3px]" style={{ gridTemplateColumns: "repeat(7, 1fr)" }}>
           {stats.heatmap.map((day) => (
             <div
               key={day.date}
-              className="aspect-square rounded-[3px]"
+              className="w-[10px] h-[10px] rounded-[3px]"
               style={{ background: heatmapColor(day.count) }}
               title={`${day.date}: ${day.count}`}
             />
@@ -82,7 +127,7 @@ export function StudyStatsPanel({ stats, sessions, subjects }: Props) {
 
       {/* Recent sessions */}
       <div className="rounded-lg p-4" style={{ background: "var(--surface)" }}>
-        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("recent_sessions")}
         </p>
         {recentSessions.length === 0 ? (

@@ -4,17 +4,18 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
 import { usePlanner, type ScheduledBlock } from "../hooks/usePlanner";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
+import { PRIORITY_COLORS } from "@/modules/tasks/presentation/constants/taskColors";
 import type { UUID } from "@/shared/types/database.types";
 
 const TIMELINE_START = 6;
 const TIMELINE_END = 23;
 const HOURS = Array.from({ length: TIMELINE_END - TIMELINE_START + 1 }, (_, i) => TIMELINE_START + i);
-const HOUR_HEIGHT = 60;
+const HOUR_HEIGHT = 68;
 
 interface Props {
   userId: UUID;
@@ -53,20 +54,20 @@ export default function PlannerView({ userId }: Props) {
         </div>
 
         {/* Date nav */}
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={planner.prevDay} className="p-1.5 rounded-md" style={{ color: "var(--text-secondary)" }}>
-            <ChevronLeft size={18} />
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={planner.prevDay} className="p-1 rounded-md transition-opacity active:opacity-60" style={{ color: "var(--text-secondary)" }}>
+            <ChevronLeft size={16} />
           </button>
           <button
             type="button"
             onClick={planner.goToToday}
-            className="text-sm font-medium capitalize px-3 py-1 rounded-md"
-            style={{ color: "var(--text-primary)", background: "var(--surface)" }}
+            className="text-base font-medium capitalize"
+            style={{ color: "var(--text-primary)" }}
           >
             {dateStr}
           </button>
-          <button type="button" onClick={planner.nextDay} className="p-1.5 rounded-md" style={{ color: "var(--text-secondary)" }}>
-            <ChevronRight size={18} />
+          <button type="button" onClick={planner.nextDay} className="p-1 rounded-md transition-opacity active:opacity-60" style={{ color: "var(--text-secondary)" }}>
+            <ChevronRight size={16} />
           </button>
         </div>
       </div>
@@ -75,7 +76,7 @@ export default function PlannerView({ userId }: Props) {
         {/* Pending sidebar */}
         <div className="lg:w-[280px] flex-shrink-0">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text-secondary)" }}>
               {t("pending")}
             </span>
             <div className="flex-1 h-px" style={{ background: "var(--border)", opacity: 0.4 }} />
@@ -104,6 +105,7 @@ export default function PlannerView({ userId }: Props) {
                 </motion.div>
               ))
             )}
+
           </div>
         </div>
 
@@ -131,7 +133,7 @@ export default function PlannerView({ userId }: Props) {
                 onClick={() => handleTimeClick(hour)}
               >
                 <span
-                  className="absolute left-3 top-1 text-[10px] font-medium"
+                  className="absolute left-3 top-1 text-[10px] font-medium tabular-nums"
                   style={{ color: "var(--text-muted)" }}
                 >
                   {String(hour).padStart(2, "0")}:00
@@ -168,21 +170,33 @@ function PendingTaskCard({
 }) {
   return (
     <div
-      className="rounded-lg p-3 flex items-center gap-2.5"
+      className="rounded-lg p-2.5 flex items-center gap-2"
       style={{
         background: isScheduling ? "var(--accent)15" : "var(--surface)",
         border: isScheduling ? "1px solid var(--accent)40" : "1px solid transparent",
       }}
     >
+      {/* Priority dot */}
+      <span
+        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+        style={{ background: PRIORITY_COLORS[task.priority] }}
+      />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
           {task.title}
         </p>
-        {task.dueDate && (
-          <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-            {task.dueDate}
-          </p>
-        )}
+        <div className="flex items-center gap-2 mt-0.5">
+          {task.dueDate && (
+            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+              {task.dueDate}
+            </span>
+          )}
+          {(task.subtaskTotal ?? 0) > 0 && (
+            <span className="text-[10px] tabular-nums" style={{ color: "var(--text-muted)" }}>
+              {task.subtaskCompleted ?? 0}/{task.subtaskTotal}
+            </span>
+          )}
+        </div>
       </div>
       <button
         type="button"
@@ -250,7 +264,7 @@ function NowIndicator() {
 
 function PlannerSkeleton() {
   return (
-    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10 animate-pulse">
+    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10 skeleton-shimmer">
       <div className="h-7 w-32 rounded-lg mb-6" style={{ background: "var(--surface)" }} />
       <div className="flex gap-6">
         <div className="w-[280px] flex flex-col gap-2">

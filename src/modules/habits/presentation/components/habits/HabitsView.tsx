@@ -520,7 +520,7 @@ function DeleteConfirmDialog({
 
 function HabitsSkeleton() {
   return (
-    <div className="animate-pulse flex flex-col gap-2">
+    <div className="skeleton-shimmer flex flex-col gap-2">
       {[1, 2, 3].map((i) => (
         <div key={i} className="rounded-lg h-16" style={{ background: "var(--surface)" }} />
       ))}

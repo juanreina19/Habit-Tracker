@@ -12,14 +12,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#0F0F1A",
-        surface: "#1A1A2E",
-        "surface-elevated": "#252540",
-        primary: "#FFFFFF",
-        "text-primary": "#FFFFFF",
-        "text-secondary": "#8888AA",
-        success: "#4CAF82",
-        danger: "#FF5252",
+        background: "var(--bg)",
+        surface: "var(--surface)",
+        "surface-elevated": "var(--surface-elevated)",
+        "surface-hover": "var(--surface-hover)",
+        primary: "var(--text-primary)",
+        "text-primary": "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        "text-tertiary": "var(--text-tertiary)",
+        success: "var(--accent)",
+        danger: "var(--danger)",
       },
       borderRadius: {
         sm: "var(--radius-sm)",
@@ -28,7 +30,8 @@ const config: Config = {
         xl: "var(--radius-xl)",
       },
       fontFamily: {
-        sans: ["-apple-system", "BlinkMacSystemFont", "SF Pro Display", "Segoe UI", "sans-serif"],
+        sans: ["var(--font-geist-sans)", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
       },
       animation: {
         "fade-in": "fadeIn 0.3s ease-out",

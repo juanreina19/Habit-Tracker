@@ -535,7 +535,7 @@ function ProgressRing({ percentage, size }: { percentage: number; size: number }
 
 function TodayViewSkeleton() {
   return (
-    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10 animate-pulse">
+    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10 skeleton-shimmer">
       <div className="mb-8">
         <div className="h-4 w-20 rounded-full mb-2" style={{ background: "var(--surface)" }} />
         <div className="h-8 w-48 rounded-full" style={{ background: "var(--surface)" }} />

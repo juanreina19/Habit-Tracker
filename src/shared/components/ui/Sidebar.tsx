@@ -45,10 +45,16 @@ export default function Sidebar() {
               <Tooltip key={href} label={t(key as Parameters<typeof t>[0])}>
                 <Link
                   href={href}
-                  className={`sidebar-link flex items-center justify-center py-2.5 rounded-md ${isActive ? "sidebar-active" : ""}`}
+                  className={`sidebar-link relative flex items-center justify-center py-2.5 rounded-md ${isActive ? "sidebar-active" : ""}`}
                   style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
                 >
-                  <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
+                  {isActive && (
+                    <span
+                      className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full"
+                      style={{ background: "var(--accent)" }}
+                    />
+                  )}
+                  <Icon size={20} strokeWidth={isActive ? 2 : 1.25} />
                 </Link>
               </Tooltip>
             );

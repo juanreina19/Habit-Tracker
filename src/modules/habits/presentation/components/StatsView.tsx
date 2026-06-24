@@ -86,7 +86,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
       {/* Yearly heatmap */}
       <Section title={t("activity_year", { year: currentYear })}>
         {heatmapLoading ? (
-          <div className="h-20 rounded-md animate-pulse" style={{ background: "#1A1A1A" }} />
+          <div className="h-20 rounded-md skeleton-shimmer" style={{ background: "#1A1A1A" }} />
         ) : (
           <YearlyHeatmap days={heatmapDays} year={currentYear} />
         )}
@@ -437,7 +437,7 @@ function EmptyChart() {
 
 function StatsSkeleton() {
   return (
-    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10 animate-pulse">
+    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10 skeleton-shimmer">
       <div className="mb-6">
         <div className="h-4 w-24 rounded-full mb-2" style={{ background: "var(--surface)" }} />
         <div className="h-8 w-40 rounded-full" style={{ background: "var(--surface)" }} />

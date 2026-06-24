@@ -113,7 +113,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
       } : undefined}
       whileTap={!compact ? { scale: 0.98 } : {}}
       transition={{ type: "spring", stiffness: 500, damping: 35 }}
-      className="flex flex-col gap-2 rounded-lg p-4 select-none"
+      className="flex flex-col gap-2 rounded-lg p-3 select-none"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",

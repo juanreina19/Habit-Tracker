@@ -87,22 +87,25 @@ export default function StudiesView({ userId }: Props) {
           <div className="flex flex-col gap-5">
             {/* Schedule week */}
             <div className="rounded-lg p-4" style={{ background: "var(--surface)" }}>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
                 {t("schedule")}
               </p>
               <div className="flex gap-2">
                 {DAYS.map((day, i) => (
                   <div
                     key={i}
-                    className="flex-1 flex flex-col items-center gap-1 py-2 rounded-md"
+                    className="flex-1 flex flex-col items-center gap-1 py-2.5 rounded-lg transition-colors"
                     style={{
                       background: i === todayIdx ? "var(--btn-primary-bg)" : "transparent",
                       color: i === todayIdx ? "var(--btn-primary-text)" : "var(--text-secondary)",
                     }}
                   >
-                    <span className="text-xs font-medium">{day}</span>
+                    <span className={`text-sm ${i === todayIdx ? "font-semibold" : "font-medium"}`}>{day}</span>
                     {i === todayIdx && (
-                      <span className="text-[10px]">Today</span>
+                      <span className="text-[10px] font-medium">Today</span>
+                    )}
+                    {i !== todayIdx && (
+                      <span className="w-1 h-1 rounded-full" style={{ background: "var(--text-muted)", opacity: 0.3 }} />
                     )}
                   </div>
                 ))}
@@ -111,7 +114,7 @@ export default function StudiesView({ userId }: Props) {
 
             {/* Subjects */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
                 {t("subjects")}
               </p>
 
@@ -217,7 +220,7 @@ export default function StudiesView({ userId }: Props) {
 
 function StudiesSkeleton() {
   return (
-    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10 animate-pulse">
+    <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10 skeleton-shimmer">
       <div className="h-7 w-32 rounded-lg mb-2" style={{ background: "var(--surface)" }} />
       <div className="h-4 w-64 rounded-lg mb-6" style={{ background: "var(--surface)" }} />
       <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-6">

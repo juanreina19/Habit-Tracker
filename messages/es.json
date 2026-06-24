@@ -341,7 +341,8 @@
   },
   "quickAdd": {
     "new_task": "Nueva tarea",
-    "new_habit": "Nuevo hábito"
+    "new_habit": "Nuevo hábito",
+    "new_study": "Sesión de estudio"
   },
   "planner": {
     "title": "Planificador",
@@ -374,6 +375,7 @@
     "stats_sessions": "Sesiones",
     "stats_streak": "Racha",
     "stats_monthly": "Frecuencia mensual",
+    "monthly_frequency": "Frecuencia mensual",
     "recent_sessions": "Sesiones recientes",
     "no_subjects": "Sin materias aún",
     "no_subjects_hint": "Crea tu primera materia para comenzar a registrar sesiones de estudio.",

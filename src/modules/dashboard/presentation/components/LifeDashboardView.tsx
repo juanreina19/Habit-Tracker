@@ -183,13 +183,13 @@ export default function LifeDashboardView({ userId }: Props) {
 function DashboardSkeleton() {
   return (
     <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10">
-      <div className="h-7 w-48 rounded-lg mb-6 animate-pulse" style={{ background: "var(--surface)" }} />
+      <div className="h-7 w-48 rounded-lg mb-6 skeleton-shimmer" style={{ background: "var(--surface)" }} />
       <div className="flex gap-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="w-[300px] flex-shrink-0 flex flex-col gap-2">
-            <div className="h-5 w-24 rounded-lg animate-pulse" style={{ background: "var(--surface)" }} />
-            <div className="h-14 rounded-lg animate-pulse" style={{ background: "var(--surface)" }} />
-            <div className="h-14 rounded-lg animate-pulse" style={{ background: "var(--surface)" }} />
+            <div className="h-5 w-24 rounded-lg skeleton-shimmer" style={{ background: "var(--surface)" }} />
+            <div className="h-14 rounded-lg skeleton-shimmer" style={{ background: "var(--surface)" }} />
+            <div className="h-14 rounded-lg skeleton-shimmer" style={{ background: "var(--surface)" }} />
           </div>
         ))}
       </div>

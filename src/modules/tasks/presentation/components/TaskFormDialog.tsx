@@ -175,7 +175,7 @@ export function TaskFormDialog({
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
           style={{ background: "var(--surface)", maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto p-6" style={{ maxHeight: "90dvh" }}>
@@ -250,14 +250,14 @@ export function TaskFormDialog({
                   />
 
                   {/* Metadata pills row */}
-                  <div className="flex flex-wrap gap-2 py-1" style={{ borderTop: "1px solid var(--border)" }}>
+                  <div className="flex flex-wrap gap-1.5 py-1.5" style={{ borderTop: "1px solid var(--border)" }}>
                     {/* Priority pills */}
                     {PRIORITIES.map((p) => (
                       <button
                         key={p}
                         type="button"
                         onClick={() => setPriority(p)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
                         style={{
                           background: priority === p ? PRIORITY_COLORS[p] + "1A" : "var(--surface-elevated)",
                           color:      priority === p ? PRIORITY_COLORS[p] : "var(--text-secondary)",
@@ -272,13 +272,13 @@ export function TaskFormDialog({
                     <button
                       type="button"
                       onClick={() => setIsImportant((p) => !p)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
                       style={{
                         background: isImportant ? "rgba(245,158,11,0.12)" : "var(--surface-elevated)",
                         color: isImportant ? "#F59E0B" : "var(--text-secondary)",
                       }}
                     >
-                      <Star size={12} fill={isImportant ? "#F59E0B" : "none"} strokeWidth={isImportant ? 0 : 1.5} />
+                      <Star size={11} fill={isImportant ? "#F59E0B" : "none"} strokeWidth={isImportant ? 0 : 1.5} />
                       {isImportant ? t("important") : t("mark_important")}
                     </button>
 
@@ -290,7 +290,7 @@ export function TaskFormDialog({
                             key={cat.id}
                             type="button"
                             onClick={() => setCategoryId(categoryId === cat.id ? null : cat.id)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all"
                             style={{
                               background: categoryId === cat.id
                                 ? (cat.color ? cat.color + "1A" : "var(--btn-primary-bg)")
@@ -312,7 +312,7 @@ export function TaskFormDialog({
 
                   {/* Recurrencia */}
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                    <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                       {t("recurrence_label")}
                     </label>
                     <div className="grid grid-cols-2 gap-2">
@@ -384,7 +384,7 @@ export function TaskFormDialog({
                         exit={{ opacity: 0, height: 0 }}
                         className="overflow-hidden"
                       >
-                        <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                        <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                           {t("due_date_label")}
                         </label>
                         <input
@@ -408,7 +408,7 @@ export function TaskFormDialog({
                   {/* Horario */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+                      <label className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text-secondary)" }}>
                         {t("schedule_label")}
                       </label>
                       <button
@@ -478,7 +478,7 @@ export function TaskFormDialog({
 
                   {/* Icono */}
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                    <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                       {t("icon_label")}
                     </label>
                     <button
@@ -520,7 +520,7 @@ export function TaskFormDialog({
                   <div>
                     {isEdit && subtasks.length > 0 && (
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text-secondary)" }}>
                           {t("subtasks_label")}
                         </span>
                         <span className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -538,12 +538,12 @@ export function TaskFormDialog({
                       </div>
                     )}
                     {isEdit && subtasks.length === 0 && (
-                      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                      <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                         {t("subtasks_label")}
                       </label>
                     )}
                     {!isEdit && (
-                      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                      <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                         {t("subtasks_label")}
                       </label>
                     )}
