@@ -4,10 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Home, CalendarRange, Sparkles, BookOpen, Settings2, Plus, Sun, Moon, User, LogOut } from "lucide-react";
+import { Home, CalendarRange, Sparkles, BookOpen, Settings2, Sun, Moon, User, LogOut } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
-import { QuickAddMenu } from "@/shared/components/ui/QuickAddMenu";
 import { createClient } from "@/shared/lib/supabase/client";
 
 const NAV_ROUTES = [
@@ -23,7 +22,6 @@ export default function Sidebar() {
   const { theme, toggleTheme } = useTheme();
   const t = useTranslations("nav");
   const ts = useTranslations("settings");
-  const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -37,15 +35,17 @@ export default function Sidebar() {
   return (
     <TooltipProvider>
       <aside
-        className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-[72px] z-40 border-r"
-        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-[72px] z-40"
+        style={{ background: "var(--sidebar-bg)" }}
       >
         {/* Logo */}
-        <div className="flex items-center justify-center py-6 border-b" style={{ borderColor: "var(--border)" }}>
+        <div className="flex items-center justify-center py-6">
           <span className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
             HT
           </span>
         </div>
+        {/* Divider */}
+        <div className="mx-4 h-px" style={{ background: "var(--border)" }} />
 
         {/* Nav items */}
         <nav className="flex-1 px-2.5 py-4 flex flex-col gap-1">
@@ -70,23 +70,13 @@ export default function Sidebar() {
             );
           })}
 
-          {/* Quick-Add */}
-          <div className="relative mt-2">
-            <Tooltip label={t("quick_add")}>
-              <button
-                onClick={() => setQuickAddOpen((o) => !o)}
-                className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-all"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                <Plus size={20} strokeWidth={1.5} />
-              </button>
-            </Tooltip>
-            <QuickAddMenu open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
-          </div>
         </nav>
 
+        {/* Divider */}
+        <div className="mx-4 h-px" style={{ background: "var(--border)" }} />
+
         {/* Bottom section — theme, settings, profile, logout */}
-        <div className="px-2.5 py-3 border-t flex flex-col gap-1" style={{ borderColor: "var(--border)" }}>
+        <div className="px-2.5 py-3 flex flex-col gap-1">
           {/* Theme toggle */}
           <Tooltip label={theme === "dark" ? ts("theme_light") : ts("theme_dark")}>
             <button

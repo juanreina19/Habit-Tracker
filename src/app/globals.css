@@ -5,10 +5,10 @@
 :root {
   /* Backgrounds */
   --bg:               #000000;
-  --surface:          #111111;
-  --surface-elevated: #1C1C1C;
+  --surface:          #0C0C0C;
+  --surface-elevated: #161616;
   --surface-hover:    #1A1A1A;
-  --border:           #2A2A2A;
+  --border:           #222222;
 
   /* Text */
   --text-primary:   #FFFFFF;
@@ -29,7 +29,8 @@
   --nav-bg:     rgba(20, 20, 22, 0.55);
   --nav-border: rgba(255,255,255,0.13);
 
-  /* Sidebar hover/active */
+  /* Sidebar */
+  --sidebar-bg:           #0D0D0D;
   --sidebar-active-bg:    rgba(255, 255, 255, 0.10);
   --sidebar-hover-bg:     rgba(255, 255, 255, 0.05);
   --sidebar-active-color: #FFFFFF;
@@ -82,7 +83,8 @@
   --nav-bg:     rgba(240, 240, 242, 0.80);
   --nav-border: rgba(0,0,0,0.10);
 
-  /* Sidebar hover/active */
+  /* Sidebar */
+  --sidebar-bg:           #F0F0F2;
   --sidebar-active-bg:    rgba(0, 0, 0, 0.08);
   --sidebar-hover-bg:     rgba(0, 0, 0, 0.04);
   --sidebar-active-color: #000000;
