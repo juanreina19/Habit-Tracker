@@ -42,11 +42,11 @@
   --focus-btn-ring: 0 0 0 1px rgba(255, 255, 255, 0.14);
 
   /* Design tokens — radius */
-  --radius-xs: 6px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
   /* Design tokens — spacing */
   --space-2xs: 2px;
@@ -107,16 +107,22 @@ body {
   background-color: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
 }
 
-/* "-webkit-font-smoothing: antialiased" se pensó para pantallas Retina de macOS:
-   en Windows desactiva ClearType y deja el texto (sobre todo blanco en fondo
-   oscuro) más fino y borroso. Se activa solo en pantallas de alta densidad
-   (Retina y equivalentes), donde sí mejora el render. */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   html, body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Linux desktop: force subpixel antialiasing for sharper text */
+@media (hover: hover) and (pointer: fine) and (not (-webkit-min-device-pixel-ratio: 2)) {
+  html, body {
+    -webkit-font-smoothing: auto;
+    font-smooth: auto;
   }
 }
 

@@ -108,6 +108,8 @@
     "my_profile": "My profile",
     "sign_out": "Sign out",
     "signing_out": "Signing out…",
+    "sign_out_confirm": "Do you want to sign out?",
+    "cancel": "Cancel",
     "language": "Language",
     "statistics": "Statistics",
     "view_statistics": "View Statistics",

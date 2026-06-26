@@ -2,27 +2,37 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Home, CalendarRange, Sparkles, BookOpen, Settings2, Plus, Sun, Moon } from "lucide-react";
+import { Home, CalendarRange, Sparkles, BookOpen, Settings2, Plus, Sun, Moon, User, LogOut } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 import { QuickAddMenu } from "@/shared/components/ui/QuickAddMenu";
+import { createClient } from "@/shared/lib/supabase/client";
 
 const NAV_ROUTES = [
   { href: "/",         key: "home",     Icon: Home },
   { href: "/planner",  key: "planner",  Icon: CalendarRange },
   { href: "/habits",   key: "habits",   Icon: Sparkles },
   { href: "/studies",  key: "studies",  Icon: BookOpen },
-  { href: "/settings", key: "settings", Icon: Settings2 },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const t = useTranslations("nav");
   const ts = useTranslations("settings");
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    const client = createClient();
+    await client.auth.signOut();
+    router.push("/login");
+  };
 
   return (
     <TooltipProvider>
@@ -75,8 +85,9 @@ export default function Sidebar() {
           </div>
         </nav>
 
-        {/* Theme toggle */}
-        <div className="px-2.5 py-4 border-t" style={{ borderColor: "var(--border)" }}>
+        {/* Bottom section — theme, settings, profile, logout */}
+        <div className="px-2.5 py-3 border-t flex flex-col gap-1" style={{ borderColor: "var(--border)" }}>
+          {/* Theme toggle */}
           <Tooltip label={theme === "dark" ? ts("theme_light") : ts("theme_dark")}>
             <button
               onClick={toggleTheme}
@@ -86,6 +97,71 @@ export default function Sidebar() {
               {theme === "dark" ? <Sun size={20} strokeWidth={1.5} /> : <Moon size={20} strokeWidth={1.5} />}
             </button>
           </Tooltip>
+
+          {/* Settings */}
+          <Tooltip label={t("settings")}>
+            <Link
+              href="/settings"
+              className={`sidebar-link relative flex items-center justify-center py-2.5 rounded-md ${pathname.startsWith("/settings") ? "sidebar-active" : ""}`}
+              style={{ color: pathname.startsWith("/settings") ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
+            >
+              <Settings2 size={20} strokeWidth={pathname.startsWith("/settings") ? 2 : 1.25} />
+            </Link>
+          </Tooltip>
+
+          {/* Profile */}
+          <Tooltip label={ts("my_profile")}>
+            <Link
+              href="/settings"
+              className="sidebar-link flex items-center justify-center py-2.5 rounded-md transition-all"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              <User size={20} strokeWidth={1.25} />
+            </Link>
+          </Tooltip>
+
+          {/* Logout */}
+          <div className="relative">
+            <Tooltip label={ts("sign_out")}>
+              <button
+                onClick={() => setConfirmLogout(true)}
+                disabled={loggingOut}
+                className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-all disabled:opacity-40"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                <LogOut size={20} strokeWidth={1.25} />
+              </button>
+            </Tooltip>
+
+            {/* Confirm logout popover */}
+            {confirmLogout && (
+              <div
+                className="absolute left-full bottom-0 ml-2 z-50 rounded-md p-3 w-48 flex flex-col gap-2"
+                style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+              >
+                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                  {ts("sign_out_confirm")}
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setConfirmLogout(false)}
+                    className="flex-1 py-1.5 rounded-md text-xs font-medium"
+                    style={{ background: "var(--surface)", color: "var(--text-secondary)" }}
+                  >
+                    {ts("cancel")}
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    disabled={loggingOut}
+                    className="flex-1 py-1.5 rounded-md text-xs font-semibold disabled:opacity-50"
+                    style={{ background: "#ef4444", color: "#fff" }}
+                  >
+                    {loggingOut ? "…" : ts("sign_out")}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </aside>
     </TooltipProvider>
