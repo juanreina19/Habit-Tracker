@@ -79,10 +79,10 @@ export function SubjectFormDialog({ open, onClose, subject, onSave }: Props) {
               style={{
                 background: "var(--surface-elevated)",
                 color: "var(--text-primary)",
-                border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
+                border: nameError ? "1.5px solid var(--danger)" : "1.5px solid transparent",
               }}
             />
-            {nameError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{nameError}</p>}
+            {nameError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{nameError}</p>}
           </div>
 
           {/* Color */}
@@ -118,7 +118,7 @@ export function SubjectFormDialog({ open, onClose, subject, onSave }: Props) {
                   key={emoji}
                   type="button"
                   onClick={() => setIcon(icon === emoji ? null : emoji)}
-                  className="w-10 h-10 rounded-md flex items-center justify-center text-xl transition-all active:scale-90"
+                  className="w-10 h-10 rounded-md flex items-center justify-center text-xl transition-transform active:scale-90"
                   style={{
                     background: icon === emoji ? "var(--surface-elevated)" : "transparent",
                     border: `1.5px solid ${icon === emoji ? "var(--btn-primary-bg)" : "var(--border)"}`,

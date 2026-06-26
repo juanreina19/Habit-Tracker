@@ -94,7 +94,7 @@ export default function WeeklyView({ userId, userCreatedAt, embedded = false }: 
         <WeeklySkeleton />
       ) : error ? (
         <div className="p-6 flex items-center justify-center">
-          <p className="text-sm" style={{ color: "#FF5252" }}>Error: {error}</p>
+          <p className="text-sm" style={{ color: "var(--danger)" }}>Error: {error}</p>
         </div>
       ) : !data ? null : (
         <>

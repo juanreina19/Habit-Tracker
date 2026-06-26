@@ -50,7 +50,7 @@ export default function BottomNav() {
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all min-w-[52px]",
+                "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-colors min-w-[52px]",
                 isActive ? "opacity-100" : "opacity-35 active:opacity-60"
               )}
             >

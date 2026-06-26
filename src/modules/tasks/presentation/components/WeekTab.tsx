@@ -247,7 +247,7 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
         {showOverdue && (
           <span
             className="flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-            style={{ background: "#ef444418", color: "#ef4444" }}
+            style={{ background: "rgba(239,68,68,0.09)", color: "var(--danger)" }}
           >
             {t("overdue")}
           </span>

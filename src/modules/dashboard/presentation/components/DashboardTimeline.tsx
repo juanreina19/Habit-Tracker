@@ -100,7 +100,7 @@ export function DashboardTimeline({ tasks, habits }: Props) {
         {showNow && (
           <div
             className="absolute rounded-full"
-            style={{ left: `${nowPct}%`, top: 18, width: 3, height: 12, background: "#ef4444", transform: "translateX(-50%)", zIndex: 10 }}
+            style={{ left: `${nowPct}%`, top: 18, width: 3, height: 12, background: "var(--danger)", transform: "translateX(-50%)", zIndex: 10 }}
           />
         )}
 

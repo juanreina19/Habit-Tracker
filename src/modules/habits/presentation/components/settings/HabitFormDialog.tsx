@@ -364,7 +364,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                           key={tabType}
                           type="button"
                           onClick={() => setIconTab(tabType)}
-                          className="flex-1 py-2 rounded-sm text-xs font-medium transition-all"
+                          className="flex-1 py-2 rounded-sm text-xs font-medium transition-colors"
                           style={{
                             background: iconTab === tabType ? "var(--surface)" : "transparent",
                             color: iconTab === tabType ? "var(--text-primary)" : "var(--text-secondary)",
@@ -382,7 +382,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                             key={emoji}
                             type="button"
                             onClick={() => { setIcon(icon === emoji ? null : emoji); navigate(homeScene(), -1); }}
-                            className="w-12 h-12 rounded-md flex items-center justify-center text-2xl transition-all active:scale-90"
+                            className="w-12 h-12 rounded-md flex items-center justify-center text-2xl transition-transform active:scale-90"
                             style={{
                               background: icon === emoji ? "var(--surface-elevated)" : "transparent",
                               border: `1.5px solid ${icon === emoji ? "var(--btn-primary-bg)" : "var(--border)"}`,
@@ -487,10 +487,10 @@ function NameField({ name, setName, nameError, setNameError, t }: {
         style={{
           background: "var(--surface-elevated)",
           color: "var(--text-primary)",
-          border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
+          border: nameError ? "1.5px solid var(--danger)" : "1.5px solid transparent",
         }}
       />
-      {nameError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{nameError}</p>}
+      {nameError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{nameError}</p>}
     </div>
   );
 }
@@ -511,7 +511,7 @@ function CategoryField({ categories, categoryId, setCategoryId, t }: {
         <button
           type="button"
           onClick={() => setCategoryId(null)}
-          className="px-3 py-2 rounded-md text-xs font-medium transition-all active:scale-95"
+          className="px-3 py-2 rounded-md text-xs font-medium transition-colors active:scale-95"
           style={{
             background: categoryId === null ? "var(--surface-elevated)" : "transparent",
             color: categoryId === null ? "var(--text-primary)" : "var(--text-secondary)",
@@ -525,7 +525,7 @@ function CategoryField({ categories, categoryId, setCategoryId, t }: {
             key={cat.id}
             type="button"
             onClick={() => setCategoryId(cat.id)}
-            className="px-3 py-2 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all active:scale-95"
+            className="px-3 py-2 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors active:scale-95"
             style={{
               background: categoryId === cat.id ? (cat.color ?? "#4CAF82") + "25" : "transparent",
               color: categoryId === cat.id ? (cat.color ?? "#4CAF82") : "var(--text-secondary)",
@@ -561,7 +561,7 @@ function DaysGrid({ activeDays, toggleDay, daysError, tDays, t }: {
               key={day}
               type="button"
               onClick={() => toggleDay(day)}
-              className="flex-1 py-2.5 rounded-md text-xs font-semibold transition-all active:scale-95"
+              className="flex-1 py-2.5 rounded-md text-xs font-semibold transition-colors active:scale-95"
               style={{
                 background: on ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
                 color: on ? "var(--btn-primary-text)" : "var(--text-secondary)",
@@ -572,7 +572,7 @@ function DaysGrid({ activeDays, toggleDay, daysError, tDays, t }: {
           );
         })}
       </div>
-      {daysError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{daysError}</p>}
+      {daysError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{daysError}</p>}
     </div>
   );
 }

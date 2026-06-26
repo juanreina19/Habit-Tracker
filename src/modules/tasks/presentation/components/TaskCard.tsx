@@ -34,7 +34,7 @@ function DueDate({ dueDate, done }: { dueDate: string; done: boolean }) {
     label = dueDate === yesterdayStr
       ? t("yesterday")
       : format(parseLocalDate(dueDate), "d MMM", { locale: dateFnsLocale });
-    color = "#ef4444";
+    color = "var(--danger)";
   } else if (dueDate === todayStr) {
     label = t("today"); color = "var(--accent)";
   } else {
@@ -141,7 +141,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         {isLate && (
           <span
             className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-            style={{ background: "#ef444415", color: "#ef4444" }}
+            style={{ background: "rgba(239,68,68,0.08)", color: "var(--danger)" }}
           >
             {t("overdue")}
           </span>
@@ -229,7 +229,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
               {onDelete && (
                 <DropdownMenu.Item
                   className="task-menu-item flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm cursor-pointer outline-none"
-                  style={{ color: "#ef4444" }}
+                  style={{ color: "var(--danger)" }}
                   onSelect={onDelete}
                 >
                   <Trash2 size={14} strokeWidth={2} />

@@ -93,7 +93,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
             />
           ) : (
             <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold"
+              className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-medium"
               style={{ background: "var(--border)", color: "var(--text-primary)" }}
             >
               {initials}
@@ -152,8 +152,8 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
             onClick={() => setShowDeleteConfirm(true)}
             className="w-full px-5 py-4 flex items-center justify-between transition-opacity active:opacity-60"
           >
-            <span className="text-sm font-medium" style={{ color: "#FF5252" }}>Eliminar cuenta</span>
-            <span style={{ color: "#FF5252", fontSize: 18 }}>→</span>
+            <span className="text-sm font-medium" style={{ color: "var(--danger)" }}>Eliminar cuenta</span>
+            <span style={{ color: "var(--danger)", fontSize: 18 }}>→</span>
           </button>
         ) : (
           <div className="px-5 py-4">
@@ -171,7 +171,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
               <button
                 onClick={handleSignOut}
                 className="flex-1 py-2.5 rounded-md text-sm font-medium"
-                style={{ background: "rgba(255,82,82,0.15)", color: "#FF5252" }}
+                style={{ background: "rgba(255,82,82,0.15)", color: "var(--danger)" }}
               >
                 Eliminar
               </button>
@@ -189,7 +189,7 @@ function StatCard({ label, value, unit, highlight = false }: {
   return (
     <div className="rounded-lg p-3 flex flex-col gap-1" style={{ background: "var(--surface)" }}>
       <p className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>{label}</p>
-      <p className="text-xl font-bold leading-none" style={{ color: highlight ? "var(--accent)" : "var(--text-primary)" }}>
+      <p className="text-xl font-medium leading-none" style={{ color: highlight ? "var(--accent)" : "var(--text-primary)" }}>
         {value}
       </p>
       <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{unit}</p>

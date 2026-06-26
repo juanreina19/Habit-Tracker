@@ -40,7 +40,7 @@ export default function Sidebar() {
       >
         {/* Logo */}
         <div className="flex items-center justify-center py-6">
-          <span className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+          <span className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
             HT
           </span>
         </div>
@@ -81,7 +81,7 @@ export default function Sidebar() {
           <Tooltip label={theme === "dark" ? ts("theme_light") : ts("theme_dark")}>
             <button
               onClick={toggleTheme}
-              className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-all"
+              className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
               {theme === "dark" ? <Sun size={20} strokeWidth={1.5} /> : <Moon size={20} strokeWidth={1.5} />}
@@ -103,7 +103,7 @@ export default function Sidebar() {
           <Tooltip label={ts("my_profile")}>
             <Link
               href="/settings"
-              className="sidebar-link flex items-center justify-center py-2.5 rounded-md transition-all"
+              className="sidebar-link flex items-center justify-center py-2.5 rounded-md transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
               <User size={20} strokeWidth={1.25} />
@@ -116,7 +116,7 @@ export default function Sidebar() {
               <button
                 onClick={() => setConfirmLogout(true)}
                 disabled={loggingOut}
-                className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-all disabled:opacity-40"
+                className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-colors disabled:opacity-40"
                 style={{ color: "var(--text-secondary)" }}
               >
                 <LogOut size={20} strokeWidth={1.25} />
@@ -144,7 +144,7 @@ export default function Sidebar() {
                     onClick={handleLogout}
                     disabled={loggingOut}
                     className="flex-1 py-1.5 rounded-md text-xs font-semibold disabled:opacity-50"
-                    style={{ background: "#ef4444", color: "#fff" }}
+                    style={{ background: "var(--danger)", color: "#fff" }}
                   >
                     {loggingOut ? "…" : ts("sign_out")}
                   </button>

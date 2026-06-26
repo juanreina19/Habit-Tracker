@@ -45,7 +45,7 @@ export function KanbanTab({ tasks, onToggleTask, onEditTask, onDeleteTask, onUpd
       {
         key: "in_progress" as TaskStatus,
         i18nKey: "kanban_in_progress",
-        color: "#3b82f6",
+        color: "var(--info)",
         tasks: tasks.filter((tk) => !isTaskDone(tk) && tk.status === "in_progress"),
       },
       {

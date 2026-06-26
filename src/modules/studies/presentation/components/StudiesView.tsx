@@ -53,7 +53,7 @@ export default function StudiesView({ userId }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between mb-1">
           <div>
-            <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <h1 className="text-xl font-medium" style={{ color: "var(--text-primary)" }}>
               {t("title")}
             </h1>
             <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
@@ -206,7 +206,7 @@ export default function StudiesView({ userId }: Props) {
                 type="button"
                 onClick={handleDeleteSubject}
                 className="flex-1 py-3 rounded-lg text-sm font-semibold"
-                style={{ background: "#FF5252", color: "#FFFFFF" }}
+                style={{ background: "var(--danger)", color: "#FFFFFF" }}
               >
                 {t("delete")}
               </button>

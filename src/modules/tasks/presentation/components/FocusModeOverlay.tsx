@@ -222,7 +222,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
           {/* Timer */}
           <div className="flex flex-col items-center gap-6 w-full lg:w-auto lg:flex-shrink-0">
             <FocusRing percentage={percentage} color={timerColor}>
-              <span className="text-6xl lg:text-8xl font-bold tabular-nums" style={{ color: timerColor }}>
+              <span className="text-6xl lg:text-8xl font-medium tabular-nums" style={{ color: timerColor }}>
                 {formatClock(remainingSec)}
               </span>
               <span className="text-xs lg:text-sm" style={{ color: "var(--text-secondary)" }}>

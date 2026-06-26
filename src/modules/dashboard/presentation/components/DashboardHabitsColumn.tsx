@@ -74,7 +74,7 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
             >
               {/* Checkbox */}
               <span
-                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
+                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity"
                 style={{
                   background: done ? "#FFFFFF" : "transparent",
                   border: done ? "2px solid #FFFFFF" : "2px solid var(--border)",

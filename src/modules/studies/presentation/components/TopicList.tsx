@@ -45,7 +45,7 @@ export function TopicList({ topics, subjectId, onCreateTopic, onDeleteTopic }: P
             type="button"
             onClick={() => onDeleteTopic(topic.id, subjectId)}
             className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded-sm transition-opacity"
-            style={{ color: "#FF5252" }}
+            style={{ color: "var(--danger)" }}
           >
             <Trash2 size={12} />
           </button>

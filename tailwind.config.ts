@@ -19,11 +19,15 @@ const config: Config = {
         primary: "var(--text-primary)",
         "text-primary": "var(--text-primary)",
         "text-secondary": "var(--text-secondary)",
-        "text-tertiary": "var(--text-tertiary)",
-        success: "var(--accent)",
+        "text-muted": "var(--text-muted)",
+        "text-disabled": "var(--text-disabled)",
+        accent: "var(--accent)",
         danger: "var(--danger)",
+        warning: "var(--warning)",
+        info: "var(--info)",
       },
       borderRadius: {
+        xs: "var(--radius-xs)",
         sm: "var(--radius-sm)",
         md: "var(--radius-md)",
         lg: "var(--radius-lg)",
@@ -33,11 +37,16 @@ const config: Config = {
         sans: ["var(--font-geist-sans)", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "sans-serif"],
         serif: ["var(--font-serif)", "Georgia", "serif"],
       },
+      boxShadow: {
+        xs: "var(--shadow-xs)",
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+      },
       animation: {
-        "fade-in": "fadeIn 0.3s ease-out",
-        "slide-up": "slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-        "scale-in": "scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-        "check-bounce": "checkBounce 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        "fade-in": "fadeIn 0.2s var(--ease-out)",
+        "slide-up": "slideUp 0.3s var(--ease-out)",
+        "scale-in": "scaleIn 0.2s var(--ease-out)",
       },
       keyframes: {
         fadeIn: {
@@ -45,17 +54,12 @@ const config: Config = {
           to: { opacity: "1" },
         },
         slideUp: {
-          from: { opacity: "0", transform: "translateY(16px)" },
+          from: { opacity: "0", transform: "translateY(8px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
         scaleIn: {
-          from: { opacity: "0", transform: "scale(0.95)" },
+          from: { opacity: "0", transform: "scale(0.97)" },
           to: { opacity: "1", transform: "scale(1)" },
-        },
-        checkBounce: {
-          "0%": { transform: "scale(0.8)" },
-          "50%": { transform: "scale(1.15)" },
-          "100%": { transform: "scale(1)" },
         },
       },
     },
