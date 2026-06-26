@@ -92,7 +92,7 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
                       onClick={() => toggle(task.id)}
                       className="flex items-center gap-3 rounded-lg p-4 text-left transition-opacity active:opacity-70"
                       style={{
-                        background: "var(--surface-elevated)",
+                        background: "var(--surface)",
                         border: `1.5px solid ${checked ? "var(--accent)" : "transparent"}`,
                       }}
                     >
@@ -129,7 +129,7 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
                   onClick={() => setDuration(min)}
                   className="flex-1 py-2 rounded-md text-xs font-normal transition-colors"
                   style={{
-                    background: duration === min ? "var(--text-primary)" : "var(--surface-elevated)",
+                    background: duration === min ? "var(--text-primary)" : "var(--surface)",
                     color: duration === min ? "var(--bg)" : "var(--text-muted)",
                   }}
                 >

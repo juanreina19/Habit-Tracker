@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDashboard } from "../hooks/useDashboard";
 import { MotivationalHeader } from "./MotivationalHeader";
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function LifeDashboardView({ userId }: Props) {
+  const router = useRouter();
   const dashboard = useDashboard(userId);
 
   const [activeTab, setActiveTab] = useState<HomeTab>("focus");
@@ -64,10 +66,11 @@ export default function LifeDashboardView({ userId }: Props) {
     const handler = (e: Event) => {
       const type = (e as CustomEvent).detail;
       if (type === "task") openCreateRef();
+      if (type === "habit") router.push("/habits");
     };
     window.addEventListener("quick-add", handler);
     return () => window.removeEventListener("quick-add", handler);
-  }, [openCreateRef]);
+  }, [openCreateRef, router]);
 
   if (dashboard.isLoading) return <DashboardSkeleton />;
 
@@ -98,7 +101,7 @@ export default function LifeDashboardView({ userId }: Props) {
                 todayTasks={dashboard.todayTasks}
                 habits={dashboard.habits}
                 overdue={dashboard.overdue}
-                onToggleTask={dashboard.toggleTask}
+                onToggleTask={dashboard.toggleTodayTask}
                 onEditTask={openEdit}
                 onDeleteTask={openDelete}
                 onCreateTask={handleInlineCreate}
