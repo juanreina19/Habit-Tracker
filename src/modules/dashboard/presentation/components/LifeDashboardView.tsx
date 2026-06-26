@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDashboard } from "../hooks/useDashboard";
 import { MotivationalHeader } from "./MotivationalHeader";
@@ -58,6 +58,16 @@ export default function LifeDashboardView({ userId }: Props) {
   const handleInlineCreate = (title: string) => {
     dashboard.createTask({ title });
   };
+
+  const openCreateRef = useCallback(() => openCreate(), []);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const type = (e as CustomEvent).detail;
+      if (type === "task") openCreateRef();
+    };
+    window.addEventListener("quick-add", handler);
+    return () => window.removeEventListener("quick-add", handler);
+  }, [openCreateRef]);
 
   if (dashboard.isLoading) return <DashboardSkeleton />;
 

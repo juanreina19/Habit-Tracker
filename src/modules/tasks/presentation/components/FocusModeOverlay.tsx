@@ -132,51 +132,56 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
         <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:justify-center">
           {/* Timer column */}
           <div
-            className="flex flex-col items-center justify-center gap-6 w-full transition-[flex] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="flex flex-col w-full transition-[flex] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{ flex: expanded ? "1 1 100%" : "3 1 0%" }}
           >
-            <span className="flex items-center gap-1.5 text-xs font-normal uppercase tracking-wider px-2.5 py-1 rounded-full"
-              style={{ color: phaseColor, background: `${phaseColor}15` }}>
-              <PhaseIcon size={13} strokeWidth={1.5} />
-              {t(PHASE_LABEL_KEY[session.phase])}
-            </span>
-
-            <FocusRing percentage={percentage} color={timerColor}>
-              <span className="text-6xl lg:text-8xl font-normal tabular-nums" style={{ color: timerColor }}>
-                {formatClock(remainingSec)}
-              </span>
-              <span className="text-xs lg:text-sm" style={{ color: "var(--text-secondary)" }}>
-                {notStarted ? t("status_ready") : isPaused ? t("status_paused") : t("status_running")}
-              </span>
-            </FocusRing>
-
-            {skipError && <p className="text-xs" style={{ color: "var(--danger)" }}>{t("skip_error")}</p>}
-
-            <div className="flex items-center gap-4">
-              <IconButton icon={RotateCcw} onClick={onReset} label={t("reset_session")} size={56} />
-              <IconButton icon={isPaused ? Play : Pause}
-                onClick={isPaused ? onResume : onPause}
-                label={notStarted ? t("start_session") : isPaused ? t("resume") : t("pause")}
-                primary size={72} />
-              <IconButton icon={SkipForward} onClick={handleSkip} label={t("skip_phase")} disabled={isSkipping} size={56} />
+            {/* Expand/collapse — top right of timer column, desktop only */}
+            <div className="hidden lg:flex justify-end mb-4">
+              <button type="button" onClick={() => setExpanded(p => !p)}
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
+                style={{ color: "var(--text-muted)" }}>
+                {expanded ? <Minimize2 size={16} strokeWidth={1.5} /> : <Maximize2 size={16} strokeWidth={1.5} />}
+              </button>
             </div>
 
-            {/* Expand/collapse — inside timer column, desktop only */}
-            <button type="button" onClick={() => setExpanded(p => !p)}
-              className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full transition-opacity active:opacity-70"
-              style={{ color: "var(--text-muted)" }}>
-              {expanded ? <Minimize2 size={16} strokeWidth={1.5} /> : <Maximize2 size={16} strokeWidth={1.5} />}
-            </button>
+            {/* Centered content */}
+            <div className="flex flex-col items-center justify-center gap-6 flex-1">
+              <span className="flex items-center gap-1.5 text-xs font-normal uppercase tracking-wider px-2.5 py-1 rounded-full"
+                style={{ color: phaseColor, background: `${phaseColor}15` }}>
+                <PhaseIcon size={13} strokeWidth={1.5} />
+                {t(PHASE_LABEL_KEY[session.phase])}
+              </span>
 
-            {/* End flow when expanded — desktop */}
-            {expanded && (
-              <button type="button" onClick={onEndSession}
-                className="hidden lg:flex items-center justify-center gap-2 py-3 px-8 rounded-md text-sm font-normal transition-opacity active:opacity-70"
-                style={{ background: "var(--bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
-                <Flag size={14} strokeWidth={1.5} />
-                {t("end_flow")}
-              </button>
-            )}
+              <FocusRing percentage={percentage} color={timerColor}>
+                <span className="text-6xl lg:text-8xl font-normal tabular-nums" style={{ color: timerColor }}>
+                  {formatClock(remainingSec)}
+                </span>
+                <span className="text-xs lg:text-sm" style={{ color: "var(--text-secondary)" }}>
+                  {notStarted ? t("status_ready") : isPaused ? t("status_paused") : t("status_running")}
+                </span>
+              </FocusRing>
+
+              {skipError && <p className="text-xs" style={{ color: "var(--danger)" }}>{t("skip_error")}</p>}
+
+              <div className="flex items-center gap-4">
+                <IconButton icon={RotateCcw} onClick={onReset} label={t("reset_session")} size={56} />
+                <IconButton icon={isPaused ? Play : Pause}
+                  onClick={isPaused ? onResume : onPause}
+                  label={notStarted ? t("start_session") : isPaused ? t("resume") : t("pause")}
+                  primary size={72} />
+                <IconButton icon={SkipForward} onClick={handleSkip} label={t("skip_phase")} disabled={isSkipping} size={56} />
+              </div>
+
+              {/* End flow when expanded — desktop */}
+              {expanded && (
+                <button type="button" onClick={onEndSession}
+                  className="hidden lg:flex items-center justify-center gap-2 py-3 px-8 rounded-md text-sm font-normal transition-opacity active:opacity-70"
+                  style={{ background: "var(--bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
+                  <Flag size={14} strokeWidth={1.5} />
+                  {t("end_flow")}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Divider + Tasks — use opacity + width transition instead of AnimatePresence */}
