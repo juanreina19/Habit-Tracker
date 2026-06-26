@@ -25,8 +25,8 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue }: Props) {
     <div
       className="group relative rounded-md p-2.5"
       style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
+        background: done ? "var(--bg)" : "var(--surface)",
+        border: done ? "1px solid transparent" : "1px solid var(--border)",
       }}
     >
       {/* Priority dot — top right with neon glow */}

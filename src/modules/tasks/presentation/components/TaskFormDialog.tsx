@@ -266,6 +266,7 @@ export function TaskFormDialog({
 
                   {/* Subtasks — right after description */}
                   <div>
+                    {/* Header with progress — shown when there are subtasks (edit or create) */}
                     {isEdit && subtasks.length > 0 && (
                       <div className="flex items-center gap-3 mb-2">
                         <span className="text-[11px] font-medium uppercase tracking-[0.12em]" style={{ color: "var(--text-secondary)" }}>
@@ -285,10 +286,18 @@ export function TaskFormDialog({
                         </div>
                       </div>
                     )}
-                    {isEdit && subtasks.length === 0 && (
-                      <label className="text-[11px] font-medium uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                        {t("subtasks_label")}
-                      </label>
+                    {!isEdit && localSubtasks.length > 0 && (
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-[11px] font-medium uppercase tracking-[0.12em]" style={{ color: "var(--text-secondary)" }}>
+                          {t("subtasks_label")}
+                        </span>
+                        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                          0/{localSubtasks.length}
+                        </span>
+                        <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+                          <div className="h-full rounded-full" style={{ width: "0%", background: "var(--accent)" }} />
+                        </div>
+                      </div>
                     )}
                     {isEdit ? (
                       <div className="flex flex-col gap-1">

@@ -17,13 +17,12 @@ export function FocusModeButton({ onClick }: Props) {
       aria-label={t("open_picker")}
       className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-95"
       style={{
-        background: "var(--surface-elevated)",
-        color: "var(--text-primary)",
-        border: "1px solid var(--border)",
-        boxShadow: "0 4px 16px -4px rgba(0,0,0,0.5)",
+        background: "var(--btn-primary-bg)",
+        color: "var(--btn-primary-text)",
+        boxShadow: "var(--shadow-md)",
       }}
     >
-      <Zap size={20} strokeWidth={2.5} fill="currentColor" />
+      <Zap size={20} strokeWidth={2} fill="currentColor" />
     </button>
   );
 }

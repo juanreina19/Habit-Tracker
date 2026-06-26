@@ -6,6 +6,7 @@ import { Settings2, Flame } from "lucide-react";
 import { DashboardColumn } from "./DashboardColumn";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
+import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 
 interface Props {
   habits: HabitWithStatus[];
@@ -27,13 +28,13 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
 
   const formatTime = (startTime: string | null, estimatedMinutes: number | null): string | null => {
     if (!startTime) return null;
-    const start = startTime.slice(0, 5);
+    const start = formatTaskTime(startTime);
     if (!estimatedMinutes) return start;
     const [h, m] = startTime.split(":").map(Number);
     const endMin = h * 60 + m + estimatedMinutes;
     const endH = Math.floor(endMin / 60) % 24;
     const endM = endMin % 60;
-    return `${start} – ${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`;
+    return `${start} – ${formatTaskTime(`${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`)}`;
   };
 
   return (
