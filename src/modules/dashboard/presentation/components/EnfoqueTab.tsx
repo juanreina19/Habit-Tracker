@@ -7,6 +7,7 @@ import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
 import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
+import { today as getToday } from "@/shared/lib/utils/dates";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
 
@@ -42,15 +43,15 @@ export function EnfoqueTab({
 }: Props) {
   const t = useTranslations("dashboard");
 
-  const pendingTasks = useMemo(
-    () => todayTasks.filter((tk) => !isTaskDone(tk) && !(tk.dueDate && tk.dueDate < new Date().toISOString().slice(0, 10))),
+  const todayNonOverdue = useMemo(
+    () => todayTasks.filter((tk) => !(tk.dueDate && tk.dueDate < getToday())),
     [todayTasks],
   );
 
   const agendaItems = useMemo<AgendaItem[]>(() => {
     const items: AgendaItem[] = [];
 
-    for (const task of pendingTasks) {
+    for (const task of todayNonOverdue) {
       items.push({
         type: "task",
         id: task.id,
@@ -75,12 +76,18 @@ export function EnfoqueTab({
     }
 
     return items.sort((a, b) => {
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
       if (a.time && !b.time) return -1;
       if (!a.time && b.time) return 1;
       if (a.time && b.time) return a.time.localeCompare(b.time);
       return 0;
     });
-  }, [pendingTasks, habits]);
+  }, [todayNonOverdue, habits]);
+
+  const pendingTasks = useMemo(
+    () => todayNonOverdue.filter((tk) => !isTaskDone(tk)),
+    [todayNonOverdue],
+  );
 
   const urgencyTasks = useMemo(
     () => [...pendingTasks].sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2)),
@@ -94,12 +101,11 @@ export function EnfoqueTab({
         <SectionHeader label="AGENDA" />
         <InlineTaskInput onCreateTask={onCreateTask} />
         <div className="flex flex-col gap-2">
-          {agendaItems.map((item, i) => (
+          {agendaItems.map((item) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: i * 0.03 }}
+              layout
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="flex items-start gap-2"
             >
               {/* Time gutter */}
@@ -234,11 +240,6 @@ function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle:
           {habit.name}
         </p>
       </div>
-      {habit.startTime && (
-        <span className="text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-          {habit.startTime}
-        </span>
-      )}
     </button>
   );
 }

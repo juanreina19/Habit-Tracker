@@ -330,19 +330,34 @@ export function TaskFormDialog({
                       {hasSchedule && startTime ? startTime : t("form_free")}
                     </button>
 
-                    {/* Priority pill — cycles through on click */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const idx = PRIORITIES.indexOf(priority);
-                        setPriority(PRIORITIES[(idx + 1) % PRIORITIES.length]);
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
-                      style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[priority] }} />
-                      {t(`priority_${priority}` as `priority_${TaskPriority}`)}
-                    </button>
+                    {/* Priority pill — dropdown selector */}
+                    <div className="relative group/pri">
+                      <button
+                        type="button"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[priority] }} />
+                        {t(`priority_${priority}` as `priority_${TaskPriority}`)}
+                      </button>
+                      <div
+                        className="absolute left-0 top-full mt-1 z-10 rounded-lg p-1 min-w-[140px] hidden group-focus-within/pri:block"
+                        style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                      >
+                        {PRIORITIES.map((p) => (
+                          <button
+                            key={p}
+                            type="button"
+                            onClick={() => setPriority(p)}
+                            className="w-full text-left px-3 py-1.5 rounded-md text-xs flex items-center gap-2 transition-colors"
+                            style={{ color: priority === p ? "var(--text-primary)" : "var(--text-secondary)" }}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[p] }} />
+                            {t(`priority_${p}` as `priority_${TaskPriority}`)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
                     {/* Importance pill */}
                     {isImportant && (

@@ -78,7 +78,8 @@ export class TaskSupabaseRepository implements ITaskRepository {
         .or(
           `and(due_date.lt.${today},completed_at.is.null),` +
           `due_date.eq.${today},` +
-          `and(due_date.is.null,completed_at.is.null)`
+          `and(due_date.is.null,completed_at.is.null),` +
+          `and(due_date.is.null,completed_at.gte.${today}T00:00:00)`
         ),
       this.client
         .from("tasks")
