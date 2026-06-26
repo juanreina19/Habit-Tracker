@@ -36,8 +36,13 @@ export const isRecurring = (t: Task): boolean =>
 export const isTaskDone = (t: Task | TaskWithStatus): boolean =>
   'isCompletedToday' in t ? (t as TaskWithStatus).isCompletedToday : t.completedAt !== null;
 
-/** Formatea un string de tiempo "HH:MM:SS" → "HH:MM" para display. */
-export const formatTaskTime = (t: string): string => t.slice(0, 5);
+/** Formatea un string de tiempo "HH:MM:SS" → "h:MM AM/PM" para display. */
+export const formatTaskTime = (t: string): string => {
+  const [h, m] = t.slice(0, 5).split(":").map(Number);
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${String(m).padStart(2, "0")} ${period}`;
+};
 
 /**
  * Devuelve true si el endTime de la tarea ya pasó hoy.

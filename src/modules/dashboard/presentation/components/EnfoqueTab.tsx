@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
-import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
+import { isTaskDone, formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import { today as getToday } from "@/shared/lib/utils/dates";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
@@ -56,7 +56,7 @@ export function EnfoqueTab({
         type: "task",
         id: task.id,
         label: task.title,
-        time: task.startTime?.slice(0, 5) ?? null,
+        time: task.startTime ? formatTaskTime(task.startTime) : null,
         color: "var(--accent)",
         completed: isTaskDone(task),
         task,
@@ -212,8 +212,8 @@ function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle:
       onClick={onToggle}
       className="w-full text-left rounded-lg p-3 flex items-center gap-3 transition-colors active:scale-[0.98]"
       style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
+        background: done ? "var(--bg)" : "var(--surface)",
+        border: done ? "1px solid transparent" : "1px solid var(--border)",
       }}
     >
       <div
