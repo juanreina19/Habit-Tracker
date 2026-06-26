@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-export const TASK_CHECKBOX_SIZE = { card: 24, week: 18 } as const;
+export const TASK_CHECKBOX_SIZE = { card: 20, week: 18 } as const;
 
 interface TaskCheckboxProps {
   done:       boolean;

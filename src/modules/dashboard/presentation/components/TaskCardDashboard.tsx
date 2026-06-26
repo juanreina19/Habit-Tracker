@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Pencil, Trash2, Star } from "lucide-react";
+import { Pencil, Star } from "lucide-react";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import { isTaskDone, formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import { PRIORITY_COLORS } from "@/modules/tasks/presentation/constants/taskColors";
@@ -38,7 +38,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
 
   return (
     <div
-      className="group rounded-lg p-2.5 transition-all cursor-pointer"
+      className="group relative rounded-lg p-2.5 transition-all cursor-pointer"
       style={{
         background: "var(--surface)",
         border: overdue ? "1px solid rgba(239,68,68,0.3)" : "1px solid var(--border)",
@@ -48,14 +48,14 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
         setExpanded(p => !p);
       }}
     >
-      {/* Compact row */}
-      <div className="flex items-center gap-2">
-        {/* Priority dot — first for visual scanning */}
-        <span
-          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-          style={{ background: PRIORITY_COLORS[task.priority] }}
-        />
+      {/* Priority dot — top right */}
+      <span
+        className="absolute top-2 right-2 w-2 h-2 rounded-full"
+        style={{ background: PRIORITY_COLORS[task.priority] }}
+      />
 
+      {/* Compact row */}
+      <div className="flex items-center gap-2 pr-4">
         <TaskCheckbox
           done={done}
           size={TASK_CHECKBOX_SIZE.card}
@@ -95,8 +95,8 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
           </span>
         )}
 
-        {/* Actions — visible on hover (desktop) */}
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+        {/* Edit action — visible on hover (desktop), z-10 over priority dot */}
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 relative z-10">
           <button
             type="button"
             onClick={onEdit}
@@ -104,14 +104,6 @@ export function TaskCardDashboard({ task, onToggle, onEdit, onDelete, overdue }:
             style={{ color: "var(--text-muted)" }}
           >
             <Pencil size={12} />
-          </button>
-          <button
-            type="button"
-            onClick={onDelete}
-            className="p-1 rounded-sm transition-opacity active:opacity-70"
-            style={{ color: "var(--text-muted)" }}
-          >
-            <Trash2 size={12} />
           </button>
         </div>
       </div>
