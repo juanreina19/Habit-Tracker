@@ -22,7 +22,7 @@ export function useDashboard(userId: UUID) {
 
   const derived = useMemo(() => {
     const pending = tasks.filter(t => !isTaskDone(t));
-    const overdue = pending.filter(t => t.dueDate !== null && t.dueDate < todayStr);
+    const overdue = tasks.filter(t => t.dueDate !== null && t.dueDate < todayStr);
     const overdueIds = new Set(overdue.map(t => t.id));
 
     const tasksByCategory: Record<string, TaskWithStatus[]> = {};
