@@ -177,6 +177,10 @@ export default function LifeDashboardView({ userId }: Props) {
             onResume={dashboard.focusMode.resume}
             onSkip={dashboard.focusMode.advancePhase}
             onClose={() => setFocusOverlayOpen(false)}
+            onEndSession={() => {
+              dashboard.focusMode.discard();
+              setFocusOverlayOpen(false);
+            }}
             onUpdateConfig={dashboard.focusMode.updateActiveConfig}
             onReset={dashboard.focusMode.resetTimer}
           />
