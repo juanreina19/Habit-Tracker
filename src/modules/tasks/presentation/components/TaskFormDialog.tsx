@@ -59,6 +59,8 @@ export function TaskFormDialog({
   const [categoryId, setCategoryId]   = useState<string | null>(null);
   const [icon, setIcon]               = useState<string | null>(null);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const [catOpen, setCatOpen] = useState(false);
+  const [priOpen, setPriOpen] = useState(false);
 
   const { categories } = useCategories(userId);
 
@@ -99,8 +101,20 @@ export function TaskFormDialog({
       setConfirmDelete(defaultConfirmDelete);
       setNewSubtaskTitle("");
       setLocalSubtasks([]);
+      setCatOpen(false);
+      setPriOpen(false);
     }
   }, [open, task, defaultConfirmDelete]);
+
+  useEffect(() => {
+    if (!catOpen && !priOpen) return;
+    const handler = (e: MouseEvent) => {
+      setCatOpen(false);
+      setPriOpen(false);
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [catOpen, priOpen]);
 
   const toggleDay = (day: number) => {
     setRecurrenceDays(prev =>
@@ -430,9 +444,10 @@ export function TaskFormDialog({
                   <div className="flex flex-wrap gap-1.5 py-2" style={{ borderTop: "1px solid var(--border)" }}>
                     {/* Category pill */}
                     {categories.length > 0 && (
-                      <div className="relative group/cat">
+                      <div className="relative">
                         <button
                           type="button"
+                          onClick={(e) => { e.stopPropagation(); setCatOpen(p => !p); setPriOpen(false); }}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                           style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
                         >
@@ -440,31 +455,34 @@ export function TaskFormDialog({
                           <span style={{ color: "var(--text-muted)" }}>IN</span>
                           {categories.find(c => c.id === categoryId)?.name ?? "—"}
                         </button>
-                        <div
-                          className="absolute left-0 top-full mt-1 z-10 rounded-lg p-1 min-w-[140px] hidden group-focus-within/cat:block"
-                          style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => setCategoryId(null)}
-                            className="w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors"
-                            style={{ color: !categoryId ? "var(--text-primary)" : "var(--text-secondary)" }}
+                        {catOpen && (
+                          <div
+                            className="absolute left-0 top-full mt-1 z-10 rounded-lg p-1 min-w-[140px]"
+                            style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            —
-                          </button>
-                          {categories.map((cat) => (
                             <button
-                              key={cat.id}
                               type="button"
-                              onClick={() => setCategoryId(cat.id)}
-                              className="w-full text-left px-3 py-1.5 rounded-md text-xs flex items-center gap-2 transition-colors"
-                              style={{ color: categoryId === cat.id ? "var(--text-primary)" : "var(--text-secondary)" }}
+                              onClick={() => { setCategoryId(null); setCatOpen(false); }}
+                              className="w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors"
+                              style={{ color: !categoryId ? "var(--text-primary)" : "var(--text-secondary)" }}
                             >
-                              {cat.color && <span className="w-1.5 h-1.5 rounded-full" style={{ background: cat.color }} />}
-                              {cat.name}
+                              —
                             </button>
-                          ))}
-                        </div>
+                            {categories.map((cat) => (
+                              <button
+                                key={cat.id}
+                                type="button"
+                                onClick={() => { setCategoryId(cat.id); setCatOpen(false); }}
+                                className="w-full text-left px-3 py-1.5 rounded-md text-xs flex items-center gap-2 transition-colors"
+                                style={{ color: categoryId === cat.id ? "var(--text-primary)" : "var(--text-secondary)" }}
+                              >
+                                {cat.color && <span className="w-1.5 h-1.5 rounded-full" style={{ background: cat.color }} />}
+                                {cat.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -508,32 +526,36 @@ export function TaskFormDialog({
                     </button>
 
                     {/* Priority pill — dropdown selector */}
-                    <div className="relative group/pri">
+                    <div className="relative">
                       <button
                         type="button"
+                        onClick={(e) => { e.stopPropagation(); setPriOpen(p => !p); setCatOpen(false); }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                         style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
                       >
                         <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[priority] }} />
                         {t(`priority_${priority}` as `priority_${TaskPriority}`)}
                       </button>
-                      <div
-                        className="absolute left-0 top-full mt-1 z-10 rounded-lg p-1 min-w-[140px] hidden group-focus-within/pri:block"
-                        style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
-                      >
-                        {PRIORITIES.map((p) => (
-                          <button
-                            key={p}
-                            type="button"
-                            onClick={() => setPriority(p)}
-                            className="w-full text-left px-3 py-1.5 rounded-md text-xs flex items-center gap-2 transition-colors"
-                            style={{ color: priority === p ? "var(--text-primary)" : "var(--text-secondary)" }}
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[p] }} />
-                            {t(`priority_${p}` as `priority_${TaskPriority}`)}
-                          </button>
-                        ))}
-                      </div>
+                      {priOpen && (
+                        <div
+                          className="absolute left-0 top-full mt-1 z-10 rounded-lg p-1 min-w-[140px]"
+                          style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {PRIORITIES.map((p) => (
+                            <button
+                              key={p}
+                              type="button"
+                              onClick={() => { setPriority(p); setPriOpen(false); }}
+                              className="w-full text-left px-3 py-1.5 rounded-md text-xs flex items-center gap-2 transition-colors"
+                              style={{ color: priority === p ? "var(--text-primary)" : "var(--text-secondary)" }}
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[p] }} />
+                              {t(`priority_${p}` as `priority_${TaskPriority}`)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Importance pill */}

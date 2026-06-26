@@ -18,9 +18,10 @@ interface Props {
   overdue?: boolean;
   showDescription?: boolean;
   showDueDate?: boolean;
+  typeLabel?: string;
 }
 
-export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescription, showDueDate }: Props) {
+export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescription, showDueDate, typeLabel }: Props) {
   const t = useTranslations("tasks");
   const { locale } = useLocale();
   const done = isTaskDone(task);
@@ -67,6 +68,12 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
           >
             {task.title}
           </span>
+
+          {!done && typeLabel && (
+            <span className="text-[10px] block mt-0.5" style={{ color: "var(--text-muted)" }}>
+              {typeLabel}
+            </span>
+          )}
 
           {/* Description — only when not done */}
           {showDescription && task.description && !done && (

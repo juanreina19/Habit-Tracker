@@ -163,7 +163,10 @@ export default function LifeDashboardView({ userId }: Props) {
         open={focusPickerOpen}
         onClose={() => setFocusPickerOpen(false)}
         userId={userId}
-        onStart={(taskIds) => { dashboard.focusMode.start(taskIds); }}
+        onStart={(taskIds, durationMin) => {
+          dashboard.focusMode.start(taskIds, { focusDurationMin: durationMin });
+          setFocusOverlayOpen(true);
+        }}
       />
 
       <AnimatePresence>

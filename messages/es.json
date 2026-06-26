@@ -305,7 +305,8 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "validation_out_of_range": "El valor debe estar entre {min} y {max}",
-    "end_flow": "Finalizar flujo"
+    "end_flow": "Finalizar flujo",
+    "todays_tasks": "Tareas de hoy"
   },
   "dashboard": {
     "greeting_morning": "Buenos días",
@@ -342,7 +343,9 @@
     "overdue_tasks": "Vencidas",
     "add_task_placeholder": "Agregar tarea...",
     "coming_soon": "Próximamente",
-    "no_urgent": "Sin tareas urgentes"
+    "no_urgent": "Sin tareas urgentes",
+    "type_task": "Tarea",
+    "type_habit": "Hábito"
   },
   "quickAdd": {
     "new_task": "Nueva tarea",

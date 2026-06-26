@@ -100,13 +100,25 @@ export function EnfoqueTab({
         <InlineTaskInput onCreateTask={onCreateTask} />
 
         {/* Timeline */}
-        <div className="flex flex-col">
-          {agendaItems.map((item, idx) => {
+        <div className="flex flex-col relative">
+          {/* Continuous vertical line */}
+          {agendaItems.length > 1 && (
+            <div
+              className="absolute w-px"
+              style={{
+                background: "var(--border)",
+                left: "calc(3.5rem + 0.75rem)",
+                top: 0,
+                bottom: 0,
+              }}
+            />
+          )}
+          {agendaItems.map((item) => {
             const timeParts = item.time?.split(" ") ?? [];
             return (
-              <div key={item.id} className="flex items-stretch">
+              <div key={item.id} className="flex items-center">
                 {/* Time label */}
-                <div className="w-14 flex-shrink-0 text-right pr-3 pt-2.5">
+                <div className="w-14 flex-shrink-0 text-right pr-3">
                   {timeParts[0] && (
                     <>
                       <span className="text-[10px] tabular-nums font-normal leading-none block" style={{ color: "var(--text-muted)" }}>
@@ -121,28 +133,24 @@ export function EnfoqueTab({
                   )}
                 </div>
 
-                {/* Line + icon node */}
-                <div className="w-6 flex-shrink-0 flex flex-col items-center relative">
-                  {/* Vertical line */}
-                  {idx > 0 && <div className="absolute top-0 left-1/2 -translate-x-1/2 h-2.5 w-px" style={{ background: "var(--border)" }} />}
-                  {/* Node */}
+                {/* Node */}
+                <div className="w-6 flex-shrink-0 flex items-center justify-center relative z-10">
                   <div
-                    className="relative z-10 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-2.5"
-                    style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                    className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: item.completed ? "#FFFFFF" : "var(--bg)",
+                      border: item.completed ? "2px solid #FFFFFF" : "1px solid var(--border)",
+                    }}
                   >
                     {item.type === "habit"
-                      ? <Sparkles size={10} strokeWidth={1.5} style={{ color: "var(--text-muted)" }} />
-                      : <ListTodo size={10} strokeWidth={1.5} style={{ color: "var(--text-muted)" }} />
+                      ? <Sparkles size={10} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
+                      : <ListTodo size={10} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
                     }
                   </div>
-                  {/* Line below node */}
-                  {idx < agendaItems.length - 1 && (
-                    <div className="flex-1 w-px mt-0.5" style={{ background: "var(--border)" }} />
-                  )}
                 </div>
 
                 {/* Card */}
-                <div className="flex-1 min-w-0 pb-2 pl-2">
+                <div className="flex-1 min-w-0 py-1 pl-2">
                   {item.type === "task" && item.task && (
                     <TaskCardDashboard
                       task={item.task}
@@ -150,6 +158,7 @@ export function EnfoqueTab({
                       onEdit={() => onEditTask(item.task!)}
                       onDelete={() => onDeleteTask(item.task!)}
                       showDescription
+                      typeLabel={t("type_task")}
                     />
                   )}
                   {item.type === "habit" && item.habit && (
@@ -174,43 +183,58 @@ export function EnfoqueTab({
       {/* Overdue / Vencidas — timeline without time, just line + icons */}
       <div className="flex flex-col gap-3">
         <SectionHeader label={t("overdue").toUpperCase()} />
-        <div className="flex flex-col">
-          {overdue.map((task, idx) => (
-            <motion.div
-              key={task.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, delay: idx * 0.03 }}
-              className="flex items-stretch"
-            >
-              {/* Line + icon (no time) */}
-              <div className="w-6 flex-shrink-0 flex flex-col items-center relative">
-                {idx > 0 && <div className="absolute top-0 left-1/2 -translate-x-1/2 h-2.5 w-px" style={{ background: "var(--border)" }} />}
-                <div
-                  className="relative z-10 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-2.5"
-                  style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
-                >
-                  <ListTodo size={10} strokeWidth={1.5} style={{ color: "var(--text-muted)" }} />
+        <div className="flex flex-col relative">
+          {/* Continuous vertical line */}
+          {overdue.length > 1 && (
+            <div
+              className="absolute w-px"
+              style={{
+                background: "var(--border)",
+                left: "0.75rem",
+                top: 0,
+                bottom: 0,
+              }}
+            />
+          )}
+          {overdue.map((task, idx) => {
+            const done = isTaskDone(task);
+            return (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: idx * 0.03 }}
+                className="flex items-center"
+              >
+                {/* Node */}
+                <div className="w-6 flex-shrink-0 flex items-center justify-center relative z-10">
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: done ? "#FFFFFF" : "var(--bg)",
+                      border: done ? "2px solid #FFFFFF" : "1px solid var(--border)",
+                    }}
+                  >
+                    <ListTodo size={10} strokeWidth={1.5} style={{ color: done ? "var(--bg)" : "var(--text-muted)" }} />
+                  </div>
                 </div>
-                {idx < overdue.length - 1 && (
-                  <div className="flex-1 w-px mt-0.5" style={{ background: "var(--border)" }} />
-                )}
-              </div>
 
-              {/* Card */}
-              <div className="flex-1 min-w-0 pb-2 pl-2">
-                <TaskCardDashboard
-                  task={task}
-                  onToggle={() => onToggleTask(task)}
-                  onEdit={() => onEditTask(task)}
-                  onDelete={() => onDeleteTask(task)}
-                  overdue
-                  showDescription
-                  showDueDate
-                />
-              </div>
-            </motion.div>
-          ))}
+                {/* Card */}
+                <div className="flex-1 min-w-0 py-1 pl-2">
+                  <TaskCardDashboard
+                    task={task}
+                    onToggle={() => onToggleTask(task)}
+                    onEdit={() => onEditTask(task)}
+                    onDelete={() => onDeleteTask(task)}
+                    overdue
+                    showDescription
+                    showDueDate
+                    typeLabel={t("type_task")}
+                  />
+                </div>
+              </motion.div>
+            );
+          })}
           {overdue.length === 0 && (
             <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>—</p>
           )}
@@ -222,6 +246,7 @@ export function EnfoqueTab({
 
 
 function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle: () => void }) {
+  const t = useTranslations("dashboard");
   const done = habit.isCompletedToday;
 
   return (
@@ -243,7 +268,7 @@ function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle:
       >
         {done && (
           <svg width="10" height="8" viewBox="0 0 12 10" fill="none">
-            <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         )}
       </div>
@@ -257,6 +282,11 @@ function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle:
         >
           {habit.name}
         </p>
+        {!done && (
+          <span className="text-[10px] block" style={{ color: "var(--text-muted)" }}>
+            {t("type_habit")}
+          </span>
+        )}
       </div>
     </button>
   );

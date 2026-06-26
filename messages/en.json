@@ -305,7 +305,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "validation_out_of_range": "Value must be between {min} and {max}",
-    "end_flow": "End flow"
+    "end_flow": "End flow",
+    "todays_tasks": "Today's tasks"
   },
   "dashboard": {
     "greeting_morning": "Good morning",
@@ -342,7 +343,9 @@
     "overdue_tasks": "Overdue",
     "add_task_placeholder": "Add task...",
     "coming_soon": "Coming soon",
-    "no_urgent": "No urgent tasks"
+    "no_urgent": "No urgent tasks",
+    "type_task": "Task",
+    "type_habit": "Habit"
   },
   "quickAdd": {
     "new_task": "New task",

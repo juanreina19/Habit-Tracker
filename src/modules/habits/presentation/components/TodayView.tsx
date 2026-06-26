@@ -435,7 +435,7 @@ function HabitRow({
               exit={{ scale: 0, opacity: 0 }}
               transition={{ type: "spring", stiffness: 500, damping: 25 }}
             >
-              <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="2.5"
+              <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="2"
                 strokeLinecap="round" strokeLinejoin="round" />
             </motion.svg>
           )}
