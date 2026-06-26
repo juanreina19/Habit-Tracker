@@ -221,7 +221,7 @@ export function TaskFormDialog({
                     <button
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="flex-1 py-3 rounded-md text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                      className="flex-1 py-3 rounded-md text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-50"
                       style={{ background: "#ef4444", color: "#ffffff" }}
                     >
                       {isDeleting ? "…" : t("delete_confirm_btn")}
@@ -245,7 +245,7 @@ export function TaskFormDialog({
                       onKeyDown={(e) => { if (e.key === "Enter" && !isEdit && title.trim()) { e.preventDefault(); handleSave(); } }}
                       placeholder={t("title_placeholder")}
                       autoFocus
-                      className="w-full text-2xl font-semibold outline-none bg-transparent"
+                      className="w-full text-2xl font-normal outline-none bg-transparent"
                       style={{
                         color: "var(--text-primary)",
                         borderBottom: titleError ? "2px solid #ef4444" : "none",
@@ -268,7 +268,7 @@ export function TaskFormDialog({
                   <div>
                     {isEdit && subtasks.length > 0 && (
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text-secondary)" }}>
+                        <span className="text-[11px] font-medium uppercase tracking-[0.12em]" style={{ color: "var(--text-secondary)" }}>
                           {t("subtasks_label")}
                         </span>
                         <span className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -286,14 +286,14 @@ export function TaskFormDialog({
                       </div>
                     )}
                     {isEdit && subtasks.length === 0 && (
-                      <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                      <label className="text-[11px] font-medium uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                         {t("subtasks_label")}
                       </label>
                     )}
                     {isEdit ? (
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-1">
                         {subtasks.map((s) => (
-                          <div key={s.id} className="flex items-center gap-2">
+                          <div key={s.id} className="group/sub flex items-center gap-2.5 py-0.5">
                             <TaskCheckbox
                               done={s.isCompleted}
                               size={TASK_CHECKBOX_SIZE.week}
@@ -313,10 +313,10 @@ export function TaskFormDialog({
                               type="button"
                               onClick={() => deleteSubtask(s.id)}
                               aria-label={t("delete_subtask")}
-                              className="p-1.5 rounded-sm transition-opacity active:opacity-70"
+                              className="p-0.5 rounded-sm opacity-0 group-hover/sub:opacity-100 transition-opacity"
                               style={{ color: "var(--text-muted)" }}
                             >
-                              <Trash2 size={14} />
+                              <X size={14} />
                             </button>
                           </div>
                         ))}
@@ -348,22 +348,22 @@ export function TaskFormDialog({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex flex-col gap-1.5">
+                      <div className="flex flex-col gap-1">
                         {localSubtasks.map((st, idx) => (
-                          <div key={idx} className="flex items-center gap-2.5">
+                          <div key={idx} className="group/sub flex items-center gap-2.5 py-0.5">
                             <span className="w-4 h-4 rounded-full flex-shrink-0 border" style={{ borderColor: "var(--border)" }} />
                             <span className="flex-1 text-sm" style={{ color: "var(--text-primary)" }}>{st}</span>
                             <button
                               type="button"
                               onClick={() => setLocalSubtasks(prev => prev.filter((_, i) => i !== idx))}
-                              className="p-1 rounded-sm transition-opacity active:opacity-70"
+                              className="p-0.5 rounded-sm opacity-0 group-hover/sub:opacity-100 transition-opacity"
                               style={{ color: "var(--text-muted)" }}
                             >
-                              <Trash2 size={14} />
+                              <X size={14} />
                             </button>
                           </div>
                         ))}
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2.5 py-0.5">
                           <span
                             className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center"
                             style={{ background: "var(--border)", color: "var(--text-muted)" }}
@@ -545,7 +545,7 @@ export function TaskFormDialog({
                                 key={day}
                                 type="button"
                                 onClick={() => toggleDay(day)}
-                                className="flex-1 py-2 rounded-md text-xs font-semibold transition-all duration-200 active:scale-95"
+                                className="flex-1 py-2 rounded-md text-xs font-medium transition-all duration-200 active:scale-95"
                                 style={{
                                   background: on ? "var(--text-primary)" : "var(--surface-elevated)",
                                   color:      on ? "var(--bg)" : "var(--text-secondary)",
@@ -663,7 +663,7 @@ export function TaskFormDialog({
                       <button
                         onClick={handleSave}
                         disabled={isSaving || (!isEdit && !title.trim())}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-30"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-30"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
                         {isSaving ? t("saving") : isEdit ? t("save") : t("add_task")}
