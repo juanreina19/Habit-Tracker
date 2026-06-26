@@ -26,7 +26,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue }: Props) {
       className="group relative rounded-md p-2.5"
       style={{
         background: "var(--surface)",
-        border: overdue ? "1px solid rgba(239,68,68,0.3)" : "1px solid var(--border)",
+        border: "1px solid var(--border)",
       }}
     >
       {/* Priority dot — top right with neon glow */}
@@ -46,9 +46,10 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue }: Props) {
           animated
           onToggle={onToggle}
           ariaLabel={task.title}
+          overdue={overdue}
         />
         <span
-          className="flex-1 min-w-0 text-sm font-medium truncate"
+          className="flex-1 min-w-0 text-sm font-normal truncate"
           style={{
             color: done ? "var(--text-muted)" : "var(--text-primary)",
             textDecoration: done ? "line-through" : "none",

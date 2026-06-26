@@ -69,8 +69,8 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
               key={habit.id}
               type="button"
               onClick={() => done ? onUncheck(habit.id) : onComplete(habit.id)}
-              className="flex items-center gap-2.5 rounded-lg p-3 text-left transition-opacity active:opacity-70 w-full"
-              style={{ background: "var(--surface-elevated)" }}
+              className="flex items-center gap-2.5 rounded-md p-2.5 text-left transition-opacity active:opacity-70 w-full"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
             >
               {/* Checkbox */}
               <span
@@ -96,7 +96,7 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
 
               {/* Name */}
               <span
-                className="flex-1 min-w-0 text-sm font-medium truncate"
+                className="flex-1 min-w-0 text-sm font-normal truncate"
                 style={{
                   color: done ? "var(--text-muted)" : "var(--text-primary)",
                   textDecoration: done ? "line-through" : "none",
