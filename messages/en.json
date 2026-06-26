@@ -304,7 +304,8 @@
     "close": "Close",
     "save": "Save",
     "cancel": "Cancel",
-    "validation_out_of_range": "Value must be between {min} and {max}"
+    "validation_out_of_range": "Value must be between {min} and {max}",
+    "end_flow": "End flow"
   },
   "dashboard": {
     "greeting_morning": "Good morning",
@@ -328,6 +329,7 @@
     "tab_board": "Board",
     "tab_eisenhower": "Eisenhower",
     "tab_kanban": "Kanban",
+    "filter_urgent": "Urgent",
     "eisenhower_do": "Do First",
     "eisenhower_schedule": "Schedule",
     "eisenhower_delegate": "Delegate",

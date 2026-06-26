@@ -185,7 +185,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
       className="fixed inset-0 z-[100] overflow-y-auto"
       style={{ background: "var(--bg)" }}
     >
-      <div className="flex flex-col px-5 py-8 lg:py-10 lg:px-12 xl:px-24 gap-6 lg:gap-10 max-w-lg lg:max-w-7xl w-full mx-auto min-h-full lg:justify-center">
+      <div className="flex flex-col px-5 py-8 lg:py-10 lg:px-12 xl:px-24 gap-6 lg:gap-10 max-w-full w-full mx-auto min-h-full lg:justify-center">
         {/* Header */}
         <div className="flex items-center justify-between w-full">
           <span
@@ -264,7 +264,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
                     <div
                       key={task.id}
                       className="flex items-center gap-3 rounded-lg p-4"
-                      style={{ background: "var(--surface-elevated)" }}
+                      style={{ background: "var(--surface)" }}
                     >
                       <TaskCheckbox
                         done={done}
@@ -301,6 +301,14 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
                     </div>
                   );
                 })}
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-3 rounded-md text-sm font-medium mt-3 transition-opacity active:opacity-70"
+                style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+              >
+                {t("end_flow")}
+              </button>
               </div>
             );
           })()}
