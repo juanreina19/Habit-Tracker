@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Plus } from "lucide-react";
 import { useDashboard } from "../hooks/useDashboard";
 import { MotivationalHeader } from "./MotivationalHeader";
 import { HomeTabBar, type HomeTab } from "./HomeTabBar";
@@ -152,22 +151,12 @@ export default function LifeDashboardView({ userId }: Props) {
         onDelete={async (id) => { await dashboard.deleteTask(id); }}
       />
 
-      {/* Floating action buttons — bottom right */}
-      <div className="fixed z-30 right-5 bottom-[calc(env(safe-area-inset-bottom)+96px)] lg:right-8 lg:bottom-8 flex flex-col gap-3 items-center">
-        {!activeFocus && <FocusModeButton onClick={() => setFocusPickerOpen(true)} />}
-        <button
-          type="button"
-          onClick={() => openCreate()}
-          className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-95"
-          style={{
-            background: "var(--btn-primary-bg)",
-            color: "var(--btn-primary-text)",
-            boxShadow: "0 4px 16px -4px rgba(0,0,0,0.5)",
-          }}
-        >
-          <Plus size={22} strokeWidth={2} />
-        </button>
-      </div>
+      {/* Focus Mode FAB — positioned above the global QuickAdd FAB */}
+      {!activeFocus && (
+        <div className="fixed z-30 right-5 bottom-[calc(env(safe-area-inset-bottom)+160px)] lg:right-8 lg:bottom-[76px]">
+          <FocusModeButton onClick={() => setFocusPickerOpen(true)} />
+        </div>
+      )}
 
       <FocusModeTaskPickerDialog
         open={focusPickerOpen}

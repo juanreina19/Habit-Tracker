@@ -99,6 +99,9 @@ export default function Sidebar() {
             </Link>
           </Tooltip>
 
+          {/* Divider */}
+          <div className="mx-3 my-1 h-px" style={{ background: "var(--border)" }} />
+
           {/* Profile */}
           <Tooltip label={ts("my_profile")}>
             <Link
