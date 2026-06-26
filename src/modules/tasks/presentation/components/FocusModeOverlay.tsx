@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { X, Play, Pause, Settings, SkipForward, RotateCcw, Clock, Flame, Coffee, Moon, type LucideIcon } from "lucide-react";
+import { X, Play, Pause, Settings, SkipForward, RotateCcw, Clock, Flame, Coffee, Moon, Flag, type LucideIcon } from "lucide-react";
 import type { FocusModeSession, FocusPhase } from "../../domain/entities/FocusModeSession";
 import { getElapsedSec } from "../../domain/entities/FocusModeSession";
 import type { TaskWithStatus } from "../../domain/entities/Task";
@@ -22,6 +22,7 @@ interface Props {
   onResume: () => void;
   onSkip: () => Promise<void> | void;
   onClose: () => void;
+  onEndSession: () => void;
   onUpdateConfig: (patch: FocusModeSettingsInput) => void;
   onReset: () => void;
 }
@@ -38,8 +39,6 @@ const PHASE_NOTIFY_KEY: Record<FocusPhase, "notify_phase_focus" | "notify_phase_
   long_break: "notify_phase_long_break",
 };
 
-/** Color de acento por fase: foco usa el verde de la app; los descansos tienen su propio color.
- *  Hex literal (no var()) porque se usa también para fondos con alpha (`${color}15`). */
 const PHASE_COLOR: Record<FocusPhase, string> = {
   focus: "#4CAF82",
   short_break: "#4A9EFF",
@@ -59,15 +58,7 @@ function formatClock(totalSec: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function FocusRing({
-  percentage,
-  color,
-  children,
-}: {
-  percentage: number;
-  color?: string;
-  children: React.ReactNode;
-}) {
+function FocusRing({ percentage, color, children }: { percentage: number; color?: string; children: React.ReactNode }) {
   const size = 260;
   const radius = (size - 12) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -75,19 +66,13 @@ function FocusRing({
   const offset = circumference - (clamped / 100) * circumference;
 
   return (
-    <div className="relative mx-auto w-full max-w-[280px] lg:max-w-[420px]" style={{ aspectRatio: "1 / 1" }}>
+    <div className="relative mx-auto w-full max-w-[260px] lg:max-w-[380px]" style={{ aspectRatio: "1 / 1" }}>
       <svg viewBox={`0 0 ${size} ${size}`} className="-rotate-90 w-full h-full">
         <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--border)" strokeWidth={6} />
         <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={color ?? "var(--text-primary)"}
-          strokeWidth={6}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
+          cx={size / 2} cy={size / 2} r={radius} fill="none"
+          stroke={color ?? "var(--text-primary)"} strokeWidth={6} strokeLinecap="round"
+          strokeDasharray={circumference} strokeDashoffset={offset}
           style={{ transition: "stroke-dashoffset 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
         />
       </svg>
@@ -98,30 +83,15 @@ function FocusRing({
   );
 }
 
-function IconButton({
-  icon: Icon,
-  onClick,
-  label,
-  primary,
-  disabled,
-  size = 56,
-}: {
-  icon: LucideIcon;
-  onClick: () => void;
-  label: string;
-  primary?: boolean;
-  disabled?: boolean;
-  size?: number;
+function IconButton({ icon: Icon, onClick, label, primary, disabled, size = 56 }: {
+  icon: LucideIcon; onClick: () => void; label: string; primary?: boolean; disabled?: boolean; size?: number;
 }) {
   return (
     <button
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={label}
+      onClick={onClick} disabled={disabled} aria-label={label}
       className="rounded-full flex items-center justify-center transition-opacity active:opacity-70 disabled:opacity-50"
       style={{
-        width: size,
-        height: size,
+        width: size, height: size,
         background: primary ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
         color: primary ? "var(--btn-primary-text)" : "var(--text-secondary)",
       }}
@@ -131,7 +101,7 @@ function IconButton({
   );
 }
 
-export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume, onSkip, onClose, onUpdateConfig, onReset }: Props) {
+export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume, onSkip, onClose, onEndSession, onUpdateConfig, onReset }: Props) {
   const t = useTranslations("focus");
   const [, forceTick] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -143,7 +113,6 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
     return () => clearInterval(id);
   }, []);
 
-  // Notifica al usuario cada vez que cambia la fase (foco↔descanso), si hay permiso concedido.
   const prevPhaseRef = useRef(session.phase);
   useEffect(() => {
     if (prevPhaseRef.current !== session.phase) {
@@ -163,17 +132,12 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
   const timerColor = session.phase === "focus" ? "var(--text-primary)" : PHASE_COLOR[session.phase];
   const phaseColor = PHASE_COLOR[session.phase];
   const PhaseIcon = PHASE_ICON[session.phase];
+  const pendingCount = tasks.filter((tk) => !isTaskDone(tk)).length;
 
   const handleSkip = async () => {
     setSkipError(false);
     setIsSkipping(true);
-    try {
-      await onSkip();
-    } catch {
-      setSkipError(true);
-    } finally {
-      setIsSkipping(false);
-    }
+    try { await onSkip(); } catch { setSkipError(true); } finally { setIsSkipping(false); }
   };
 
   return (
@@ -185,42 +149,43 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
       className="fixed inset-0 z-[100] overflow-y-auto"
       style={{ background: "var(--bg)" }}
     >
-      <div className="flex flex-col px-5 py-8 lg:py-10 lg:px-12 xl:px-24 gap-6 lg:gap-10 max-w-full w-full mx-auto min-h-full lg:justify-center">
-        {/* Header */}
-        <div className="flex items-center justify-between w-full">
-          <span
-            className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full"
-            style={{ color: phaseColor, background: `${phaseColor}15` }}
+      <div className="flex flex-col min-h-full px-5 py-6 lg:py-8 lg:px-12">
+        {/* Top bar — X and Config on the LEFT */}
+        <div className="flex items-center gap-1 mb-6">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t("close_session")}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
+            style={{ color: "var(--text-secondary)" }}
           >
-            <PhaseIcon size={13} strokeWidth={2.5} />
-            {t(PHASE_LABEL_KEY[session.phase])}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setSettingsOpen(true)}
-              aria-label={t("settings_label")}
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              <Settings size={18} strokeWidth={2} />
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label={t("close_session")}
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              <X size={20} strokeWidth={2} />
-            </button>
-          </div>
+            <X size={20} strokeWidth={2} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setSettingsOpen(true)}
+            aria-label={t("settings_label")}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            <Settings size={18} strokeWidth={2} />
+          </button>
         </div>
 
-        {/* Cuerpo: timer + tareas (lado a lado en escritorio) */}
-        <div className="flex flex-col items-center gap-6 w-full lg:flex-row lg:items-start lg:justify-center lg:gap-20">
-          {/* Timer */}
-          <div className="flex flex-col items-center gap-6 w-full lg:w-auto lg:flex-shrink-0">
+        {/* Body — mobile: stacked, desktop: 2 columns (timer 3fr, tasks 2fr) */}
+        <div className="flex-1 flex flex-col lg:flex-row lg:gap-12 xl:gap-20 lg:items-center lg:justify-center">
+          {/* Timer column (larger) */}
+          <div className="flex flex-col items-center gap-6 w-full lg:flex-[3] lg:max-w-[520px]">
+            {/* Phase badge */}
+            <span
+              className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider px-2.5 py-1 rounded-full"
+              style={{ color: phaseColor, background: `${phaseColor}15` }}
+            >
+              <PhaseIcon size={13} strokeWidth={2} />
+              {t(PHASE_LABEL_KEY[session.phase])}
+            </span>
+
+            {/* Timer ring */}
             <FocusRing percentage={percentage} color={timerColor}>
               <span className="text-6xl lg:text-8xl font-medium tabular-nums" style={{ color: timerColor }}>
                 {formatClock(remainingSec)}
@@ -231,87 +196,82 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
             </FocusRing>
 
             {skipError && (
-              <p className="text-xs" style={{ color: "var(--danger)" }}>
-                {t("skip_error")}
-              </p>
+              <p className="text-xs" style={{ color: "var(--danger)" }}>{t("skip_error")}</p>
             )}
 
-            {/* Controles */}
+            {/* Controls */}
             <div className="flex items-center gap-4">
               <IconButton icon={RotateCcw} onClick={onReset} label={t("reset_session")} size={56} />
               <IconButton
                 icon={isPaused ? Play : Pause}
                 onClick={isPaused ? onResume : onPause}
                 label={notStarted ? t("start_session") : isPaused ? t("resume") : t("pause")}
-                primary
-                size={72}
+                primary size={72}
               />
               <IconButton icon={SkipForward} onClick={handleSkip} label={t("skip_phase")} disabled={isSkipping} size={56} />
             </div>
           </div>
 
-          {/* Tareas seleccionadas */}
-          {tasks.length > 0 && (() => {
-            const pendingCount = tasks.filter((tk) => !isTaskDone(tk)).length;
-            return (
-              <div className="flex flex-col gap-2 w-full lg:w-[380px] lg:flex-shrink-0">
-                <h3 className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--text-secondary)" }}>
-                  {t("tasks_pending_count", { count: pendingCount })}
-                </h3>
-                {tasks.map((task) => {
-                  const done = isTaskDone(task);
-                  return (
-                    <div
-                      key={task.id}
-                      className="flex items-center gap-3 rounded-lg p-4"
-                      style={{ background: "var(--surface)" }}
-                    >
-                      <TaskCheckbox
-                        done={done}
-                        size={TASK_CHECKBOX_SIZE.card}
-                        animated
-                        variant="focus"
-                        onToggle={() => toggleTask(task)}
-                        ariaLabel={task.title}
-                      />
-                      <span
-                        className="w-2 h-2 rounded-full flex-shrink-0"
-                        style={{ background: PRIORITY_COLORS[task.priority] }}
-                      />
-                      {task.icon && (
-                        <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
-                          <HabitIcon icon={task.icon} size={18} />
-                        </span>
-                      )}
-                      <span
-                        className="flex-1 min-w-0 text-sm font-medium truncate"
-                        style={{
-                          color: done ? "var(--text-secondary)" : "var(--text-primary)",
-                          textDecoration: done ? "line-through" : "none",
-                        }}
-                      >
-                        {task.title}
+          {/* Tasks column (smaller, to the right) */}
+          {tasks.length > 0 && (
+            <div className="flex flex-col gap-2 w-full lg:flex-[2] lg:max-w-[360px] mt-8 lg:mt-0">
+              <h3 className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: "var(--text-secondary)" }}>
+                {t("tasks_pending_count", { count: pendingCount })}
+              </h3>
+              {tasks.map((task) => {
+                const done = isTaskDone(task);
+                return (
+                  <div
+                    key={task.id}
+                    className="flex items-center gap-3 rounded-md p-3"
+                    style={{ background: "var(--surface)" }}
+                  >
+                    <TaskCheckbox
+                      done={done} size={TASK_CHECKBOX_SIZE.card} animated variant="focus"
+                      onToggle={() => toggleTask(task)} ariaLabel={task.title}
+                    />
+                    <span
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{ background: PRIORITY_COLORS[task.priority] }}
+                    />
+                    {task.icon && (
+                      <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
+                        <HabitIcon icon={task.icon} size={16} />
                       </span>
-                      {task.startTime && (
-                        <span className="flex items-center gap-1 flex-shrink-0 text-xs" style={{ color: "var(--text-secondary)" }}>
-                          <Clock size={13} />
-                          {formatTaskTime(task.startTime)}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-full py-3 rounded-md text-sm font-medium mt-3 transition-opacity active:opacity-70"
-                style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
-              >
-                {t("end_flow")}
-              </button>
-              </div>
-            );
-          })()}
+                    )}
+                    <span
+                      className="flex-1 min-w-0 text-sm font-normal truncate"
+                      style={{
+                        color: done ? "var(--text-secondary)" : "var(--text-primary)",
+                        textDecoration: done ? "line-through" : "none",
+                      }}
+                    >
+                      {task.title}
+                    </span>
+                    {task.startTime && (
+                      <span className="flex items-center gap-1 flex-shrink-0 text-xs" style={{ color: "var(--text-secondary)" }}>
+                        <Clock size={12} />
+                        {formatTaskTime(task.startTime)}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* End flow button — bottom, full width, outside columns */}
+        <div className="mt-auto pt-6">
+          <button
+            type="button"
+            onClick={onEndSession}
+            className="flex items-center justify-center gap-2 w-full max-w-md mx-auto py-3 rounded-md text-sm font-medium transition-opacity active:opacity-70"
+            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+          >
+            <Flag size={14} strokeWidth={1.5} />
+            {t("end_flow")}
+          </button>
         </div>
       </div>
 

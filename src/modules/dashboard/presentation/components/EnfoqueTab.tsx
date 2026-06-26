@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { ListTodo, Sparkles } from "lucide-react";
+import { ListTodo, Sparkles, Filter } from "lucide-react";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
@@ -27,9 +27,7 @@ interface Props {
 interface AgendaItem {
   type: "task" | "habit";
   id: string;
-  label: string;
   time: string | null;
-  color: string;
   completed: boolean;
   task?: TaskWithStatus;
   habit?: HabitWithStatus;
@@ -56,9 +54,7 @@ export function EnfoqueTab({
       items.push({
         type: "task",
         id: task.id,
-        label: task.title,
         time: task.startTime ? formatTaskTime(task.startTime) : null,
-        color: "var(--accent)",
         completed: isTaskDone(task),
         task,
       });
@@ -68,9 +64,7 @@ export function EnfoqueTab({
       items.push({
         type: "habit",
         id: habit.id,
-        label: habit.name,
         time: habit.startTime ? formatTaskTime(habit.startTime) : null,
-        color: habit.color ?? "#4CAF82",
         completed: habit.isCompletedToday,
         habit,
       });
@@ -85,55 +79,55 @@ export function EnfoqueTab({
   }, [todayNonOverdue, habits, urgencyFilter]);
 
   return (
-    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[1fr_280px] lg:gap-4">
+    <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[1fr_280px] lg:gap-6">
       {/* Agenda with timeline */}
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between">
           <SectionHeader label="AGENDA" />
           <button
             type="button"
             onClick={() => setUrgencyFilter(p => !p)}
-            className="px-2.5 py-0.5 rounded-full text-[10px] font-medium transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors"
             style={{
               background: urgencyFilter ? "var(--danger)" : "var(--surface-elevated)",
               color: urgencyFilter ? "#fff" : "var(--text-muted)",
             }}
           >
+            <Filter size={10} strokeWidth={1.5} />
             {t("filter_urgent")}
           </button>
         </div>
         <InlineTaskInput onCreateTask={onCreateTask} />
 
         {/* Timeline */}
-        <div className="flex flex-col relative">
-          {/* Vertical line */}
-          <div
-            className="absolute left-[23px] top-4 bottom-4 w-px"
-            style={{ background: "var(--border)" }}
-          />
-
-          {agendaItems.map((item) => {
+        <div className="flex flex-col">
+          {agendaItems.map((item, idx) => {
             const timeParts = item.time?.split(" ") ?? [];
             return (
-              <div key={item.id} className="flex items-stretch gap-0">
-                {/* Timeline column */}
-                <div className="w-12 flex-shrink-0 flex flex-col items-center relative py-1">
-                  {/* Time label */}
+              <div key={item.id} className="flex items-stretch">
+                {/* Time label */}
+                <div className="w-14 flex-shrink-0 text-right pr-3 pt-2.5">
                   {timeParts[0] && (
-                    <div className="text-right w-full pr-4 mb-0.5">
-                      <span className="text-[10px] tabular-nums font-normal leading-none" style={{ color: "var(--text-muted)" }}>
+                    <>
+                      <span className="text-[10px] tabular-nums font-normal leading-none block" style={{ color: "var(--text-muted)" }}>
                         {timeParts[0]}
                       </span>
                       {timeParts[1] && (
-                        <span className="text-[8px] font-normal block leading-none mt-px" style={{ color: "var(--text-muted)" }}>
+                        <span className="text-[8px] font-normal leading-none block mt-px" style={{ color: "var(--text-muted)" }}>
                           {timeParts[1]}
                         </span>
                       )}
-                    </div>
+                    </>
                   )}
-                  {/* Node icon */}
+                </div>
+
+                {/* Line + icon node */}
+                <div className="w-6 flex-shrink-0 flex flex-col items-center relative">
+                  {/* Vertical line */}
+                  {idx > 0 && <div className="absolute top-0 left-1/2 -translate-x-1/2 h-2.5 w-px" style={{ background: "var(--border)" }} />}
+                  {/* Node */}
                   <div
-                    className="relative z-10 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                    className="relative z-10 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-2.5"
                     style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                   >
                     {item.type === "habit"
@@ -141,16 +135,21 @@ export function EnfoqueTab({
                       : <ListTodo size={10} strokeWidth={1.5} style={{ color: "var(--text-muted)" }} />
                     }
                   </div>
+                  {/* Line below node */}
+                  {idx < agendaItems.length - 1 && (
+                    <div className="flex-1 w-px mt-0.5" style={{ background: "var(--border)" }} />
+                  )}
                 </div>
 
                 {/* Card */}
-                <div className="flex-1 min-w-0 pb-2">
+                <div className="flex-1 min-w-0 pb-2 pl-2">
                   {item.type === "task" && item.task && (
                     <TaskCardDashboard
                       task={item.task}
                       onToggle={() => onToggleTask(item.task!)}
                       onEdit={() => onEditTask(item.task!)}
                       onDelete={() => onDeleteTask(item.task!)}
+                      showDescription
                     />
                   )}
                   {item.type === "habit" && item.habit && (
@@ -167,37 +166,53 @@ export function EnfoqueTab({
             );
           })}
           {agendaItems.length === 0 && (
-            <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>
-              —
-            </p>
+            <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>—</p>
           )}
         </div>
       </div>
 
-      {/* Overdue / Vencidas */}
+      {/* Overdue / Vencidas — timeline without time, just line + icons */}
       <div className="flex flex-col gap-3">
         <SectionHeader label={t("overdue").toUpperCase()} />
-        <div className="flex flex-col gap-2">
-          {overdue.map((task, i) => (
+        <div className="flex flex-col">
+          {overdue.map((task, idx) => (
             <motion.div
               key={task.id}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: i * 0.03 }}
+              transition={{ duration: 0.2, delay: idx * 0.03 }}
+              className="flex items-stretch"
             >
-              <TaskCardDashboard
-                task={task}
-                onToggle={() => onToggleTask(task)}
-                onEdit={() => onEditTask(task)}
-                onDelete={() => onDeleteTask(task)}
-                overdue
-              />
+              {/* Line + icon (no time) */}
+              <div className="w-6 flex-shrink-0 flex flex-col items-center relative">
+                {idx > 0 && <div className="absolute top-0 left-1/2 -translate-x-1/2 h-2.5 w-px" style={{ background: "var(--border)" }} />}
+                <div
+                  className="relative z-10 w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-2.5"
+                  style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                >
+                  <ListTodo size={10} strokeWidth={1.5} style={{ color: "var(--text-muted)" }} />
+                </div>
+                {idx < overdue.length - 1 && (
+                  <div className="flex-1 w-px mt-0.5" style={{ background: "var(--border)" }} />
+                )}
+              </div>
+
+              {/* Card */}
+              <div className="flex-1 min-w-0 pb-2 pl-2">
+                <TaskCardDashboard
+                  task={task}
+                  onToggle={() => onToggleTask(task)}
+                  onEdit={() => onEditTask(task)}
+                  onDelete={() => onDeleteTask(task)}
+                  overdue
+                  showDescription
+                  showDueDate
+                />
+              </div>
             </motion.div>
           ))}
           {overdue.length === 0 && (
-            <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>
-              —
-            </p>
+            <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>—</p>
           )}
         </div>
       </div>

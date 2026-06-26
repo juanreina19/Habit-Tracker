@@ -174,6 +174,7 @@ export default function TasksView({ userId }: Props) {
             onResume={focusMode.resume}
             onSkip={focusMode.advancePhase}
             onClose={focusMode.discard}
+            onEndSession={focusMode.discard}
             onUpdateConfig={focusMode.updateActiveConfig}
             onReset={focusMode.resetTimer}
           />
