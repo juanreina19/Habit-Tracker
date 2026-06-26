@@ -152,7 +152,7 @@ export default function LifeDashboardView({ userId }: Props) {
       />
 
       {/* Focus Mode FAB — always visible, positioned above the global QuickAdd FAB */}
-      <div className="fixed z-30 right-5 bottom-[calc(env(safe-area-inset-bottom)+160px)] lg:right-8 lg:bottom-[76px]">
+      <div className="fixed z-30 right-5 bottom-[calc(env(safe-area-inset-bottom)+160px)] lg:right-8 lg:bottom-[88px]">
         <FocusModeButton onClick={() => {
           if (activeFocus) setFocusOverlayOpen(true);
           else setFocusPickerOpen(true);

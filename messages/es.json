@@ -304,7 +304,8 @@
     "close": "Cerrar",
     "save": "Guardar",
     "cancel": "Cancelar",
-    "validation_out_of_range": "El valor debe estar entre {min} y {max}"
+    "validation_out_of_range": "El valor debe estar entre {min} y {max}",
+    "end_flow": "Finalizar flujo"
   },
   "dashboard": {
     "greeting_morning": "Buenos días",
@@ -328,6 +329,7 @@
     "tab_board": "Tablero",
     "tab_eisenhower": "Eisenhower",
     "tab_kanban": "Kanban",
+    "filter_urgent": "Urgente",
     "eisenhower_do": "Hacer primero",
     "eisenhower_schedule": "Programar",
     "eisenhower_delegate": "Delegar",
