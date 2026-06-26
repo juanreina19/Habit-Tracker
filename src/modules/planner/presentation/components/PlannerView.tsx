@@ -136,7 +136,7 @@ export default function PlannerView({ userId }: Props) {
                   className="absolute left-3 top-1 text-[10px] font-medium tabular-nums"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  {String(hour).padStart(2, "0")}:00
+                  {hour === 0 ? "12 AM" : hour < 12 ? `${hour} AM` : hour === 12 ? "12 PM" : `${hour - 12} PM`}
                 </span>
 
                 {/* Blocks at this hour */}

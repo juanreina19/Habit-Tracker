@@ -71,7 +71,7 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
               type="button"
               onClick={() => done ? onUncheck(habit.id) : onComplete(habit.id)}
               className="flex items-center gap-2.5 rounded-md p-2.5 text-left transition-opacity active:opacity-70 w-full"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+              style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
             >
               {/* Checkbox */}
               <span

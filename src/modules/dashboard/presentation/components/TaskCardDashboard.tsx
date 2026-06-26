@@ -25,7 +25,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue }: Props) {
     <div
       className="group relative rounded-md p-2.5"
       style={{
-        background: done ? "var(--bg)" : "var(--surface)",
+        background: "var(--bg)",
         border: done ? "1px solid transparent" : "1px solid var(--border)",
       }}
     >

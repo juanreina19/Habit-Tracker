@@ -13,6 +13,7 @@ import { useLocale } from "@/shared/i18n/useLocale";
 import { useHabits } from "../hooks/useHabits";
 import { useTodayTasks } from "@/modules/tasks/presentation/hooks/useTodayTasks";
 import { TaskCard } from "@/modules/tasks/presentation/components/TaskCard";
+import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import { today as todayISODate } from "@/shared/lib/utils/dates";
 import { useSettingsHabits } from "../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
@@ -26,7 +27,9 @@ import type { CreateHabitInput } from "../../domain/repositories/IHabitRepositor
 function calcEndTime(start: string, minutes: number): string {
   const [h, m] = start.split(":").map(Number);
   const total = h * 60 + m + minutes;
-  return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+  const endH = Math.floor(total / 60) % 24;
+  const endM = total % 60;
+  return formatTaskTime(`${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`);
 }
 
 function isHabitLocked(habit: HabitWithStatus): boolean {
@@ -462,7 +465,7 @@ function HabitRow({
             <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
               <Clock size={11} strokeWidth={2} />
               <span>
-                {habit.startTime}
+                {formatTaskTime(habit.startTime)}
                 {habit.estimatedMinutes ? ` – ${calcEndTime(habit.startTime, habit.estimatedMinutes)}` : ""}
               </span>
             </span>

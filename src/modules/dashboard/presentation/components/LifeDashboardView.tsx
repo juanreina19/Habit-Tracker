@@ -151,12 +151,13 @@ export default function LifeDashboardView({ userId }: Props) {
         onDelete={async (id) => { await dashboard.deleteTask(id); }}
       />
 
-      {/* Focus Mode FAB — positioned above the global QuickAdd FAB */}
-      {!activeFocus && (
-        <div className="fixed z-30 right-5 bottom-[calc(env(safe-area-inset-bottom)+160px)] lg:right-8 lg:bottom-[76px]">
-          <FocusModeButton onClick={() => setFocusPickerOpen(true)} />
-        </div>
-      )}
+      {/* Focus Mode FAB — always visible, positioned above the global QuickAdd FAB */}
+      <div className="fixed z-30 right-5 bottom-[calc(env(safe-area-inset-bottom)+160px)] lg:right-8 lg:bottom-[76px]">
+        <FocusModeButton onClick={() => {
+          if (activeFocus) setFocusOverlayOpen(true);
+          else setFocusPickerOpen(true);
+        }} />
+      </div>
 
       <FocusModeTaskPickerDialog
         open={focusPickerOpen}

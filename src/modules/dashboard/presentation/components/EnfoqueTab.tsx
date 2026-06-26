@@ -68,7 +68,7 @@ export function EnfoqueTab({
         type: "habit",
         id: habit.id,
         label: habit.name,
-        time: habit.startTime ?? null,
+        time: habit.startTime ? formatTaskTime(habit.startTime) : null,
         color: habit.color ?? "#4CAF82",
         completed: habit.isCompletedToday,
         habit,
@@ -108,13 +108,24 @@ export function EnfoqueTab({
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
               className="flex items-start gap-2"
             >
-              {/* Time gutter */}
-              <span
-                className="w-10 flex-shrink-0 text-[10px] tabular-nums font-medium pt-2.5 text-right"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {item.time ?? ""}
-              </span>
+              {/* Time gutter — "5:40" + "PM" below */}
+              <div className="w-12 flex-shrink-0 text-right pt-2">
+                {item.time ? (() => {
+                  const parts = item.time.split(" ");
+                  return (
+                    <>
+                      <span className="text-[11px] tabular-nums font-normal block leading-tight" style={{ color: "var(--text-muted)" }}>
+                        {parts[0]}
+                      </span>
+                      {parts[1] && (
+                        <span className="text-[9px] font-normal block leading-tight" style={{ color: "var(--text-muted)" }}>
+                          {parts[1]}
+                        </span>
+                      )}
+                    </>
+                  );
+                })() : null}
+              </div>
 
               <div className="flex-1 min-w-0">
                 {item.type === "task" && item.task && (
@@ -210,9 +221,9 @@ function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle:
     <button
       type="button"
       onClick={onToggle}
-      className="w-full text-left rounded-lg p-3 flex items-center gap-3 transition-colors active:scale-[0.98]"
+      className="w-full text-left rounded-md p-2.5 flex items-center gap-3 transition-colors active:scale-[0.98]"
       style={{
-        background: done ? "var(--bg)" : "var(--surface)",
+        background: "var(--bg)",
         border: done ? "1px solid transparent" : "1px solid var(--border)",
       }}
     >
