@@ -64,7 +64,7 @@ export default function Sidebar() {
                       style={{ background: "var(--accent)" }}
                     />
                   )}
-                  <Icon size={20} strokeWidth={isActive ? 2 : 1.25} />
+                  <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
                 </Link>
               </Tooltip>
             );
@@ -95,7 +95,7 @@ export default function Sidebar() {
               className={`sidebar-link relative flex items-center justify-center py-2.5 rounded-md ${pathname.startsWith("/settings") ? "sidebar-active" : ""}`}
               style={{ color: pathname.startsWith("/settings") ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
             >
-              <Settings2 size={20} strokeWidth={pathname.startsWith("/settings") ? 2 : 1.25} />
+              <Settings2 size={20} strokeWidth={pathname.startsWith("/settings") ? 2 : 1.5} />
             </Link>
           </Tooltip>
 
@@ -109,7 +109,7 @@ export default function Sidebar() {
               className="sidebar-link flex items-center justify-center py-2.5 rounded-md transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
-              <User size={20} strokeWidth={1.25} />
+              <User size={20} strokeWidth={1.5} />
             </Link>
           </Tooltip>
 
@@ -122,7 +122,7 @@ export default function Sidebar() {
                 className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-colors disabled:opacity-40"
                 style={{ color: "var(--text-secondary)" }}
               >
-                <LogOut size={20} strokeWidth={1.25} />
+                <LogOut size={20} strokeWidth={1.5} />
               </button>
             </Tooltip>
 

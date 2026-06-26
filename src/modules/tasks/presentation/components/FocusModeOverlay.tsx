@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { X, Play, Pause, Settings, SkipForward, RotateCcw, Clock, Flame, Coffee, Moon, Flag, type LucideIcon } from "lucide-react";
+import { X, Play, Pause, Settings, SkipForward, RotateCcw, Clock, Flame, Coffee, Moon, Flag, Maximize2, Minimize2, type LucideIcon } from "lucide-react";
 import type { FocusModeSession, FocusPhase } from "../../domain/entities/FocusModeSession";
 import { getElapsedSec } from "../../domain/entities/FocusModeSession";
 import type { TaskWithStatus } from "../../domain/entities/Task";
@@ -96,7 +96,7 @@ function IconButton({ icon: Icon, onClick, label, primary, disabled, size = 56 }
         color: primary ? "var(--btn-primary-text)" : "var(--text-secondary)",
       }}
     >
-      <Icon size={Math.round(size * 0.42)} strokeWidth={2} />
+      <Icon size={Math.round(size * 0.42)} strokeWidth={1.5} />
     </button>
   );
 }
@@ -107,6 +107,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
   const [skipError, setSkipError] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const id = setInterval(() => forceTick((n) => n + 1), 1000);
@@ -159,7 +160,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
             className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
             style={{ color: "var(--text-secondary)" }}
           >
-            <X size={20} strokeWidth={2} />
+            <X size={20} strokeWidth={1.5} />
           </button>
           <button
             type="button"
@@ -168,20 +169,20 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
             className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
             style={{ color: "var(--text-secondary)" }}
           >
-            <Settings size={18} strokeWidth={2} />
+            <Settings size={18} strokeWidth={1.5} />
           </button>
         </div>
 
-        {/* Body — mobile: stacked, desktop: 2 columns (timer 3fr, tasks 2fr) */}
-        <div className="flex-1 flex flex-col lg:flex-row lg:gap-12 xl:gap-20 lg:items-center lg:justify-center">
-          {/* Timer column (larger) */}
-          <div className="flex flex-col items-center gap-6 w-full lg:flex-[3] lg:max-w-[520px]">
+        {/* Body — mobile: stacked, desktop: 2 columns (timer | divider | tasks) */}
+        <div className="flex-1 flex flex-col lg:flex-row lg:gap-0 lg:items-center lg:justify-center">
+          {/* Timer column */}
+          <div className={`flex flex-col items-center gap-6 w-full ${expanded ? "lg:flex-[1]" : "lg:flex-[3]"} lg:max-w-[520px]`}>
             {/* Phase badge */}
             <span
               className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider px-2.5 py-1 rounded-full"
               style={{ color: phaseColor, background: `${phaseColor}15` }}
             >
-              <PhaseIcon size={13} strokeWidth={2} />
+              <PhaseIcon size={13} strokeWidth={1.5} />
               {t(PHASE_LABEL_KEY[session.phase])}
             </span>
 
@@ -210,68 +211,95 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
               />
               <IconButton icon={SkipForward} onClick={handleSkip} label={t("skip_phase")} disabled={isSkipping} size={56} />
             </div>
+
+            {/* Expand/collapse button — desktop only */}
+            <button
+              type="button"
+              onClick={() => setExpanded(p => !p)}
+              className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full transition-opacity active:opacity-70"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {expanded ? <Minimize2 size={16} strokeWidth={1.5} /> : <Maximize2 size={16} strokeWidth={1.5} />}
+            </button>
+
+            {/* End flow — visible on desktop when expanded, centered below timer */}
+            {expanded && (
+              <button
+                type="button"
+                onClick={onEndSession}
+                className="hidden lg:flex items-center justify-center gap-2 py-3 px-8 rounded-md text-sm font-normal transition-opacity active:opacity-70"
+                style={{ background: "var(--bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+              >
+                <Flag size={14} strokeWidth={1.5} />
+                {t("end_flow")}
+              </button>
+            )}
           </div>
 
-          {/* Tasks column (smaller, to the right) */}
+          {/* Divider — desktop only, hidden when expanded */}
+          {!expanded && (
+            <div className="hidden lg:block w-px self-stretch mx-6" style={{ background: "var(--border)" }} />
+          )}
+
+          {/* Tasks column — hidden on desktop when expanded, always visible on mobile */}
           {tasks.length > 0 && (
-            <div className="flex flex-col gap-2 w-full lg:flex-[2] lg:max-w-[360px] mt-8 lg:mt-0">
-              <h3 className="text-xs font-medium uppercase tracking-wider mb-1" style={{ color: "var(--text-secondary)" }}>
-                {t("tasks_pending_count", { count: pendingCount })}
+            <div className={`flex flex-col w-full lg:flex-[2] lg:max-w-[360px] mt-8 lg:mt-0 lg:self-stretch ${expanded ? "lg:hidden" : ""}`}>
+              <h3 className="text-xs font-normal uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
+                {t("todays_tasks")}
               </h3>
-              {tasks.map((task) => {
-                const done = isTaskDone(task);
-                return (
-                  <div
-                    key={task.id}
-                    className="flex items-center gap-3 rounded-md p-3"
-                    style={{ background: "var(--surface)" }}
-                  >
-                    <TaskCheckbox
-                      done={done} size={TASK_CHECKBOX_SIZE.card} animated variant="focus"
-                      onToggle={() => toggleTask(task)} ariaLabel={task.title}
-                    />
-                    <span
-                      className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ background: PRIORITY_COLORS[task.priority] }}
-                    />
-                    {task.icon && (
-                      <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
-                        <HabitIcon icon={task.icon} size={16} />
-                      </span>
-                    )}
-                    <span
-                      className="flex-1 min-w-0 text-sm font-normal truncate"
-                      style={{
-                        color: done ? "var(--text-secondary)" : "var(--text-primary)",
-                        textDecoration: done ? "line-through" : "none",
-                      }}
+              <div className="flex flex-col gap-2 flex-1">
+                {tasks.map((task) => {
+                  const done = isTaskDone(task);
+                  return (
+                    <div
+                      key={task.id}
+                      className="flex items-center gap-3 rounded-md p-3"
+                      style={{ background: "var(--surface)" }}
                     >
-                      {task.title}
-                    </span>
-                    {task.startTime && (
-                      <span className="flex items-center gap-1 flex-shrink-0 text-xs" style={{ color: "var(--text-secondary)" }}>
-                        <Clock size={12} />
-                        {formatTaskTime(task.startTime)}
+                      <TaskCheckbox
+                        done={done} size={TASK_CHECKBOX_SIZE.card} animated variant="focus"
+                        onToggle={() => toggleTask(task)} ariaLabel={task.title}
+                      />
+                      <span
+                        className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ background: PRIORITY_COLORS[task.priority] }}
+                      />
+                      {task.icon && (
+                        <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}>
+                          <HabitIcon icon={task.icon} size={16} />
+                        </span>
+                      )}
+                      <span
+                        className="flex-1 min-w-0 text-sm font-normal truncate"
+                        style={{
+                          color: done ? "var(--text-secondary)" : "var(--text-primary)",
+                          textDecoration: done ? "line-through" : "none",
+                        }}
+                      >
+                        {task.title}
                       </span>
-                    )}
-                  </div>
-                );
-              })}
+                      {task.startTime && (
+                        <span className="flex items-center gap-1 flex-shrink-0 text-xs" style={{ color: "var(--text-secondary)" }}>
+                          <Clock size={12} />
+                          {formatTaskTime(task.startTime)}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {/* End flow at bottom of this column */}
+              <button
+                type="button"
+                onClick={onEndSession}
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-md text-sm font-normal mt-4 transition-opacity active:opacity-70"
+                style={{ background: "var(--bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+              >
+                <Flag size={14} strokeWidth={1.5} />
+                {t("end_flow")}
+              </button>
             </div>
           )}
-        </div>
-
-        {/* End flow button — bottom, full width, outside columns */}
-        <div className="mt-auto pt-6">
-          <button
-            type="button"
-            onClick={onEndSession}
-            className="flex items-center justify-center gap-2 w-full max-w-md mx-auto py-3 rounded-md text-sm font-medium transition-opacity active:opacity-70"
-            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
-          >
-            <Flag size={14} strokeWidth={1.5} />
-            {t("end_flow")}
-          </button>
         </div>
       </div>
 

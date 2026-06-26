@@ -15,13 +15,14 @@ interface Props {
   open: boolean;
   onClose: () => void;
   userId: UUID;
-  onStart: (taskIds: UUID[]) => void;
+  onStart: (taskIds: UUID[], durationMin: number) => void;
 }
 
 export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Props) {
   const t = useTranslations("focus");
   const { tasks } = useTodayTasks(userId);
   const [selected, setSelected] = useState<Set<UUID>>(new Set());
+  const [duration, setDuration] = useState(25);
 
   useEffect(() => {
     if (open) setSelected(new Set());
@@ -38,7 +39,7 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
   };
 
   const handleStart = () => {
-    onStart(Array.from(selected));
+    onStart(Array.from(selected), duration);
     onClose();
   };
 
@@ -52,13 +53,13 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
           className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
-          style={{ background: "var(--surface)", maxHeight: "90dvh" }}
+          style={{ background: "var(--bg)", maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto p-6 flex flex-col gap-4" style={{ maxHeight: "90dvh" }}>
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
               <div className="flex flex-col gap-1">
-                <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                <Dialog.Title className="text-lg font-normal" style={{ color: "var(--text-primary)" }}>
                   {t("picker_heading")}
                 </Dialog.Title>
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
@@ -72,7 +73,7 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
                 className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70"
                 style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
               >
-                <X size={16} />
+                <X size={16} strokeWidth={1.5} />
               </button>
             </div>
 
@@ -105,7 +106,7 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
                           <HabitIcon icon={task.icon} size={18} />
                         </span>
                       )}
-                      <span className="flex-1 min-w-0 text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
+                      <span className="flex-1 min-w-0 text-sm font-normal truncate" style={{ color: "var(--text-primary)" }}>
                         {task.title}
                       </span>
                       {task.startTime && (
@@ -120,12 +121,29 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
               </div>
             )}
 
+            <div className="flex gap-2 mb-3">
+              {[5, 15, 25, 45].map(min => (
+                <button
+                  key={min}
+                  type="button"
+                  onClick={() => setDuration(min)}
+                  className="flex-1 py-2 rounded-md text-xs font-normal transition-colors"
+                  style={{
+                    background: duration === min ? "var(--text-primary)" : "var(--surface-elevated)",
+                    color: duration === min ? "var(--bg)" : "var(--text-muted)",
+                  }}
+                >
+                  {min} min
+                </button>
+              ))}
+            </div>
+
             <button
               onClick={handleStart}
-              className="w-full py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-lg text-sm font-normal transition-opacity active:opacity-70 flex items-center justify-center gap-2"
               style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
             >
-              <Zap size={16} fill="currentColor" />
+              <Zap size={16} />
               {t("start_flow", { count: selected.size })}
             </button>
           </div>

@@ -83,7 +83,7 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
               >
                 {done && (
                   <svg width={10} height={10} viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6l3 3 5-5" stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M2 6l3 3 5-5" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
               </span>
