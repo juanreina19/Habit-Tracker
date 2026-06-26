@@ -181,19 +181,19 @@ export function TaskFormDialog({
           style={{ background: "var(--surface)", maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto p-6" style={{ maxHeight: "90dvh" }}>
-            {/* Close button */}
-            <div className="flex items-center justify-between mb-4">
+            {/* Close button — top right */}
+            <div className="flex items-center justify-end mb-2">
               <Dialog.Title className="sr-only">
                 {isEdit ? t("edit_title") : t("new_title")}
               </Dialog.Title>
               <Dialog.Close asChild>
                 <button
                   type="button"
-                  className="p-1.5 rounded-md transition-opacity active:opacity-70"
+                  className="p-1 rounded-md transition-opacity active:opacity-70"
                   style={{ color: "var(--text-muted)" }}
                   aria-label={t("close")}
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
               </Dialog.Close>
             </div>
@@ -285,7 +285,7 @@ export function TaskFormDialog({
                         </div>
                       </div>
                     )}
-                    {(isEdit ? subtasks.length === 0 : true) && (
+                    {isEdit && subtasks.length === 0 && (
                       <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
                         {t("subtasks_label")}
                       </label>
@@ -320,7 +320,13 @@ export function TaskFormDialog({
                             </button>
                           </div>
                         ))}
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center gap-2.5 mt-1">
+                          <span
+                            className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center"
+                            style={{ background: "var(--border)", color: "var(--text-muted)" }}
+                          >
+                            <Plus size={10} strokeWidth={2.5} />
+                          </span>
                           <input
                             type="text"
                             value={newSubtaskTitle}
@@ -335,32 +341,17 @@ export function TaskFormDialog({
                                 }
                               }
                             }}
-                            placeholder={t("subtask_placeholder")}
-                            className="flex-1 rounded-md px-3 py-2 text-sm outline-none"
-                            style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
+                            placeholder={t("add_subtask")}
+                            className="flex-1 py-1 text-sm outline-none bg-transparent"
+                            style={{ color: "var(--text-muted)" }}
                           />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const value = newSubtaskTitle.trim();
-                              if (value) {
-                                createSubtask({ title: value });
-                                setNewSubtaskTitle("");
-                              }
-                            }}
-                            aria-label={t("add_subtask")}
-                            className="w-8 h-8 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
-                            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-                          >
-                            <Plus size={16} />
-                          </button>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-1.5">
                         {localSubtasks.map((st, idx) => (
-                          <div key={idx} className="flex items-center gap-2">
-                            <span className="w-4 h-4 rounded flex-shrink-0 border" style={{ borderColor: "var(--border)" }} />
+                          <div key={idx} className="flex items-center gap-2.5">
+                            <span className="w-4 h-4 rounded-full flex-shrink-0 border" style={{ borderColor: "var(--border)" }} />
                             <span className="flex-1 text-sm" style={{ color: "var(--text-primary)" }}>{st}</span>
                             <button
                               type="button"
@@ -372,7 +363,13 @@ export function TaskFormDialog({
                             </button>
                           </div>
                         ))}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <span
+                            className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center"
+                            style={{ background: "var(--border)", color: "var(--text-muted)" }}
+                          >
+                            <Plus size={10} strokeWidth={2.5} />
+                          </span>
                           <input
                             type="text"
                             value={newSubtaskTitle}
@@ -387,25 +384,10 @@ export function TaskFormDialog({
                                 }
                               }
                             }}
-                            placeholder={t("subtask_placeholder")}
-                            className="flex-1 rounded-md px-3 py-2 text-sm outline-none"
-                            style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
+                            placeholder={t("add_subtask")}
+                            className="flex-1 py-1 text-sm outline-none bg-transparent"
+                            style={{ color: "var(--text-muted)" }}
                           />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const value = newSubtaskTitle.trim();
-                              if (value) {
-                                setLocalSubtasks(prev => [...prev, value]);
-                                setNewSubtaskTitle("");
-                              }
-                            }}
-                            aria-label={t("add_subtask")}
-                            className="w-8 h-8 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
-                            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-                          >
-                            <Plus size={16} />
-                          </button>
                         </div>
                       </div>
                     )}

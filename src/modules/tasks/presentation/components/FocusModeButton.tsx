@@ -15,14 +15,15 @@ export function FocusModeButton({ onClick }: Props) {
       type="button"
       onClick={onClick}
       aria-label={t("open_picker")}
-      className="fixed z-30 right-5 bottom-[calc(env(safe-area-inset-bottom)+96px)] lg:right-8 lg:bottom-8 w-[54px] h-[54px] rounded-full flex items-center justify-center transition-transform active:scale-95"
+      className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-95"
       style={{
-        background: "#000000",
-        color: "#FFFFFF",
-        boxShadow: "var(--focus-btn-ring), 0 8px 24px -6px rgba(0,0,0,0.45)",
+        background: "var(--surface-elevated)",
+        color: "var(--text-primary)",
+        border: "1px solid var(--border)",
+        boxShadow: "0 4px 16px -4px rgba(0,0,0,0.5)",
       }}
     >
-      <Zap size={24} strokeWidth={2.5} fill="currentColor" />
+      <Zap size={20} strokeWidth={2.5} fill="currentColor" />
     </button>
   );
 }
