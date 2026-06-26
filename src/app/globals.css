@@ -3,116 +3,150 @@
 @tailwind utilities;
 
 :root {
-  /* Backgrounds */
-  --bg:               #000000;
-  --surface:          #0C0C0C;
-  --surface-elevated: #161616;
-  --surface-hover:    #1A1A1A;
-  --border:           #222222;
+  /* ── Backgrounds ── */
+  --bg:               #0f0f0f;
+  --sidebar-bg:       #0a0a0a;
+  --surface:          #161616;
+  --surface-elevated: #1e1e1e;
+  --surface-hover:    #242424;
+  --border:           #2a2a2a;
 
-  /* Text */
-  --text-primary:   #FFFFFF;
-  --text-secondary: #7A7A96;
-  --text-tertiary:  #444455;
-  --text-muted:     #555555;
+  /* ── Text ── */
+  --text-primary:   #e8e8e8;
+  --text-secondary: #8a8aa0;
+  --text-muted:     #6a6a6a;
+  --text-disabled:  #444444;
 
-  /* Accents (unchanged between themes) */
+  /* ── Accents ── */
   --accent:  #4CAF82;
-  --danger:  #FF5252;
+  --danger:  #ef4444;
   --warning: #F5A623;
+  --info:    #3b82f6;
+  --purple:  #8b5cf6;
 
-  /* Primary action button */
-  --btn-primary-bg:   #FFFFFF;
+  /* ── Priorities ── */
+  --priority-urgent: #ef4444;
+  --priority-high:   #f97316;
+  --priority-medium: #eab308;
+  --priority-low:    #6b7280;
+
+  /* ── Primary action button ── */
+  --btn-primary-bg:   #ffffff;
   --btn-primary-text: #000000;
 
-  /* Nav glassmorphism */
-  --nav-bg:     rgba(20, 20, 22, 0.55);
-  --nav-border: rgba(255,255,255,0.13);
+  /* ── Nav glassmorphism ── */
+  --nav-bg:     rgba(15, 15, 15, 0.55);
+  --nav-border: rgba(255,255,255,0.10);
 
-  /* Sidebar */
-  --sidebar-bg:           #0D0D0D;
-  --sidebar-active-bg:    rgba(255, 255, 255, 0.10);
-  --sidebar-hover-bg:     rgba(255, 255, 255, 0.05);
-  --sidebar-active-color: #FFFFFF;
+  /* ── Sidebar ── */
+  --sidebar-active-bg:    rgba(255, 255, 255, 0.08);
+  --sidebar-hover-bg:     rgba(255, 255, 255, 0.04);
+  --sidebar-active-color: #e8e8e8;
 
-  /* Tooltip — colores invertidos respecto al tema activo */
-  --tooltip-bg:   #FFFFFF;
-  --tooltip-text: #0A0A0A;
+  /* ── Tooltip ── */
+  --tooltip-bg:   #ffffff;
+  --tooltip-text: #0a0a0a;
 
-  /* Focus Mode button — ring sutil, solo visible en tema oscuro */
-  --focus-btn-ring: 0 0 0 1px rgba(255, 255, 255, 0.14);
+  /* ── Focus ring ── */
+  --focus-btn-ring: 0 0 0 1px rgba(255, 255, 255, 0.12);
 
-  /* Design tokens — radius */
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* ── Radius ── */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-full: 9999px;
 
-  /* Design tokens — spacing */
-  --space-2xs: 2px;
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 32px;
-  --space-3xl: 48px;
+  /* ── Spacing (4px base) ── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
 
-  /* Design tokens — motion */
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* ── Motion ── */
+  --motion-instant: 100ms;
+  --motion-fast:    150ms;
+  --motion-normal:  200ms;
+  --motion-slow:    300ms;
+  --motion-slower:  500ms;
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Shadows ── */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
 }
 
 .light {
-  --bg:               #F5F5F7;
-  --surface:          #FFFFFF;
-  --surface-elevated: #F0F0F2;
-  --surface-hover:    #E8E8EC;
-  --border:           #E5E5EA;
-  --text-primary:   #1C1C1E;
-  --text-secondary: #6E6E8A;
-  --text-tertiary:  #AEAEB2;
-  --text-muted:     #AEAEB2;
+  --bg:               #f5f5f7;
+  --sidebar-bg:       #ececee;
+  --surface:          #ffffff;
+  --surface-elevated: #f0f0f2;
+  --surface-hover:    #e8e8ec;
+  --border:           #e0e0e4;
+
+  --text-primary:   #1c1c1e;
+  --text-secondary: #6e6e8a;
+  --text-muted:     #9a9aaa;
+  --text-disabled:  #c0c0c8;
+
   --accent:  #4CAF82;
-  --danger:  #FF5252;
+  --danger:  #ef4444;
   --warning: #F5A623;
-  --btn-primary-bg:   #1C1C1E;
-  --btn-primary-text: #FFFFFF;
-  --nav-bg:     rgba(240, 240, 242, 0.80);
-  --nav-border: rgba(0,0,0,0.10);
+  --info:    #3b82f6;
+  --purple:  #8b5cf6;
 
-  /* Sidebar */
-  --sidebar-bg:           #F0F0F2;
-  --sidebar-active-bg:    rgba(0, 0, 0, 0.08);
-  --sidebar-hover-bg:     rgba(0, 0, 0, 0.04);
-  --sidebar-active-color: #000000;
+  --priority-urgent: #ef4444;
+  --priority-high:   #f97316;
+  --priority-medium: #eab308;
+  --priority-low:    #6b7280;
 
-  /* Tooltip — colores invertidos respecto al tema activo */
-  --tooltip-bg:   #1C1C1E;
-  --tooltip-text: #FFFFFF;
+  --btn-primary-bg:   #1c1c1e;
+  --btn-primary-text: #ffffff;
 
-  /* Focus Mode button — sin ring en tema claro */
+  --nav-bg:     rgba(245, 245, 247, 0.80);
+  --nav-border: rgba(0,0,0,0.08);
+
+  --sidebar-active-bg:    rgba(0, 0, 0, 0.06);
+  --sidebar-hover-bg:     rgba(0, 0, 0, 0.03);
+  --sidebar-active-color: #1c1c1e;
+
+  --tooltip-bg:   #1c1c1e;
+  --tooltip-text: #ffffff;
+
   --focus-btn-ring: 0 0 0 1px rgba(0, 0, 0, 0);
+
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+/* ── Reset ── */
+* { box-sizing: border-box; padding: 0; margin: 0; }
 
-html,
-body {
+/* ── Base typography ── */
+html, body {
   max-width: 100vw;
   background-color: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "kern" 1, "liga" 1;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  font-optical-sizing: auto;
+  -webkit-text-size-adjust: 100%;
 }
 
+/* HiDPI: grayscale antialiasing */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   html, body {
     -webkit-font-smoothing: antialiased;
@@ -120,7 +154,7 @@ body {
   }
 }
 
-/* Linux desktop: force subpixel antialiasing for sharper text */
+/* Desktop 1x (Linux/Windows): subpixel rendering */
 @media (hover: hover) and (pointer: fine) and (not (-webkit-min-device-pixel-ratio: 2)) {
   html, body {
     -webkit-font-smoothing: auto;
@@ -128,26 +162,33 @@ body {
   }
 }
 
-/* Scrollbar minimalista */
-html { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
-.light { scrollbar-color: rgba(0,0,0,0.08) transparent; }
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
-.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); }
-.light ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.15); }
-
-/* Elimina el delay de 300ms en taps de iOS */
-button, a, [role="button"] {
-  touch-action: manipulation;
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
 
-/* Safe area para PWA en iPhone con notch */
+/* ── Scrollbar ── */
+html { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent; }
+.light { scrollbar-color: rgba(0,0,0,0.06) transparent; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+.light ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.06); }
+.light ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.12); }
+
+/* ── Touch ── */
+button, a, [role="button"] { touch-action: manipulation; }
+
+/* ── Safe areas ── */
 .safe-top    { padding-top: env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-/* Shimmer skeleton animation */
+/* ── Skeleton shimmer ── */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -158,27 +199,27 @@ button, a, [role="button"] {
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
-/* Radix DropdownMenu item highlight */
-.task-menu-item[data-highlighted] { background: var(--surface); }
+/* ── Radix menu highlight ── */
+.task-menu-item[data-highlighted] { background: var(--surface-hover); }
 
-/* Sidebar desktop — hover y active */
-.sidebar-link { transition: background 0.15s ease; }
+/* ── Sidebar ── */
+.sidebar-link { transition: background var(--motion-instant) ease; }
 .sidebar-link:hover { background: var(--sidebar-hover-bg); }
 .sidebar-link.sidebar-active {
   background: var(--sidebar-active-bg);
   color: var(--sidebar-active-color) !important;
 }
 
-/* Tooltips del sidebar — colores invertidos respecto al tema activo */
+/* ── Tooltip ── */
 .tooltip-content {
   background: var(--tooltip-bg);
   color: var(--tooltip-text);
-  padding: 6px 10px;
-  border-radius: 8px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
   font-size: 12px;
   font-weight: 500;
   line-height: 1.2;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
   z-index: 60;
 }
 .tooltip-arrow { fill: var(--tooltip-bg); }

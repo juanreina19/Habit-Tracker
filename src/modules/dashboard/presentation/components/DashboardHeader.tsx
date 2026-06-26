@@ -53,7 +53,7 @@ export function DashboardHeader({ habitsProgress, focusSession, onOpenFocusOverl
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between w-full">
       {/* Left: date + greeting */}
       <div className="flex flex-col gap-0.5">
-        <h1 className="text-lg lg:text-xl font-bold capitalize" style={{ color: "var(--text-primary)" }}>
+        <h1 className="text-lg lg:text-xl font-medium capitalize" style={{ color: "var(--text-primary)" }}>
           {dateStr}
         </h1>
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>

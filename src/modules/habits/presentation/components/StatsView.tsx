@@ -43,7 +43,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
   if (error) {
     return (
       <div className="p-6 pt-14 flex items-center justify-center min-h-screen">
-        <p className="text-sm" style={{ color: "#FF5252" }}>Error: {error}</p>
+        <p className="text-sm" style={{ color: "var(--danger)" }}>Error: {error}</p>
       </div>
     );
   }
@@ -213,7 +213,7 @@ function StatCard({ label, value, unit, highlight = false }: {
     <div className="rounded-lg p-3 flex flex-col gap-1" style={{ background: "var(--surface)" }}>
       <p className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>{label}</p>
       <p
-        className="text-xl font-bold leading-none"
+        className="text-xl font-medium leading-none"
         style={{ color: highlight ? "var(--accent)" : "var(--text-primary)" }}
       >
         {value}

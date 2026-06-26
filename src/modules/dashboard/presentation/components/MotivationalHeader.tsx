@@ -89,7 +89,7 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
 
       {/* Greeting + motivational quote */}
       <p className="max-w-lg mt-1">
-        <span className="text-xl lg:text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+        <span className="text-xl lg:text-2xl font-medium" style={{ color: "var(--text-primary)" }}>
           {greeting}
         </span>{" "}
         <span className="font-serif italic text-lg lg:text-xl" style={{ color: "var(--text-secondary)" }}>

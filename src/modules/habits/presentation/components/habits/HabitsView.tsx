@@ -100,7 +100,7 @@ export default function HabitsView({ userId }: Props) {
           <button
             key={tabKey}
             onClick={() => setTab(tabKey)}
-            className="flex-1 py-2.5 rounded-md text-sm font-medium transition-all"
+            className="flex-1 py-2.5 rounded-md text-sm font-medium transition-colors"
             style={{
               background: tab === tabKey ? "var(--surface-elevated)" : "transparent",
               color: tab === tabKey ? "var(--text-primary)" : "var(--text-secondary)",
@@ -445,8 +445,8 @@ function IconButton({
       aria-label={label}
       className="w-8 h-8 rounded-sm flex items-center justify-center transition-opacity active:opacity-60"
       style={{
-        background: danger ? "#FF525215" : "var(--surface-elevated)",
-        color: danger ? "#FF5252" : "var(--text-secondary)",
+        background: danger ? "rgba(239,68,68,0.08)" : "var(--surface-elevated)",
+        color: danger ? "var(--danger)" : "var(--text-secondary)",
       }}
     >
       {children}
@@ -508,7 +508,7 @@ function DeleteConfirmDialog({
             onClick={handleConfirm}
             disabled={isDeleting}
             className="flex-1 py-3 rounded-lg text-sm font-semibold disabled:opacity-50"
-            style={{ background: "#FF5252", color: "#FFFFFF" }}
+            style={{ background: "var(--danger)", color: "#FFFFFF" }}
           >
             {t("delete_confirm_btn")}
           </button>

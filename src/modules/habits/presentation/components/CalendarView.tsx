@@ -33,7 +33,7 @@ export default function CalendarView({ userId, userCreatedAt }: Props) {
             <button
               key={m}
               onClick={() => setMode(m)}
-              className="px-4 py-2 rounded-md text-sm font-medium transition-all"
+              className="px-4 py-2 rounded-md text-sm font-medium transition-colors"
               style={{
                 background: mode === m ? "var(--surface-elevated)" : "transparent",
                 color: mode === m ? "var(--text-primary)" : "var(--text-secondary)",

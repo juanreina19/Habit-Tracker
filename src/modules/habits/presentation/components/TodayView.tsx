@@ -169,7 +169,7 @@ export default function TodayView({ userId }: Props) {
             {maxStreak > 0 && (
               <>
                 <span className="text-base leading-none">🔥</span>
-                <span className="text-sm font-bold" style={{ color: "#FF9500" }}>{maxStreak}</span>
+                <span className="text-sm font-medium" style={{ color: "#FF9500" }}>{maxStreak}</span>
               </>
             )}
           </div>
@@ -205,7 +205,7 @@ export default function TodayView({ userId }: Props) {
             {maxStreak > 0 && (
               <>
                 <span className="text-base leading-none">🔥</span>
-                <span className="text-sm font-bold" style={{ color: "#FF9500" }}>{maxStreak}</span>
+                <span className="text-sm font-medium" style={{ color: "#FF9500" }}>{maxStreak}</span>
               </>
             )}
           </div>
@@ -330,7 +330,7 @@ export default function TodayView({ userId }: Props) {
                 <Link
                   href="/tasks"
                   className="text-xs font-medium"
-                  style={{ color: "var(--accent, #3b82f6)" }}
+                  style={{ color: "var(--accent)" }}
                 >
                   {tTasks("see_all")} →
                 </Link>
@@ -479,7 +479,7 @@ function HabitRow({
       {expired && (
         <span
           className="flex-shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-          style={{ background: "#ef444415", color: "#ef4444" }}
+          style={{ background: "rgba(239,68,68,0.08)", color: "var(--danger)" }}
         >
           {t("expired")}
         </span>

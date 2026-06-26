@@ -18,7 +18,7 @@ export function DashboardOverdueColumn({ tasks, onToggle, onEdit, onDelete }: Pr
   if (tasks.length === 0) return null;
 
   return (
-    <DashboardColumn title={t("overdue")} count={tasks.length} color="#ef4444">
+    <DashboardColumn title={t("overdue")} count={tasks.length} color="var(--danger)">
       {tasks.map((task) => (
         <TaskCardDashboard
           key={task.id}

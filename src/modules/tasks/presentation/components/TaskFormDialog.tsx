@@ -222,7 +222,7 @@ export function TaskFormDialog({
                       onClick={handleDelete}
                       disabled={isDeleting}
                       className="flex-1 py-3 rounded-md text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-50"
-                      style={{ background: "#ef4444", color: "#ffffff" }}
+                      style={{ background: "var(--danger)", color: "#ffffff" }}
                     >
                       {isDeleting ? "…" : t("delete_confirm_btn")}
                     </button>
@@ -248,10 +248,10 @@ export function TaskFormDialog({
                       className="w-full text-2xl font-normal outline-none bg-transparent"
                       style={{
                         color: "var(--text-primary)",
-                        borderBottom: titleError ? "2px solid #ef4444" : "none",
+                        borderBottom: titleError ? "2px solid var(--danger)" : "none",
                       }}
                     />
-                    {titleError && <p className="text-xs mt-1" style={{ color: "#ef4444" }}>{titleError}</p>}
+                    {titleError && <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{titleError}</p>}
                   </div>
 
                   {/* Description — open notes area */}
@@ -276,7 +276,7 @@ export function TaskFormDialog({
                         </span>
                         <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
                           <div
-                            className="h-full rounded-full transition-all"
+                            className="h-full rounded-full transition-[width]"
                             style={{
                               width: `${(subtasks.filter(s => s.isCompleted).length / subtasks.length) * 100}%`,
                               background: "var(--accent)",
@@ -400,7 +400,7 @@ export function TaskFormDialog({
                       <div className="relative group/cat">
                         <button
                           type="button"
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                           style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
                         >
                           <span className="w-1.5 h-1.5 rounded-full" style={{ background: categories.find(c => c.id === categoryId)?.color ?? "var(--text-muted)" }} />
@@ -442,7 +442,7 @@ export function TaskFormDialog({
                         const input = document.getElementById("task-date-input");
                         if (input) (input as HTMLInputElement).showPicker?.();
                       }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                       style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
                     >
                       <span className="w-1.5 h-1.5 rounded-full" style={{ background: dueDate ? "var(--accent)" : "var(--text-muted)" }} />
@@ -454,10 +454,10 @@ export function TaskFormDialog({
                     <button
                       type="button"
                       onClick={() => setIsRecurring(prev => !prev)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                       style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
                     >
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: isRecurring ? "#3b82f6" : "var(--text-muted)" }} />
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: isRecurring ? "var(--info)" : "var(--text-muted)" }} />
                       <span style={{ color: "var(--text-muted)" }}>REPEAT</span>
                       {isRecurring ? t("recurrence_repeat") : t("recurrence_once")}
                     </button>
@@ -466,10 +466,10 @@ export function TaskFormDialog({
                     <button
                       type="button"
                       onClick={() => { setHasSchedule(p => !p); setTimeError(""); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                       style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
                     >
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: hasSchedule && startTime ? "#8b5cf6" : "var(--text-muted)" }} />
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: hasSchedule && startTime ? "var(--purple)" : "var(--text-muted)" }} />
                       <span style={{ color: "var(--text-muted)" }}>TIME</span>
                       {hasSchedule && startTime ? startTime : t("form_free")}
                     </button>
@@ -478,7 +478,7 @@ export function TaskFormDialog({
                     <div className="relative group/pri">
                       <button
                         type="button"
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                         style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
                       >
                         <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[priority] }} />
@@ -508,7 +508,7 @@ export function TaskFormDialog({
                       <button
                         type="button"
                         onClick={() => setIsImportant(false)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                         style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
                       >
                         <Star size={10} fill="var(--text-primary)" strokeWidth={0} />
@@ -545,7 +545,7 @@ export function TaskFormDialog({
                                 key={day}
                                 type="button"
                                 onClick={() => toggleDay(day)}
-                                className="flex-1 py-2 rounded-md text-xs font-medium transition-all duration-200 active:scale-95"
+                                className="flex-1 py-2 rounded-md text-xs font-medium transition-colors duration-200 active:scale-95"
                                 style={{
                                   background: on ? "var(--text-primary)" : "var(--surface-elevated)",
                                   color:      on ? "var(--bg)" : "var(--text-secondary)",
@@ -556,7 +556,7 @@ export function TaskFormDialog({
                             );
                           })}
                         </div>
-                        {daysError && <p className="text-xs mt-1.5" style={{ color: "#ef4444" }}>{daysError}</p>}
+                        {daysError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{daysError}</p>}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -583,7 +583,7 @@ export function TaskFormDialog({
                               style={{
                                 background: "var(--surface-elevated)",
                                 color: "var(--text-primary)",
-                                border: `1.5px solid ${timeError ? "#ef4444" : "transparent"}`,
+                                border: `1.5px solid ${timeError ? "var(--danger)" : "transparent"}`,
                               }}
                             />
                           </div>
@@ -599,12 +599,12 @@ export function TaskFormDialog({
                               style={{
                                 background: "var(--surface-elevated)",
                                 color: "var(--text-primary)",
-                                border: `1.5px solid ${timeError ? "#ef4444" : "transparent"}`,
+                                border: `1.5px solid ${timeError ? "var(--danger)" : "transparent"}`,
                               }}
                             />
                           </div>
                         </div>
-                        {timeError && <p className="text-xs mt-1.5" style={{ color: "#ef4444" }}>{timeError}</p>}
+                        {timeError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{timeError}</p>}
                       </motion.div>
                     )}
                   </AnimatePresence>

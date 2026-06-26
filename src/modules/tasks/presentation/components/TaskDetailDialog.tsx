@@ -59,7 +59,7 @@ export function TaskDetailDialog({ open, onClose, entry, userId }: Props) {
     statusColor = priorityColor;
   } else if (showOverdue) {
     statusLabel = t("overdue");
-    statusColor = "#ef4444";
+    statusColor = "var(--danger)";
   } else {
     statusLabel = t("status_pending");
     statusColor = "var(--text-secondary)";

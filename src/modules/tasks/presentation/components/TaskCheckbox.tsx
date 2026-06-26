@@ -36,7 +36,7 @@ export function TaskCheckbox({ done, size = TASK_CHECKBOX_SIZE.card, animated = 
     )
   ) : null;
 
-  const borderColor = done ? "#FFFFFF" : overdue ? "#ef4444" : "var(--border)";
+  const borderColor = done ? "#FFFFFF" : overdue ? "var(--danger)" : "var(--border)";
 
   const style = {
     width:       px,

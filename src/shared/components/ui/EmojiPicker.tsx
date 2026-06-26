@@ -20,7 +20,7 @@ export function EmojiPicker({ value, onChange }: Props) {
           key={emoji}
           type="button"
           onClick={() => onChange(value === emoji ? null : emoji)}
-          className="w-10 h-10 rounded-md flex items-center justify-center text-xl transition-all active:scale-90"
+          className="w-10 h-10 rounded-md flex items-center justify-center text-xl transition-transform active:scale-90"
           style={{
             background: value === emoji ? "#1C1C1C" : "transparent",
             border: `1.5px solid ${value === emoji ? "#FFFFFF30" : "transparent"}`,

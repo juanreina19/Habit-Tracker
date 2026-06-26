@@ -133,7 +133,7 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
         <MonthlySkeleton weekDays={WEEK_DAYS} />
       ) : error ? (
         <div className="flex items-center justify-center py-20">
-          <p className="text-sm" style={{ color: "#FF5252" }}>Error: {error}</p>
+          <p className="text-sm" style={{ color: "var(--danger)" }}>Error: {error}</p>
         </div>
       ) : data ? (
         <CalendarGrid
@@ -224,8 +224,8 @@ function CalendarGrid({
         {[
           { color: "#4CAF82", label: "100%" },
           { color: "#A3CF8A", label: "50-99%" },
-          { color: "#F5A623", label: "1-49%" },
-          { color: "#FF5252", label: "0%" },
+          { color: "var(--warning)", label: "1-49%" },
+          { color: "var(--danger)", label: "0%" },
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full" style={{ background: color }} />
@@ -367,8 +367,8 @@ function getTextColor(rate: number, isFuture: boolean): string {
 function getDotColor(rate: number): string {
   if (rate === 100) return "#4CAF82";
   if (rate >= 50) return "#A3CF8A";
-  if (rate > 0) return "#F5A623";
-  return "#FF5252";
+  if (rate > 0) return "var(--warning)";
+  return "var(--danger)";
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────

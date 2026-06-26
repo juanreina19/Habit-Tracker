@@ -35,14 +35,14 @@ export function EisenhowerTab({ tasks, onToggleTask, onEditTask, onDeleteTask }:
       {
         key: "do",
         i18nKey: "eisenhower_do",
-        color: "#ef4444",
+        color: "var(--danger)",
         borderColor: "rgba(239,68,68,0.5)",
         tasks: pending.filter((t) => isUrgent(t) && t.isImportant),
       },
       {
         key: "schedule",
         i18nKey: "eisenhower_schedule",
-        color: "#3b82f6",
+        color: "var(--info)",
         borderColor: "rgba(59,130,246,0.5)",
         tasks: pending.filter((t) => !isUrgent(t) && t.isImportant),
       },

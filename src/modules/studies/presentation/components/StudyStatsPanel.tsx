@@ -50,7 +50,7 @@ export function StudyStatsPanel({ stats, sessions, subjects }: Props) {
           { label: t("stats_streak"), value: stats.streak.toString() },
         ].map((stat) => (
           <div key={stat.label} className="text-center">
-            <p className="text-3xl font-bold tabular-nums" style={{ color: "var(--text-primary)" }}>
+            <p className="text-3xl font-medium tabular-nums" style={{ color: "var(--text-primary)" }}>
               {stat.value}
             </p>
             <p className="text-[11px] mt-1 uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>

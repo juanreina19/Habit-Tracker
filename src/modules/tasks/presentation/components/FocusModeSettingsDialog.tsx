@@ -240,7 +240,7 @@ export function FocusModeSettingsDialog({ open, onClose, session, onSave }: Prop
             </p>
 
             {error && (
-              <p className="text-xs" style={{ color: "#ef4444" }}>
+              <p className="text-xs" style={{ color: "var(--danger)" }}>
                 {error}
               </p>
             )}

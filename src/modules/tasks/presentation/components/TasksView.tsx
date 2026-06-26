@@ -88,7 +88,7 @@ export default function TasksView({ userId }: Props) {
         {/* Header */}
         <div className="flex items-center mb-6">
           <div className="flex-1">
-            <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+            <h1 className="text-xl font-medium" style={{ color: "var(--text-primary)" }}>
               {t("title")}
             </h1>
           </div>
@@ -116,7 +116,7 @@ export default function TasksView({ userId }: Props) {
             <button
               key={tabKey}
               onClick={() => setTab(tabKey)}
-              className="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-all"
+              className="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors"
               style={{
                 background: tab === tabKey ? "var(--surface-elevated)" : "transparent",
                 color: tab === tabKey ? "var(--text-primary)" : "var(--text-secondary)",

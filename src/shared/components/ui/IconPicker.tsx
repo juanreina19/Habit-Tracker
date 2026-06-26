@@ -18,7 +18,7 @@ export function IconPicker({ value, onChange, allowNone = false, noneLabel = "â€
           <button
             type="button"
             onClick={() => onChange(null)}
-            className="w-12 h-12 rounded-md flex items-center justify-center text-sm font-medium transition-all active:scale-90"
+            className="w-12 h-12 rounded-md flex items-center justify-center text-sm font-medium transition-transform active:scale-90"
             style={{
               background: value === null ? "var(--surface-elevated)" : "transparent",
               border: `1.5px solid ${value === null ? "var(--btn-primary-bg)" : "var(--border)"}`,
@@ -44,7 +44,7 @@ export function IconPicker({ value, onChange, allowNone = false, noneLabel = "â€
                   key={iconName}
                   type="button"
                   onClick={() => onChange(isSelected ? null : iconValue)}
-                  className="w-12 h-12 rounded-md flex items-center justify-center transition-all active:scale-90"
+                  className="w-12 h-12 rounded-md flex items-center justify-center transition-transform active:scale-90"
                   style={{
                     background: isSelected ? "var(--surface-elevated)" : "transparent",
                     border: `1.5px solid ${isSelected ? "var(--btn-primary-bg)" : "var(--border)"}`,

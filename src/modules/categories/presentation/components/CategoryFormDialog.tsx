@@ -180,10 +180,10 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                       style={{
                         background: "var(--surface-elevated)",
                         color: "var(--text-primary)",
-                        border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
+                        border: nameError ? "1.5px solid var(--danger)" : "1.5px solid transparent",
                       }}
                     />
-                    {nameError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{nameError}</p>}
+                    {nameError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{nameError}</p>}
                   </div>
                 )}
 
@@ -209,10 +209,10 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                         style={{
                           background: "var(--surface-elevated)",
                           color: "var(--text-primary)",
-                          border: nameError ? "1.5px solid #FF5252" : "1.5px solid transparent",
+                          border: nameError ? "1.5px solid var(--danger)" : "1.5px solid transparent",
                         }}
                       />
-                      {nameError && <p className="text-xs mt-1.5" style={{ color: "#FF5252" }}>{nameError}</p>}
+                      {nameError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{nameError}</p>}
                     </div>
 
                     <AppearanceRows color={color} icon={icon} navigate={navigate} t={t} />
@@ -284,7 +284,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                         key={emoji}
                         type="button"
                         onClick={() => { setIcon(icon === emoji ? null : emoji); navigate(homeScene(), -1); }}
-                        className="w-12 h-12 rounded-md flex items-center justify-center text-2xl transition-all active:scale-90"
+                        className="w-12 h-12 rounded-md flex items-center justify-center text-2xl transition-transform active:scale-90"
                         style={{
                           background: icon === emoji ? "var(--surface-elevated)" : "transparent",
                           border: `1.5px solid ${icon === emoji ? "var(--btn-primary-bg)" : "var(--border)"}`,

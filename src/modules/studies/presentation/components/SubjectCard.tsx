@@ -71,7 +71,7 @@ export function SubjectCard({ subject, topics, onLoadTopics, onCreateTopic, onDe
             onClick={onDelete}
             aria-label="Delete"
             className="w-8 h-8 rounded-sm flex items-center justify-center transition-opacity active:opacity-60"
-            style={{ background: "#FF525215", color: "#FF5252" }}
+            style={{ background: "rgba(239,68,68,0.08)", color: "var(--danger)" }}
           >
             <Trash2 size={14} />
           </button>

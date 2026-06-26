@@ -45,7 +45,7 @@ export default function PlannerView({ userId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+          <h1 className="text-xl font-medium" style={{ color: "var(--text-primary)" }}>
             {t("title")}
           </h1>
           <p className="text-sm mt-0.5" style={{ color: "var(--text-secondary)" }}>
@@ -255,8 +255,8 @@ function NowIndicator() {
       style={{ top: topPx }}
     >
       <div className="flex items-center">
-        <div className="w-2 h-2 rounded-full" style={{ background: "#ef4444" }} />
-        <div className="flex-1 h-px" style={{ background: "#ef4444" }} />
+        <div className="w-2 h-2 rounded-full" style={{ background: "var(--danger)" }} />
+        <div className="flex-1 h-px" style={{ background: "var(--danger)" }} />
       </div>
     </div>
   );

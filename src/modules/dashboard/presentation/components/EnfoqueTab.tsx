@@ -210,7 +210,7 @@ function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle:
     <button
       type="button"
       onClick={onToggle}
-      className="w-full text-left rounded-lg p-3 flex items-center gap-3 transition-all active:scale-[0.98]"
+      className="w-full text-left rounded-lg p-3 flex items-center gap-3 transition-colors active:scale-[0.98]"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
