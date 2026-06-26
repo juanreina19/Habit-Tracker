@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
-import { Plus, Trash2, ChevronRight, Star } from "lucide-react";
+import { Plus, X, Trash2, ChevronRight, Star } from "lucide-react";
 import { formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
 import type { Task, CreateTaskInput, UpdateTaskInput, TaskPriority } from "../../domain/entities/Task";
@@ -68,6 +68,7 @@ export function TaskFormDialog({
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
+  const [localSubtasks, setLocalSubtasks] = useState<string[]>([]);
   const { subtasks, createSubtask, toggleSubtask, deleteSubtask } = useSubtasks(userId, task?.id ?? null);
 
   useEffect(() => {
@@ -97,6 +98,7 @@ export function TaskFormDialog({
       setIsDeleting(false);
       setConfirmDelete(defaultConfirmDelete);
       setNewSubtaskTitle("");
+      setLocalSubtasks([]);
     }
   }, [open, task, defaultConfirmDelete]);
 
@@ -179,9 +181,22 @@ export function TaskFormDialog({
           style={{ background: "var(--surface)", maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto p-6" style={{ maxHeight: "90dvh" }}>
-            <Dialog.Title className="sr-only">
-              {isEdit ? t("edit_title") : t("new_title")}
-            </Dialog.Title>
+            {/* Close button */}
+            <div className="flex items-center justify-between mb-4">
+              <Dialog.Title className="sr-only">
+                {isEdit ? t("edit_title") : t("new_title")}
+              </Dialog.Title>
+              <Dialog.Close asChild>
+                <button
+                  type="button"
+                  className="p-1.5 rounded-md transition-opacity active:opacity-70"
+                  style={{ color: "var(--text-muted)" }}
+                  aria-label={t("close")}
+                >
+                  <X size={18} />
+                </button>
+              </Dialog.Close>
+            </div>
 
             <AnimatePresence mode="wait">
               {confirmDelete ? (
@@ -197,8 +212,8 @@ export function TaskFormDialog({
                   </p>
                   <div className="flex gap-3">
                     <button
-                      onClick={onClose}
-                      className="flex-1 py-3 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
+                      onClick={() => setConfirmDelete(false)}
+                      className="flex-1 py-3 rounded-md text-sm font-medium transition-opacity active:opacity-70"
                       style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
                     >
                       {t("delete_cancel")}
@@ -206,7 +221,7 @@ export function TaskFormDialog({
                     <button
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="flex-1 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                      className="flex-1 py-3 rounded-md text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
                       style={{ background: "#ef4444", color: "#ffffff" }}
                     >
                       {isDeleting ? "…" : t("delete_confirm_btn")}
@@ -248,6 +263,153 @@ export function TaskFormDialog({
                     className="w-full text-sm outline-none resize-none bg-transparent"
                     style={{ color: "var(--text-secondary)" }}
                   />
+
+                  {/* Subtasks — right after description */}
+                  <div>
+                    {isEdit && subtasks.length > 0 && (
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text-secondary)" }}>
+                          {t("subtasks_label")}
+                        </span>
+                        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                          {subtasks.filter(s => s.isCompleted).length}/{subtasks.length}
+                        </span>
+                        <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{
+                              width: `${(subtasks.filter(s => s.isCompleted).length / subtasks.length) * 100}%`,
+                              background: "var(--accent)",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {(isEdit ? subtasks.length === 0 : true) && (
+                      <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                        {t("subtasks_label")}
+                      </label>
+                    )}
+                    {isEdit ? (
+                      <div className="flex flex-col gap-2">
+                        {subtasks.map((s) => (
+                          <div key={s.id} className="flex items-center gap-2">
+                            <TaskCheckbox
+                              done={s.isCompleted}
+                              size={TASK_CHECKBOX_SIZE.week}
+                              onToggle={() => toggleSubtask(s)}
+                              ariaLabel={s.title}
+                            />
+                            <span
+                              className="flex-1 text-sm"
+                              style={{
+                                color: s.isCompleted ? "var(--text-muted)" : "var(--text-primary)",
+                                textDecoration: s.isCompleted ? "line-through" : "none",
+                              }}
+                            >
+                              {s.title}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => deleteSubtask(s.id)}
+                              aria-label={t("delete_subtask")}
+                              className="p-1.5 rounded-sm transition-opacity active:opacity-70"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                        <div className="flex items-center gap-2 mt-1">
+                          <input
+                            type="text"
+                            value={newSubtaskTitle}
+                            onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                const value = newSubtaskTitle.trim();
+                                if (value) {
+                                  createSubtask({ title: value });
+                                  setNewSubtaskTitle("");
+                                }
+                              }
+                            }}
+                            placeholder={t("subtask_placeholder")}
+                            className="flex-1 rounded-md px-3 py-2 text-sm outline-none"
+                            style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const value = newSubtaskTitle.trim();
+                              if (value) {
+                                createSubtask({ title: value });
+                                setNewSubtaskTitle("");
+                              }
+                            }}
+                            aria-label={t("add_subtask")}
+                            className="w-8 h-8 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
+                            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
+                          >
+                            <Plus size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        {localSubtasks.map((st, idx) => (
+                          <div key={idx} className="flex items-center gap-2">
+                            <span className="w-4 h-4 rounded flex-shrink-0 border" style={{ borderColor: "var(--border)" }} />
+                            <span className="flex-1 text-sm" style={{ color: "var(--text-primary)" }}>{st}</span>
+                            <button
+                              type="button"
+                              onClick={() => setLocalSubtasks(prev => prev.filter((_, i) => i !== idx))}
+                              className="p-1 rounded-sm transition-opacity active:opacity-70"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={newSubtaskTitle}
+                            onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                const value = newSubtaskTitle.trim();
+                                if (value) {
+                                  setLocalSubtasks(prev => [...prev, value]);
+                                  setNewSubtaskTitle("");
+                                }
+                              }
+                            }}
+                            placeholder={t("subtask_placeholder")}
+                            className="flex-1 rounded-md px-3 py-2 text-sm outline-none"
+                            style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const value = newSubtaskTitle.trim();
+                              if (value) {
+                                setLocalSubtasks(prev => [...prev, value]);
+                                setNewSubtaskTitle("");
+                              }
+                            }}
+                            aria-label={t("add_subtask")}
+                            className="w-8 h-8 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
+                            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
+                          >
+                            <Plus size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Metadata pills row — compact dark capsules */}
                   <div className="flex flex-wrap gap-1.5 py-2" style={{ borderTop: "1px solid var(--border)" }}>
@@ -498,115 +660,6 @@ export function TaskFormDialog({
                     categoryLabel={(key) => tCat(key as Parameters<typeof tCat>[0])}
                   />
 
-                  {/* Subtareas */}
-                  <div>
-                    {isEdit && subtasks.length > 0 && (
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text-secondary)" }}>
-                          {t("subtasks_label")}
-                        </span>
-                        <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                          {subtasks.filter(s => s.isCompleted).length}/{subtasks.length}
-                        </span>
-                        <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
-                          <div
-                            className="h-full rounded-full transition-all"
-                            style={{
-                              width: `${(subtasks.filter(s => s.isCompleted).length / subtasks.length) * 100}%`,
-                              background: "var(--accent)",
-                            }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                    {isEdit && subtasks.length === 0 && (
-                      <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                        {t("subtasks_label")}
-                      </label>
-                    )}
-                    {!isEdit && (
-                      <label className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                        {t("subtasks_label")}
-                      </label>
-                    )}
-                    {isEdit ? (
-                      <div className="flex flex-col gap-2">
-                        {subtasks.map((s) => (
-                          <div key={s.id} className="flex items-center gap-2">
-                            <TaskCheckbox
-                              done={s.isCompleted}
-                              size={TASK_CHECKBOX_SIZE.week}
-                              onToggle={() => toggleSubtask(s)}
-                              ariaLabel={s.title}
-                            />
-                            <span
-                              className="flex-1 text-sm"
-                              style={{
-                                color: s.isCompleted ? "var(--text-muted)" : "var(--text-primary)",
-                                textDecoration: s.isCompleted ? "line-through" : "none",
-                              }}
-                            >
-                              {s.title}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => deleteSubtask(s.id)}
-                              aria-label={t("delete_subtask")}
-                              className="p-1.5 rounded-sm transition-opacity active:opacity-70"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        ))}
-                        {subtasks.length === 0 && (
-                          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                            {t("subtasks_empty")}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-1">
-                          <input
-                            type="text"
-                            value={newSubtaskTitle}
-                            onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.preventDefault();
-                                const value = newSubtaskTitle.trim();
-                                if (value) {
-                                  createSubtask({ title: value });
-                                  setNewSubtaskTitle("");
-                                }
-                              }
-                            }}
-                            placeholder={t("subtask_placeholder")}
-                            className="flex-1 rounded-md px-3 py-2.5 text-sm outline-none"
-                            style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const value = newSubtaskTitle.trim();
-                              if (value) {
-                                createSubtask({ title: value });
-                                setNewSubtaskTitle("");
-                              }
-                            }}
-                            aria-label={t("add_subtask")}
-                            className="w-9 h-9 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
-                            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-                          >
-                            <Plus size={18} />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                        {t("subtasks_hint_new_task")}
-                      </p>
-                    )}
-                  </div>
-
                   {/* Actions */}
                   <div className="flex items-center gap-3 mt-1 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
                     {!isEdit && (
@@ -617,25 +670,18 @@ export function TaskFormDialog({
                     {isEdit && (
                       <button
                         onClick={() => setConfirmDelete(true)}
-                        className="p-2.5 rounded-lg transition-opacity active:opacity-70"
+                        className="p-2.5 rounded-md transition-opacity active:opacity-70"
                         style={{ color: "var(--danger)" }}
                         aria-label={t("delete")}
                       >
                         <Trash2 size={18} />
                       </button>
                     )}
-                    <div className="flex gap-2 ml-auto">
-                      <button
-                        onClick={onClose}
-                        className="px-4 py-2.5 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
-                        style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-                      >
-                        {t("cancel")}
-                      </button>
+                    <div className="ml-auto">
                       <button
                         onClick={handleSave}
-                        disabled={isSaving}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                        disabled={isSaving || (!isEdit && !title.trim())}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-30"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
                         {isSaving ? t("saving") : isEdit ? t("save") : t("add_task")}

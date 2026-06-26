@@ -108,6 +108,8 @@
     "my_profile": "Mi perfil",
     "sign_out": "Cerrar sesión",
     "signing_out": "Cerrando sesión…",
+    "sign_out_confirm": "¿Deseas cerrar sesión?",
+    "cancel": "Cancelar",
     "language": "Idioma",
     "statistics": "Estadísticas",
     "view_statistics": "Ver estadísticas",
