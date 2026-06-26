@@ -57,6 +57,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
           onToggle={onToggle}
           ariaLabel={task.title}
           overdue={overdue}
+          variant={overdue ? "focus" : "default"}
         />
         <div className="flex-1 min-w-0">
           <span
