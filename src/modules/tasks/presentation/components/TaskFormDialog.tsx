@@ -321,12 +321,24 @@ export function TaskFormDialog({
                           </div>
                         ))}
                         <div className="flex items-center gap-2.5 mt-1">
-                          <span
-                            className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center"
-                            style={{ background: "var(--border)", color: "var(--text-muted)" }}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const value = newSubtaskTitle.trim();
+                              if (value) {
+                                createSubtask({ title: value });
+                                setNewSubtaskTitle("");
+                              }
+                            }}
+                            className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center transition-opacity"
+                            style={{
+                              background: newSubtaskTitle.trim() ? "var(--text-muted)" : "var(--border)",
+                              color: newSubtaskTitle.trim() ? "var(--bg)" : "var(--text-muted)",
+                              cursor: newSubtaskTitle.trim() ? "pointer" : "default",
+                            }}
                           >
                             <Plus size={10} strokeWidth={2.5} />
-                          </span>
+                          </button>
                           <input
                             type="text"
                             value={newSubtaskTitle}
@@ -364,12 +376,24 @@ export function TaskFormDialog({
                           </div>
                         ))}
                         <div className="flex items-center gap-2.5 py-0.5">
-                          <span
-                            className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center"
-                            style={{ background: "var(--border)", color: "var(--text-muted)" }}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const value = newSubtaskTitle.trim();
+                              if (value) {
+                                setLocalSubtasks(prev => [...prev, value]);
+                                setNewSubtaskTitle("");
+                              }
+                            }}
+                            className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center transition-opacity"
+                            style={{
+                              background: newSubtaskTitle.trim() ? "var(--text-muted)" : "var(--border)",
+                              color: newSubtaskTitle.trim() ? "var(--bg)" : "var(--text-muted)",
+                              cursor: newSubtaskTitle.trim() ? "pointer" : "default",
+                            }}
                           >
                             <Plus size={10} strokeWidth={2.5} />
-                          </span>
+                          </button>
                           <input
                             type="text"
                             value={newSubtaskTitle}

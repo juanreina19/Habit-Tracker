@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from "@/shared/lib/supabase/server";
 import { redirect } from "next/navigation";
 import BottomNav from "@/shared/components/ui/BottomNav";
 import Sidebar from "@/shared/components/ui/Sidebar";
+import { FloatingActions } from "@/shared/components/ui/FloatingActions";
 import { ToastProvider } from "@/shared/components/ui/Toast";
 
 export default async function DashboardLayout({
@@ -24,6 +25,7 @@ export default async function DashboardLayout({
         >
           {children}
         </main>
+        <FloatingActions />
         <BottomNav />
       </div>
     </ToastProvider>
