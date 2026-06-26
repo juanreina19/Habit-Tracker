@@ -28,6 +28,7 @@ interface AgendaItem {
   type: "task" | "habit";
   id: string;
   time: string | null;
+  rawTime: string | null;
   completed: boolean;
   task?: TaskWithStatus;
   habit?: HabitWithStatus;
@@ -55,6 +56,7 @@ export function EnfoqueTab({
         type: "task",
         id: task.id,
         time: task.startTime ? formatTaskTime(task.startTime) : null,
+        rawTime: task.startTime?.slice(0, 5) ?? null,
         completed: isTaskDone(task),
         task,
       });
@@ -65,15 +67,16 @@ export function EnfoqueTab({
         type: "habit",
         id: habit.id,
         time: habit.startTime ? formatTaskTime(habit.startTime) : null,
+        rawTime: habit.startTime?.slice(0, 5) ?? null,
         completed: habit.isCompletedToday,
         habit,
       });
     }
 
     return items.sort((a, b) => {
-      if (a.time && !b.time) return -1;
-      if (!a.time && b.time) return 1;
-      if (a.time && b.time) return a.time.localeCompare(b.time);
+      if (a.rawTime && !b.rawTime) return -1;
+      if (!a.rawTime && b.rawTime) return 1;
+      if (a.rawTime && b.rawTime) return a.rawTime.localeCompare(b.rawTime);
       return 0;
     });
   }, [todayNonOverdue, habits, urgencyFilter]);
