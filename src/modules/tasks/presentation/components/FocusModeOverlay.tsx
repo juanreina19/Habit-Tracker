@@ -38,9 +38,7 @@ const PHASE_ICON: Record<FocusPhase, LucideIcon> = { focus: Flame, short_break: 
 
 function formatClock(totalSec: number): string {
   const sec = Math.max(0, Math.floor(totalSec));
-  const m = Math.floor(sec / 60);
-  const s = sec % 60;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  return `${String(Math.floor(sec / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`;
 }
 
 function FocusRing({ percentage, color, children }: { percentage: number; color?: string; children: React.ReactNode }) {
@@ -55,8 +53,7 @@ function FocusRing({ percentage, color, children }: { percentage: number; color?
         <circle cx={size / 2} cy={size / 2} r={radius} fill="none"
           stroke={color ?? "var(--text-primary)"} strokeWidth={6} strokeLinecap="round"
           strokeDasharray={circumference} strokeDashoffset={offset}
-          style={{ transition: "stroke-dashoffset 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }}
-        />
+          style={{ transition: "stroke-dashoffset 0.5s cubic-bezier(0.16, 1, 0.3, 1)" }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-4 text-center">{children}</div>
     </div>
@@ -89,9 +86,8 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
   useEffect(() => {
     if (prevPhaseRef.current !== session.phase) {
       prevPhaseRef.current = session.phase;
-      if (typeof window !== "undefined" && Notification.permission === "granted") {
+      if (typeof window !== "undefined" && Notification.permission === "granted")
         new Notification(t(PHASE_NOTIFY_KEY[session.phase]), { icon: "/api/pwa/icon-192" });
-      }
     }
   }, [session.phase, t]);
 
@@ -118,35 +114,26 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
       className="fixed inset-0 z-[100] overflow-y-auto" style={{ background: "var(--bg)" }}
     >
       <div className="flex flex-col min-h-full px-5 py-6 lg:py-8 lg:px-12">
-        {/* Top bar — X + Config left, Expand right */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-1">
-            <button type="button" onClick={onClose} aria-label={t("close_session")}
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
-              style={{ color: "var(--text-secondary)" }}>
-              <X size={20} strokeWidth={1.5} />
-            </button>
-            <button type="button" onClick={() => setSettingsOpen(true)} aria-label={t("settings_label")}
-              className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
-              style={{ color: "var(--text-secondary)" }}>
-              <Settings size={18} strokeWidth={1.5} />
-            </button>
-          </div>
-          {/* Expand/collapse — desktop only, same height as X */}
-          <button type="button" onClick={() => setExpanded(p => !p)}
-            className="hidden lg:flex items-center justify-center w-9 h-9 rounded-full transition-opacity active:opacity-70"
-            style={{ color: "var(--text-muted)" }}>
-            {expanded ? <Minimize2 size={16} strokeWidth={1.5} /> : <Maximize2 size={16} strokeWidth={1.5} />}
+        {/* Top bar — X + Config left only */}
+        <div className="flex items-center gap-1 mb-6">
+          <button type="button" onClick={onClose} aria-label={t("close_session")}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
+            style={{ color: "var(--text-secondary)" }}>
+            <X size={20} strokeWidth={1.5} />
+          </button>
+          <button type="button" onClick={() => setSettingsOpen(true)} aria-label={t("settings_label")}
+            className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
+            style={{ color: "var(--text-secondary)" }}>
+            <Settings size={18} strokeWidth={1.5} />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 flex flex-col lg:flex-row lg:gap-0 lg:items-center lg:justify-center">
-          {/* Timer column — centered, takes more space */}
-          <motion.div
-            layout
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className={`flex flex-col items-center justify-center gap-6 w-full ${expanded ? "lg:flex-[1]" : "lg:flex-[3]"}`}
+        {/* Body — CSS transition for smooth flex change */}
+        <div className="flex-1 flex flex-col lg:flex-row lg:items-center lg:justify-center">
+          {/* Timer column */}
+          <div
+            className="flex flex-col items-center justify-center gap-6 w-full transition-[flex] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            style={{ flex: expanded ? "1 1 100%" : "3 1 0%" }}
           >
             <span className="flex items-center gap-1.5 text-xs font-normal uppercase tracking-wider px-2.5 py-1 rounded-full"
               style={{ color: phaseColor, background: `${phaseColor}15` }}>
@@ -174,39 +161,38 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
               <IconButton icon={SkipForward} onClick={handleSkip} label={t("skip_phase")} disabled={isSkipping} size={56} />
             </div>
 
+            {/* Expand/collapse — inside timer column, desktop only */}
+            <button type="button" onClick={() => setExpanded(p => !p)}
+              className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full transition-opacity active:opacity-70"
+              style={{ color: "var(--text-muted)" }}>
+              {expanded ? <Minimize2 size={16} strokeWidth={1.5} /> : <Maximize2 size={16} strokeWidth={1.5} />}
+            </button>
+
             {/* End flow when expanded — desktop */}
-            <AnimatePresence>
-              {expanded && (
-                <motion.button
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
-                  type="button" onClick={onEndSession}
-                  className="hidden lg:flex items-center justify-center gap-2 py-3 px-8 rounded-md text-sm font-normal transition-opacity active:opacity-70"
-                  style={{ background: "var(--bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
-                  <Flag size={14} strokeWidth={1.5} />
-                  {t("end_flow")}
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </motion.div>
-
-          {/* Divider — desktop, hidden when expanded */}
-          <AnimatePresence>
-            {!expanded && (
-              <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="hidden lg:block w-px self-stretch mx-8" style={{ background: "var(--border)" }}
-              />
+            {expanded && (
+              <button type="button" onClick={onEndSession}
+                className="hidden lg:flex items-center justify-center gap-2 py-3 px-8 rounded-md text-sm font-normal transition-opacity active:opacity-70"
+                style={{ background: "var(--bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
+                <Flag size={14} strokeWidth={1.5} />
+                {t("end_flow")}
+              </button>
             )}
-          </AnimatePresence>
+          </div>
 
-          {/* Tasks column */}
-          <AnimatePresence>
-            {!expanded && tasks.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.2 }}
-                className="flex flex-col w-full lg:flex-[2] lg:max-w-[360px] mt-8 lg:mt-0 lg:self-stretch"
-              >
+          {/* Divider + Tasks — use opacity + width transition instead of AnimatePresence */}
+          <div
+            className="hidden lg:flex items-stretch transition-opacity duration-300"
+            style={{ opacity: expanded ? 0 : 1, pointerEvents: expanded ? "none" : "auto" }}
+          >
+            <div className="w-px self-stretch mx-8" style={{ background: "var(--border)" }} />
+          </div>
+
+          <div
+            className={`flex flex-col mt-8 lg:mt-0 lg:self-stretch transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${expanded ? "lg:opacity-0 lg:w-0 lg:overflow-hidden lg:pointer-events-none" : "lg:opacity-100"}`}
+            style={{ flex: expanded ? "0 0 0px" : "2 1 0%", maxWidth: expanded ? 0 : 360 }}
+          >
+            {tasks.length > 0 && (
+              <>
                 <h3 className="text-sm font-normal mb-0.5" style={{ color: "var(--text-primary)" }}>
                   {t("todays_tasks")}
                 </h3>
@@ -241,12 +227,12 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
                   <Flag size={14} strokeWidth={1.5} />
                   {t("end_flow")}
                 </button>
-              </motion.div>
+              </>
             )}
-          </AnimatePresence>
+          </div>
         </div>
 
-        {/* End flow for mobile when expanded */}
+        {/* Mobile end flow when expanded */}
         {expanded && (
           <div className="lg:hidden mt-6">
             <button type="button" onClick={onEndSession}
