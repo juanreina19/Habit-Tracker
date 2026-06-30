@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { useFocusMode } from "@/modules/tasks/presentation/hooks/useFocusMode";
@@ -21,7 +21,11 @@ export function GlobalFocusModeActions({ userId }: Props) {
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [overlayOpen, setOverlayOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted) return null;
   if (pathname.startsWith("/settings") || pathname.startsWith("/profile")) return null;
 
   const activeFocus = focusMode.active;
