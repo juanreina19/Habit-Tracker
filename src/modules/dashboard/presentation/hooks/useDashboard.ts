@@ -6,7 +6,6 @@ import { useTasks } from "@/modules/tasks/presentation/hooks/useTasks";
 import { useTodayTasks } from "@/modules/tasks/presentation/hooks/useTodayTasks";
 import { useHabits } from "@/modules/habits/presentation/hooks/useHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
-import { useFocusMode } from "@/modules/tasks/presentation/hooks/useFocusMode";
 import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
 import type { TaskWithStatus, TaskStatus } from "@/modules/tasks/domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
@@ -16,7 +15,6 @@ export function useDashboard(userId: UUID) {
   const { tasks: todayTasks, toggleTask: toggleTodayTask } = useTodayTasks(userId);
   const { habits, completedCount, totalCount, completeHabit, uncheckHabit } = useHabits(userId);
   const { categories, isLoading: categoriesLoading } = useCategories(userId);
-  const focusMode = useFocusMode(userId);
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
 
@@ -58,7 +56,6 @@ export function useDashboard(userId: UUID) {
     habits,
     todayTasks,
     tasks,
-    focusMode,
     isLoading: tasksLoading || categoriesLoading,
     habitsProgress: { completed: completedCount, total: totalCount },
     toggleTask,
