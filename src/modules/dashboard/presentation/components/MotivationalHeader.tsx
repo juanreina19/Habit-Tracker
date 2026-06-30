@@ -3,7 +3,6 @@
 import { format, getDayOfYear, addDays, getHours } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
 
 const QUOTES_ES = [
@@ -48,7 +47,6 @@ interface Props {
 }
 
 export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount }: Props) {
-  const t = useTranslations("dashboard");
   const { locale } = useLocale();
   const dateFnsLocale = locale === "en" ? enUS : es;
 
@@ -99,15 +97,23 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
 
       {/* Summary */}
       <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-        {t.rich("motivational_summary", {
-          habits: habitsCount,
-          tasks: tasksCount,
-          b: (chunks) => (
-            <span className="font-bold" style={{ color: "var(--text-primary)" }}>
-              {chunks}
-            </span>
-          ),
-        })}
+        {locale === "en" ? (
+          <>
+            You have{" "}
+            <span className="font-bold" style={{ color: "var(--text-primary)" }}>{habitsCount}</span>
+            {" "}habits and{" "}
+            <span className="font-bold" style={{ color: "var(--text-primary)" }}>{tasksCount}</span>
+            {" "}tasks for today
+          </>
+        ) : (
+          <>
+            Tienes{" "}
+            <span className="font-bold" style={{ color: "var(--text-primary)" }}>{habitsCount}</span>
+            {" "}hábitos y{" "}
+            <span className="font-bold" style={{ color: "var(--text-primary)" }}>{tasksCount}</span>
+            {" "}tareas para hoy
+          </>
+        )}
       </p>
     </div>
   );
