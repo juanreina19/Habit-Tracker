@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDashboard } from "../hooks/useDashboard";
 import { MotivationalHeader } from "./MotivationalHeader";
@@ -11,9 +10,9 @@ import { TableroTab } from "./TableroTab";
 import { EisenhowerTab } from "./EisenhowerTab";
 import { KanbanTab } from "./KanbanTab";
 import { TaskFormDialog } from "@/modules/tasks/presentation/components/TaskFormDialog";
-import { FocusModeButton } from "@/modules/tasks/presentation/components/FocusModeButton";
-import { FocusModeTaskPickerDialog } from "@/modules/tasks/presentation/components/FocusModeTaskPickerDialog";
-import { FocusModeOverlay } from "@/modules/tasks/presentation/components/FocusModeOverlay";
+import { HabitFormDialog } from "@/modules/habits/presentation/components/settings/HabitFormDialog";
+import { useSettingsHabits } from "@/modules/habits/presentation/hooks/useSettingsHabits";
+import type { CreateHabitInput } from "@/modules/habits/domain/repositories/IHabitRepository";
 import type { TaskWithStatus, CreateTaskInput, UpdateTaskInput } from "@/modules/tasks/domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 
@@ -22,8 +21,8 @@ interface Props {
 }
 
 export default function LifeDashboardView({ userId }: Props) {
-  const router = useRouter();
   const dashboard = useDashboard(userId);
+  const { create: createHabit } = useSettingsHabits(userId);
 
   const [activeTab, setActiveTab] = useState<HomeTab>("focus");
   const [viewDate, setViewDate] = useState(() => new Date());
@@ -33,8 +32,7 @@ export default function LifeDashboardView({ userId }: Props) {
   const [dialogStartAtDelete, setDialogStartAtDelete] = useState(false);
   const [defaultCategoryId, setDefaultCategoryId] = useState<string | null>(null);
 
-  const [focusPickerOpen, setFocusPickerOpen] = useState(false);
-  const [focusOverlayOpen, setFocusOverlayOpen] = useState(false);
+  const [habitDialogOpen, setHabitDialogOpen] = useState(false);
 
   const openCreate = (categoryId?: string | null) => {
     setSelectedTask(null);
@@ -66,15 +64,13 @@ export default function LifeDashboardView({ userId }: Props) {
     const handler = (e: Event) => {
       const type = (e as CustomEvent).detail;
       if (type === "task") openCreateRef();
-      if (type === "habit") router.push("/habits");
+      if (type === "habit") setHabitDialogOpen(true);
     };
     window.addEventListener("quick-add", handler);
     return () => window.removeEventListener("quick-add", handler);
-  }, [openCreateRef, router]);
+  }, [openCreateRef]);
 
   if (dashboard.isLoading) return <DashboardSkeleton />;
-
-  const activeFocus = dashboard.focusMode.active;
 
   return (
     <>
@@ -164,44 +160,16 @@ export default function LifeDashboardView({ userId }: Props) {
         onDelete={async (id) => { await dashboard.deleteTask(id); }}
       />
 
-      {/* Focus Mode FAB — always visible, positioned above the global QuickAdd FAB */}
-      <div className="fixed z-30 right-5 bottom-[calc(env(safe-area-inset-bottom)+160px)] lg:right-8 lg:bottom-[88px]">
-        <FocusModeButton onClick={() => {
-          if (activeFocus) setFocusOverlayOpen(true);
-          else setFocusPickerOpen(true);
-        }} />
-      </div>
-
-      <FocusModeTaskPickerDialog
-        open={focusPickerOpen}
-        onClose={() => setFocusPickerOpen(false)}
-        userId={userId}
-        onStart={(taskIds, durationMin) => {
-          dashboard.focusMode.start(taskIds, { focusDurationMin: durationMin });
-          setFocusOverlayOpen(true);
+      <HabitFormDialog
+        open={habitDialogOpen}
+        onClose={() => setHabitDialogOpen(false)}
+        habit={null}
+        categories={dashboard.categories}
+        onSave={async (data) => {
+          await createHabit(data as CreateHabitInput);
+          setHabitDialogOpen(false);
         }}
       />
-
-      <AnimatePresence>
-        {(activeFocus && focusOverlayOpen) && (
-          <FocusModeOverlay
-            key="focus-overlay"
-            session={activeFocus}
-            tasks={dashboard.todayTasks.filter((tk) => activeFocus.taskIds.includes(tk.id))}
-            toggleTask={dashboard.toggleTodayTask}
-            onPause={dashboard.focusMode.pause}
-            onResume={dashboard.focusMode.resume}
-            onSkip={dashboard.focusMode.advancePhase}
-            onClose={() => setFocusOverlayOpen(false)}
-            onEndSession={() => {
-              dashboard.focusMode.discard();
-              setFocusOverlayOpen(false);
-            }}
-            onUpdateConfig={dashboard.focusMode.updateActiveConfig}
-            onReset={dashboard.focusMode.resetTimer}
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 }

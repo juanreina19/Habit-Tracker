@@ -22,7 +22,15 @@ export function useDashboard(userId: UUID) {
 
   const derived = useMemo(() => {
     const pending = tasks.filter(t => !isTaskDone(t));
-    const overdue = tasks.filter(t => t.dueDate !== null && t.dueDate < todayStr);
+    const overdue = tasks.filter(t => {
+      if (t.dueDate === null || t.dueDate >= todayStr) return false;
+      if (!isTaskDone(t)) return true;
+      // Completadas: solo mostrar si se completaron HOY
+      const completedToday = t.recurrenceDays
+        ? t.isCompletedToday
+        : (t.completedAt?.startsWith(todayStr) ?? false);
+      return completedToday;
+    });
     const overdueIds = new Set(overdue.map(t => t.id));
 
     const tasksByCategory: Record<string, TaskWithStatus[]> = {};

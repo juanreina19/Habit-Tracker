@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import BottomNav from "@/shared/components/ui/BottomNav";
 import Sidebar from "@/shared/components/ui/Sidebar";
 import { FloatingActions } from "@/shared/components/ui/FloatingActions";
+import { GlobalFocusModeActions } from "@/shared/components/ui/GlobalFocusModeActions";
 import { ToastProvider } from "@/shared/components/ui/Toast";
 
 export default async function DashboardLayout({
@@ -26,6 +27,7 @@ export default async function DashboardLayout({
           {children}
         </main>
         <FloatingActions />
+        <GlobalFocusModeActions userId={user.id} />
         <BottomNav />
       </div>
     </ToastProvider>

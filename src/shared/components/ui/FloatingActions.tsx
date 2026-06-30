@@ -18,7 +18,7 @@ export function FloatingActions() {
     return () => { clearTimeout(timer); document.removeEventListener("click", close); };
   }, [open]);
 
-  if (pathname.startsWith("/settings")) return null;
+  if (pathname.startsWith("/settings") || pathname.startsWith("/profile")) return null;
 
   const handleSelect = (type: "task" | "habit") => {
     setOpen(false);
