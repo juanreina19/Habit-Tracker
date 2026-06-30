@@ -99,7 +99,15 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
 
       {/* Summary */}
       <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-        {t("motivational_summary", { habits: habitsCount, tasks: tasksCount })}
+        {t.rich("motivational_summary", {
+          habits: habitsCount,
+          tasks: tasksCount,
+          b: (chunks) => (
+            <span className="font-bold" style={{ color: "var(--text-primary)" }}>
+              {chunks}
+            </span>
+          ),
+        })}
       </p>
     </div>
   );

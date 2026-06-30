@@ -37,14 +37,15 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
         border: done ? "1px solid transparent" : "1px solid var(--border)",
       }}
     >
-      {/* Priority dot — top right with neon glow */}
+      {/* Priority dot — top right with neon pulse */}
       {!done && (
         <span
           className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full"
           style={{
             background: PRIORITY_COLORS[task.priority],
-            boxShadow: `0 0 6px 1px ${PRIORITY_COLORS[task.priority]}80`,
-          }}
+            "--glow-color": `${PRIORITY_COLORS[task.priority]}80`,
+            animation: "neon-pulse 2.5s ease-in-out infinite",
+          } as React.CSSProperties}
         />
       )}
 

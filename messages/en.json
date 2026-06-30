@@ -325,7 +325,7 @@
     "done": "Done",
     "collapse": "Collapse",
     "expand": "Expand",
-    "motivational_summary": "You have {habits} habits and {tasks} tasks for today",
+    "motivational_summary": "You have <b>{habits}</b> habits and <b>{tasks}</b> tasks for today",
     "tab_focus": "Focus",
     "tab_board": "Board",
     "tab_eisenhower": "Eisenhower",

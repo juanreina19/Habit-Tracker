@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { ListTodo, Sparkles, Filter } from "lucide-react";
 import { InlineTaskInput } from "./InlineTaskInput";
@@ -92,8 +92,8 @@ export function EnfoqueTab({
             onClick={() => setUrgencyFilter(p => !p)}
             className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors"
             style={{
-              background: urgencyFilter ? "var(--danger)" : "var(--surface-elevated)",
-              color: urgencyFilter ? "#fff" : "var(--text-muted)",
+              background: urgencyFilter ? "var(--text-primary)" : "var(--surface-elevated)",
+              color: urgencyFilter ? "var(--bg)" : "var(--text-muted)",
             }}
           >
             <Filter size={10} strokeWidth={1.5} />
@@ -116,10 +116,19 @@ export function EnfoqueTab({
               }}
             />
           )}
+          <AnimatePresence initial={false}>
           {agendaItems.map((item) => {
             const timeParts = item.time?.split(" ") ?? [];
             return (
-              <div key={item.id} className="flex items-center">
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                className="flex items-center"
+              >
                 {/* Time label */}
                 <div className="w-14 flex-shrink-0 text-right pr-3">
                   {timeParts[0] && (
@@ -174,9 +183,10 @@ export function EnfoqueTab({
                     />
                   )}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
+          </AnimatePresence>
           {agendaItems.length === 0 && (
             <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>—</p>
           )}

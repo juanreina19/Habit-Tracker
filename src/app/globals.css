@@ -223,3 +223,9 @@ button, a, [role="button"] { touch-action: manipulation; }
   z-index: 60;
 }
 .tooltip-arrow { fill: var(--tooltip-bg); }
+
+/* ── Priority neon pulse ── */
+@keyframes neon-pulse {
+  0%, 100% { box-shadow: 0 0 4px 1px var(--glow-color, #ffffff40); }
+  50%       { box-shadow: 0 0 10px 4px var(--glow-color, #ffffff60); }
+}
