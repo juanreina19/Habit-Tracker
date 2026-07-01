@@ -232,8 +232,14 @@ button, a, [role="button"] { touch-action: manipulation; }
 
 /* ── Priority dot fade pulse ── */
 @keyframes neon-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.4; }
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 5px 2px var(--dot-glow, transparent);
+  }
+  50% {
+    opacity: 0.45;
+    box-shadow: 0 0 2px 0px var(--dot-glow, transparent);
+  }
 }
 
 /* ── Card hover border — desktop only ── */
