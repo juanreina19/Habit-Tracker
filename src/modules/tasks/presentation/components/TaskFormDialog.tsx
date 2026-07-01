@@ -86,8 +86,8 @@ export function TaskFormDialog({
 
       const hasSched = !!task?.startTime;
       setHasSchedule(hasSched);
-      setStartTime(task?.startTime ? formatTaskTime(task.startTime) : "");
-      setEndTime(task?.endTime ? formatTaskTime(task.endTime) : "");
+      setStartTime(task?.startTime?.slice(0, 5) ?? "");
+      setEndTime(task?.endTime?.slice(0, 5) ?? "");
 
       setIsImportant(task?.isImportant ?? false);
       setCategoryId(task?.categoryId ?? null);

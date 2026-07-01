@@ -11,8 +11,10 @@ import { isTaskDone, formatTaskTime } from "@/modules/tasks/domain/entities/Task
 import { today as getToday } from "@/shared/lib/utils/dates";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
+import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
+  userId: UUID;
   todayTasks: TaskWithStatus[];
   habits: HabitWithStatus[];
   overdue: TaskWithStatus[];
@@ -37,7 +39,7 @@ interface AgendaItem {
 }
 
 export function EnfoqueTab({
-  todayTasks, habits, overdue,
+  userId, todayTasks, habits, overdue,
   onToggleTask, onToggleOverdueTask, onEditTask, onDeleteTask, onCreateTask,
   onCompleteHabit, onUncheckHabit, onEditHabit,
 }: Props) {
@@ -169,6 +171,7 @@ export function EnfoqueTab({
                   {item.type === "task" && item.task && (
                     <TaskCardDashboard
                       task={item.task}
+                      userId={userId}
                       onToggle={() => onToggleTask(item.task!)}
                       onEdit={() => onEditTask(item.task!)}
                       onDelete={() => onDeleteTask(item.task!)}
@@ -240,6 +243,7 @@ export function EnfoqueTab({
                 <div className="flex-1 min-w-0 py-1 pl-2">
                   <TaskCardDashboard
                     task={task}
+                    userId={userId}
                     onToggle={() => toggleOverdue(task)}
                     onEdit={() => onEditTask(task)}
                     onDelete={() => onDeleteTask(task)}

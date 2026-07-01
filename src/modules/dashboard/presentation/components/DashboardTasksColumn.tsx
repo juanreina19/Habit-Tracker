@@ -5,8 +5,10 @@ import { DashboardColumn } from "./DashboardColumn";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import type { Category } from "@/modules/categories/domain/entities/Category";
+import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
+  userId: UUID;
   category: Category;
   tasks: TaskWithStatus[];
   onToggle: (task: TaskWithStatus) => void;
@@ -15,7 +17,7 @@ interface Props {
   onAdd: () => void;
 }
 
-export function DashboardTasksColumn({ category, tasks, onToggle, onEdit, onDelete, onAdd }: Props) {
+export function DashboardTasksColumn({ userId, category, tasks, onToggle, onEdit, onDelete, onAdd }: Props) {
   const t = useTranslations("dashboard");
 
   return (
@@ -34,6 +36,7 @@ export function DashboardTasksColumn({ category, tasks, onToggle, onEdit, onDele
           <TaskCardDashboard
             key={task.id}
             task={task}
+            userId={userId}
             onToggle={() => onToggle(task)}
             onEdit={() => onEdit(task)}
             onDelete={() => onDelete(task)}

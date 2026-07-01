@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { X, Play, Pause, Settings, SkipForward, RotateCcw, Clock, Flame, Coffee, Moon, Flag, Maximize2, Minimize2, type LucideIcon } from "lucide-react";
+import { X, Play, Pause, Settings, SkipForward, RotateCcw, Clock, Flame, Coffee, Moon, Flag, Maximize2, Minimize2, GripVertical, type LucideIcon } from "lucide-react";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { FocusModeSession, FocusPhase } from "../../domain/entities/FocusModeSession";
 import { getElapsedSec } from "../../domain/entities/FocusModeSession";
 import type { TaskWithStatus } from "../../domain/entities/Task";
@@ -25,6 +28,40 @@ interface Props {
   onEndSession: () => void;
   onUpdateConfig: (patch: FocusModeSettingsInput) => void;
   onReset: () => void;
+  onReorderTasks?: (taskIds: string[]) => void;
+}
+
+function SortableTaskRow({ task, toggleTask, showHandle }: { task: TaskWithStatus; toggleTask: () => void; showHandle: boolean }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
+  const done = isTaskDone(task);
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, background: "var(--surface)" }}
+      className="flex items-center gap-3 rounded-md p-3"
+    >
+      {showHandle && (
+        <button type="button" {...attributes} {...listeners}
+          className="flex-shrink-0 touch-none cursor-grab active:cursor-grabbing"
+          style={{ color: "var(--text-muted)" }}>
+          <GripVertical size={14} strokeWidth={1.5} />
+        </button>
+      )}
+      <TaskCheckbox done={done} size={TASK_CHECKBOX_SIZE.card} animated variant="focus"
+        onToggle={toggleTask} ariaLabel={task.title} />
+      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PRIORITY_COLORS[task.priority] }} />
+      {task.icon && <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}><HabitIcon icon={task.icon} size={16} /></span>}
+      <span className="flex-1 min-w-0 text-sm font-normal truncate"
+        style={{ color: done ? "var(--text-secondary)" : "var(--text-primary)", textDecoration: done ? "line-through" : "none" }}>
+        {task.title}
+      </span>
+      {task.startTime && (
+        <span className="flex items-center gap-1 flex-shrink-0 text-xs" style={{ color: "var(--text-secondary)" }}>
+          <Clock size={12} strokeWidth={1.5} />{formatTaskTime(task.startTime)}
+        </span>
+      )}
+    </div>
+  );
 }
 
 const PHASE_LABEL_KEY: Record<FocusPhase, "phase_focus" | "phase_short_break" | "phase_long_break"> = {
@@ -72,13 +109,32 @@ function IconButton({ icon: Icon, onClick, label, primary, disabled, size = 56 }
   );
 }
 
-export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume, onSkip, onClose, onEndSession, onUpdateConfig, onReset }: Props) {
+export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume, onSkip, onClose, onEndSession, onUpdateConfig, onReset, onReorderTasks }: Props) {
   const t = useTranslations("focus");
   const [, forceTick] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
   const [skipError, setSkipError] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [orderedTasks, setOrderedTasks] = useState(tasks);
+  useEffect(() => { setOrderedTasks(tasks); }, [tasks]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setOrderedTasks(prev => {
+      const oldIdx = prev.findIndex(t => t.id === active.id);
+      const newIdx = prev.findIndex(t => t.id === over.id);
+      const next = arrayMove(prev, oldIdx, newIdx);
+      onReorderTasks?.(next.map(t => t.id));
+      return next;
+    });
+  };
 
   useEffect(() => { const id = setInterval(() => forceTick((n) => n + 1), 1000); return () => clearInterval(id); }, []);
 
@@ -200,28 +256,20 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
                 <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>
                   {t("tasks_pending_count", { count: pendingCount })}
                 </p>
-                <div className="flex flex-col gap-2 flex-1">
-                  {tasks.map((task) => {
-                    const done = isTaskDone(task);
-                    return (
-                      <div key={task.id} className="flex items-center gap-3 rounded-md p-3" style={{ background: "var(--surface)" }}>
-                        <TaskCheckbox done={done} size={TASK_CHECKBOX_SIZE.card} animated variant="focus"
-                          onToggle={() => toggleTask(task)} ariaLabel={task.title} />
-                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PRIORITY_COLORS[task.priority] }} />
-                        {task.icon && <span className="flex-shrink-0" style={{ color: "var(--text-secondary)" }}><HabitIcon icon={task.icon} size={16} /></span>}
-                        <span className="flex-1 min-w-0 text-sm font-normal truncate"
-                          style={{ color: done ? "var(--text-secondary)" : "var(--text-primary)", textDecoration: done ? "line-through" : "none" }}>
-                          {task.title}
-                        </span>
-                        {task.startTime && (
-                          <span className="flex items-center gap-1 flex-shrink-0 text-xs" style={{ color: "var(--text-secondary)" }}>
-                            <Clock size={12} strokeWidth={1.5} />{formatTaskTime(task.startTime)}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={orderedTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+                    <div className="flex flex-col gap-2 flex-1">
+                      {orderedTasks.map((task) => (
+                        <SortableTaskRow
+                          key={task.id}
+                          task={task}
+                          toggleTask={() => toggleTask(task)}
+                          showHandle={orderedTasks.length > 1}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
                 <button type="button" onClick={onEndSession}
                   className="flex items-center justify-center gap-2 w-full py-3 rounded-md text-sm font-normal mt-4 transition-opacity active:opacity-70"
                   style={{ background: "var(--bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>

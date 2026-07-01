@@ -240,5 +240,16 @@ export function useFocusMode(userId: UUID) {
     });
   }, [userId, getRepo]);
 
-  return { active, loading, start, pause, resume, discard, advancePhase, updateActiveConfig, resetTimer };
+  const reorderTasks = useCallback(async (newTaskIds: UUID[]) => {
+    const prev = activeRef.current;
+    if (!prev) return;
+    setActive({ ...prev, taskIds: newTaskIds });
+    try {
+      await getRepo().update(userId, { taskIds: newTaskIds });
+    } catch {
+      setActive(prev);
+    }
+  }, [userId, getRepo]);
+
+  return { active, loading, start, pause, resume, discard, advancePhase, updateActiveConfig, resetTimer, reorderTasks };
 }

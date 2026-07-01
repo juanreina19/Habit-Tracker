@@ -6,8 +6,10 @@ import { useTranslations } from "next-intl";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
+import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
+  userId: UUID;
   tasks: TaskWithStatus[];
   onToggleTask: (task: TaskWithStatus) => void;
   onEditTask: (task: TaskWithStatus) => void;
@@ -22,7 +24,7 @@ interface Quadrant {
   tasks: TaskWithStatus[];
 }
 
-export function EisenhowerTab({ tasks, onToggleTask, onEditTask, onDeleteTask }: Props) {
+export function EisenhowerTab({ userId, tasks, onToggleTask, onEditTask, onDeleteTask }: Props) {
   const t = useTranslations("dashboard");
 
   const quadrants = useMemo<Quadrant[]>(() => {
@@ -103,6 +105,7 @@ export function EisenhowerTab({ tasks, onToggleTask, onEditTask, onDeleteTask }:
                   <TaskCardDashboard
                     key={task.id}
                     task={task}
+                    userId={userId}
                     onToggle={() => onToggleTask(task)}
                     onEdit={() => onEditTask(task)}
                     onDelete={() => onDeleteTask(task)}

@@ -234,11 +234,17 @@ button, a, [role="button"] { touch-action: manipulation; }
 @keyframes neon-pulse {
   0%, 100% {
     opacity: 1;
-    box-shadow: 0 0 5px 2px var(--dot-glow, transparent);
+    box-shadow:
+      0 0 0 1.5px var(--dot-glow-soft, transparent),
+      0 0 5px 2px var(--dot-glow, transparent),
+      0 0 10px 5px var(--dot-glow-outer, transparent);
   }
   50% {
     opacity: 0.45;
-    box-shadow: 0 0 2px 0px var(--dot-glow, transparent);
+    box-shadow:
+      0 0 0 0.5px var(--dot-glow-soft, transparent),
+      0 0 2px 0px var(--dot-glow, transparent),
+      0 0 5px 2px var(--dot-glow-outer, transparent);
   }
 }
 
