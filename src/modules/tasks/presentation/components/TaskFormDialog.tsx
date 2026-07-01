@@ -360,7 +360,7 @@ export function TaskFormDialog({
                               cursor: newSubtaskTitle.trim() ? "pointer" : "default",
                             }}
                           >
-                            <Plus size={10} strokeWidth={2.5} />
+                            <Plus size={10} strokeWidth={1} />
                           </button>
                           <input
                             type="text"
@@ -415,7 +415,7 @@ export function TaskFormDialog({
                               cursor: newSubtaskTitle.trim() ? "pointer" : "default",
                             }}
                           >
-                            <Plus size={10} strokeWidth={2.5} />
+                            <Plus size={10} strokeWidth={1} />
                           </button>
                           <input
                             type="text"

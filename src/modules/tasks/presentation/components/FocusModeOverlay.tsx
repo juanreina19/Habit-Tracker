@@ -114,7 +114,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
       className="fixed inset-0 z-[100] overflow-y-auto" style={{ background: "var(--bg)" }}
     >
       <div className="flex flex-col min-h-full px-5 py-6 lg:py-8 lg:px-12">
-        {/* Top bar — X + Config left only */}
+        {/* Top bar — X + Config left | Expand right */}
         <div className="flex items-center gap-1 mb-6">
           <button type="button" onClick={onClose} aria-label={t("close_session")}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
@@ -126,6 +126,14 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
             style={{ color: "var(--text-secondary)" }}>
             <Settings size={18} strokeWidth={1.5} />
           </button>
+          <div className="flex-1" />
+          <div className="hidden lg:block">
+            <button type="button" onClick={() => setExpanded(p => !p)}
+              className="w-8 h-8 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
+              style={{ color: "var(--text-muted)" }}>
+              {expanded ? <Minimize2 size={16} strokeWidth={1.5} /> : <Maximize2 size={16} strokeWidth={1.5} />}
+            </button>
+          </div>
         </div>
 
         {/* Body — CSS transition for smooth flex change */}
@@ -135,15 +143,6 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
             className="flex flex-col w-full transition-[flex] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{ flex: expanded ? "1 1 100%" : "3 1 0%" }}
           >
-            {/* Expand/collapse — top right of timer column, desktop only */}
-            <div className="hidden lg:flex justify-end mb-4">
-              <button type="button" onClick={() => setExpanded(p => !p)}
-                className="w-8 h-8 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
-                style={{ color: "var(--text-muted)" }}>
-                {expanded ? <Minimize2 size={16} strokeWidth={1.5} /> : <Maximize2 size={16} strokeWidth={1.5} />}
-              </button>
-            </div>
-
             {/* Centered content */}
             <div className="flex flex-col items-center justify-center gap-6 flex-1">
               <span className="flex items-center gap-1.5 text-xs font-normal uppercase tracking-wider px-2.5 py-1 rounded-full"
@@ -184,11 +183,8 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
             </div>
           </div>
 
-          {/* Divider + Tasks — use opacity + width transition instead of AnimatePresence */}
-          <div
-            className="hidden lg:flex items-stretch transition-opacity duration-300"
-            style={{ opacity: expanded ? 0 : 1, pointerEvents: expanded ? "none" : "auto" }}
-          >
+          {/* Divider */}
+          <div className="hidden lg:flex items-stretch">
             <div className="w-px self-stretch mx-8" style={{ background: "var(--border)" }} />
           </div>
 

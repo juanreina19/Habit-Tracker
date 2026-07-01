@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ListTodo, Repeat, BookOpen, X } from "lucide-react";
+import { ClipboardPen, Repeat, BookOpen, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface Props {
@@ -58,7 +58,7 @@ export function QuickAddMenu({ open, onClose, onSelectTask, onSelectHabit, onSel
             onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface)")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
-            <ListTodo size={16} strokeWidth={1.5} />
+            <ClipboardPen size={16} strokeWidth={1.5} />
             {t("new_task")}
           </button>
           <button

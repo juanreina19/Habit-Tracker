@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { ListTodo, Repeat, Filter } from "lucide-react";
+import { ClipboardPen, Repeat, Filter, Pencil } from "lucide-react";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
@@ -23,6 +23,7 @@ interface Props {
   onCreateTask: (title: string) => void;
   onCompleteHabit: (habitId: string) => void;
   onUncheckHabit: (habitId: string) => void;
+  onEditHabit?: (habitId: string) => void;
 }
 
 interface AgendaItem {
@@ -38,7 +39,7 @@ interface AgendaItem {
 export function EnfoqueTab({
   todayTasks, habits, overdue,
   onToggleTask, onToggleOverdueTask, onEditTask, onDeleteTask, onCreateTask,
-  onCompleteHabit, onUncheckHabit,
+  onCompleteHabit, onUncheckHabit, onEditHabit,
 }: Props) {
   const toggleOverdue = onToggleOverdueTask ?? onToggleTask;
   const t = useTranslations("dashboard");
@@ -158,7 +159,7 @@ export function EnfoqueTab({
                   >
                     {item.type === "habit"
                       ? <Repeat size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
-                      : <ListTodo size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
+                      : <ClipboardPen size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
                     }
                   </div>
                 </div>
@@ -182,6 +183,7 @@ export function EnfoqueTab({
                         if (item.habit!.isCompletedToday) onUncheckHabit(item.habit!.id);
                         else onCompleteHabit(item.habit!.id);
                       }}
+                      onEdit={onEditHabit ? () => onEditHabit(item.habit!.id) : undefined}
                     />
                   )}
                 </div>
@@ -230,7 +232,7 @@ export function EnfoqueTab({
                       border: done ? "2px solid #FFFFFF" : "1px solid var(--border)",
                     }}
                   >
-                    <ListTodo size={10} strokeWidth={1.5} style={{ color: done ? "var(--bg)" : "var(--text-muted)" }} />
+                    <ClipboardPen size={10} strokeWidth={1.5} style={{ color: done ? "var(--bg)" : "var(--text-muted)" }} />
                   </div>
                 </div>
 
@@ -260,49 +262,63 @@ export function EnfoqueTab({
 }
 
 
-function HabitAgendaRow({ habit, onToggle }: { habit: HabitWithStatus; onToggle: () => void }) {
+function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; onToggle: () => void; onEdit?: () => void }) {
   const t = useTranslations("dashboard");
   const done = habit.isCompletedToday;
 
   return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className="w-full text-left rounded-md p-2.5 flex items-center gap-3 transition-colors active:scale-[0.98]"
+    <div
+      className="group w-full rounded-md p-2.5 flex items-center gap-3 card-border-hover"
       style={{
         background: "var(--bg)",
         border: done ? "1px solid transparent" : "1px solid var(--border)",
       }}
     >
-      <div
-        className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-        style={{
-          background: done ? "#FFFFFF" : "transparent",
-          border: done ? "2px solid #FFFFFF" : "2px solid var(--border)",
-        }}
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex items-center gap-3 flex-1 min-w-0 text-left active:scale-[0.98]"
       >
-        {done && (
-          <svg width="10" height="8" viewBox="0 0 12 10" fill="none">
-            <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p
-          className="text-sm font-normal truncate"
+        <div
+          className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
           style={{
-            color: done ? "var(--text-secondary)" : "var(--text-primary)",
-            textDecoration: done ? "line-through" : "none",
+            background: done ? "#FFFFFF" : "transparent",
+            border: done ? "2px solid #FFFFFF" : "2px solid var(--border)",
           }}
         >
-          {habit.name}
-        </p>
-        {!done && (
-          <span className="text-[10px] block" style={{ color: "var(--text-muted)" }}>
-            {t("type_habit")}
-          </span>
-        )}
-      </div>
-    </button>
+          {done && (
+            <svg width="10" height="8" viewBox="0 0 12 10" fill="none">
+              <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p
+            className="text-sm font-normal truncate"
+            style={{
+              color: done ? "var(--text-secondary)" : "var(--text-primary)",
+              textDecoration: done ? "line-through" : "none",
+            }}
+          >
+            {habit.name}
+          </p>
+          {!done && (
+            <span className="text-[10px] block" style={{ color: "var(--text-muted)" }}>
+              {t("type_habit")}
+            </span>
+          )}
+        </div>
+      </button>
+      {onEdit && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 p-1 rounded-sm active:opacity-70"
+          style={{ color: "var(--text-muted)" }}
+        >
+          <Pencil size={12} strokeWidth={1.5} />
+        </button>
+      )}
+    </div>
   );
 }

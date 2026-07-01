@@ -1,16 +1,21 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { format } from "date-fns";
 import { useTasks } from "@/modules/tasks/presentation/hooks/useTasks";
 import { useTodayTasks } from "@/modules/tasks/presentation/hooks/useTodayTasks";
 import { useHabits } from "@/modules/habits/presentation/hooks/useHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
+import { useMidnightRefresh } from "@/shared/hooks/useMidnightRefresh";
 import type { TaskWithStatus, TaskStatus } from "@/modules/tasks/domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 
 export function useDashboard(userId: UUID) {
+  const [, forceTick] = useState(0);
+  const onMidnight = useCallback(() => forceTick(n => n + 1), []);
+  useMidnightRefresh(onMidnight);
+
   const { tasks, isLoading: tasksLoading, toggleTask, createTask, updateTask, deleteTask } = useTasks(userId);
   const { tasks: todayTasks, toggleTask: toggleTodayTask } = useTodayTasks(userId);
   const { habits, completedCount, totalCount, completeHabit, uncheckHabit } = useHabits(userId);

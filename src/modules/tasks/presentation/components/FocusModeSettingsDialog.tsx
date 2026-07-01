@@ -89,7 +89,7 @@ function InfoTooltip({ text }: { text: string }) {
         className="flex items-center justify-center"
         style={{ color: "var(--text-secondary)" }}
       >
-        <Info size={14} strokeWidth={2} />
+        <Info size={14} strokeWidth={1} />
       </button>
       {open && (
         <span

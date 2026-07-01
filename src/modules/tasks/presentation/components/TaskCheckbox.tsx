@@ -27,11 +27,11 @@ export function TaskCheckbox({ done, size = TASK_CHECKBOX_SIZE.card, animated = 
         transition={{ type: "spring", stiffness: 500, damping: 25 }}
         width={checkScale} height={checkScale} viewBox="0 0 12 12" fill="none"
       >
-        <path d="M2 6l3 3 5-5" stroke={checkStroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 6l3 3 5-5" stroke={checkStroke} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
       </motion.svg>
     ) : (
       <svg width={checkScale} height={checkScale} viewBox="0 0 12 12" fill="none">
-        <path d="M2 6l3 3 5-5" stroke={checkStroke} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M2 6l3 3 5-5" stroke={checkStroke} strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     )
   ) : null;

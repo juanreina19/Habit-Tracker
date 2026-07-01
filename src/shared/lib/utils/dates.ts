@@ -35,6 +35,13 @@ export function formatFriendly(date: Date): string {
   return format(date, "d 'de' MMMM", { locale: es });
 }
 
+/** Comprueba si una hora "HH:MM" ya pasó en el momento actual */
+export function isTimePast(timeStr: string): boolean {
+  const [h, m] = timeStr.split(":").map(Number);
+  const now = new Date();
+  return (now.getHours() * 60 + now.getMinutes()) > (h * 60 + m);
+}
+
 /** Verifica si un hábito debe ejecutarse en un día dado.
  *  Si se pasa createdAt, días anteriores a la creación del hábito devuelven false. */
 export function isHabitActiveOnDay(activeDays: number[], date: Date, createdAt?: string): boolean {

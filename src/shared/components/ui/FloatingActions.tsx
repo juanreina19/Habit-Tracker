@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, ListTodo, Repeat } from "lucide-react";
+import { Plus, ClipboardPen, Repeat } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export function FloatingActions() {
@@ -49,7 +49,7 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <ListTodo size={16} strokeWidth={1.5} />
+              <ClipboardPen size={16} strokeWidth={1.5} />
               {t("new_task")}
             </button>
             <button
@@ -82,7 +82,7 @@ export function FloatingActions() {
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Plus size={22} strokeWidth={2} />
+          <Plus size={22} strokeWidth={1} />
         </motion.div>
       </button>
     </div>
