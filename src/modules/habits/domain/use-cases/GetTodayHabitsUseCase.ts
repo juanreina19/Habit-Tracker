@@ -6,14 +6,14 @@ import { today } from "@/shared/lib/utils/dates";
 export class GetTodayHabitsUseCase {
   constructor(private readonly habitRepository: IHabitRepository) {}
 
-  async execute(userId: UUID): Promise<{
+  async execute(userId: UUID, date?: string): Promise<{
     habits: HabitWithStatus[];
     completedCount: number;
     totalCount: number;
     completionPercentage: number;
     estimatedMinutes: number;
   }> {
-    const habits = await this.habitRepository.findActiveForDate(userId, today());
+    const habits = await this.habitRepository.findActiveForDate(userId, date ?? today());
 
     const completedCount = habits.filter((h) => h.isCompletedToday).length;
     const totalCount = habits.length;

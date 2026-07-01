@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Pencil, Star } from "lucide-react";
 import { format } from "date-fns";
@@ -27,7 +28,7 @@ interface Props {
 }
 
 export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescription, showDueDate, typeLabel, userId }: Props) {
-  const [subtasksOpen, setSubtasksOpen] = useState(false);
+  const [subtasksOpen, setSubtasksOpen] = useState(true);
   const t = useTranslations("tasks");
   const { locale } = useLocale();
   const done = isTaskDone(task);
@@ -56,6 +57,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
             ["--dot-glow-soft" as string]: `${PRIORITY_COLORS[task.priority]}40`,
             ["--dot-glow" as string]: `${PRIORITY_COLORS[task.priority]}60`,
             ["--dot-glow-outer" as string]: `${PRIORITY_COLORS[task.priority]}20`,
+            ["--dot-glow-far" as string]: `${PRIORITY_COLORS[task.priority]}10`,
             animation: "neon-pulse 2s ease-in-out infinite",
           }}
         />
@@ -160,9 +162,19 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
         </div>
       )}
 
-      {subtasksOpen && userId && !!task.subtaskTotal && (
-        <SubtaskList userId={userId} taskId={task.id as UUID} />
-      )}
+      <AnimatePresence initial={false}>
+        {subtasksOpen && userId && !!task.subtaskTotal && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            style={{ overflow: "hidden" }}
+          >
+            <SubtaskList userId={userId} taskId={task.id as UUID} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

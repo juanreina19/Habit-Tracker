@@ -22,11 +22,12 @@ interface Props {
 }
 
 export default function LifeDashboardView({ userId }: Props) {
-  const dashboard = useDashboard(userId);
   const { create: createHabit, update: updateHabit } = useSettingsHabits(userId);
 
   const [activeTab, setActiveTab] = useState<HomeTab>("focus");
   const [viewDate, setViewDate] = useState(() => new Date());
+
+  const dashboard = useDashboard(userId, viewDate);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskWithStatus | null>(null);
@@ -100,6 +101,7 @@ export default function LifeDashboardView({ userId }: Props) {
                 todayTasks={dashboard.todayTasks}
                 habits={dashboard.habits}
                 overdue={dashboard.overdue}
+                isToday={dashboard.isToday}
                 onToggleTask={dashboard.toggleTodayTask}
                 onToggleOverdueTask={dashboard.toggleTask}
                 onEditTask={openEdit}

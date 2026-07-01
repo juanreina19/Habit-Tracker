@@ -7,7 +7,7 @@ export function SubtaskList({ userId, taskId }: { userId: UUID; taskId: UUID }) 
   const { subtasks, isLoading, toggleSubtask } = useSubtasks(userId, taskId);
   if (isLoading) return <div className="py-1 text-xs" style={{ color: "var(--text-muted)" }}>…</div>;
   return (
-    <div className="flex flex-col gap-1 mt-2 pt-2 border-t" style={{ borderColor: "var(--border)" }}>
+    <div className="flex flex-col gap-1 mt-2 pt-2 pl-7 border-t" style={{ borderColor: "var(--border)" }}>
       {subtasks.map(sub => (
         <button
           key={sub.id}

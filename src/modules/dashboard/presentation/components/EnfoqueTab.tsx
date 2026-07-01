@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { ClipboardPen, Repeat, Filter, Pencil } from "lucide-react";
+import { ClipboardPen, Repeat, Filter, Pencil, GripVertical } from "lucide-react";
+import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
@@ -18,6 +21,7 @@ interface Props {
   todayTasks: TaskWithStatus[];
   habits: HabitWithStatus[];
   overdue: TaskWithStatus[];
+  isToday?: boolean;
   onToggleTask: (task: TaskWithStatus) => void;
   onToggleOverdueTask?: (task: TaskWithStatus) => void;
   onEditTask: (task: TaskWithStatus) => void;
@@ -39,7 +43,7 @@ interface AgendaItem {
 }
 
 export function EnfoqueTab({
-  userId, todayTasks, habits, overdue,
+  userId, todayTasks, habits, overdue, isToday = true,
   onToggleTask, onToggleOverdueTask, onEditTask, onDeleteTask, onCreateTask,
   onCompleteHabit, onUncheckHabit, onEditHabit,
 }: Props) {
@@ -52,7 +56,7 @@ export function EnfoqueTab({
     [todayTasks],
   );
 
-  const agendaItems = useMemo<AgendaItem[]>(() => {
+  const { timedItems, untimedItems } = useMemo<{ timedItems: AgendaItem[]; untimedItems: AgendaItem[] }>(() => {
     const items: AgendaItem[] = [];
 
     for (const task of todayNonOverdue) {
@@ -78,13 +82,35 @@ export function EnfoqueTab({
       });
     }
 
-    return items.sort((a, b) => {
+    const sorted = items.sort((a, b) => {
       if (a.rawTime && !b.rawTime) return -1;
       if (!a.rawTime && b.rawTime) return 1;
       if (a.rawTime && b.rawTime) return a.rawTime.localeCompare(b.rawTime);
       return 0;
     });
+
+    return {
+      timedItems: sorted.filter(i => i.rawTime !== null),
+      untimedItems: sorted.filter(i => i.rawTime === null),
+    };
   }, [todayNonOverdue, habits, urgencyFilter]);
+
+  const [orderedUntimed, setOrderedUntimed] = useState(untimedItems);
+  useEffect(() => { setOrderedUntimed(untimedItems); }, [untimedItems]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    setOrderedUntimed(prev => {
+      const from = prev.findIndex(i => i.id === active.id);
+      const to = prev.findIndex(i => i.id === over.id);
+      return arrayMove(prev, from, to);
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[1fr_280px] lg:gap-6">
@@ -105,12 +131,12 @@ export function EnfoqueTab({
             {t("filter_urgent")}
           </button>
         </div>
-        <InlineTaskInput onCreateTask={onCreateTask} />
+        {isToday && <InlineTaskInput onCreateTask={onCreateTask} />}
 
         {/* Timeline */}
         <div className="flex flex-col relative">
           {/* Continuous vertical line */}
-          {agendaItems.length > 1 && (
+          {(timedItems.length + orderedUntimed.length) > 1 && (
             <div
               className="absolute w-px"
               style={{
@@ -121,80 +147,62 @@ export function EnfoqueTab({
               }}
             />
           )}
+
+          {/* Time-based items — static, sorted by startTime */}
           <AnimatePresence initial={false}>
-          {agendaItems.map((item) => {
-            const timeParts = item.time?.split(" ") ?? [];
-            return (
-              <motion.div
-                key={item.id}
-                layout
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                className="flex items-center"
-              >
-                {/* Time label */}
-                <div className="w-14 flex-shrink-0 text-right pr-3">
-                  {timeParts[0] && (
-                    <>
-                      <span className="text-[11px] tabular-nums font-normal leading-none block" style={{ color: "var(--text-muted)" }}>
-                        {timeParts[0]}
-                      </span>
-                      {timeParts[1] && (
-                        <span className="text-[9px] font-normal leading-none block mt-px" style={{ color: "var(--text-muted)" }}>
-                          {timeParts[1]}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* Node */}
-                <div className="w-6 flex-shrink-0 flex items-center justify-center relative z-10">
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: item.completed ? "#FFFFFF" : "var(--bg)",
-                      border: item.completed ? "2px solid #FFFFFF" : "1px solid var(--border)",
-                    }}
-                  >
-                    {item.type === "habit"
-                      ? <Repeat size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
-                      : <ClipboardPen size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
-                    }
+            {timedItems.map((item) => {
+              const timeParts = item.time?.split(" ") ?? [];
+              return (
+                <motion.div
+                  key={item.id}
+                  layout
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center"
+                >
+                  <div className="w-14 flex-shrink-0 text-right pr-3">
+                    {timeParts[0] && (
+                      <>
+                        <span className="text-[11px] tabular-nums font-normal leading-none block" style={{ color: "var(--text-muted)" }}>{timeParts[0]}</span>
+                        {timeParts[1] && <span className="text-[9px] font-normal leading-none block mt-px" style={{ color: "var(--text-muted)" }}>{timeParts[1]}</span>}
+                      </>
+                    )}
                   </div>
-                </div>
-
-                {/* Card */}
-                <div className="flex-1 min-w-0 py-1 pl-2">
-                  {item.type === "task" && item.task && (
-                    <TaskCardDashboard
-                      task={item.task}
-                      userId={userId}
-                      onToggle={() => onToggleTask(item.task!)}
-                      onEdit={() => onEditTask(item.task!)}
-                      onDelete={() => onDeleteTask(item.task!)}
-                      showDescription
-                      typeLabel={t("type_task")}
-                    />
-                  )}
-                  {item.type === "habit" && item.habit && (
-                    <HabitAgendaRow
-                      habit={item.habit}
-                      onToggle={() => {
-                        if (item.habit!.isCompletedToday) onUncheckHabit(item.habit!.id);
-                        else onCompleteHabit(item.habit!.id);
-                      }}
-                      onEdit={onEditHabit ? () => onEditHabit(item.habit!.id) : undefined}
-                    />
-                  )}
-                </div>
-              </motion.div>
-            );
-          })}
+                  <AgendaNode item={item} />
+                  <div className="flex-1 min-w-0 py-1 pl-2">
+                    <AgendaCard item={item} userId={userId} typeTaskLabel={t("type_task")}
+                      onToggleTask={onToggleTask} onEditTask={onEditTask} onDeleteTask={onDeleteTask}
+                      onCompleteHabit={onCompleteHabit} onUncheckHabit={onUncheckHabit} onEditHabit={onEditHabit} />
+                  </div>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
-          {agendaItems.length === 0 && (
+
+          {/* Untimed items — draggable, freely reorderable */}
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={orderedUntimed.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              {orderedUntimed.map((item) => (
+                <SortableAgendaItem
+                  key={item.id}
+                  item={item}
+                  showHandle={orderedUntimed.length > 1}
+                  userId={userId}
+                  typeTaskLabel={t("type_task")}
+                  onToggleTask={onToggleTask}
+                  onEditTask={onEditTask}
+                  onDeleteTask={onDeleteTask}
+                  onCompleteHabit={onCompleteHabit}
+                  onUncheckHabit={onUncheckHabit}
+                  onEditHabit={onEditHabit}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+
+          {timedItems.length === 0 && orderedUntimed.length === 0 && (
             <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>—</p>
           )}
         </div>
@@ -265,6 +273,99 @@ export function EnfoqueTab({
   );
 }
 
+
+// ─── Shared agenda item sub-components ──────────────────────────────────────
+
+function AgendaNode({ item }: { item: AgendaItem }) {
+  return (
+    <div className="w-6 flex-shrink-0 flex items-center justify-center relative z-10">
+      <div
+        className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+        style={{
+          background: item.completed ? "#FFFFFF" : "var(--bg)",
+          border: item.completed ? "2px solid #FFFFFF" : "1px solid var(--border)",
+        }}
+      >
+        {item.type === "habit"
+          ? <Repeat size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
+          : <ClipboardPen size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
+        }
+      </div>
+    </div>
+  );
+}
+
+interface AgendaCardProps {
+  item: AgendaItem;
+  userId: UUID;
+  typeTaskLabel: string;
+  onToggleTask: (task: TaskWithStatus) => void;
+  onEditTask: (task: TaskWithStatus) => void;
+  onDeleteTask: (task: TaskWithStatus) => void;
+  onCompleteHabit: (habitId: string) => void;
+  onUncheckHabit: (habitId: string) => void;
+  onEditHabit?: (habitId: string) => void;
+}
+
+function AgendaCard({ item, userId, typeTaskLabel, onToggleTask, onEditTask, onDeleteTask, onCompleteHabit, onUncheckHabit, onEditHabit }: AgendaCardProps) {
+  if (item.type === "task" && item.task) {
+    return (
+      <TaskCardDashboard
+        task={item.task}
+        userId={userId}
+        onToggle={() => onToggleTask(item.task!)}
+        onEdit={() => onEditTask(item.task!)}
+        onDelete={() => onDeleteTask(item.task!)}
+        showDescription
+        typeLabel={typeTaskLabel}
+      />
+    );
+  }
+  if (item.type === "habit" && item.habit) {
+    return (
+      <HabitAgendaRow
+        habit={item.habit}
+        onToggle={() => {
+          if (item.habit!.isCompletedToday) onUncheckHabit(item.habit!.id);
+          else onCompleteHabit(item.habit!.id);
+        }}
+        onEdit={onEditHabit ? () => onEditHabit(item.habit!.id) : undefined}
+      />
+    );
+  }
+  return null;
+}
+
+function SortableAgendaItem({ item, showHandle, ...cardProps }: AgendaCardProps & { showHandle: boolean }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      className="flex items-center"
+    >
+      <div className="w-14 flex-shrink-0 flex items-center justify-end pr-3">
+        {showHandle && (
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            className="touch-none cursor-grab active:cursor-grabbing"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <GripVertical size={12} strokeWidth={1.5} />
+          </button>
+        )}
+      </div>
+      <AgendaNode item={item} />
+      <div className="flex-1 min-w-0 py-1 pl-2">
+        <AgendaCard item={item} {...cardProps} />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; onToggle: () => void; onEdit?: () => void }) {
   const t = useTranslations("dashboard");

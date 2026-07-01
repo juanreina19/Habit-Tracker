@@ -71,7 +71,7 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
         </button>
         <span
           className="text-xs font-medium uppercase tracking-widest"
-          style={{ color: "var(--text-secondary)" }}
+          style={{ color: "var(--text-primary)" }}
         >
           {dateStr}
         </span>

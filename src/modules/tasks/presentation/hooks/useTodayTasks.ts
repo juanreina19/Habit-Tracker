@@ -10,7 +10,7 @@ import type { TaskWithStatus } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 import { today } from "@/shared/lib/utils/dates";
 
-export function useTodayTasks(userId: UUID) {
+export function useTodayTasks(userId: UUID, date?: string) {
   const [tasks, setTasks] = useState<TaskWithStatus[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +35,7 @@ export function useTodayTasks(userId: UUID) {
     const generation = ++fetchGeneration.current;
     setError(null);
     try {
-      const data = await new GetTodayTasksUseCase(getRepo()).execute(userId, today());
+      const data = await new GetTodayTasksUseCase(getRepo()).execute(userId, date ?? today());
       if (fetchGeneration.current !== generation) return;
       if (pendingToggles.current.size > 0) return;
       setTasks(data);
@@ -46,7 +46,7 @@ export function useTodayTasks(userId: UUID) {
     } finally {
       if (fetchGeneration.current === generation) setIsLoading(false);
     }
-  }, [userId, getRepo]);
+  }, [userId, date, getRepo]);
 
   const fetchRef = useRef(fetch);
   useEffect(() => { fetchRef.current = fetch; });
@@ -77,7 +77,7 @@ export function useTodayTasks(userId: UUID) {
   const toggleTask = useCallback(async (task: TaskWithStatus): Promise<void> => {
     if (pendingToggles.current.has(task.id)) return; // ignora doble-tap mientras el primero resuelve
 
-    const todayStr = today();
+    const todayStr = date ?? today();
     const isOverdue = !isRecurring(task) && !!task.dueDate && task.dueDate < todayStr;
 
     if (isOverdue) {

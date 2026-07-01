@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useHabitStore } from "../store/habitStore";
 import { createClient } from "@/shared/lib/supabase/client";
 import { HabitSupabaseRepository } from "../../infrastructure/supabase/HabitSupabaseRepository";
@@ -11,6 +11,7 @@ import { UncompleteHabitUseCase } from "../../domain/use-cases/UncompleteHabitUs
 import { CalculateStreakUseCase } from "../../domain/use-cases/CalculateStreakUseCase";
 import { UseFreezeUseCase } from "../../domain/use-cases/UseFreezeUseCase";
 import { today } from "@/shared/lib/utils/dates";
+import type { HabitWithStatus } from "../../domain/entities/Habit";
 import type { UUID } from "@/shared/types/database.types";
 
 // Actualiza el store de hábitos de hoy desde cualquier contexto (sin montar el hook)
@@ -26,7 +27,24 @@ export async function refreshTodayHabitsInStore(userId: UUID): Promise<void> {
   }
 }
 
-export function useHabits(userId: UUID) {
+export function useHabits(userId: UUID, date?: string) {
+  const isHistorical = !!date && date !== today();
+
+  // ─── Historical state (read-only, bypasses store) ───────────────────────────
+  const [historicalHabits, setHistoricalHabits] = useState<HabitWithStatus[]>([]);
+  const [historicalLoading, setHistoricalLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isHistorical || !date) return;
+    setHistoricalLoading(true);
+    const repo = new HabitSupabaseRepository(createClient());
+    new GetTodayHabitsUseCase(repo).execute(userId, date)
+      .then(result => setHistoricalHabits(result.habits))
+      .catch(() => setHistoricalHabits([]))
+      .finally(() => setHistoricalLoading(false));
+  }, [userId, date, isHistorical]);
+
+  // ─── Store-based state (today only) ─────────────────────────────────────────
   const { setHabits, toggleHabit, setLoading, setError, habits, isLoading, error,
     completedCount, totalCount, completionPercentage, estimatedMinutes, dataVersion } = useHabitStore();
 
@@ -164,11 +182,13 @@ export function useHabits(userId: UUID) {
 
   // ─── Fetch inicial y reactividad por dataVersion ─────────────────────────────
   useEffect(() => {
+    if (isHistorical) return;
     fetchHabits();
-  }, [fetchHabits, dataVersion]);
+  }, [fetchHabits, dataVersion, isHistorical]);
 
   // ─── Supabase Realtime ────────────────────────────────────────────────────────
   useEffect(() => {
+    if (isHistorical) return;
     const client = createClient();
     let debounceTimer: ReturnType<typeof setTimeout>;
 
@@ -193,7 +213,25 @@ export function useHabits(userId: UUID) {
       clearTimeout(debounceTimer);
       client.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, isHistorical]);
+
+  if (isHistorical) {
+    const hCompleted = historicalHabits.filter(h => h.isCompletedToday).length;
+    const hTotal = historicalHabits.length;
+    return {
+      habits: historicalHabits,
+      isLoading: historicalLoading,
+      error: null,
+      completedCount: hCompleted,
+      totalCount: hTotal,
+      completionPercentage: hTotal > 0 ? Math.round((hCompleted / hTotal) * 100) : 0,
+      estimatedMinutes: 0,
+      refetch: async () => {},
+      completeHabit: async (_: UUID) => {},
+      uncheckHabit: (_: UUID) => () => {},
+      freezeHabit: async (_: UUID) => {},
+    };
+  }
 
   return {
     habits,

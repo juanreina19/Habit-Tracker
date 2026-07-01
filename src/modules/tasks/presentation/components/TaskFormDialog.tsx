@@ -194,9 +194,9 @@ export function TaskFormDialog({
           className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
           style={{ background: "var(--surface)", maxHeight: "90dvh" }}
         >
-          <div className="overflow-y-auto p-6" style={{ maxHeight: "90dvh" }}>
+          <div className="overflow-y-auto px-6 pt-3 pb-6" style={{ maxHeight: "90dvh" }}>
             {/* Close button — top right */}
-            <div className="flex items-center justify-end mb-2">
+            <div className="flex items-center justify-end mb-0.5">
               <Dialog.Title className="sr-only">
                 {isEdit ? t("edit_title") : t("new_title")}
               </Dialog.Title>

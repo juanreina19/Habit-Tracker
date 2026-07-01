@@ -236,15 +236,17 @@ button, a, [role="button"] { touch-action: manipulation; }
     opacity: 1;
     box-shadow:
       0 0 0 1.5px var(--dot-glow-soft, transparent),
-      0 0 5px 2px var(--dot-glow, transparent),
-      0 0 10px 5px var(--dot-glow-outer, transparent);
+      0 0 8px 3px var(--dot-glow, transparent),
+      0 0 18px 8px var(--dot-glow-outer, transparent),
+      0 0 32px 14px var(--dot-glow-far, transparent);
   }
   50% {
-    opacity: 0.45;
+    opacity: 0.4;
     box-shadow:
       0 0 0 0.5px var(--dot-glow-soft, transparent),
-      0 0 2px 0px var(--dot-glow, transparent),
-      0 0 5px 2px var(--dot-glow-outer, transparent);
+      0 0 4px 1px var(--dot-glow, transparent),
+      0 0 8px 4px var(--dot-glow-outer, transparent),
+      0 0 16px 7px var(--dot-glow-far, transparent);
   }
 }
 

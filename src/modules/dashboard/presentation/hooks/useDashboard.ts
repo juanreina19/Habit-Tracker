@@ -12,15 +12,17 @@ import { useMinuteTick } from "@/shared/hooks/useMinuteTick";
 import type { TaskWithStatus, TaskStatus } from "@/modules/tasks/domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 
-export function useDashboard(userId: UUID) {
+export function useDashboard(userId: UUID, viewDate?: Date) {
   const [, forceTick] = useState(0);
   const onMidnight = useCallback(() => forceTick(n => n + 1), []);
   useMidnightRefresh(onMidnight);
   useMinuteTick(onMidnight);
 
+  const dateStr = viewDate ? format(viewDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd");
+
   const { tasks, isLoading: tasksLoading, toggleTask, createTask, updateTask, deleteTask } = useTasks(userId);
-  const { tasks: todayTasks, toggleTask: toggleTodayTask } = useTodayTasks(userId);
-  const { habits, completedCount, totalCount, completeHabit, uncheckHabit } = useHabits(userId);
+  const { tasks: todayTasks, toggleTask: toggleTodayTask } = useTodayTasks(userId, dateStr);
+  const { habits, completedCount, totalCount, completeHabit, uncheckHabit } = useHabits(userId, dateStr);
   const { categories, isLoading: categoriesLoading } = useCategories(userId);
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
@@ -65,6 +67,7 @@ export function useDashboard(userId: UUID) {
     tasks,
     isLoading: tasksLoading || categoriesLoading,
     habitsProgress: { completed: completedCount, total: totalCount },
+    isToday: dateStr === format(new Date(), "yyyy-MM-dd"),
     toggleTask,
     toggleTodayTask,
     completeHabit,
