@@ -55,7 +55,7 @@ export function DashboardColumn({
             className="w-6 h-6 rounded-sm flex items-center justify-center transition-opacity active:opacity-70"
             style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
           >
-            <Plus size={14} strokeWidth={2.5} />
+            <Plus size={14} strokeWidth={1} />
           </button>
         )}
       </div>

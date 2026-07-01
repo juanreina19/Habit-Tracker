@@ -12,7 +12,8 @@ import { KanbanTab } from "./KanbanTab";
 import { TaskFormDialog } from "@/modules/tasks/presentation/components/TaskFormDialog";
 import { HabitFormDialog } from "@/modules/habits/presentation/components/settings/HabitFormDialog";
 import { useSettingsHabits } from "@/modules/habits/presentation/hooks/useSettingsHabits";
-import type { CreateHabitInput } from "@/modules/habits/domain/repositories/IHabitRepository";
+import type { CreateHabitInput, UpdateHabitInput } from "@/modules/habits/domain/repositories/IHabitRepository";
+import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
 import type { TaskWithStatus, CreateTaskInput, UpdateTaskInput } from "@/modules/tasks/domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 
@@ -22,7 +23,7 @@ interface Props {
 
 export default function LifeDashboardView({ userId }: Props) {
   const dashboard = useDashboard(userId);
-  const { create: createHabit } = useSettingsHabits(userId);
+  const { create: createHabit, update: updateHabit } = useSettingsHabits(userId);
 
   const [activeTab, setActiveTab] = useState<HomeTab>("focus");
   const [viewDate, setViewDate] = useState(() => new Date());
@@ -33,6 +34,7 @@ export default function LifeDashboardView({ userId }: Props) {
   const [defaultCategoryId, setDefaultCategoryId] = useState<string | null>(null);
 
   const [habitDialogOpen, setHabitDialogOpen] = useState(false);
+  const [selectedHabit, setSelectedHabit] = useState<HabitWithStatus | null>(null);
 
   const openCreate = (categoryId?: string | null) => {
     setSelectedTask(null);
@@ -104,6 +106,10 @@ export default function LifeDashboardView({ userId }: Props) {
                 onCreateTask={handleInlineCreate}
                 onCompleteHabit={dashboard.completeHabit}
                 onUncheckHabit={dashboard.uncheckHabit}
+                onEditHabit={(id) => {
+                  setSelectedHabit(dashboard.habits.find(h => h.id === id) ?? null);
+                  setHabitDialogOpen(true);
+                }}
               />
             )}
 
@@ -163,12 +169,17 @@ export default function LifeDashboardView({ userId }: Props) {
 
       <HabitFormDialog
         open={habitDialogOpen}
-        onClose={() => setHabitDialogOpen(false)}
-        habit={null}
+        onClose={() => { setHabitDialogOpen(false); setSelectedHabit(null); }}
+        habit={selectedHabit}
         categories={dashboard.categories}
         onSave={async (data) => {
-          await createHabit(data as CreateHabitInput);
+          if (selectedHabit) {
+            await updateHabit(selectedHabit.id, data as UpdateHabitInput);
+          } else {
+            await createHabit(data as CreateHabitInput);
+          }
           setHabitDialogOpen(false);
+          setSelectedHabit(null);
         }}
       />
     </>

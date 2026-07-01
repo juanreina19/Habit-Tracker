@@ -336,7 +336,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                         >
                           {color === c && (
                             <svg width="14" height="11" viewBox="0 0 12 10" fill="none">
-                              <path d="M1 5l3.5 3.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                              <path d="M1 5l3.5 3.5L11 1" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           )}
                         </button>

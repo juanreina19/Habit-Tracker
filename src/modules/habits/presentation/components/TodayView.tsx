@@ -18,6 +18,7 @@ import { today as todayISODate } from "@/shared/lib/utils/dates";
 import { useSettingsHabits } from "../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { HabitFormDialog } from "./settings/HabitFormDialog";
+import { Pencil } from "lucide-react";
 import { useToast } from "@/shared/components/ui/Toast";
 import { Confetti } from "@/shared/components/ui/Confetti";
 import type { UUID } from "@/shared/types/database.types";
@@ -67,9 +68,10 @@ export default function TodayView({ userId }: Props) {
   } = useHabits(userId);
 
   const { showToast } = useToast();
-  const { create: createHabit } = useSettingsHabits(userId);
+  const { create: createHabit, update: updateHabit } = useSettingsHabits(userId);
   const { categories } = useCategories(userId);
   const [createOpen, setCreateOpen] = useState(false);
+  const [editHabit, setEditHabit] = useState<HabitWithStatus | null>(null);
 
   const { tasks: allTodayTasks, toggleTask: toggleTodayTask } = useTodayTasks(userId);
   const todayStr = todayISODate();
@@ -185,7 +187,7 @@ export default function TodayView({ userId }: Props) {
               style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
               aria-label={t("new_habit")}
             >
-              <Plus size={22} strokeWidth={2.5} />
+              <Plus size={22} strokeWidth={1} />
             </button>
           </div>
         </div>
@@ -218,7 +220,7 @@ export default function TodayView({ userId }: Props) {
               className="flex items-center gap-2 px-4 py-2 rounded-full transition-opacity active:opacity-70"
               style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
             >
-              <Plus size={18} strokeWidth={2.5} />
+              <Plus size={18} strokeWidth={1} />
               <span className="text-sm font-semibold">{t("new_habit")}</span>
             </button>
           </div>
@@ -310,6 +312,7 @@ export default function TodayView({ userId }: Props) {
                           onToggle={() => !locked && handleToggle(habit)}
                           onFreeze={canFreeze(habit) ? () => handleFreeze(habit.id) : undefined}
                           freezeLabel={t("save_streak")}
+                          onEdit={() => setEditHabit(habit)}
                         />
                       </motion.div>
                     );
@@ -373,6 +376,18 @@ export default function TodayView({ userId }: Props) {
           // dialog closed by handleSave after this returns
         }}
       />
+
+      <HabitFormDialog
+        open={!!editHabit}
+        onClose={() => setEditHabit(null)}
+        habit={editHabit}
+        categories={categories}
+        onSave={async (data) => {
+          if (editHabit) await updateHabit(editHabit.id, data as CreateHabitInput);
+          await refetch();
+          setEditHabit(null);
+        }}
+      />
     </>
   );
 }
@@ -380,13 +395,14 @@ export default function TodayView({ userId }: Props) {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function HabitRow({
-  habit, locked, onToggle, onFreeze, freezeLabel,
+  habit, locked, onToggle, onFreeze, freezeLabel, onEdit,
 }: {
   habit: HabitWithStatus;
   locked: boolean;
   onToggle: () => void;
   onFreeze?: () => void;
   freezeLabel: string;
+  onEdit?: () => void;
 }) {
   const t = useTranslations("today");
   const expired = locked && !habit.isCompletedToday;
@@ -403,7 +419,7 @@ function HabitRow({
         if (!locked && info.offset.x > 60 && Math.abs(info.velocity.x) > 0) onToggle();
       }}
       onClick={locked ? undefined : onToggle}
-      className="w-full text-left rounded-lg p-4 flex items-center gap-4 relative overflow-hidden"
+      className="group w-full text-left rounded-lg p-4 flex items-center gap-4 relative overflow-hidden card-border-hover"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -435,7 +451,7 @@ function HabitRow({
               exit={{ scale: 0, opacity: 0 }}
               transition={{ type: "spring", stiffness: 500, damping: 25 }}
             >
-              <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="2"
+              <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="1"
                 strokeLinecap="round" strokeLinejoin="round" />
             </motion.svg>
           )}
@@ -463,7 +479,7 @@ function HabitRow({
         <div className="flex items-center gap-3 mt-0.5 flex-wrap">
           {habit.startTime && (
             <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
-              <Clock size={11} strokeWidth={2} />
+              <Clock size={11} strokeWidth={1} />
               <span>
                 {formatTaskTime(habit.startTime)}
                 {habit.estimatedMinutes ? ` – ${calcEndTime(habit.startTime, habit.estimatedMinutes)}` : ""}
@@ -496,6 +512,18 @@ function HabitRow({
           style={{ background: "rgba(100,160,255,0.12)", color: "#88AAFF" }}
         >
           {freezeLabel}
+        </button>
+      )}
+
+      {/* Edit pencil — hover only, desktop */}
+      {onEdit && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onEdit(); }}
+          className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 p-1 rounded-sm active:opacity-70"
+          style={{ color: "var(--text-muted)" }}
+        >
+          <Pencil size={14} strokeWidth={1.5} />
         </button>
       )}
     </motion.div>

@@ -84,6 +84,9 @@
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+
+  /* ── Card hover border ── */
+  --border-hover: #363636;
 }
 
 .light {
@@ -129,6 +132,9 @@
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
   --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
   --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
+
+  /* ── Card hover border ── */
+  --border-hover: #d0d0d4;
 }
 
 /* ── Reset ── */
@@ -224,19 +230,17 @@ button, a, [role="button"] { touch-action: manipulation; }
 }
 .tooltip-arrow { fill: var(--tooltip-bg); }
 
-/* ── Priority neon pulse — LED on/off effect ── */
+/* ── Priority dot fade pulse ── */
 @keyframes neon-pulse {
-  0%, 40%, 100% {
-    box-shadow:
-      0 0 0 1.5px var(--glow-border, transparent),
-      0 0 7px 3px var(--glow-color, #ffffff40);
-    opacity: 1;
-  }
-  55%, 85% {
-    box-shadow:
-      0 0 0 0.5px transparent,
-      0 0 2px 0px var(--glow-color, #ffffff10);
-    opacity: 0.35;
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Card hover border — desktop only ── */
+@media (min-width: 1024px) {
+  .card-border-hover:hover {
+    border-color: var(--border-hover) !important;
+    transition: border-color 0.15s ease;
   }
 }
 

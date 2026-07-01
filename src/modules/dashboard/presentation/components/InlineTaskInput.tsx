@@ -30,7 +30,7 @@ export function InlineTaskInput({ onCreateTask, placeholder = "Agregar tarea..."
         className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
         style={{ background: "var(--accent)", color: "#fff" }}
       >
-        <Plus size={14} strokeWidth={2.5} />
+        <Plus size={14} strokeWidth={1} />
       </button>
       <input
         ref={inputRef}

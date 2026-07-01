@@ -139,7 +139,7 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
                   type="monotone"
                   dataKey="completionRate"
                   stroke={trendLineColor}
-                  strokeWidth={2.5}
+                  strokeWidth={1}
                   fill="url(#weeklyTrendFill)"
                   dot={{ r: 3, fill: trendLineColor, strokeWidth: 0 }}
                   activeDot={{ r: 5, fill: trendLineColor }}

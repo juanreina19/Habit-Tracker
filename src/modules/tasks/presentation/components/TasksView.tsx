@@ -98,14 +98,14 @@ export default function TasksView({ userId }: Props) {
             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
             aria-label={t("new_task")}
           >
-            <Plus size={22} strokeWidth={2.5} />
+            <Plus size={22} strokeWidth={1} />
           </button>
           <button
             onClick={openCreate}
             className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full transition-opacity active:opacity-70"
             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
           >
-            <Plus size={18} strokeWidth={2.5} />
+            <Plus size={18} strokeWidth={1} />
             <span className="text-sm font-semibold">{t("new_task")}</span>
           </button>
         </div>
@@ -443,7 +443,7 @@ function PriorityFilterMenu({ value, onChange }: {
             color: isActive ? "var(--btn-primary-text)" : "var(--text-secondary)",
           }}
         >
-          <ListFilter size={15} strokeWidth={2} />
+          <ListFilter size={15} strokeWidth={1} />
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
@@ -461,7 +461,7 @@ function PriorityFilterMenu({ value, onChange }: {
               onSelect={() => onChange(opt.value)}
             >
               {opt.label}
-              {value === opt.value && <Check size={14} strokeWidth={2} />}
+              {value === opt.value && <Check size={14} strokeWidth={1} />}
             </DropdownMenu.Item>
           ))}
         </DropdownMenu.Content>

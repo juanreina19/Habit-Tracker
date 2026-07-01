@@ -64,7 +64,7 @@ export default function Sidebar() {
                       style={{ background: "var(--accent)" }}
                     />
                   )}
-                  <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
+                  <Icon size={20} strokeWidth={1} />
                 </Link>
               </Tooltip>
             );
@@ -95,7 +95,7 @@ export default function Sidebar() {
               className={`sidebar-link relative flex items-center justify-center py-2.5 rounded-md ${pathname.startsWith("/settings") ? "sidebar-active" : ""}`}
               style={{ color: pathname.startsWith("/settings") ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
             >
-              <Settings2 size={20} strokeWidth={pathname.startsWith("/settings") ? 2 : 1.5} />
+              <Settings2 size={20} strokeWidth={1} />
             </Link>
           </Tooltip>
 

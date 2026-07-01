@@ -7,6 +7,7 @@ import { es, enUS } from "date-fns/locale";
 import { useLocale } from "@/shared/i18n/useLocale";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
+import { today as getToday, isTimePast } from "@/shared/lib/utils/dates";
 import { PRIORITY_COLORS } from "@/modules/tasks/presentation/constants/taskColors";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "@/modules/tasks/presentation/components/TaskCheckbox";
 
@@ -25,13 +26,14 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
   const t = useTranslations("tasks");
   const { locale } = useLocale();
   const done = isTaskDone(task);
+  const agendaOverdue = !done && !overdue && !!task.startTime && task.dueDate === getToday() && isTimePast(task.startTime);
 
   const hasSubtasks = (task.subtaskTotal ?? 0) > 0;
   const subtaskPct = hasSubtasks ? ((task.subtaskCompleted ?? 0) / task.subtaskTotal!) * 100 : 0;
 
   return (
     <div
-      className="group relative rounded-md p-2.5"
+      className="group relative rounded-md p-2.5 card-border-hover"
       style={{
         background: "var(--bg)",
         border: done ? "1px solid transparent" : "1px solid var(--border)",
@@ -43,10 +45,8 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
           className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full transition-opacity group-hover:opacity-0"
           style={{
             background: PRIORITY_COLORS[task.priority],
-            "--glow-color": `${PRIORITY_COLORS[task.priority]}60`,
-            "--glow-border": `${PRIORITY_COLORS[task.priority]}35`,
             animation: "neon-pulse 2s ease-in-out infinite",
-          } as React.CSSProperties}
+          }}
         />
       )}
 
@@ -96,6 +96,16 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
         {/* Importance star */}
         {task.isImportant && !done && (
           <Star size={12} fill="var(--text-secondary)" stroke="var(--text-secondary)" className="flex-shrink-0" />
+        )}
+
+        {/* Agenda overdue badge — same day, startTime passed */}
+        {agendaOverdue && (
+          <span
+            className="text-[9px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0"
+            style={{ background: "rgba(239,68,68,0.1)", color: "var(--danger)" }}
+          >
+            {t("overdue")}
+          </span>
         )}
 
         {/* Subtask count inline */}
