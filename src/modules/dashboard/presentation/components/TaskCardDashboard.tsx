@@ -53,7 +53,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
         <span
           className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full transition-opacity group-hover:opacity-0"
           style={{
-            background: PRIORITY_COLORS[task.priority],
+            background: `radial-gradient(circle at 35% 35%, rgba(255,255,255,0.45) 0%, transparent 65%), ${PRIORITY_COLORS[task.priority]}`,
             ["--dot-glow-soft" as string]: `${PRIORITY_COLORS[task.priority]}40`,
             ["--dot-glow" as string]: `${PRIORITY_COLORS[task.priority]}60`,
             ["--dot-glow-outer" as string]: `${PRIORITY_COLORS[task.priority]}20`,

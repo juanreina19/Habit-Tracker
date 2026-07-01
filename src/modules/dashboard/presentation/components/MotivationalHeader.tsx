@@ -55,7 +55,8 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
   const quote = quotes[dayIndex % quotes.length];
   const greeting = getGreeting(locale);
 
-  const dateStr = format(date, "EEEE d 'de' MMMM", { locale: dateFnsLocale });
+  const weekday  = format(date, "EEEE", { locale: dateFnsLocale });
+  const dateOnly = format(date, locale === "en" ? "MMMM d" : "d 'de' MMMM", { locale: dateFnsLocale });
 
   return (
     <div className="flex flex-col items-center text-center gap-1.5 py-4">
@@ -69,11 +70,10 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
         >
           <ChevronLeft size={16} />
         </button>
-        <span
-          className="text-xs font-medium uppercase tracking-widest"
-          style={{ color: "var(--text-primary)" }}
-        >
-          {dateStr}
+        <span className="text-xs font-medium uppercase tracking-widest">
+          <span style={{ color: "var(--text-primary)" }}>{weekday}</span>
+          {" "}
+          <span style={{ color: "var(--text-muted)" }}>{dateOnly}</span>
         </span>
         <button
           type="button"

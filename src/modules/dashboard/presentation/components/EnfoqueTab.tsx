@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { ClipboardPen, Repeat, Filter, Pencil, GripVertical } from "lucide-react";
+import { ClipboardPen, Repeat, Filter, Pencil } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -95,8 +95,8 @@ export function EnfoqueTab({
     };
   }, [todayNonOverdue, habits, urgencyFilter]);
 
-  const [orderedUntimed, setOrderedUntimed] = useState(untimedItems);
-  useEffect(() => { setOrderedUntimed(untimedItems); }, [untimedItems]);
+  const [orderedItems, setOrderedItems] = useState<AgendaItem[]>(() => [...timedItems, ...untimedItems]);
+  useEffect(() => { setOrderedItems([...timedItems, ...untimedItems]); }, [timedItems, untimedItems]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -105,7 +105,7 @@ export function EnfoqueTab({
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
-    setOrderedUntimed(prev => {
+    setOrderedItems(prev => {
       const from = prev.findIndex(i => i.id === active.id);
       const to = prev.findIndex(i => i.id === over.id);
       return arrayMove(prev, from, to);
@@ -117,7 +117,7 @@ export function EnfoqueTab({
       {/* Agenda with timeline */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <SectionHeader label="AGENDA" />
+          <SectionHeader label={t("agenda").toUpperCase()} />
           <button
             type="button"
             onClick={() => setUrgencyFilter(p => !p)}
@@ -136,7 +136,7 @@ export function EnfoqueTab({
         {/* Timeline */}
         <div className="flex flex-col relative">
           {/* Continuous vertical line */}
-          {(timedItems.length + orderedUntimed.length) > 1 && (
+          {orderedItems.length > 1 && (
             <div
               className="absolute w-px"
               style={{
@@ -148,47 +148,13 @@ export function EnfoqueTab({
             />
           )}
 
-          {/* Time-based items — static, sorted by startTime */}
-          <AnimatePresence initial={false}>
-            {timedItems.map((item) => {
-              const timeParts = item.time?.split(" ") ?? [];
-              return (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex items-center"
-                >
-                  <div className="w-14 flex-shrink-0 text-right pr-3">
-                    {timeParts[0] && (
-                      <>
-                        <span className="text-[11px] tabular-nums font-normal leading-none block" style={{ color: "var(--text-muted)" }}>{timeParts[0]}</span>
-                        {timeParts[1] && <span className="text-[9px] font-normal leading-none block mt-px" style={{ color: "var(--text-muted)" }}>{timeParts[1]}</span>}
-                      </>
-                    )}
-                  </div>
-                  <AgendaNode item={item} />
-                  <div className="flex-1 min-w-0 py-1 pl-2">
-                    <AgendaCard item={item} userId={userId} typeTaskLabel={t("type_task")}
-                      onToggleTask={onToggleTask} onEditTask={onEditTask} onDeleteTask={onDeleteTask}
-                      onCompleteHabit={onCompleteHabit} onUncheckHabit={onUncheckHabit} onEditHabit={onEditHabit} />
-                  </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
-
-          {/* Untimed items — draggable, freely reorderable */}
+          {/* All items — timed and untimed — unified sortable list */}
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={orderedUntimed.map(i => i.id)} strategy={verticalListSortingStrategy}>
-              {orderedUntimed.map((item) => (
+            <SortableContext items={orderedItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
+              {orderedItems.map((item) => (
                 <SortableAgendaItem
                   key={item.id}
                   item={item}
-                  showHandle={orderedUntimed.length > 1}
                   userId={userId}
                   typeTaskLabel={t("type_task")}
                   onToggleTask={onToggleTask}
@@ -202,7 +168,7 @@ export function EnfoqueTab({
             </SortableContext>
           </DndContext>
 
-          {timedItems.length === 0 && orderedUntimed.length === 0 && (
+          {orderedItems.length === 0 && (
             <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>—</p>
           )}
         </div>
@@ -239,11 +205,11 @@ export function EnfoqueTab({
                   <div
                     className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
                     style={{
-                      background: done ? "#FFFFFF" : "var(--bg)",
-                      border: done ? "2px solid #FFFFFF" : "1px solid var(--border)",
+                      background: done ? "var(--accent)" : "var(--bg)",
+                      border: done ? "2px solid var(--accent)" : "1px solid var(--border)",
                     }}
                   >
-                    <ClipboardPen size={10} strokeWidth={1.5} style={{ color: done ? "var(--bg)" : "var(--text-muted)" }} />
+                    <ClipboardPen size={10} strokeWidth={1.5} style={{ color: done ? "#FFFFFF" : "var(--text-muted)" }} />
                   </div>
                 </div>
 
@@ -282,13 +248,13 @@ function AgendaNode({ item }: { item: AgendaItem }) {
       <div
         className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
         style={{
-          background: item.completed ? "#FFFFFF" : "var(--bg)",
-          border: item.completed ? "2px solid #FFFFFF" : "1px solid var(--border)",
+          background: item.completed ? "var(--accent)" : "var(--bg)",
+          border: item.completed ? "2px solid var(--accent)" : "1px solid var(--border)",
         }}
       >
         {item.type === "habit"
-          ? <Repeat size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
-          : <ClipboardPen size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
+          ? <Repeat size={11} strokeWidth={1.5} style={{ color: item.completed ? "#FFFFFF" : "var(--text-muted)" }} />
+          : <ClipboardPen size={11} strokeWidth={1.5} style={{ color: item.completed ? "#FFFFFF" : "var(--text-muted)" }} />
         }
       </div>
     </div>
@@ -336,25 +302,23 @@ function AgendaCard({ item, userId, typeTaskLabel, onToggleTask, onEditTask, onD
   return null;
 }
 
-function SortableAgendaItem({ item, showHandle, ...cardProps }: AgendaCardProps & { showHandle: boolean }) {
+function SortableAgendaItem({ item, ...cardProps }: AgendaCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const timeParts = item.time?.split(" ") ?? [];
   return (
     <div
       ref={setNodeRef}
+      {...attributes}
+      {...listeners}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
-      className="flex items-center"
+      className="flex items-center touch-none cursor-grab active:cursor-grabbing"
     >
-      <div className="w-14 flex-shrink-0 flex items-center justify-end pr-3">
-        {showHandle && (
-          <button
-            type="button"
-            {...attributes}
-            {...listeners}
-            className="touch-none cursor-grab active:cursor-grabbing"
-            style={{ color: "var(--text-muted)" }}
-          >
-            <GripVertical size={12} strokeWidth={1.5} />
-          </button>
+      <div className="w-14 flex-shrink-0 text-right pr-3">
+        {timeParts[0] && (
+          <>
+            <span className="text-[11px] tabular-nums font-normal leading-none block" style={{ color: "var(--text-muted)" }}>{timeParts[0]}</span>
+            {timeParts[1] && <span className="text-[9px] font-normal leading-none block mt-px" style={{ color: "var(--text-muted)" }}>{timeParts[1]}</span>}
+          </>
         )}
       </div>
       <AgendaNode item={item} />
@@ -387,13 +351,13 @@ function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; o
         <div
           className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
           style={{
-            background: done ? "#FFFFFF" : "transparent",
-            border: done ? "2px solid #FFFFFF" : "2px solid var(--border)",
+            background: done ? "var(--accent)" : "transparent",
+            border: done ? "2px solid var(--accent)" : "2px solid var(--border)",
           }}
         >
           {done && (
             <svg width="10" height="8" viewBox="0 0 12 10" fill="none">
-              <path d="M1 5l3.5 3.5L11 1" stroke="#000000" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M1 5l3.5 3.5L11 1" stroke="#FFFFFF" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           )}
         </div>

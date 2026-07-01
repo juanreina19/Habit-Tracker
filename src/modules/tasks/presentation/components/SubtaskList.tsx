@@ -26,7 +26,7 @@ export function SubtaskList({ userId, taskId }: { userId: UUID; taskId: UUID }) 
           >
             {sub.isCompleted && (
               <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
-                <path d="M1 3l2 2 4-4" stroke="var(--bg)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M1 3l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             )}
           </span>
