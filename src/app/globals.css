@@ -250,6 +250,10 @@ button, a, [role="button"] { touch-action: manipulation; }
   }
 }
 
+/* ── Hide scrollbar ── */
+.hide-scrollbar { scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
 /* ── Card hover border — desktop only ── */
 @media (min-width: 1024px) {
   .card-border-hover:hover {

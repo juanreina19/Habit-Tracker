@@ -78,7 +78,7 @@ export function TaskFormDialog({
       setTitle(task?.title ?? "");
       setDescription(task?.description ?? "");
       setPriority(task?.priority ?? "medium");
-      setDueDate(task?.dueDate ?? "");
+      setDueDate(task?.dueDate ? task.dueDate.split("T")[0] : "");
 
       const hasRec = Array.isArray(task?.recurrenceDays) && (task?.recurrenceDays?.length ?? 0) > 0;
       setIsRecurring(hasRec);
@@ -196,7 +196,7 @@ export function TaskFormDialog({
         >
           <div className="overflow-y-auto px-6 pt-3 pb-6" style={{ maxHeight: "90dvh" }}>
             {/* Close button — top right */}
-            <div className="flex items-center justify-end mb-0.5">
+            <div className="flex items-center justify-end mb-0.5 -mr-3">
               <Dialog.Title className="sr-only">
                 {isEdit ? t("edit_title") : t("new_title")}
               </Dialog.Title>
@@ -577,7 +577,7 @@ export function TaskFormDialog({
                     id="task-date-input"
                     type="date"
                     value={dueDate}
-                    min={today()}
+                    min={isEdit ? undefined : today()}
                     onChange={(e) => setDueDate(e.target.value)}
                     className="sr-only"
                     tabIndex={-1}
@@ -701,7 +701,7 @@ export function TaskFormDialog({
                   <div className="flex items-center gap-3 mt-1 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
                     {!isEdit && (
                       <p className="flex-1 text-xs" style={{ color: "var(--text-muted)" }}>
-                        Press <strong>Enter</strong> to create
+                        Press{" "}<span style={{ color: "var(--text-primary)" }}>Enter</span>{" "}to create
                       </p>
                     )}
                     {isEdit && (

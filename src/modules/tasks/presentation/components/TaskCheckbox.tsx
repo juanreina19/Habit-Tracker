@@ -17,7 +17,7 @@ interface TaskCheckboxProps {
 export function TaskCheckbox({ done, size = TASK_CHECKBOX_SIZE.card, animated = false, onToggle, ariaLabel, variant = "default", overdue = false }: TaskCheckboxProps) {
   const px = size;
   const checkScale = px <= 18 ? 10 : 12;
-  const checkStroke = "#000000";
+  const checkStroke = "#FFFFFF";
 
   const inner = done ? (
     animated ? (
@@ -36,14 +36,14 @@ export function TaskCheckbox({ done, size = TASK_CHECKBOX_SIZE.card, animated = 
     )
   ) : null;
 
-  const borderColor = done ? "#FFFFFF" : overdue ? "var(--danger)" : "var(--border)";
+  const borderColor = done ? "var(--accent)" : overdue ? "var(--danger)" : "var(--border)";
 
   const style = {
     width:       px,
     height:      px,
     borderRadius: variant === "focus" ? "50%" : 6,
     border:      `2px solid ${borderColor}`,
-    background:  done ? "#FFFFFF" : "transparent",
+    background:  done ? "var(--accent)" : "transparent",
     flexShrink:  0,
     display:     "flex",
     alignItems:  "center",

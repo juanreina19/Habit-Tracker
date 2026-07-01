@@ -2,13 +2,15 @@
 
 import { useState, useRef } from "react";
 import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   onCreateTask: (title: string) => void;
   placeholder?: string;
 }
 
-export function InlineTaskInput({ onCreateTask, placeholder = "Agregar tarea..." }: Props) {
+export function InlineTaskInput({ onCreateTask, placeholder }: Props) {
+  const t = useTranslations("dashboard");
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -43,7 +45,7 @@ export function InlineTaskInput({ onCreateTask, placeholder = "Agregar tarea..."
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t("add_task_placeholder")}
         className="flex-1 bg-transparent outline-none text-sm"
         style={{ color: "var(--text-primary)" }}
       />

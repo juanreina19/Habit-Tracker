@@ -22,6 +22,8 @@ export function useSubtasks(userId: UUID, taskId: UUID | null) {
     try {
       const data = await new ListSubtasksUseCase(getRepo()).execute(taskId);
       setSubtasks(data);
+    } catch {
+      setSubtasks([]);
     } finally {
       setIsLoading(false);
     }

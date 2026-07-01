@@ -165,7 +165,7 @@ export function FocusModeSettingsDialog({ open, onClose, session, onSave }: Prop
           className="fixed z-[120] left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
           style={{ background: "var(--surface)", maxHeight: "90dvh" }}
         >
-          <div className="overflow-y-auto p-6 flex flex-col gap-4" style={{ maxHeight: "90dvh" }}>
+          <div className="overflow-y-auto hide-scrollbar p-6 flex flex-col gap-4" style={{ maxHeight: "90dvh" }}>
             <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
               {t("session_settings_title")}
             </Dialog.Title>
