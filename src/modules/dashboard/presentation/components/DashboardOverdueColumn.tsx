@@ -4,15 +4,17 @@ import { useTranslations } from "next-intl";
 import { DashboardColumn } from "./DashboardColumn";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
+import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
+  userId: UUID;
   tasks: TaskWithStatus[];
   onToggle: (task: TaskWithStatus) => void;
   onEdit: (task: TaskWithStatus) => void;
   onDelete: (task: TaskWithStatus) => void;
 }
 
-export function DashboardOverdueColumn({ tasks, onToggle, onEdit, onDelete }: Props) {
+export function DashboardOverdueColumn({ userId, tasks, onToggle, onEdit, onDelete }: Props) {
   const t = useTranslations("dashboard");
 
   if (tasks.length === 0) return null;
@@ -23,6 +25,7 @@ export function DashboardOverdueColumn({ tasks, onToggle, onEdit, onDelete }: Pr
         <TaskCardDashboard
           key={task.id}
           task={task}
+          userId={userId}
           overdue
           onToggle={() => onToggle(task)}
           onEdit={() => onEdit(task)}

@@ -10,6 +10,7 @@ import type { TaskWithStatus, TaskStatus } from "@/modules/tasks/domain/entities
 import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
+  userId: UUID;
   tasks: TaskWithStatus[];
   onToggleTask: (task: TaskWithStatus) => void;
   onEditTask: (task: TaskWithStatus) => void;
@@ -31,7 +32,7 @@ function nextStatus(current: TaskStatus): TaskStatus | null {
   return idx < STATUS_ORDER.length - 1 ? STATUS_ORDER[idx + 1] : null;
 }
 
-export function KanbanTab({ tasks, onToggleTask, onEditTask, onDeleteTask, onUpdateStatus }: Props) {
+export function KanbanTab({ userId, tasks, onToggleTask, onEditTask, onDeleteTask, onUpdateStatus }: Props) {
   const t = useTranslations("dashboard");
 
   const columns = useMemo<KanbanColumn[]>(() => {
@@ -105,6 +106,7 @@ export function KanbanTab({ tasks, onToggleTask, onEditTask, onDeleteTask, onUpd
                     <div key={task.id} className="group/kanban relative">
                       <TaskCardDashboard
                         task={task}
+                        userId={userId}
                         onToggle={() => onToggleTask(task)}
                         onEdit={() => onEditTask(task)}
                         onDelete={() => onDeleteTask(task)}

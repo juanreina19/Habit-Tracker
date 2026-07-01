@@ -9,8 +9,10 @@ import { TaskCardDashboard } from "./TaskCardDashboard";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
 import type { Category } from "@/modules/categories/domain/entities/Category";
+import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
+  userId: UUID;
   categories: Category[];
   tasksByCategory: Record<string, TaskWithStatus[]>;
   uncategorized: TaskWithStatus[];
@@ -25,7 +27,7 @@ interface Props {
 }
 
 export function TableroTab({
-  categories, tasksByCategory, uncategorized, overdue, habits,
+  userId, categories, tasksByCategory, uncategorized, overdue, habits,
   onToggleTask, onEditTask, onDeleteTask, onAddTask,
   onCompleteHabit, onUncheckHabit,
 }: Props) {
@@ -34,6 +36,7 @@ export function TableroTab({
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:gap-4 lg:overflow-x-auto lg:pb-4 lg:-mx-2 lg:px-2">
       <DashboardOverdueColumn
+        userId={userId}
         tasks={overdue}
         onToggle={onToggleTask}
         onEdit={onEditTask}
@@ -49,6 +52,7 @@ export function TableroTab({
       {categories.map((cat) => (
         <DashboardTasksColumn
           key={cat.id}
+          userId={userId}
           category={cat}
           tasks={tasksByCategory[cat.id] ?? []}
           onToggle={onToggleTask}
@@ -70,6 +74,7 @@ export function TableroTab({
             <TaskCardDashboard
               key={task.id}
               task={task}
+              userId={userId}
               onToggle={() => onToggleTask(task)}
               onEdit={() => onEditTask(task)}
               onDelete={() => onDeleteTask(task)}

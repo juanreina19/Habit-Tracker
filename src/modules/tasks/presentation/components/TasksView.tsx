@@ -168,7 +168,9 @@ export default function TasksView({ userId }: Props) {
           <FocusModeOverlay
             key="focus-overlay"
             session={focusMode.active}
-            tasks={tasks.filter((tk) => focusMode.active!.taskIds.includes(tk.id))}
+            tasks={focusMode.active!.taskIds
+              .map(id => tasks.find(t => t.id === id))
+              .filter(Boolean) as TaskWithStatus[]}
             toggleTask={toggleTask}
             onPause={focusMode.pause}
             onResume={focusMode.resume}
@@ -177,6 +179,7 @@ export default function TasksView({ userId }: Props) {
             onEndSession={focusMode.discard}
             onUpdateConfig={focusMode.updateActiveConfig}
             onReset={focusMode.resetTimer}
+            onReorderTasks={focusMode.reorderTasks}
           />
         )}
       </AnimatePresence>

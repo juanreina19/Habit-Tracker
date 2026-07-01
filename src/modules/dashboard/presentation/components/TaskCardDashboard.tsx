@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Pencil, Star } from "lucide-react";
 import { format } from "date-fns";
@@ -7,6 +8,8 @@ import { es, enUS } from "date-fns/locale";
 import { useLocale } from "@/shared/i18n/useLocale";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
+import type { UUID } from "@/shared/types/database.types";
+import { SubtaskList } from "@/modules/tasks/presentation/components/SubtaskList";
 import { today as getToday, isTimePast } from "@/shared/lib/utils/dates";
 import { PRIORITY_COLORS } from "@/modules/tasks/presentation/constants/taskColors";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "@/modules/tasks/presentation/components/TaskCheckbox";
@@ -20,13 +23,15 @@ interface Props {
   showDescription?: boolean;
   showDueDate?: boolean;
   typeLabel?: string;
+  userId?: UUID;
 }
 
-export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescription, showDueDate, typeLabel }: Props) {
+export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescription, showDueDate, typeLabel, userId }: Props) {
+  const [subtasksOpen, setSubtasksOpen] = useState(false);
   const t = useTranslations("tasks");
   const { locale } = useLocale();
   const done = isTaskDone(task);
-  const timeRef = task.endTime ?? task.startTime;
+  const timeRef = task.endTime;
   const agendaOverdue = !done && !overdue && !!timeRef &&
     (task.dueDate === null || task.dueDate === getToday()) &&
     isTimePast(timeRef);
@@ -48,7 +53,9 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
           className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full transition-opacity group-hover:opacity-0"
           style={{
             background: PRIORITY_COLORS[task.priority],
-            ["--dot-glow" as string]: `${PRIORITY_COLORS[task.priority]}70`,
+            ["--dot-glow-soft" as string]: `${PRIORITY_COLORS[task.priority]}40`,
+            ["--dot-glow" as string]: `${PRIORITY_COLORS[task.priority]}60`,
+            ["--dot-glow-outer" as string]: `${PRIORITY_COLORS[task.priority]}20`,
             animation: "neon-pulse 2s ease-in-out infinite",
           }}
         />
@@ -112,11 +119,22 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
           </span>
         )}
 
-        {/* Subtask count inline */}
+        {/* Subtask count inline — clickeable cuando hay userId */}
         {hasSubtasks && !done && (
-          <span className="text-[10px] tabular-nums font-medium flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-            {task.subtaskCompleted}/{task.subtaskTotal}
-          </span>
+          userId ? (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setSubtasksOpen(v => !v); }}
+              className="text-[10px] tabular-nums font-medium flex-shrink-0 transition-opacity active:opacity-70"
+              style={{ color: subtasksOpen ? "var(--text-primary)" : "var(--text-muted)" }}
+            >
+              {task.subtaskCompleted}/{task.subtaskTotal}
+            </button>
+          ) : (
+            <span className="text-[10px] tabular-nums font-medium flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+              {task.subtaskCompleted}/{task.subtaskTotal}
+            </span>
+          )
         )}
 
         {/* Edit action — absolute right, swaps with priority dot on hover */}
@@ -140,6 +158,10 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
             />
           </div>
         </div>
+      )}
+
+      {subtasksOpen && userId && !!task.subtaskTotal && (
+        <SubtaskList userId={userId} taskId={task.id as UUID} />
       )}
     </div>
   );

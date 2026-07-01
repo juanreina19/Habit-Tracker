@@ -96,6 +96,7 @@ export default function LifeDashboardView({ userId }: Props) {
           >
             {activeTab === "focus" && (
               <EnfoqueTab
+                userId={userId}
                 todayTasks={dashboard.todayTasks}
                 habits={dashboard.habits}
                 overdue={dashboard.overdue}
@@ -115,6 +116,7 @@ export default function LifeDashboardView({ userId }: Props) {
 
             {activeTab === "board" && (
               <TableroTab
+                userId={userId}
                 categories={dashboard.categories}
                 tasksByCategory={dashboard.tasksByCategory}
                 uncategorized={dashboard.uncategorized}
@@ -131,6 +133,7 @@ export default function LifeDashboardView({ userId }: Props) {
 
             {activeTab === "eisenhower" && (
               <EisenhowerTab
+                userId={userId}
                 tasks={dashboard.tasks}
                 onToggleTask={dashboard.toggleTask}
                 onEditTask={openEdit}
@@ -140,6 +143,7 @@ export default function LifeDashboardView({ userId }: Props) {
 
             {activeTab === "kanban" && (
               <KanbanTab
+                userId={userId}
                 tasks={dashboard.tasks}
                 onToggleTask={dashboard.toggleTask}
                 onEditTask={openEdit}
