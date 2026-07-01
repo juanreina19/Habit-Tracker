@@ -23,10 +23,10 @@ export function useDashboard(userId: UUID) {
     const overdue = tasks.filter(t => {
       if (t.dueDate === null || t.dueDate >= todayStr) return false;
       if (!isTaskDone(t)) return true;
-      // Completadas: solo mostrar si se completaron HOY
+      // Completadas: solo mostrar si se completaron HOY (usa timezone local, no UTC string)
       const completedToday = t.recurrenceDays
         ? t.isCompletedToday
-        : (t.completedAt?.startsWith(todayStr) ?? false);
+        : (t.completedAt ? format(new Date(t.completedAt), "yyyy-MM-dd") === todayStr : false);
       return completedToday;
     });
     const overdueIds = new Set(overdue.map(t => t.id));

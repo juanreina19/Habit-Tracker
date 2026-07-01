@@ -98,6 +98,7 @@ export default function LifeDashboardView({ userId }: Props) {
                 habits={dashboard.habits}
                 overdue={dashboard.overdue}
                 onToggleTask={dashboard.toggleTodayTask}
+                onToggleOverdueTask={dashboard.toggleTask}
                 onEditTask={openEdit}
                 onDeleteTask={openDelete}
                 onCreateTask={handleInlineCreate}

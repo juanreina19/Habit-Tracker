@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { ListTodo, Sparkles, Filter } from "lucide-react";
+import { ListTodo, Repeat, Filter } from "lucide-react";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
@@ -17,6 +17,7 @@ interface Props {
   habits: HabitWithStatus[];
   overdue: TaskWithStatus[];
   onToggleTask: (task: TaskWithStatus) => void;
+  onToggleOverdueTask?: (task: TaskWithStatus) => void;
   onEditTask: (task: TaskWithStatus) => void;
   onDeleteTask: (task: TaskWithStatus) => void;
   onCreateTask: (title: string) => void;
@@ -36,9 +37,10 @@ interface AgendaItem {
 
 export function EnfoqueTab({
   todayTasks, habits, overdue,
-  onToggleTask, onEditTask, onDeleteTask, onCreateTask,
+  onToggleTask, onToggleOverdueTask, onEditTask, onDeleteTask, onCreateTask,
   onCompleteHabit, onUncheckHabit,
 }: Props) {
+  const toggleOverdue = onToggleOverdueTask ?? onToggleTask;
   const t = useTranslations("dashboard");
   const [urgencyFilter, setUrgencyFilter] = useState(false);
 
@@ -155,7 +157,7 @@ export function EnfoqueTab({
                     }}
                   >
                     {item.type === "habit"
-                      ? <Sparkles size={10} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
+                      ? <Repeat size={10} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
                       : <ListTodo size={10} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
                     }
                   </div>
@@ -236,7 +238,7 @@ export function EnfoqueTab({
                 <div className="flex-1 min-w-0 py-1 pl-2">
                   <TaskCardDashboard
                     task={task}
-                    onToggle={() => onToggleTask(task)}
+                    onToggle={() => toggleOverdue(task)}
                     onEdit={() => onEditTask(task)}
                     onDelete={() => onDeleteTask(task)}
                     overdue

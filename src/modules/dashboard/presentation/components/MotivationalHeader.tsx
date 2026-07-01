@@ -100,17 +100,17 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
         {locale === "en" ? (
           <>
             You have{" "}
-            <span className="font-bold" style={{ color: "var(--text-primary)" }}>{habitsCount}</span>
+            <span style={{ color: "var(--text-primary)" }}>{habitsCount}</span>
             {" "}habits and{" "}
-            <span className="font-bold" style={{ color: "var(--text-primary)" }}>{tasksCount}</span>
+            <span style={{ color: "var(--text-primary)" }}>{tasksCount}</span>
             {" "}tasks for today
           </>
         ) : (
           <>
             Tienes{" "}
-            <span className="font-bold" style={{ color: "var(--text-primary)" }}>{habitsCount}</span>
+            <span style={{ color: "var(--text-primary)" }}>{habitsCount}</span>
             {" "}hábitos y{" "}
-            <span className="font-bold" style={{ color: "var(--text-primary)" }}>{tasksCount}</span>
+            <span style={{ color: "var(--text-primary)" }}>{tasksCount}</span>
             {" "}tareas para hoy
           </>
         )}
