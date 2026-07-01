@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
 import { X, Zap, Clock } from "lucide-react";
@@ -52,16 +51,10 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
           style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
         />
         <Dialog.Content
-          asChild
           onOpenAutoFocus={(e) => e.preventDefault()}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden [animation:dialog-in_0.22s_cubic-bezier(0.16,1,0.3,1)]"
+          style={{ background: "var(--bg)", maxHeight: "90dvh" }}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
-            style={{ background: "var(--bg)", maxHeight: "90dvh" }}
-          >
           <div className="overflow-y-auto p-6 flex flex-col gap-4" style={{ maxHeight: "90dvh" }}>
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
@@ -154,7 +147,6 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
               {t("start_flow", { count: selected.size })}
             </button>
           </div>
-          </motion.div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

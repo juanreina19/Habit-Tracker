@@ -224,8 +224,24 @@ button, a, [role="button"] { touch-action: manipulation; }
 }
 .tooltip-arrow { fill: var(--tooltip-bg); }
 
-/* ── Priority neon pulse ── */
+/* ── Priority neon pulse — LED on/off effect ── */
 @keyframes neon-pulse {
-  0%, 100% { box-shadow: 0 0 4px 1px var(--glow-color, #ffffff40); }
-  50%       { box-shadow: 0 0 10px 4px var(--glow-color, #ffffff60); }
+  0%, 40%, 100% {
+    box-shadow:
+      0 0 0 1.5px var(--glow-border, transparent),
+      0 0 7px 3px var(--glow-color, #ffffff40);
+    opacity: 1;
+  }
+  55%, 85% {
+    box-shadow:
+      0 0 0 0.5px transparent,
+      0 0 2px 0px var(--glow-color, #ffffff10);
+    opacity: 0.35;
+  }
+}
+
+/* ── Focus mode dialog enter animation ── */
+@keyframes dialog-in {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 12px)) scale(0.96); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }

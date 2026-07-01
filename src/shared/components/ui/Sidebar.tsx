@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Home, CalendarRange, Sparkles, BookOpen, Settings2, Sun, Moon, User, LogOut } from "lucide-react";
+import { Home, CalendarRange, Repeat, BookOpen, Settings2, Sun, Moon, User, LogOut } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 import { createClient } from "@/shared/lib/supabase/client";
@@ -12,7 +12,7 @@ import { createClient } from "@/shared/lib/supabase/client";
 const NAV_ROUTES = [
   { href: "/",         key: "home",     Icon: Home },
   { href: "/planner",  key: "planner",  Icon: CalendarRange },
-  { href: "/habits",   key: "habits",   Icon: Sparkles },
+  { href: "/habits",   key: "habits",   Icon: Repeat },
   { href: "/studies",  key: "studies",  Icon: BookOpen },
 ];
 

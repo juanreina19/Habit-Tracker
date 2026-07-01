@@ -135,11 +135,11 @@ export function EnfoqueTab({
                 <div className="w-14 flex-shrink-0 text-right pr-3">
                   {timeParts[0] && (
                     <>
-                      <span className="text-[10px] tabular-nums font-normal leading-none block" style={{ color: "var(--text-muted)" }}>
+                      <span className="text-[11px] tabular-nums font-normal leading-none block" style={{ color: "var(--text-muted)" }}>
                         {timeParts[0]}
                       </span>
                       {timeParts[1] && (
-                        <span className="text-[8px] font-normal leading-none block mt-px" style={{ color: "var(--text-muted)" }}>
+                        <span className="text-[9px] font-normal leading-none block mt-px" style={{ color: "var(--text-muted)" }}>
                           {timeParts[1]}
                         </span>
                       )}
@@ -150,15 +150,15 @@ export function EnfoqueTab({
                 {/* Node */}
                 <div className="w-6 flex-shrink-0 flex items-center justify-center relative z-10">
                   <div
-                    className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                    className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
                     style={{
                       background: item.completed ? "#FFFFFF" : "var(--bg)",
                       border: item.completed ? "2px solid #FFFFFF" : "1px solid var(--border)",
                     }}
                   >
                     {item.type === "habit"
-                      ? <Repeat size={10} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
-                      : <ListTodo size={10} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
+                      ? <Repeat size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
+                      : <ListTodo size={11} strokeWidth={1.5} style={{ color: item.completed ? "var(--bg)" : "var(--text-muted)" }} />
                     }
                   </div>
                 </div>

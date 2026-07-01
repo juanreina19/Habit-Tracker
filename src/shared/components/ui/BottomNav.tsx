@@ -4,13 +4,13 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Home, CalendarRange, Sparkles, Settings2 } from "lucide-react";
+import { Home, CalendarRange, Repeat, Settings2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils/cn";
 
 const NAV_ROUTES = [
   { href: "/",         key: "home",     Icon: Home },
   { href: "/planner",  key: "planner",  Icon: CalendarRange },
-  { href: "/habits",   key: "habits",   Icon: Sparkles },
+  { href: "/habits",   key: "habits",   Icon: Repeat },
   { href: "/settings", key: "settings", Icon: Settings2 },
 ];
 

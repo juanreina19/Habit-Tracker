@@ -37,20 +37,21 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
         border: done ? "1px solid transparent" : "1px solid var(--border)",
       }}
     >
-      {/* Priority dot — top right with neon pulse */}
+      {/* Priority dot — top right with neon pulse; swaps with pencil on hover */}
       {!done && (
         <span
-          className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full"
+          className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full transition-opacity group-hover:opacity-0"
           style={{
             background: PRIORITY_COLORS[task.priority],
-            "--glow-color": `${PRIORITY_COLORS[task.priority]}80`,
-            animation: "neon-pulse 2.5s ease-in-out infinite",
+            "--glow-color": `${PRIORITY_COLORS[task.priority]}60`,
+            "--glow-border": `${PRIORITY_COLORS[task.priority]}35`,
+            animation: "neon-pulse 2s ease-in-out infinite",
           } as React.CSSProperties}
         />
       )}
 
       {/* Main row */}
-      <div className="flex items-center gap-2 pr-5">
+      <div className="flex items-center gap-2 pr-7">
         <TaskCheckbox
           done={done}
           size={TASK_CHECKBOX_SIZE.card}
@@ -104,17 +105,15 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
           </span>
         )}
 
-        {/* Edit action — visible on hover */}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 relative z-10">
-          <button
-            type="button"
-            onClick={onEdit}
-            className="p-1 rounded-sm transition-opacity active:opacity-70"
-            style={{ color: "var(--text-muted)" }}
-          >
-            <Pencil size={12} />
-          </button>
-        </div>
+        {/* Edit action — absolute right, swaps with priority dot on hover */}
+        <button
+          type="button"
+          onClick={onEdit}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-1 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity active:opacity-70"
+          style={{ color: "var(--text-muted)" }}
+        >
+          <Pencil size={12} />
+        </button>
       </div>
 
       {/* Subtask progress bar */}
