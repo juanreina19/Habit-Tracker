@@ -26,7 +26,10 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
   const t = useTranslations("tasks");
   const { locale } = useLocale();
   const done = isTaskDone(task);
-  const agendaOverdue = !done && !overdue && !!task.startTime && task.dueDate === getToday() && isTimePast(task.startTime);
+  const timeRef = task.endTime ?? task.startTime;
+  const agendaOverdue = !done && !overdue && !!timeRef &&
+    (task.dueDate === null || task.dueDate === getToday()) &&
+    isTimePast(timeRef);
 
   const hasSubtasks = (task.subtaskTotal ?? 0) > 0;
   const subtaskPct = hasSubtasks ? ((task.subtaskCompleted ?? 0) / task.subtaskTotal!) * 100 : 0;
@@ -45,6 +48,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
           className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full transition-opacity group-hover:opacity-0"
           style={{
             background: PRIORITY_COLORS[task.priority],
+            ["--dot-glow" as string]: `${PRIORITY_COLORS[task.priority]}70`,
             animation: "neon-pulse 2s ease-in-out infinite",
           }}
         />

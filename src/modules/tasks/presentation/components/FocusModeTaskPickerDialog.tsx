@@ -140,7 +140,8 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
 
             <button
               onClick={handleStart}
-              className="w-full py-3 rounded-lg text-sm font-normal transition-opacity active:opacity-70 flex items-center justify-center gap-2"
+              disabled={selected.size === 0}
+              className="w-full py-3 rounded-lg text-sm font-normal transition-opacity active:opacity-70 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
             >
               <Zap size={16} />

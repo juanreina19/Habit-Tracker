@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
@@ -10,9 +11,11 @@ import { useLocale } from "@/shared/i18n/useLocale";
 import { today } from "@/shared/lib/utils/dates";
 import { isTaskDone, isRecurring, formatTaskTime, isTaskTimeExpired } from "../../domain/entities/Task";
 import type { TaskWithStatus, TaskPriority } from "../../domain/entities/Task";
+import type { UUID } from "@/shared/types/database.types";
 import { PRIORITY_COLORS } from "../constants/taskColors";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
+import { useSubtasks } from "../hooks/useSubtasks";
 export { PRIORITY_COLORS };
 
 function parseLocalDate(iso: string): Date {
@@ -75,12 +78,56 @@ function TimeBadge({ startTime, endTime }: { startTime: string; endTime?: string
   );
 }
 
-function SubtaskBadge({ completed, total }: { completed: number; total: number }) {
+function SubtaskBadge({ completed, total, open, onToggle }: {
+  completed: number; total: number; open: boolean; onToggle?: (e: React.MouseEvent) => void;
+}) {
   return (
-    <span className="flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+    <button
+      type="button"
+      onPointerDown={e => e.stopPropagation()}
+      onClick={onToggle}
+      className="flex items-center gap-1 rounded active:opacity-70"
+      style={{ color: open ? "var(--text-primary)" : "var(--text-secondary)" }}
+    >
       <ListChecks size={11} strokeWidth={1} />
       <span className="text-xs">{completed}/{total}</span>
-    </span>
+    </button>
+  );
+}
+
+function SubtaskList({ userId, taskId }: { userId: UUID; taskId: UUID }) {
+  const { subtasks, isLoading, toggleSubtask } = useSubtasks(userId, taskId);
+  if (isLoading) return <div className="py-1 text-xs" style={{ color: "var(--text-muted)" }}>…</div>;
+  return (
+    <div className="flex flex-col gap-1 mt-2 pt-2 border-t" style={{ borderColor: "var(--border)" }}>
+      {subtasks.map(sub => (
+        <button
+          key={sub.id}
+          type="button"
+          onPointerDown={e => e.stopPropagation()}
+          onClick={e => { e.stopPropagation(); toggleSubtask(sub); }}
+          className="flex items-center gap-2 text-left text-xs py-0.5 transition-opacity active:opacity-70"
+          style={{ color: sub.isCompleted ? "var(--text-muted)" : "var(--text-primary)" }}
+        >
+          <span
+            className="w-3.5 h-3.5 rounded-full flex-shrink-0 border flex items-center justify-center"
+            style={{
+              borderColor: sub.isCompleted ? "var(--text-muted)" : "var(--border)",
+              background: sub.isCompleted ? "var(--text-muted)" : "transparent",
+            }}
+          >
+            {sub.isCompleted && (
+              <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
+                <path d="M1 3l2 2 4-4" stroke="var(--bg)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </span>
+          <span style={{ textDecoration: sub.isCompleted ? "line-through" : "none" }}>
+            {sub.title}
+          </span>
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -90,9 +137,11 @@ interface Props {
   onEdit?: () => void;
   onDelete?: () => void;
   compact?: boolean;
+  userId?: UUID;
 }
 
-export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: Props) {
+export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, userId }: Props) {
+  const [subtasksOpen, setSubtasksOpen] = useState(false);
   const t = useTranslations("tasks");
   const done = isTaskDone(task);
   const recurring = isRecurring(task);
@@ -185,7 +234,12 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
                 <TimeBadge startTime={task.startTime} endTime={task.endTime} />
               )}
               {!!task.subtaskTotal && (
-                <SubtaskBadge completed={task.subtaskCompleted ?? 0} total={task.subtaskTotal} />
+                <SubtaskBadge
+                  completed={task.subtaskCompleted ?? 0}
+                  total={task.subtaskTotal}
+                  open={subtasksOpen}
+                  onToggle={userId ? (e) => { e.stopPropagation(); setSubtasksOpen(v => !v); } : undefined}
+                />
               )}
             </div>
           )}
@@ -254,6 +308,10 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
         </DropdownMenu.Root>
       )}
       </div>
+
+      {subtasksOpen && userId && !!task.subtaskTotal && (
+        <SubtaskList userId={userId} taskId={task.id as UUID} />
+      )}
     </motion.div>
   );
 }

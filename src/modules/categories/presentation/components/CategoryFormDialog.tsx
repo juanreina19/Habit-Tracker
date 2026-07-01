@@ -24,11 +24,11 @@ interface Props {
 // ─── Slide animation ──────────────────────────────────────────────────────────
 
 const slideVariants = {
-  enter: (dir: number) => ({ x: dir > 0 ? "100%" : "-100%", opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: (dir: number) => ({ x: dir < 0 ? "100%" : "-100%", opacity: 0 }),
+  enter: (dir: number) => ({ x: dir > 0 ? "55%" : "-55%", opacity: 0, scale: 0.98 }),
+  center: { x: 0, opacity: 1, scale: 1 },
+  exit: (dir: number) => ({ x: dir < 0 ? "55%" : "-55%", opacity: 0, scale: 0.98 }),
 };
-const slideTransition = { type: "tween", duration: 0.15, ease: [0.4, 0, 0.2, 1] } as const;
+const slideTransition = { type: "spring", stiffness: 380, damping: 36, mass: 0.8 } as const;
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
@@ -101,11 +101,11 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden [animation:dialog-in_0.25s_cubic-bezier(0.16,1,0.3,1)]"
           style={{ background: "var(--surface)", maxHeight: "85dvh" }}
         >
           <div className="overflow-y-auto" style={{ maxHeight: "85dvh" }}>
-            <AnimatePresence mode="popLayout" custom={slideDir}>
+            <AnimatePresence mode="wait" custom={slideDir}>
               <motion.div
                 key={scene}
                 custom={slideDir}

@@ -138,7 +138,7 @@ export default function TasksView({ userId }: Props) {
           )}
           {tab === "week" && <WeekTab userId={userId} tasks={tasks} />}
           {tab === "all" && (
-            <AllTab tasks={tasks} toggleTask={toggleTask} onEdit={openEdit} onDelete={openDelete} />
+            <AllTab userId={userId} tasks={tasks} toggleTask={toggleTask} onEdit={openEdit} onDelete={openDelete} />
           )}
         </motion.div>
       </div>
@@ -212,6 +212,7 @@ function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
       <div className="lg:hidden">
         {overdue.length > 0 && (
           <CollapsibleTaskSection
+            userId={userId}
             title={`${t("overdue_section")} (${overdue.length})`}
             tasks={overdue}
             toggleTask={toggleTask}
@@ -222,6 +223,7 @@ function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
           />
         )}
         <TaskSection
+          userId={userId}
           title={`${t("tab_today")} (${todayTasks.length})`}
           tasks={todayTasks}
           toggleTask={toggleTask}
@@ -230,6 +232,7 @@ function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
           emptyState={<TaskEmptyState />}
         />
         <CollapsibleTaskSection
+          userId={userId}
           title={`${t("completed")} (${done.length})`}
           tasks={done}
           toggleTask={toggleTask}
@@ -243,6 +246,7 @@ function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
       {/* Desktop — 3 columnas: Atrasadas / Hoy / Completadas */}
       <div className="hidden lg:grid lg:grid-cols-3 lg:gap-4">
         <TaskColumn
+          userId={userId}
           title={`${t("overdue_section")} (${overdue.length})`}
           tasks={overdue}
           toggleTask={toggleTask}
@@ -251,6 +255,7 @@ function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
           emptyState={<EmptyColumnPlaceholder text="—" />}
         />
         <TaskColumn
+          userId={userId}
           title={`${t("tab_today")} (${todayTasks.length})`}
           tasks={todayTasks}
           toggleTask={toggleTask}
@@ -259,6 +264,7 @@ function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
           emptyState={<TaskEmptyState />}
         />
         <TaskColumn
+          userId={userId}
           title={`${t("completed")} (${done.length})`}
           tasks={done}
           toggleTask={toggleTask}
@@ -276,6 +282,7 @@ function TodayTab({ userId, onEdit, onDelete }: TodayTabProps) {
 // + filtros por prioridad y tipo (única / recurrente). Edición nunca bloqueada.
 
 interface AllTabProps {
+  userId: UUID;
   tasks: TaskWithStatus[];
   toggleTask: (task: TaskWithStatus) => void;
   onEdit: (task: TaskWithStatus) => void;
@@ -284,7 +291,7 @@ interface AllTabProps {
 
 type TypeFilter = "all" | "once" | "recurring";
 
-function AllTab({ tasks, toggleTask, onEdit, onDelete }: AllTabProps) {
+function AllTab({ userId, tasks, toggleTask, onEdit, onDelete }: AllTabProps) {
   const t = useTranslations("tasks");
   const [showDone, setShowDone]           = useState(true);
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | "all">("all");
@@ -325,6 +332,7 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete }: AllTabProps) {
       <div className="lg:hidden">
         {overdue.length > 0 && (
           <TaskSection
+            userId={userId}
             title={`${t("overdue_section")} (${overdue.length})`}
             tasks={overdue}
             toggleTask={toggleTask}
@@ -334,6 +342,7 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete }: AllTabProps) {
         )}
 
         <TaskSection
+          userId={userId}
           title={`${t("pending")} (${pending.length})`}
           tasks={pending}
           toggleTask={toggleTask}
@@ -343,6 +352,7 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete }: AllTabProps) {
         />
 
         <CollapsibleTaskSection
+          userId={userId}
           title={`${t("completed")} (${done.length})`}
           tasks={done}
           toggleTask={toggleTask}
@@ -356,6 +366,7 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete }: AllTabProps) {
       {/* Desktop — 3 columnas: Atrasadas / Pendientes / Completadas */}
       <div className="hidden lg:grid lg:grid-cols-3 lg:gap-4">
         <TaskColumn
+          userId={userId}
           title={`${t("overdue_section")} (${overdue.length})`}
           tasks={overdue}
           toggleTask={toggleTask}
@@ -364,6 +375,7 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete }: AllTabProps) {
           emptyState={<EmptyColumnPlaceholder text="—" />}
         />
         <TaskColumn
+          userId={userId}
           title={`${t("pending")} (${pending.length})`}
           tasks={pending}
           toggleTask={toggleTask}
@@ -372,6 +384,7 @@ function AllTab({ tasks, toggleTask, onEdit, onDelete }: AllTabProps) {
           emptyState={<TaskEmptyState />}
         />
         <TaskColumn
+          userId={userId}
           title={`${t("completed")} (${done.length})`}
           tasks={done}
           toggleTask={toggleTask}
@@ -475,6 +488,7 @@ function PriorityFilterMenu({ value, onChange }: {
 // la estructura visual ya validada (evita drift entre copias).
 
 interface TaskSectionProps {
+  userId: UUID;
   title: string;
   tasks: TaskWithStatus[];
   toggleTask: (task: TaskWithStatus) => void;
@@ -483,7 +497,7 @@ interface TaskSectionProps {
   emptyState?: React.ReactNode;
 }
 
-function TaskSection({ title, tasks, toggleTask, onEdit, onDelete, emptyState }: TaskSectionProps) {
+function TaskSection({ userId, title, tasks, toggleTask, onEdit, onDelete, emptyState }: TaskSectionProps) {
   return (
     <div className="mb-3">
       <div className="flex items-center gap-2 mb-3">
@@ -506,6 +520,7 @@ function TaskSection({ title, tasks, toggleTask, onEdit, onDelete, emptyState }:
               >
                 <TaskCard
                   task={task}
+                  userId={userId}
                   onToggle={() => toggleTask(task)}
                   onEdit={() => onEdit(task)}
                   onDelete={() => onDelete(task)}
@@ -520,6 +535,7 @@ function TaskSection({ title, tasks, toggleTask, onEdit, onDelete, emptyState }:
 }
 
 interface CollapsibleTaskSectionProps {
+  userId: UUID;
   title: string;
   tasks: TaskWithStatus[];
   toggleTask: (task: TaskWithStatus) => void;
@@ -529,7 +545,7 @@ interface CollapsibleTaskSectionProps {
   onToggleShow: () => void;
 }
 
-function CollapsibleTaskSection({ title, tasks, toggleTask, onEdit, onDelete, show, onToggleShow }: CollapsibleTaskSectionProps) {
+function CollapsibleTaskSection({ userId, title, tasks, toggleTask, onEdit, onDelete, show, onToggleShow }: CollapsibleTaskSectionProps) {
   if (tasks.length === 0) return null;
 
   return (
@@ -562,6 +578,7 @@ function CollapsibleTaskSection({ title, tasks, toggleTask, onEdit, onDelete, sh
                 >
                   <TaskCard
                     task={task}
+                    userId={userId}
                     onToggle={() => toggleTask(task)}
                     onEdit={() => onEdit(task)}
                     onDelete={() => onDelete(task)}
@@ -581,6 +598,7 @@ function CollapsibleTaskSection({ title, tasks, toggleTask, onEdit, onDelete, sh
 // pero con TaskCard interactivo en lugar de WeekDayCard de solo lectura.
 
 interface TaskColumnProps {
+  userId: UUID;
   title: string;
   tasks: TaskWithStatus[];
   toggleTask: (task: TaskWithStatus) => void;
@@ -589,7 +607,7 @@ interface TaskColumnProps {
   emptyState: React.ReactNode;
 }
 
-function TaskColumn({ title, tasks, toggleTask, onEdit, onDelete, emptyState }: TaskColumnProps) {
+function TaskColumn({ userId, title, tasks, toggleTask, onEdit, onDelete, emptyState }: TaskColumnProps) {
   return (
     <div className="flex flex-col gap-2.5 min-w-0">
       <div className="flex items-center gap-2">
@@ -612,6 +630,7 @@ function TaskColumn({ title, tasks, toggleTask, onEdit, onDelete, emptyState }: 
               >
                 <TaskCard
                   task={task}
+                  userId={userId}
                   onToggle={() => toggleTask(task)}
                   onEdit={() => onEdit(task)}
                   onDelete={() => onDelete(task)}

@@ -8,6 +8,7 @@ import { useHabits } from "@/modules/habits/presentation/hooks/useHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
 import { useMidnightRefresh } from "@/shared/hooks/useMidnightRefresh";
+import { useMinuteTick } from "@/shared/hooks/useMinuteTick";
 import type { TaskWithStatus, TaskStatus } from "@/modules/tasks/domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 
@@ -15,6 +16,7 @@ export function useDashboard(userId: UUID) {
   const [, forceTick] = useState(0);
   const onMidnight = useCallback(() => forceTick(n => n + 1), []);
   useMidnightRefresh(onMidnight);
+  useMinuteTick(onMidnight);
 
   const { tasks, isLoading: tasksLoading, toggleTask, createTask, updateTask, deleteTask } = useTasks(userId);
   const { tasks: todayTasks, toggleTask: toggleTodayTask } = useTodayTasks(userId);
