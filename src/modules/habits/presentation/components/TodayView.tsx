@@ -411,13 +411,6 @@ function HabitRow({
   return (
     <motion.div
       layout="position"
-      drag={locked ? false : "x"}
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={{ left: 0.05, right: 0.3 }}
-      dragSnapToOrigin
-      onDragEnd={(_, info) => {
-        if (!locked && info.offset.x > 60 && Math.abs(info.velocity.x) > 0) onToggle();
-      }}
       onClick={locked ? undefined : onToggle}
       className="group w-full text-left rounded-lg p-4 flex items-center gap-4 relative overflow-hidden card-border-hover"
       style={{

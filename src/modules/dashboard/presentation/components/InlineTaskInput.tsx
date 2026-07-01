@@ -26,9 +26,14 @@ export function InlineTaskInput({ onCreateTask, placeholder = "Agregar tarea..."
     >
       <button
         type="button"
-        onClick={() => inputRef.current?.focus()}
-        className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
-        style={{ background: "var(--accent)", color: "#fff" }}
+        disabled={!value.trim()}
+        onClick={() => value.trim() ? handleSubmit() : inputRef.current?.focus()}
+        className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+        style={{
+          background: value.trim() ? "var(--accent)" : "var(--border)",
+          color: value.trim() ? "#fff" : "var(--text-muted)",
+          cursor: value.trim() ? "pointer" : "default",
+        }}
       >
         <Plus size={14} strokeWidth={1} />
       </button>
