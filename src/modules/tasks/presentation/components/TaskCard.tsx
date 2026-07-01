@@ -113,7 +113,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
       } : undefined}
       whileTap={!compact ? { scale: 0.98 } : {}}
       transition={{ type: "spring", stiffness: 500, damping: 35 }}
-      className="flex flex-col gap-2 rounded-lg p-3 select-none"
+      className="group flex flex-col gap-2 rounded-lg p-3 select-none"
       style={{
         background: "var(--surface)",
         border: "1px solid var(--border)",
@@ -190,6 +190,19 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false }: 
             </div>
           )}
         </div>
+
+        {/* Hover pencil — edit shortcut */}
+        {onEdit && !compact && (
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 p-1 rounded-sm active:opacity-70"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <Pencil size={12} strokeWidth={2} />
+          </button>
+        )}
 
       {/* Three-dots menu */}
       {showMenu && (

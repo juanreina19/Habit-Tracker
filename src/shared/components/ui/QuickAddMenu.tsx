@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ListTodo, Sparkles, BookOpen, X } from "lucide-react";
+import { ListTodo, Repeat, BookOpen, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface Props {
@@ -69,7 +69,7 @@ export function QuickAddMenu({ open, onClose, onSelectTask, onSelectHabit, onSel
             onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface)")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
-            <Sparkles size={16} strokeWidth={1.5} />
+            <Repeat size={16} strokeWidth={1.5} />
             {t("new_habit")}
           </button>
           {onSelectStudy && (

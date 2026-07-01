@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, ListTodo, Sparkles } from "lucide-react";
+import { Plus, ListTodo, Repeat } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export function FloatingActions() {
@@ -38,8 +38,8 @@ export function FloatingActions() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute bottom-full right-0 mb-3 min-w-[180px] rounded-md p-1.5"
-            style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+            className="fixed z-30 right-5 lg:right-8 min-w-[180px] rounded-md p-1.5 bottom-[calc(env(safe-area-inset-bottom)+228px)] lg:bottom-[148px]"
+            style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
           >
             <button
               type="button"
@@ -60,7 +60,7 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <Sparkles size={16} strokeWidth={1.5} />
+              <Repeat size={16} strokeWidth={1.5} />
               {t("new_habit")}
             </button>
           </motion.div>
