@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
 import { HABIT_EMOJIS } from "@/shared/components/ui/EmojiPicker";
@@ -166,7 +166,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
           className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden [animation:dialog-in_0.25s_cubic-bezier(0.16,1,0.3,1)]"
           style={{ background: "var(--surface)", maxHeight: "85dvh" }}
         >
-          <div className="overflow-y-auto" style={{ maxHeight: "85dvh" }}>
+          <div className="overflow-y-auto hide-scrollbar" style={{ maxHeight: "85dvh" }}>
             <AnimatePresence mode="wait" custom={slideDir}>
               <motion.div
                 key={scene}
@@ -176,7 +176,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                 animate="center"
                 exit="exit"
                 transition={slideTransition}
-                className="p-6"
+                className="p-5"
               >
 
                 {/* ── Wizard header (create mode, steps 0-2) ──── */}
@@ -203,10 +203,15 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
 
                 {/* ── Edit flat-view header ────────────────────── */}
                 {scene === "edit" && (
-                  <div className="mb-6">
+                  <div className="flex items-center justify-between mb-4">
                     <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
                       {t("edit_title")}
                     </Dialog.Title>
+                    <Dialog.Close asChild>
+                      <button type="button" className="p-1.5 rounded-md transition-opacity active:opacity-70" style={{ color: "var(--text-muted)" }}>
+                        <X size={16} />
+                      </button>
+                    </Dialog.Close>
                   </div>
                 )}
 
@@ -255,29 +260,30 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
 
                 {/* ── Edit flat view (edit mode) ─────────────────── */}
                 {scene === "edit" && (
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-3">
                     <NameField name={name} setName={setName} nameError={nameError} setNameError={setNameError} t={t} />
-                    <CategoryField categories={categories} categoryId={categoryId} setCategoryId={setCategoryId} t={t} />
 
-                    {/* Days button */}
-                    <button
-                      type="button"
-                      onClick={() => navigate("edit_days", 1)}
-                      className="w-full flex items-center justify-between px-4 py-4 rounded-lg transition-opacity active:opacity-70"
-                      style={{ background: "var(--surface-elevated)" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="text-left">
+                    <div className="grid grid-cols-2 gap-3">
+                      <CategoryField categories={categories} categoryId={categoryId} setCategoryId={setCategoryId} t={t} />
+
+                      {/* Days button */}
+                      <button
+                        type="button"
+                        onClick={() => navigate("edit_days", 1)}
+                        className="w-full flex items-center justify-between px-3 py-3 rounded-lg transition-opacity active:opacity-70"
+                        style={{ background: "var(--surface-elevated)" }}
+                      >
+                        <div className="text-left min-w-0">
                           <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("days_label")}</p>
-                          <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+                          <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-secondary)" }}>
                             {activeDays.length === 7
                               ? "L M X J V S D"
                               : activeDays.map((d) => ["L","M","X","J","V","S","D"][d - 1]).join(" ")}
                           </p>
                         </div>
-                      </div>
-                      <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
-                    </button>
+                        <ChevronRight size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                      </button>
+                    </div>
 
                     <ScheduleSection
                       timeEnabled={timeEnabled} setTimeEnabled={setTimeEnabled}
@@ -286,10 +292,61 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                       endTime={endTime} t={t}
                     />
 
-                    <AppearanceRows color={color} icon={icon} navigate={navigate} homeScene={homeScene} t={t} />
+                    {/* Color + Icon side by side */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => navigate("color", 1)}
+                        className="flex items-center justify-between px-3 py-3 rounded-lg transition-opacity active:opacity-70"
+                        style={{ background: "var(--surface-elevated)" }}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div
+                            className="w-7 h-7 rounded-full flex-shrink-0 border-2"
+                            style={{
+                              background: color ?? "var(--border)",
+                              borderColor: color ? color + "60" : "var(--border)",
+                            }}
+                          />
+                          <div className="text-left min-w-0">
+                            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("color_label")}</p>
+                            <p className="text-xs mt-0.5 truncate" style={{ color: color ?? "var(--text-secondary)" }}>
+                              {color ?? t("no_color")}
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronRight size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => navigate("icon", 1)}
+                        className="flex items-center justify-between px-3 py-3 rounded-lg transition-opacity active:opacity-70"
+                        style={{ background: "var(--surface-elevated)" }}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div
+                            className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+                            style={{ background: icon ? (color ?? "#4CAF82") + "25" : "var(--border)" }}
+                          >
+                            {icon
+                              ? <HabitIcon icon={icon} size={16} color={color ?? "var(--text-primary)"} />
+                              : <span className="text-sm" style={{ color: "var(--text-muted)" }}>—</span>
+                            }
+                          </div>
+                          <div className="text-left min-w-0">
+                            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("icon_label")}</p>
+                            <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-secondary)" }}>
+                              {icon ? (icon.startsWith("lucide:") ? icon.slice(7) : icon) : t("no_icon")}
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronRight size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+                      </button>
+                    </div>
 
                     {/* Edit save/cancel */}
-                    <div className="flex gap-3 mt-2">
+                    <div className="flex gap-3 mt-1">
                       <button
                         type="button"
                         onClick={onClose}

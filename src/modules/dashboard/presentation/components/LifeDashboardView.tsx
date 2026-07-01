@@ -98,6 +98,7 @@ export default function LifeDashboardView({ userId }: Props) {
             {activeTab === "focus" && (
               <EnfoqueTab
                 userId={userId}
+                viewDate={viewDate}
                 todayTasks={dashboard.todayTasks}
                 habits={dashboard.habits}
                 overdue={dashboard.overdue}
