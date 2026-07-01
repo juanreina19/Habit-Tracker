@@ -14,6 +14,10 @@ export function useSubtasks(userId: UUID, taskId: UUID | null) {
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Unique suffix per hook instance — prevents channel name collisions when
+  // multiple components subscribe to the same taskId (e.g. card + edit dialog).
+  const channelSuffix = useRef(Math.random().toString(36).slice(2, 9));
+
   const getRepo = useCallback(() => new SubtaskSupabaseRepository(createClient()), []);
 
   const fetch = useCallback(async () => {
@@ -43,7 +47,7 @@ export function useSubtasks(userId: UUID, taskId: UUID | null) {
       debounce = setTimeout(() => fetchRef.current(), 300);
     };
 
-    const ch = client.channel(`subtasks-${taskId}`)
+    const ch = client.channel(`subtasks-${taskId}-${channelSuffix.current}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "subtasks" }, refetch)
       .subscribe();
 
