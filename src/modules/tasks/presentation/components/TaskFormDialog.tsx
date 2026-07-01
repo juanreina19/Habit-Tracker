@@ -490,8 +490,9 @@ export function TaskFormDialog({
                     <button
                       type="button"
                       onClick={() => {
-                        const input = document.getElementById("task-date-input");
-                        if (input) (input as HTMLInputElement).showPicker?.();
+                        const input = document.getElementById("task-date-input") as HTMLInputElement | null;
+                        if (!input) return;
+                        try { input.showPicker?.(); } catch { input.click(); }
                       }}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                       style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
@@ -579,7 +580,7 @@ export function TaskFormDialog({
                     value={dueDate}
                     min={isEdit ? undefined : today()}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="sr-only"
+                    style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
                     tabIndex={-1}
                   />
 

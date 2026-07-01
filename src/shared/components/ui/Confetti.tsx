@@ -3,9 +3,6 @@
 import { useEffect, useRef, useCallback } from "react";
 
 const COLORS = ["#4CAF82", "#FFFFFF", "#F5A623", "#A3CF8A", "#FFCC44", "#FF8A65"];
-const PARTICLE_COUNT = 90;
-const DURATION_FRAMES = 200; // ~3.3s at 60fps
-const FADE_START = 140;
 
 interface Particle {
   x: number; y: number;
@@ -17,12 +14,17 @@ interface Particle {
 
 interface Props {
   onDone: () => void;
+  compact?: boolean;
 }
 
-export function Confetti({ onDone }: Props) {
+export function Confetti({ onDone, compact }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
+
+  const particleCount = compact ? 40 : 90;
+  const durationFrames = compact ? 120 : 200;
+  const fadeStart = compact ? 80 : 140;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -36,7 +38,7 @@ export function Confetti({ onDone }: Props) {
     };
     resize();
 
-    const particles: Particle[] = Array.from({ length: PARTICLE_COUNT }, () => ({
+    const particles: Particle[] = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
       y: -20 - Math.random() * 80,
       vx: (Math.random() - 0.5) * 5,
@@ -55,8 +57,8 @@ export function Confetti({ onDone }: Props) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       frame++;
 
-      const fadeProgress = frame >= FADE_START
-        ? (frame - FADE_START) / (DURATION_FRAMES - FADE_START)
+      const fadeProgress = frame >= fadeStart
+        ? (frame - fadeStart) / (durationFrames - fadeStart)
         : 0;
       const globalAlpha = Math.max(0, 1 - fadeProgress);
 
@@ -82,7 +84,7 @@ export function Confetti({ onDone }: Props) {
         ctx.restore();
       }
 
-      if (frame < DURATION_FRAMES) {
+      if (frame < durationFrames) {
         animId = requestAnimationFrame(tick);
       } else {
         onDoneRef.current();
@@ -91,7 +93,7 @@ export function Confetti({ onDone }: Props) {
 
     animId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(animId);
-  }, []);
+  }, [compact, durationFrames, fadeStart, particleCount]);
 
   return (
     <canvas

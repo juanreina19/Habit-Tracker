@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
+import { format } from "date-fns";
 import { ClipboardPen, Repeat, Filter, Pencil } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
@@ -10,6 +11,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
+import { Confetti } from "@/shared/components/ui/Confetti";
 import { isTaskDone, formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import { today as getToday } from "@/shared/lib/utils/dates";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
@@ -18,6 +20,7 @@ import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
   userId: UUID;
+  viewDate?: Date;
   todayTasks: TaskWithStatus[];
   habits: HabitWithStatus[];
   overdue: TaskWithStatus[];
@@ -43,13 +46,18 @@ interface AgendaItem {
 }
 
 export function EnfoqueTab({
-  userId, todayTasks, habits, overdue, isToday = true,
+  userId, viewDate, todayTasks, habits, overdue, isToday = true,
   onToggleTask, onToggleOverdueTask, onEditTask, onDeleteTask, onCreateTask,
   onCompleteHabit, onUncheckHabit, onEditHabit,
 }: Props) {
   const toggleOverdue = onToggleOverdueTask ?? onToggleTask;
   const t = useTranslations("dashboard");
   const [urgencyFilter, setUrgencyFilter] = useState(false);
+
+  const storageKey = useMemo(
+    () => `agenda-order-${userId}-${format(viewDate ?? new Date(), "yyyy-MM-dd")}`,
+    [userId, viewDate],
+  );
 
   const todayNonOverdue = useMemo(
     () => todayTasks.filter((tk) => !(tk.dueDate && tk.dueDate < getToday())),
@@ -95,8 +103,27 @@ export function EnfoqueTab({
     };
   }, [todayNonOverdue, habits, urgencyFilter]);
 
-  const [orderedItems, setOrderedItems] = useState<AgendaItem[]>(() => [...timedItems, ...untimedItems]);
-  useEffect(() => { setOrderedItems([...timedItems, ...untimedItems]); }, [timedItems, untimedItems]);
+  const [orderedItems, setOrderedItems] = useState<AgendaItem[]>(() => {
+    const allItems = [...timedItems, ...untimedItems];
+    const stored = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+    if (!stored) return allItems;
+    const ids: string[] = JSON.parse(stored);
+    const map = new Map(allItems.map(i => [i.id, i]));
+    const ordered = ids.map(id => map.get(id)).filter(Boolean) as AgendaItem[];
+    const newOnes = allItems.filter(i => !ids.includes(i.id));
+    return [...ordered, ...newOnes];
+  });
+
+  useEffect(() => {
+    setOrderedItems(prev => {
+      const allItems = [...timedItems, ...untimedItems];
+      const existingIds = new Set(prev.map(i => i.id));
+      const map = new Map(allItems.map(i => [i.id, i]));
+      const updated = prev.map(i => map.get(i.id)).filter(Boolean) as AgendaItem[];
+      const newOnes = allItems.filter(i => !existingIds.has(i.id));
+      return [...updated, ...newOnes];
+    });
+  }, [timedItems, untimedItems]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -106,9 +133,9 @@ export function EnfoqueTab({
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
     setOrderedItems(prev => {
-      const from = prev.findIndex(i => i.id === active.id);
-      const to = prev.findIndex(i => i.id === over.id);
-      return arrayMove(prev, from, to);
+      const next = arrayMove(prev, prev.findIndex(i => i.id === active.id), prev.findIndex(i => i.id === over.id));
+      localStorage.setItem(storageKey, JSON.stringify(next.map(i => i.id)));
+      return next;
     });
   };
 
@@ -334,8 +361,16 @@ function SortableAgendaItem({ item, ...cardProps }: AgendaCardProps) {
 function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; onToggle: () => void; onEdit?: () => void }) {
   const t = useTranslations("dashboard");
   const done = habit.isCompletedToday;
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const handleToggle = useCallback(() => {
+    if (!done) setShowConfetti(true);
+    onToggle();
+  }, [done, onToggle]);
 
   return (
+    <>
+    {showConfetti && <Confetti compact onDone={() => setShowConfetti(false)} />}
     <div
       className="group w-full rounded-md p-2.5 flex items-center gap-3 card-border-hover"
       style={{
@@ -345,7 +380,7 @@ function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; o
     >
       <button
         type="button"
-        onClick={onToggle}
+        onClick={handleToggle}
         className="flex items-center gap-3 flex-1 min-w-0 text-left active:scale-[0.98]"
       >
         <div
@@ -389,5 +424,6 @@ function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; o
         </button>
       )}
     </div>
+    </>
   );
 }

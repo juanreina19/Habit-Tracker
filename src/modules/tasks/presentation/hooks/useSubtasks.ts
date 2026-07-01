@@ -52,14 +52,21 @@ export function useSubtasks(userId: UUID, taskId: UUID | null) {
 
   const createSubtask = useCallback(async (input: CreateSubtaskInput): Promise<void> => {
     if (!taskId) return;
-    const created = await new CreateSubtaskUseCase(getRepo()).execute(userId, taskId, input);
-    setSubtasks((prev) => [...prev, created]);
+    try {
+      const created = await new CreateSubtaskUseCase(getRepo()).execute(userId, taskId, input);
+      setSubtasks((prev) => [...prev, created]);
+    } catch { /* silent fail */ }
   }, [userId, taskId, getRepo]);
 
   const updateSubtask = useCallback(async (id: UUID, input: UpdateSubtaskInput): Promise<void> => {
-    const updated = await new UpdateSubtaskUseCase(getRepo()).execute(id, input);
-    setSubtasks((prev) => prev.map((s) => (s.id === id ? updated : s)));
-  }, [getRepo]);
+    const snapshot = subtasks.find(s => s.id === id);
+    try {
+      const updated = await new UpdateSubtaskUseCase(getRepo()).execute(id, input);
+      setSubtasks((prev) => prev.map((s) => (s.id === id ? updated : s)));
+    } catch {
+      if (snapshot) setSubtasks((prev) => prev.map((s) => s.id === id ? snapshot : s));
+    }
+  }, [getRepo, subtasks]);
 
   const toggleSubtask = useCallback(async (subtask: Subtask): Promise<void> => {
     const optimistic = { ...subtask, isCompleted: !subtask.isCompleted };
