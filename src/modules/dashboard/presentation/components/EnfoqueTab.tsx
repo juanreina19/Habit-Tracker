@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { ClipboardPen, Repeat, Filter, Pencil } from "lucide-react";
@@ -351,7 +351,7 @@ function SortableAgendaItem({ item, ...cardProps }: AgendaCardProps) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      style={{ transform: CSS.Transform.toString(transform), transition: isDragging ? transition : undefined, opacity: isDragging ? 0.5 : 1 }}
       className="flex items-center touch-none cursor-grab active:cursor-grabbing"
     >
       <div className="w-14 flex-shrink-0 text-right pr-3">
@@ -395,21 +395,33 @@ function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; o
       <button
         type="button"
         onClick={onToggle}
-        className="flex items-center gap-3 flex-1 min-w-0 text-left active:scale-[0.98]"
+        className="flex items-center gap-3 flex-1 min-w-0 text-left"
       >
-        <div
+        <motion.div
           className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+          animate={done ? { scale: [1, 1.18, 1] } : { scale: 1 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
           style={{
             background: done ? "var(--accent)" : "transparent",
             border: done ? "2px solid var(--accent)" : "2px solid var(--border)",
+            transition: "background 0.2s ease, border-color 0.2s ease",
           }}
         >
-          {done && (
-            <svg width="10" height="8" viewBox="0 0 12 10" fill="none">
-              <path d="M1 5l3.5 3.5L11 1" stroke="#FFFFFF" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          )}
-        </div>
+          <AnimatePresence>
+            {done && (
+              <motion.svg
+                key="check"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                width="10" height="8" viewBox="0 0 12 10" fill="none"
+              >
+                <path d="M1 5l3.5 3.5L11 1" stroke="#FFFFFF" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+              </motion.svg>
+            )}
+          </AnimatePresence>
+        </motion.div>
         <div className="flex-1 min-w-0">
           <p
             className="text-sm font-normal truncate"
