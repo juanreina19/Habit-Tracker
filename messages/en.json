@@ -57,6 +57,7 @@
     "save": "Save",
     "saving": "Saving…",
     "save_error": "Error saving",
+    "delete": "Delete habit",
     "edit_days_title": "Active days"
   },
   "categoryForm": {

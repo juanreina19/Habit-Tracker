@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ChevronLeft, ChevronRight, Info, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, X, Trash2, Save } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
 import { HABIT_EMOJIS } from "@/shared/components/ui/EmojiPicker";
@@ -34,6 +34,7 @@ interface Props {
   habit?: Habit | null;
   categories: Category[];
   onSave: (data: CreateHabitInput | UpdateHabitInput) => Promise<void>;
+  onDelete?: () => Promise<void>;
 }
 
 // ─── Slide animation ──────────────────────────────────────────────────────────
@@ -47,7 +48,7 @@ const slideTransition = { type: "spring", stiffness: 380, damping: 36, mass: 0.8
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Props) {
+export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDelete }: Props) {
   const t = useTranslations("habitForm");
   const tDays = useTranslations("dayLabels");
   const tCat = useTranslations("iconCategories");
@@ -64,6 +65,8 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
   const [startTime, setStartTime]               = useState("");
   const [estimatedMinutes, setEstimatedMinutes] = useState("");
   const [isSaving, setIsSaving]                 = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting]             = useState(false);
   const [nameError, setNameError]               = useState("");
   const [daysError, setDaysError]               = useState("");
 
@@ -345,25 +348,51 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave }: Pr
                       </button>
                     </div>
 
-                    {/* Edit save/cancel */}
-                    <div className="flex gap-3 mt-1">
-                      <button
-                        type="button"
-                        onClick={onClose}
-                        className="flex-1 py-3 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
-                        style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-                      >
-                        {t("cancel")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleSave}
-                        disabled={isSaving}
-                        className="flex-1 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
-                        style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-                      >
-                        {isSaving ? t("saving") : t("save")}
-                      </button>
+                    {/* Edit footer — delete + save */}
+                    <div className="flex items-center gap-3 mt-1">
+                      {onDelete && !confirmingDelete && (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmingDelete(true)}
+                          className="p-2.5 rounded-md transition-opacity active:opacity-70"
+                          style={{ color: "var(--danger)" }}
+                          aria-label={t("delete")}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                      {confirmingDelete && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setConfirmingDelete(false)}
+                            className="text-sm px-3 py-2 rounded-md transition-opacity active:opacity-70"
+                            style={{ color: "var(--text-muted)", background: "var(--surface-elevated)" }}
+                          >
+                            {t("cancel")}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isDeleting}
+                            onClick={async () => { setIsDeleting(true); await onDelete?.(); }}
+                            className="text-sm px-3 py-2 rounded-md font-medium transition-opacity active:opacity-70 disabled:opacity-50"
+                            style={{ color: "#fff", background: "var(--danger)" }}
+                          >
+                            {isDeleting ? "…" : t("delete")}
+                          </button>
+                        </>
+                      )}
+                      <div className="ml-auto">
+                        <button
+                          type="button"
+                          onClick={handleSave}
+                          disabled={isSaving}
+                          className="flex items-center gap-1.5 px-5 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                          style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+                        >
+                          {isSaving ? t("saving") : <><Save size={14} />{t("save")}</>}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -668,41 +697,43 @@ function ScheduleSection({ timeEnabled, setTimeEnabled, startTime, setStartTime,
 
       {timeEnabled && (
         <div className="flex flex-col gap-3">
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-              {t("start_label")}
-            </label>
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              className="w-full rounded-md px-4 py-3 text-sm outline-none"
-              style={{
-                background: "var(--surface-elevated)",
-                color: "var(--text-primary)",
-                border: "1.5px solid transparent",
-                colorScheme: "dark",
-              }}
-            />
-          </div>
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-              {t("duration_label")}
-            </label>
-            <input
-              type="number"
-              value={estimatedMinutes}
-              onChange={(e) => setEstimatedMinutes(e.target.value)}
-              placeholder="30"
-              min={1}
-              max={480}
-              className="w-full rounded-md px-4 py-3 text-sm outline-none"
-              style={{
-                background: "var(--surface-elevated)",
-                color: "var(--text-primary)",
-                border: "1.5px solid transparent",
-              }}
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                {t("start_label")}
+              </label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full rounded-md px-3 py-3 text-sm outline-none"
+                style={{
+                  background: "var(--surface-elevated)",
+                  color: "var(--text-primary)",
+                  border: "1.5px solid transparent",
+                  colorScheme: "dark",
+                }}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
+                {t("duration_label")}
+              </label>
+              <input
+                type="number"
+                value={estimatedMinutes}
+                onChange={(e) => setEstimatedMinutes(e.target.value)}
+                placeholder="30"
+                min={1}
+                max={480}
+                className="w-full rounded-md px-3 py-3 text-sm outline-none"
+                style={{
+                  background: "var(--surface-elevated)",
+                  color: "var(--text-primary)",
+                  border: "1.5px solid transparent",
+                }}
+              />
+            </div>
           </div>
           {endTime && (
             <p className="text-xs font-medium" style={{ color: "#4CAF82" }}>

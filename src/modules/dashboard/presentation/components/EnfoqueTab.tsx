@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
@@ -13,7 +13,7 @@ import { TaskCardDashboard } from "./TaskCardDashboard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
 import { Confetti } from "@/shared/components/ui/Confetti";
 import { isTaskDone, formatTaskTime } from "@/modules/tasks/domain/entities/Task";
-import { today as getToday } from "@/shared/lib/utils/dates";
+import { today as getToday, isTimePast } from "@/shared/lib/utils/dates";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
 import type { UUID } from "@/shared/types/database.types";
@@ -139,7 +139,20 @@ export function EnfoqueTab({
     });
   };
 
+  const allDone = useMemo(
+    () => orderedItems.length > 0 && orderedItems.every(i => i.completed),
+    [orderedItems],
+  );
+  const [showConfetti, setShowConfetti] = useState(false);
+  const prevAllDone = useRef(false);
+  useEffect(() => {
+    if (!prevAllDone.current && allDone) setShowConfetti(true);
+    prevAllDone.current = allDone;
+  }, [allDone]);
+
   return (
+    <>
+    {showConfetti && <Confetti onDone={() => setShowConfetti(false)} />}
     <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[1fr_280px] lg:gap-6">
       {/* Agenda with timeline */}
       <div className="flex flex-col gap-3">
@@ -263,6 +276,7 @@ export function EnfoqueTab({
         </div>
       </div>
     </div>
+    </>
   );
 }
 
@@ -358,19 +372,19 @@ function SortableAgendaItem({ item, ...cardProps }: AgendaCardProps) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+function calcHabitEnd(start: string, mins: number): string {
+  const [h, m] = start.split(":").map(Number);
+  const total = h * 60 + m + mins;
+  return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
 function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; onToggle: () => void; onEdit?: () => void }) {
   const t = useTranslations("dashboard");
   const done = habit.isCompletedToday;
-  const [showConfetti, setShowConfetti] = useState(false);
-
-  const handleToggle = useCallback(() => {
-    if (!done) setShowConfetti(true);
-    onToggle();
-  }, [done, onToggle]);
+  const habitOverdue = !done && !!habit.startTime && !!habit.estimatedMinutes
+    && isTimePast(calcHabitEnd(habit.startTime, habit.estimatedMinutes));
 
   return (
-    <>
-    {showConfetti && <Confetti compact onDone={() => setShowConfetti(false)} />}
     <div
       className="group w-full rounded-md p-2.5 flex items-center gap-3 card-border-hover"
       style={{
@@ -380,7 +394,7 @@ function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; o
     >
       <button
         type="button"
-        onClick={handleToggle}
+        onClick={onToggle}
         className="flex items-center gap-3 flex-1 min-w-0 text-left active:scale-[0.98]"
       >
         <div
@@ -412,6 +426,14 @@ function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; o
             </span>
           )}
         </div>
+        {habitOverdue && (
+          <span
+            className="text-[9px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0"
+            style={{ background: "rgba(239,68,68,0.1)", color: "var(--danger)" }}
+          >
+            {t("overdue")}
+          </span>
+        )}
       </button>
       {onEdit && (
         <button
@@ -424,6 +446,5 @@ function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; o
         </button>
       )}
     </div>
-    </>
   );
 }
