@@ -22,7 +22,7 @@ interface Props {
 }
 
 export default function LifeDashboardView({ userId }: Props) {
-  const { create: createHabit, update: updateHabit } = useSettingsHabits(userId);
+  const { create: createHabit, update: updateHabit, deactivate: deleteHabit } = useSettingsHabits(userId);
 
   const [activeTab, setActiveTab] = useState<HomeTab>("focus");
   const [viewDate, setViewDate] = useState(() => new Date());
@@ -188,6 +188,11 @@ export default function LifeDashboardView({ userId }: Props) {
           setHabitDialogOpen(false);
           setSelectedHabit(null);
         }}
+        onDelete={selectedHabit ? async () => {
+          await deleteHabit(selectedHabit.id);
+          setHabitDialogOpen(false);
+          setSelectedHabit(null);
+        } : undefined}
       />
     </>
   );

@@ -57,6 +57,7 @@
     "save": "Guardar",
     "saving": "Guardando…",
     "save_error": "Error al guardar",
+    "delete": "Eliminar hábito",
     "edit_days_title": "Días activos"
   },
   "categoryForm": {

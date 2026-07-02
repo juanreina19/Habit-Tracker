@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const TASK_CHECKBOX_SIZE = { card: 20, week: 18 } as const;
 
@@ -18,6 +19,15 @@ export function TaskCheckbox({ done, size = TASK_CHECKBOX_SIZE.card, animated = 
   const px = size;
   const checkScale = px <= 18 ? 10 : 12;
   const checkStroke = "#FFFFFF";
+
+  const [burst, setBurst] = useState(false);
+  useEffect(() => {
+    if (done && animated) {
+      setBurst(true);
+      const id = setTimeout(() => setBurst(false), 500);
+      return () => clearTimeout(id);
+    }
+  }, [done]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const inner = done ? (
     animated ? (
@@ -59,10 +69,28 @@ export function TaskCheckbox({ done, size = TASK_CHECKBOX_SIZE.card, animated = 
         aria-checked={done}
         aria-label={ariaLabel}
         onClick={(e) => { e.stopPropagation(); onToggle(); }}
-        style={{ ...style, cursor: "pointer" }}
+        style={{ ...style, cursor: "pointer", position: "relative" }}
         className="flex-shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
       >
         {inner}
+        <AnimatePresence>
+          {burst && (
+            <motion.span
+              key="burst"
+              initial={{ scale: 0.9, opacity: 0.7 }}
+              animate={{ scale: 2.4, opacity: 0 }}
+              exit={{}}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                borderRadius: variant === "focus" ? "50%" : 6,
+                border: "2px solid var(--accent)",
+                pointerEvents: "none",
+              }}
+            />
+          )}
+        </AnimatePresence>
       </button>
     );
   }

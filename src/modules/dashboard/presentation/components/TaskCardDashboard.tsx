@@ -14,7 +14,6 @@ import { SubtaskList } from "@/modules/tasks/presentation/components/SubtaskList
 import { today as getToday, isTimePast } from "@/shared/lib/utils/dates";
 import { PRIORITY_COLORS } from "@/modules/tasks/presentation/constants/taskColors";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "@/modules/tasks/presentation/components/TaskCheckbox";
-import { Confetti } from "@/shared/components/ui/Confetti";
 
 interface Props {
   task: TaskWithStatus;
@@ -30,15 +29,9 @@ interface Props {
 
 export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescription, showDueDate, typeLabel, userId }: Props) {
   const [subtasksOpen, setSubtasksOpen] = useState(true);
-  const [showConfetti, setShowConfetti] = useState(false);
   const t = useTranslations("tasks");
   const { locale } = useLocale();
   const done = isTaskDone(task);
-
-  const handleToggle = () => {
-    if (!done) setShowConfetti(true);
-    onToggle();
-  };
   const timeRef = task.endTime;
   const agendaOverdue = !done && !overdue && !!timeRef &&
     (task.dueDate === null || task.dueDate === getToday()) &&
@@ -48,8 +41,6 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
   const subtaskPct = hasSubtasks ? ((task.subtaskCompleted ?? 0) / task.subtaskTotal!) * 100 : 0;
 
   return (
-    <>
-    {showConfetti && <Confetti compact onDone={() => setShowConfetti(false)} />}
     <div
       className="group relative rounded-md p-2.5 card-border-hover"
       style={{
@@ -78,7 +69,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
           done={done}
           size={TASK_CHECKBOX_SIZE.card}
           animated
-          onToggle={handleToggle}
+          onToggle={onToggle}
           ariaLabel={task.title}
           overdue={overdue}
           variant={overdue ? "focus" : "default"}
@@ -185,6 +176,5 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
         )}
       </AnimatePresence>
     </div>
-    </>
   );
 }

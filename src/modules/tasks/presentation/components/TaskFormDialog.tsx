@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
-import { Plus, X, Trash2, ChevronRight, Star } from "lucide-react";
+import { Plus, X, Trash2, ChevronRight, Star, Save } from "lucide-react";
 import { formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
 import type { Task, CreateTaskInput, UpdateTaskInput, TaskPriority } from "../../domain/entities/Task";
@@ -722,7 +722,7 @@ export function TaskFormDialog({
                         className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-30"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
-                        {isSaving ? t("saving") : isEdit ? t("save") : t("add_task")}
+                        {isSaving ? t("saving") : isEdit ? <><Save size={14} />{t("save")}</> : t("add_task")}
                         {!isEdit && <span>→</span>}
                       </button>
                     </div>
