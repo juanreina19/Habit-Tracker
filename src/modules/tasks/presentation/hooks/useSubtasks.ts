@@ -36,6 +36,17 @@ export function useSubtasks(userId: UUID, taskId: UUID | null) {
   const fetchRef = useRef(fetch);
   useEffect(() => { fetchRef.current = fetch; });
 
+  const silentRefetch = useCallback(async () => {
+    if (!taskId) return;
+    try {
+      const data = await new ListSubtasksUseCase(getRepo()).execute(taskId);
+      setSubtasks(data);
+    } catch { /* keep current state */ }
+  }, [taskId, getRepo]);
+
+  const silentRefetchRef = useRef(silentRefetch);
+  useEffect(() => { silentRefetchRef.current = silentRefetch; });
+
   useEffect(() => { fetch(); }, [fetch]);
 
   useEffect(() => {
@@ -44,7 +55,7 @@ export function useSubtasks(userId: UUID, taskId: UUID | null) {
     let debounce: ReturnType<typeof setTimeout>;
     const refetch = () => {
       clearTimeout(debounce);
-      debounce = setTimeout(() => fetchRef.current(), 300);
+      debounce = setTimeout(() => silentRefetchRef.current(), 300);
     };
 
     const ch = client.channel(`subtasks-${taskId}-${channelSuffix.current}`)

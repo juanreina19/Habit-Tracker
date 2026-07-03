@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { ClipboardPen, Repeat, Filter, Pencil } from "lucide-react";
+import { ClipboardPen, Repeat, Filter, Pencil, Clock } from "lucide-react";
 import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -53,6 +53,12 @@ export function EnfoqueTab({
   const toggleOverdue = onToggleOverdueTask ?? onToggleTask;
   const t = useTranslations("dashboard");
   const [urgencyFilter, setUrgencyFilter] = useState(false);
+  const [timeFilter, setTimeFilter] = useState(false);
+
+  const guardedToggleTask    = isToday ? onToggleTask    : () => {};
+  const guardedToggleOverdue = isToday ? toggleOverdue   : () => {};
+  const guardedCompleteHabit = isToday ? onCompleteHabit : () => {};
+  const guardedUncheckHabit  = isToday ? onUncheckHabit  : () => {};
 
   const storageKey = useMemo(
     () => `agenda-order-${userId}-${format(viewDate ?? new Date(), "yyyy-MM-dd")}`,
@@ -69,6 +75,7 @@ export function EnfoqueTab({
 
     for (const task of todayNonOverdue) {
       if (urgencyFilter && task.priority !== "urgent" && task.priority !== "high") continue;
+      if (timeFilter && !task.startTime) continue;
       items.push({
         type: "task",
         id: task.id,
@@ -80,6 +87,7 @@ export function EnfoqueTab({
     }
 
     for (const habit of habits) {
+      if (timeFilter && !habit.startTime) continue;
       items.push({
         type: "habit",
         id: habit.id,
@@ -101,7 +109,7 @@ export function EnfoqueTab({
       timedItems: sorted.filter(i => i.rawTime !== null),
       untimedItems: sorted.filter(i => i.rawTime === null),
     };
-  }, [todayNonOverdue, habits, urgencyFilter]);
+  }, [todayNonOverdue, habits, urgencyFilter, timeFilter]);
 
   const [orderedItems, setOrderedItems] = useState<AgendaItem[]>(() => {
     const allItems = [...timedItems, ...untimedItems];
@@ -158,18 +166,32 @@ export function EnfoqueTab({
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <SectionHeader label={t("agenda").toUpperCase()} />
-          <button
-            type="button"
-            onClick={() => setUrgencyFilter(p => !p)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors"
-            style={{
-              background: urgencyFilter ? "var(--text-primary)" : "var(--surface-elevated)",
-              color: urgencyFilter ? "var(--bg)" : "var(--text-muted)",
-            }}
-          >
-            <Filter size={10} strokeWidth={1.5} />
-            {t("filter_urgent")}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setTimeFilter(p => !p)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors"
+              style={{
+                background: timeFilter ? "var(--text-primary)" : "var(--surface-elevated)",
+                color: timeFilter ? "var(--bg)" : "var(--text-muted)",
+              }}
+            >
+              <Clock size={10} strokeWidth={1.5} />
+              {t("filter_timed")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setUrgencyFilter(p => !p)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors"
+              style={{
+                background: urgencyFilter ? "var(--text-primary)" : "var(--surface-elevated)",
+                color: urgencyFilter ? "var(--bg)" : "var(--text-muted)",
+              }}
+            >
+              <Filter size={10} strokeWidth={1.5} />
+              {t("filter_urgent")}
+            </button>
+          </div>
         </div>
         {isToday && <InlineTaskInput onCreateTask={onCreateTask} />}
 
@@ -197,11 +219,11 @@ export function EnfoqueTab({
                   item={item}
                   userId={userId}
                   typeTaskLabel={t("type_task")}
-                  onToggleTask={onToggleTask}
+                  onToggleTask={guardedToggleTask}
                   onEditTask={onEditTask}
                   onDeleteTask={onDeleteTask}
-                  onCompleteHabit={onCompleteHabit}
-                  onUncheckHabit={onUncheckHabit}
+                  onCompleteHabit={guardedCompleteHabit}
+                  onUncheckHabit={guardedUncheckHabit}
                   onEditHabit={onEditHabit}
                 />
               ))}
@@ -258,7 +280,7 @@ export function EnfoqueTab({
                   <TaskCardDashboard
                     task={task}
                     userId={userId}
-                    onToggle={() => toggleOverdue(task)}
+                    onToggle={() => guardedToggleOverdue(task)}
                     onEdit={() => onEditTask(task)}
                     onDelete={() => onDeleteTask(task)}
                     overdue

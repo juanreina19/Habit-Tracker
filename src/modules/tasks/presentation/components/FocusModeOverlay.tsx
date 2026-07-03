@@ -167,7 +167,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-      className="fixed inset-0 z-[100] overflow-y-auto" style={{ background: "var(--bg)" }}
+      className="fixed inset-0 z-[100] overflow-y-auto hide-scrollbar" style={{ background: "var(--bg)" }}
     >
       <div className="flex flex-col min-h-full px-5 py-6 lg:py-8 lg:px-12">
         {/* Top bar — X + Config left | Expand right */}

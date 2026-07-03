@@ -331,6 +331,7 @@
     "tab_board": "Tablero",
     "tab_eisenhower": "Eisenhower",
     "tab_kanban": "Kanban",
+    "filter_timed": "Con hora",
     "filter_urgent": "Urgente",
     "eisenhower_do": "Hacer primero",
     "eisenhower_schedule": "Programar",

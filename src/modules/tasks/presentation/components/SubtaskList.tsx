@@ -3,11 +3,11 @@
 import { useSubtasks } from "../hooks/useSubtasks";
 import type { UUID } from "@/shared/types/database.types";
 
-export function SubtaskList({ userId, taskId }: { userId: UUID; taskId: UUID }) {
+export function SubtaskList({ userId, taskId, subtaskPct }: { userId: UUID; taskId: UUID; subtaskPct?: number }) {
   const { subtasks, isLoading, toggleSubtask } = useSubtasks(userId, taskId);
   if (isLoading) return <div className="py-1 text-xs" style={{ color: "var(--text-muted)" }}>…</div>;
   return (
-    <div className="flex flex-col gap-1 mt-2 pt-2 pl-7 border-t" style={{ borderColor: "var(--border)" }}>
+    <div className="flex flex-col gap-1 mt-1 pt-2 pl-7">
       {subtasks.map(sub => (
         <button
           key={sub.id}
@@ -20,8 +20,8 @@ export function SubtaskList({ userId, taskId }: { userId: UUID; taskId: UUID }) 
           <span
             className="w-3.5 h-3.5 rounded-full flex-shrink-0 border flex items-center justify-center"
             style={{
-              borderColor: sub.isCompleted ? "var(--text-muted)" : "var(--border)",
-              background: sub.isCompleted ? "var(--text-muted)" : "transparent",
+              borderColor: sub.isCompleted ? "var(--accent)" : "var(--border)",
+              background: sub.isCompleted ? "var(--accent)" : "transparent",
             }}
           >
             {sub.isCompleted && (
@@ -35,6 +35,14 @@ export function SubtaskList({ userId, taskId }: { userId: UUID; taskId: UUID }) 
           </span>
         </button>
       ))}
+      {subtaskPct !== undefined && (
+        <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+          <div
+            className="h-full rounded-full transition-[width]"
+            style={{ width: `${subtaskPct}%`, background: "var(--accent)" }}
+          />
+        </div>
+      )}
     </div>
   );
 }

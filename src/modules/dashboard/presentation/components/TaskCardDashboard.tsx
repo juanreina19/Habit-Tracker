@@ -150,10 +150,10 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
         </button>
       </div>
 
-      {/* Subtask progress bar */}
-      {hasSubtasks && !done && (
-        <div className="mt-2 flex items-center gap-2">
-          <div className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+      {/* Collapsed progress bar — only visible when subtask list is closed */}
+      {hasSubtasks && !done && !subtasksOpen && (
+        <div className="mt-2">
+          <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
             <div
               className="h-full rounded-full transition-[width]"
               style={{ width: `${subtaskPct}%`, background: "var(--accent)" }}
@@ -171,7 +171,7 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
             style={{ overflow: "hidden" }}
           >
-            <SubtaskList userId={userId} taskId={task.id as UUID} />
+            <SubtaskList userId={userId} taskId={task.id as UUID} subtaskPct={subtaskPct} />
           </motion.div>
         )}
       </AnimatePresence>

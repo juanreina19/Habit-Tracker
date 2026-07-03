@@ -21,7 +21,7 @@ export function useDashboard(userId: UUID, viewDate?: Date) {
   const dateStr = viewDate ? format(viewDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd");
 
   const { tasks, isLoading: tasksLoading, toggleTask, createTask, updateTask, deleteTask } = useTasks(userId);
-  const { tasks: todayTasks, toggleTask: toggleTodayTask } = useTodayTasks(userId, dateStr);
+  const { tasks: todayTasks, toggleTask: toggleTodayTask, refetch: refetchTodayTasks } = useTodayTasks(userId, dateStr);
   const { habits, completedCount, totalCount, completeHabit, uncheckHabit } = useHabits(userId, dateStr);
   const { categories, isLoading: categoriesLoading } = useCategories(userId);
 
@@ -59,6 +59,21 @@ export function useDashboard(userId: UUID, viewDate?: Date) {
     if (task) updateTask(task, { status });
   };
 
+  const wrappedCreateTask = useCallback(async (...args: Parameters<typeof createTask>) => {
+    await createTask(...args);
+    await refetchTodayTasks();
+  }, [createTask, refetchTodayTasks]);
+
+  const wrappedUpdateTask = useCallback(async (...args: Parameters<typeof updateTask>) => {
+    await updateTask(...args);
+    await refetchTodayTasks();
+  }, [updateTask, refetchTodayTasks]);
+
+  const wrappedDeleteTask = useCallback(async (...args: Parameters<typeof deleteTask>) => {
+    await deleteTask(...args);
+    await refetchTodayTasks();
+  }, [deleteTask, refetchTodayTasks]);
+
   return {
     ...derived,
     categories,
@@ -72,9 +87,9 @@ export function useDashboard(userId: UUID, viewDate?: Date) {
     toggleTodayTask,
     completeHabit,
     uncheckHabit,
-    createTask,
-    updateTask,
-    deleteTask,
+    createTask: wrappedCreateTask,
+    updateTask: wrappedUpdateTask,
+    deleteTask: wrappedDeleteTask,
     updateTaskStatus,
   };
 }
