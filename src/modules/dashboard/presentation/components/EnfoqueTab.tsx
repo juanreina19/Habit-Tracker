@@ -116,6 +116,15 @@ export function EnfoqueTab({
     };
   }, [todayNonOverdue, habits, urgencyFilter, timeFilter, typeFilter]);
 
+  const sortedOverdue = useMemo(
+    () => [...overdue].sort((a, b) => {
+      const aDone = isTaskDone(a);
+      const bDone = isTaskDone(b);
+      return aDone === bDone ? 0 : aDone ? 1 : -1;
+    }),
+    [overdue]
+  );
+
   const [orderedItems, setOrderedItems] = useState<AgendaItem[]>(() => {
     const allItems = [...timedItems, ...untimedItems];
     const stored = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
@@ -286,7 +295,7 @@ export function EnfoqueTab({
         <SectionHeader label={t("overdue").toUpperCase()} />
         <div className="flex flex-col relative">
           {/* Continuous vertical line */}
-          {overdue.length > 1 && (
+          {sortedOverdue.length > 1 && (
             <div
               className="absolute w-px"
               style={{
@@ -297,47 +306,51 @@ export function EnfoqueTab({
               }}
             />
           )}
-          {overdue.map((task, idx) => {
-            const done = isTaskDone(task);
-            return (
-              <motion.div
-                key={task.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, delay: idx * 0.03 }}
-                className="flex items-center"
-              >
-                {/* Node */}
-                <div className="w-6 flex-shrink-0 flex items-center justify-center relative z-10">
-                  <div
-                    className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: done ? "var(--accent)" : "var(--bg)",
-                      border: done ? "2px solid var(--accent)" : "1px solid var(--border)",
-                    }}
-                  >
-                    <ClipboardPen size={10} strokeWidth={1.5} style={{ color: done ? "#FFFFFF" : "var(--text-muted)" }} />
+          <AnimatePresence initial={false}>
+            {sortedOverdue.map((task) => {
+              const done = isTaskDone(task);
+              return (
+                <motion.div
+                  key={task.id}
+                  layout
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+                  transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center"
+                >
+                  {/* Node */}
+                  <div className="w-6 flex-shrink-0 flex items-center justify-center relative z-10">
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{
+                        background: done ? "var(--accent)" : "var(--bg)",
+                        border: done ? "2px solid var(--accent)" : "1px solid var(--border)",
+                      }}
+                    >
+                      <ClipboardPen size={10} strokeWidth={1.5} style={{ color: done ? "#FFFFFF" : "var(--text-muted)" }} />
+                    </div>
                   </div>
-                </div>
 
-                {/* Card */}
-                <div className="flex-1 min-w-0 py-1 pl-2">
-                  <TaskCardDashboard
-                    task={task}
-                    userId={userId}
-                    onToggle={() => guardedToggleOverdue(task)}
-                    onEdit={() => onEditTask(task)}
-                    onDelete={() => onDeleteTask(task)}
-                    overdue
-                    showDescription
-                    showDueDate
-                    typeLabel={t("type_task")}
-                  />
-                </div>
-              </motion.div>
-            );
-          })}
-          {overdue.length === 0 && (
+                  {/* Card */}
+                  <div className="flex-1 min-w-0 py-1 pl-2">
+                    <TaskCardDashboard
+                      task={task}
+                      userId={userId}
+                      onToggle={() => guardedToggleOverdue(task)}
+                      onEdit={() => onEditTask(task)}
+                      onDelete={() => onDeleteTask(task)}
+                      overdue
+                      showDescription
+                      showDueDate
+                      typeLabel={t("type_task")}
+                    />
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+          {sortedOverdue.length === 0 && (
             <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>—</p>
           )}
         </div>

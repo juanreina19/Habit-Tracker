@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ChevronLeft, ChevronRight, Info, X, Trash2, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, X, Trash2, Save, Ban } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
 import { HABIT_EMOJIS } from "@/shared/components/ui/EmojiPicker";
@@ -597,14 +597,14 @@ function CategoryField({ categories, categoryId, setCategoryId, t }: {
         <button
           type="button"
           onClick={() => setCategoryId(null)}
-          className="px-3 py-2 rounded-md text-xs font-medium transition-colors active:scale-95"
+          className="px-3 py-2 rounded-md text-xs font-medium flex items-center justify-center transition-colors active:scale-95"
           style={{
             background: categoryId === null ? "var(--surface-elevated)" : "transparent",
             color: categoryId === null ? "var(--text-primary)" : "var(--text-secondary)",
             border: `1.5px solid ${categoryId === null ? "rgba(255,255,255,0.15)" : "var(--surface-elevated)"}`,
           }}
         >
-          {t("no_category")}
+          <Ban size={14} strokeWidth={1.5} />
         </button>
         {categories.map((cat) => (
           <button
