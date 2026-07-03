@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Pencil, Star } from "lucide-react";
 import { format } from "date-fns";
@@ -38,7 +37,6 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
     isTimePast(timeRef);
 
   const hasSubtasks = (task.subtaskTotal ?? 0) > 0;
-  const subtaskPct = hasSubtasks ? ((task.subtaskCompleted ?? 0) / task.subtaskTotal!) * 100 : 0;
 
   return (
     <div
@@ -150,31 +148,10 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
         </button>
       </div>
 
-      {/* Collapsed progress bar — only visible when subtask list is closed */}
-      {hasSubtasks && !done && !subtasksOpen && (
-        <div className="mt-2">
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
-            <div
-              className="h-full rounded-full transition-[width]"
-              style={{ width: `${subtaskPct}%`, background: "var(--accent)" }}
-            />
-          </div>
-        </div>
+      {/* SubtaskList always mounted — bar is live, list animates in/out */}
+      {hasSubtasks && !done && userId && (
+        <SubtaskList userId={userId} taskId={task.id as UUID} isOpen={subtasksOpen} />
       )}
-
-      <AnimatePresence initial={false}>
-        {subtasksOpen && userId && !!task.subtaskTotal && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            style={{ overflow: "hidden" }}
-          >
-            <SubtaskList userId={userId} taskId={task.id as UUID} subtaskPct={subtaskPct} />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
