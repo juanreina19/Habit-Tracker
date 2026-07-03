@@ -274,8 +274,8 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, us
       )}
       </div>
 
-      {subtasksOpen && userId && !!task.subtaskTotal && (
-        <SubtaskList userId={userId} taskId={task.id as UUID} />
+      {userId && !!task.subtaskTotal && !done && (
+        <SubtaskList userId={userId} taskId={task.id as UUID} isOpen={subtasksOpen} />
       )}
     </motion.div>
   );
