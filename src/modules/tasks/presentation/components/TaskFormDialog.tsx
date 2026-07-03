@@ -192,7 +192,7 @@ export function TaskFormDialog({
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
           className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
-          style={{ background: "var(--surface)", maxHeight: "90dvh" }}
+          style={{ background: "var(--bg)", maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto px-6 pt-3 pb-6" style={{ maxHeight: "90dvh" }}>
             {/* Close button — top right */}
@@ -449,7 +449,7 @@ export function TaskFormDialog({
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setCatOpen(p => !p); setPriOpen(false); }}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
-                          style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                          style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                         >
                           <span className="w-1.5 h-1.5 rounded-full" style={{ background: categories.find(c => c.id === categoryId)?.color ?? "var(--text-muted)" }} />
                           <span style={{ color: "var(--text-muted)" }}>IN</span>
@@ -495,7 +495,7 @@ export function TaskFormDialog({
                         try { input.showPicker?.(); } catch { input.click(); }
                       }}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
-                      style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                      style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                     >
                       <span className="w-1.5 h-1.5 rounded-full" style={{ background: dueDate ? "var(--accent)" : "var(--text-muted)" }} />
                       <span style={{ color: "var(--text-muted)" }}>DATE</span>
@@ -507,7 +507,7 @@ export function TaskFormDialog({
                       type="button"
                       onClick={() => setIsRecurring(prev => !prev)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
-                      style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                      style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                     >
                       <span className="w-1.5 h-1.5 rounded-full" style={{ background: isRecurring ? "var(--info)" : "var(--text-muted)" }} />
                       <span style={{ color: "var(--text-muted)" }}>REPEAT</span>
@@ -519,7 +519,7 @@ export function TaskFormDialog({
                       type="button"
                       onClick={() => { setHasSchedule(p => !p); setTimeError(""); }}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
-                      style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                      style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                     >
                       <span className="w-1.5 h-1.5 rounded-full" style={{ background: hasSchedule && startTime ? "var(--purple)" : "var(--text-muted)" }} />
                       <span style={{ color: "var(--text-muted)" }}>TIME</span>
@@ -532,7 +532,7 @@ export function TaskFormDialog({
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setPriOpen(p => !p); setCatOpen(false); }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
-                        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                        style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                       >
                         <span className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[priority] }} />
                         {t(`priority_${priority}` as `priority_${TaskPriority}`)}
@@ -565,7 +565,7 @@ export function TaskFormDialog({
                         type="button"
                         onClick={() => setIsImportant(false)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
-                        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+                        style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                       >
                         <Star size={10} fill="var(--text-primary)" strokeWidth={0} />
                         {t("important")}

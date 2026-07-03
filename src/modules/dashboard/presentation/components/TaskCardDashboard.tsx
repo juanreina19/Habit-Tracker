@@ -101,12 +101,6 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
             </p>
           )}
 
-          {/* Due date — for overdue cards */}
-          {showDueDate && task.dueDate && (
-            <p className="text-[10px] mt-0.5" style={{ color: "var(--danger)" }}>
-              {format(new Date(task.dueDate + "T12:00:00"), "d MMM", { locale: locale === "en" ? enUS : es })}
-            </p>
-          )}
         </div>
 
         {/* Importance star */}
@@ -156,6 +150,13 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
       {/* SubtaskList always mounted — bar and counter are live, list animates in/out */}
       {hasSubtasks && !done && userId && (
         <SubtaskList userId={userId} taskId={task.id as UUID} isOpen={subtasksOpen} onCountChange={setLiveCompleted} />
+      )}
+
+      {/* Due date — below subtask bar, after everything */}
+      {showDueDate && task.dueDate && (
+        <p className="text-[10px] mt-1.5 pl-7" style={{ color: "var(--danger)" }}>
+          {format(new Date(task.dueDate + "T12:00:00"), "d MMM", { locale: locale === "en" ? enUS : es })}
+        </p>
       )}
     </div>
   );
