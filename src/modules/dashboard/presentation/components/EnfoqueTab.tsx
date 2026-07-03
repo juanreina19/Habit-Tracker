@@ -4,7 +4,8 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { ClipboardPen, Repeat, Filter, Pencil, Clock } from "lucide-react";
+import { ClipboardPen, Repeat, Filter, Pencil, Check } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -54,6 +55,8 @@ export function EnfoqueTab({
   const t = useTranslations("dashboard");
   const [urgencyFilter, setUrgencyFilter] = useState(false);
   const [timeFilter, setTimeFilter] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<"task" | "habit" | null>(null);
+  const anyFilterActive = urgencyFilter || timeFilter || typeFilter !== null;
 
   const guardedToggleTask    = isToday ? onToggleTask    : () => {};
   const guardedToggleOverdue = isToday ? toggleOverdue   : () => {};
@@ -76,6 +79,7 @@ export function EnfoqueTab({
     for (const task of todayNonOverdue) {
       if (urgencyFilter && task.priority !== "urgent" && task.priority !== "high") continue;
       if (timeFilter && !task.startTime) continue;
+      if (typeFilter === "habit") continue;
       items.push({
         type: "task",
         id: task.id,
@@ -88,6 +92,7 @@ export function EnfoqueTab({
 
     for (const habit of habits) {
       if (timeFilter && !habit.startTime) continue;
+      if (typeFilter === "task") continue;
       items.push({
         type: "habit",
         id: habit.id,
@@ -109,7 +114,7 @@ export function EnfoqueTab({
       timedItems: sorted.filter(i => i.rawTime !== null),
       untimedItems: sorted.filter(i => i.rawTime === null),
     };
-  }, [todayNonOverdue, habits, urgencyFilter, timeFilter]);
+  }, [todayNonOverdue, habits, urgencyFilter, timeFilter, typeFilter]);
 
   const [orderedItems, setOrderedItems] = useState<AgendaItem[]>(() => {
     const allItems = [...timedItems, ...untimedItems];
@@ -166,32 +171,72 @@ export function EnfoqueTab({
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <SectionHeader label={t("agenda").toUpperCase()} />
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => setTimeFilter(p => !p)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors"
-              style={{
-                background: timeFilter ? "var(--text-primary)" : "var(--surface-elevated)",
-                color: timeFilter ? "var(--bg)" : "var(--text-muted)",
-              }}
-            >
-              <Clock size={10} strokeWidth={1.5} />
-              {t("filter_timed")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setUrgencyFilter(p => !p)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors"
-              style={{
-                background: urgencyFilter ? "var(--text-primary)" : "var(--surface-elevated)",
-                color: urgencyFilter ? "var(--bg)" : "var(--text-muted)",
-              }}
-            >
-              <Filter size={10} strokeWidth={1.5} />
-              {t("filter_urgent")}
-            </button>
-          </div>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors"
+                style={{
+                  background: anyFilterActive ? "var(--text-primary)" : "var(--surface-elevated)",
+                  color: anyFilterActive ? "var(--bg)" : "var(--text-muted)",
+                }}
+              >
+                <Filter size={10} strokeWidth={1.5} />
+                {t("filter_label")}
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                align="end"
+                sideOffset={6}
+                className="z-50 rounded-lg py-1.5 shadow-lg min-w-[170px]"
+                style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+              >
+                <DropdownMenu.CheckboxItem
+                  checked={urgencyFilter}
+                  onCheckedChange={setUrgencyFilter}
+                  onSelect={(e) => e.preventDefault()}
+                  className="flex items-center justify-between gap-2 px-3 py-1.5 text-xs cursor-pointer outline-none data-[highlighted]:opacity-70"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {t("filter_urgent")}
+                  {urgencyFilter && <Check size={10} strokeWidth={2} />}
+                </DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem
+                  checked={timeFilter}
+                  onCheckedChange={setTimeFilter}
+                  onSelect={(e) => e.preventDefault()}
+                  className="flex items-center justify-between gap-2 px-3 py-1.5 text-xs cursor-pointer outline-none data-[highlighted]:opacity-70"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {t("filter_timed")}
+                  {timeFilter && <Check size={10} strokeWidth={2} />}
+                </DropdownMenu.CheckboxItem>
+                {/* Divider — indented, not full width */}
+                <div className="my-1.5 mx-3 h-px" style={{ background: "var(--border)" }} />
+                <DropdownMenu.CheckboxItem
+                  checked={typeFilter === "habit"}
+                  onCheckedChange={(checked) => setTypeFilter(checked ? "habit" : null)}
+                  onSelect={(e) => e.preventDefault()}
+                  className="flex items-center justify-between gap-2 px-3 py-1.5 text-xs cursor-pointer outline-none data-[highlighted]:opacity-70"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {t("type_habit")}
+                  {typeFilter === "habit" && <Check size={10} strokeWidth={2} />}
+                </DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem
+                  checked={typeFilter === "task"}
+                  onCheckedChange={(checked) => setTypeFilter(checked ? "task" : null)}
+                  onSelect={(e) => e.preventDefault()}
+                  className="flex items-center justify-between gap-2 px-3 py-1.5 text-xs cursor-pointer outline-none data-[highlighted]:opacity-70"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {t("type_task")}
+                  {typeFilter === "task" && <Check size={10} strokeWidth={2} />}
+                </DropdownMenu.CheckboxItem>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
         </div>
         {isToday && <InlineTaskInput onCreateTask={onCreateTask} />}
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSubtasks } from "../hooks/useSubtasks";
 import type { UUID } from "@/shared/types/database.types";
@@ -8,27 +9,21 @@ interface Props {
   userId: UUID;
   taskId: UUID;
   isOpen: boolean;
+  onCountChange?: (completed: number) => void;
 }
 
-export function SubtaskList({ userId, taskId, isOpen }: Props) {
+export function SubtaskList({ userId, taskId, isOpen, onCountChange }: Props) {
   const { subtasks, isLoading, toggleSubtask } = useSubtasks(userId, taskId);
 
-  const localPct = subtasks.length > 0
-    ? (subtasks.filter(s => s.isCompleted).length / subtasks.length) * 100
-    : 0;
+  const completedCount = subtasks.filter(s => s.isCompleted).length;
+  const localPct = subtasks.length > 0 ? (completedCount / subtasks.length) * 100 : 0;
+
+  useEffect(() => {
+    if (!isLoading) onCountChange?.(completedCount);
+  }, [completedCount, isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
-      {/* Progress bar — always live from local state */}
-      {!isLoading && (
-        <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
-          <div
-            className="h-full rounded-full transition-[width] duration-200"
-            style={{ width: `${localPct}%`, background: "var(--text-primary)" }}
-          />
-        </div>
-      )}
-
       {/* Subtask list — animated open/close */}
       <AnimatePresence initial={false}>
         {isOpen && (
@@ -75,6 +70,16 @@ export function SubtaskList({ userId, taskId, isOpen }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Progress bar — below list, constrained to title-content width */}
+      {!isLoading && (
+        <div className="mt-2 ml-7 mr-7 h-1 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+          <div
+            className="h-full rounded-full transition-[width] duration-200"
+            style={{ width: `${localPct}%`, background: "var(--text-primary)" }}
+          />
+        </div>
+      )}
     </div>
   );
 }
