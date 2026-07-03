@@ -116,5 +116,5 @@ export function useTodayTasks(userId: UUID, date?: string) {
     }
   }, [getRepo]);
 
-  return { tasks, isLoading, error, toggleTask };
+  return { tasks, isLoading, error, toggleTask, refetch: fetch };
 }
