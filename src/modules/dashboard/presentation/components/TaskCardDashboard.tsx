@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Pencil, Star } from "lucide-react";
 import { format } from "date-fns";
@@ -28,6 +28,7 @@ interface Props {
 
 export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescription, showDueDate, typeLabel, userId }: Props) {
   const [subtasksOpen, setSubtasksOpen] = useState(true);
+  const [liveCompleted, setLiveCompleted] = useState<number | null>(null);
   const t = useTranslations("tasks");
   const { locale } = useLocale();
   const done = isTaskDone(task);
@@ -37,6 +38,10 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
     isTimePast(timeRef);
 
   const hasSubtasks = (task.subtaskTotal ?? 0) > 0;
+  const displayCompleted = liveCompleted !== null ? liveCompleted : (task.subtaskCompleted ?? 0);
+
+  // Reset live count when the card represents a different task
+  useEffect(() => { setLiveCompleted(null); }, [task.id]);
 
   return (
     <div
@@ -128,11 +133,11 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
               className="text-[10px] tabular-nums font-medium flex-shrink-0 transition-opacity active:opacity-70"
               style={{ color: subtasksOpen ? "var(--text-primary)" : "var(--text-muted)" }}
             >
-              {task.subtaskCompleted}/{task.subtaskTotal}
+              {displayCompleted}/{task.subtaskTotal}
             </button>
           ) : (
             <span className="text-[10px] tabular-nums font-medium flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-              {task.subtaskCompleted}/{task.subtaskTotal}
+              {displayCompleted}/{task.subtaskTotal}
             </span>
           )
         )}
@@ -148,9 +153,9 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
         </button>
       </div>
 
-      {/* SubtaskList always mounted — bar is live, list animates in/out */}
+      {/* SubtaskList always mounted — bar and counter are live, list animates in/out */}
       {hasSubtasks && !done && userId && (
-        <SubtaskList userId={userId} taskId={task.id as UUID} isOpen={subtasksOpen} />
+        <SubtaskList userId={userId} taskId={task.id as UUID} isOpen={subtasksOpen} onCountChange={setLiveCompleted} />
       )}
     </div>
   );

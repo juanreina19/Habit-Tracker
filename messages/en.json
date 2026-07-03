@@ -331,6 +331,7 @@
     "tab_board": "Board",
     "tab_eisenhower": "Eisenhower",
     "tab_kanban": "Kanban",
+    "filter_label": "Filter",
     "filter_timed": "Timed",
     "filter_urgent": "Urgent",
     "eisenhower_do": "Do First",
