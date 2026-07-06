@@ -39,6 +39,7 @@
   --nav-border: rgba(255,255,255,0.10);
 
   /* ── Sidebar ── */
+  --sidebar-width:        69px;
   --sidebar-active-bg:    rgba(255, 255, 255, 0.08);
   --sidebar-hover-bg:     rgba(255, 255, 255, 0.04);
   --sidebar-active-color: #e8e8e8;
@@ -87,6 +88,22 @@
 
   /* ── Card hover border ── */
   --border-hover: #363636;
+
+  /* ── Floating actions (FAB, su menú, botón Focus) — offsets derivados unos
+     de otros, ver override de @1024px más abajo. Antes cada componente tenía
+     su propio número mágico independiente; centralizados aquí evita que
+     vuelvan a chocar entre sí. ── */
+  --fab-bottom:          calc(env(safe-area-inset-bottom) + 96px);
+  --fab-menu-bottom:     calc(env(safe-area-inset-bottom) + 228px);
+  --focus-button-bottom: calc(env(safe-area-inset-bottom) + 160px);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --fab-bottom:          32px;
+    --fab-menu-bottom:     148px;
+    --focus-button-bottom: 88px;
+  }
 }
 
 .light {

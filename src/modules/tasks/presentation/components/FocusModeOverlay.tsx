@@ -4,9 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { X, Play, Pause, Settings, SkipForward, RotateCcw, Clock, Flame, Coffee, Moon, Flag, Maximize2, Minimize2, GripVertical, type LucideIcon } from "lucide-react";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useSortDragSensors } from "@/shared/hooks/useSortDragSensors";
 import type { FocusModeSession, FocusPhase } from "../../domain/entities/FocusModeSession";
 import { getElapsedSec } from "../../domain/entities/FocusModeSession";
 import type { TaskWithStatus } from "../../domain/entities/Task";
@@ -119,10 +120,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
   const [orderedTasks, setOrderedTasks] = useState(tasks);
   useEffect(() => { setOrderedTasks(tasks); }, [tasks]);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
+  const sensors = useSortDragSensors();
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;

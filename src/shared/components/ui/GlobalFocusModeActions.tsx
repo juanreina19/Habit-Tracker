@@ -32,7 +32,7 @@ export function GlobalFocusModeActions({ userId }: Props) {
 
   return (
     <>
-      <div className="fixed z-30 right-5 bottom-[calc(env(safe-area-inset-bottom)+160px)] lg:right-8 lg:bottom-[88px]">
+      <div className="fixed z-30 right-5 lg:right-8" style={{ bottom: "var(--focus-button-bottom)" }}>
         <FocusModeButton onClick={() => {
           if (activeFocus) setOverlayOpen(true);
           else setPickerOpen(true);

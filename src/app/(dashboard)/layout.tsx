@@ -4,6 +4,7 @@ import BottomNav from "@/shared/components/ui/BottomNav";
 import Sidebar from "@/shared/components/ui/Sidebar";
 import { FloatingActions } from "@/shared/components/ui/FloatingActions";
 import { GlobalFocusModeActions } from "@/shared/components/ui/GlobalFocusModeActions";
+import { GlobalQuickAddDialogs } from "@/shared/components/ui/GlobalQuickAddDialogs";
 import { ToastProvider } from "@/shared/components/ui/Toast";
 
 export default async function DashboardLayout({
@@ -21,13 +22,14 @@ export default async function DashboardLayout({
       <div className="min-h-screen" style={{ background: "var(--bg)" }}>
         <Sidebar />
         <main
-          className="lg:ml-[72px] hide-scrollbar"
+          className="lg:ml-[var(--sidebar-width)] hide-scrollbar"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 100px)" }}
         >
           {children}
         </main>
         <FloatingActions />
         <GlobalFocusModeActions userId={user.id} />
+        <GlobalQuickAddDialogs userId={user.id} />
         <BottomNav />
       </div>
     </ToastProvider>

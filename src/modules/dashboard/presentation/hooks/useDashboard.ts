@@ -7,6 +7,7 @@ import { useTodayTasks } from "@/modules/tasks/presentation/hooks/useTodayTasks"
 import { useHabits } from "@/modules/habits/presentation/hooks/useHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { isTaskDone } from "@/modules/tasks/domain/entities/Task";
+import { isTaskOverdue } from "@/modules/tasks/domain/entities/taskFilters";
 import { useMidnightRefresh } from "@/shared/hooks/useMidnightRefresh";
 import { useMinuteTick } from "@/shared/hooks/useMinuteTick";
 import type { TaskWithStatus, TaskStatus } from "@/modules/tasks/domain/entities/Task";
@@ -29,15 +30,7 @@ export function useDashboard(userId: UUID, viewDate?: Date) {
 
   const derived = useMemo(() => {
     const pending = tasks.filter(t => !isTaskDone(t));
-    const overdue = tasks.filter(t => {
-      if (t.dueDate === null || t.dueDate >= todayStr) return false;
-      if (!isTaskDone(t)) return true;
-      // Completadas: solo mostrar si se completaron HOY (usa timezone local, no UTC string)
-      const completedToday = t.recurrenceDays
-        ? t.isCompletedToday
-        : (t.completedAt ? format(new Date(t.completedAt), "yyyy-MM-dd") === todayStr : false);
-      return completedToday;
-    });
+    const overdue = tasks.filter(t => isTaskOverdue(t, todayStr));
     const overdueIds = new Set(overdue.map(t => t.id));
 
     const tasksByCategory: Record<string, TaskWithStatus[]> = {};
@@ -51,8 +44,11 @@ export function useDashboard(userId: UUID, viewDate?: Date) {
       t => !t.categoryId && !overdueIds.has(t.id)
     );
 
-    return { overdue, tasksByCategory, uncategorized };
-  }, [tasks, categories, todayStr]);
+    // "De hoy" excluye las atrasadas que useTodayTasks mezcla junto con las de hoy.
+    const todayCount = todayTasks.filter(t => !overdueIds.has(t.id)).length;
+
+    return { overdue, tasksByCategory, uncategorized, todayCount };
+  }, [tasks, categories, todayStr, todayTasks]);
 
   const updateTaskStatus = (taskId: UUID, status: TaskStatus) => {
     const task = tasks.find((t) => t.id === taskId);

@@ -35,7 +35,7 @@ export default function Sidebar() {
   return (
     <TooltipProvider>
       <aside
-        className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-[72px] z-40"
+        className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-[var(--sidebar-width)] z-40"
         style={{ background: "var(--sidebar-bg)" }}
       >
         {/* Logo */}
@@ -55,13 +55,13 @@ export default function Sidebar() {
               <Tooltip key={href} label={t(key as Parameters<typeof t>[0])}>
                 <Link
                   href={href}
-                  className={`sidebar-link relative flex items-center justify-center py-2.5 rounded-md ${isActive ? "sidebar-active" : ""}`}
+                  className={`sidebar-link relative flex items-center justify-center py-2 rounded-md ${isActive ? "sidebar-active" : ""}`}
                   style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
                 >
                   {isActive && (
                     <span
                       className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full"
-                      style={{ background: "var(--accent)" }}
+                      style={{ background: "var(--sidebar-active-color)" }}
                     />
                   )}
                   <Icon size={20} strokeWidth={1} />
@@ -81,7 +81,7 @@ export default function Sidebar() {
           <Tooltip label={theme === "dark" ? ts("theme_light") : ts("theme_dark")}>
             <button
               onClick={toggleTheme}
-              className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-colors"
+              className="sidebar-link w-full flex items-center justify-center py-2 rounded-md transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
               {theme === "dark" ? <Sun size={20} strokeWidth={1.5} /> : <Moon size={20} strokeWidth={1.5} />}
@@ -92,7 +92,7 @@ export default function Sidebar() {
           <Tooltip label={t("settings")}>
             <Link
               href="/settings"
-              className={`sidebar-link relative flex items-center justify-center py-2.5 rounded-md ${pathname.startsWith("/settings") ? "sidebar-active" : ""}`}
+              className={`sidebar-link relative flex items-center justify-center py-2 rounded-md ${pathname.startsWith("/settings") ? "sidebar-active" : ""}`}
               style={{ color: pathname.startsWith("/settings") ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
             >
               <Settings2 size={20} strokeWidth={1} />
@@ -106,7 +106,7 @@ export default function Sidebar() {
           <Tooltip label={ts("my_profile")}>
             <Link
               href="/settings"
-              className="sidebar-link flex items-center justify-center py-2.5 rounded-md transition-colors"
+              className="sidebar-link flex items-center justify-center py-2 rounded-md transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
               <User size={20} strokeWidth={1.5} />
@@ -119,7 +119,7 @@ export default function Sidebar() {
               <button
                 onClick={() => setConfirmLogout(true)}
                 disabled={loggingOut}
-                className="sidebar-link w-full flex items-center justify-center py-2.5 rounded-md transition-colors disabled:opacity-40"
+                className="sidebar-link w-full flex items-center justify-center py-2 rounded-md transition-colors disabled:opacity-40"
                 style={{ color: "var(--text-secondary)" }}
               >
                 <LogOut size={20} strokeWidth={1.5} />

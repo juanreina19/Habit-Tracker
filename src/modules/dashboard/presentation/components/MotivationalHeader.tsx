@@ -3,6 +3,7 @@
 import { format, getDayOfYear, addDays, getHours } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
 
 const QUOTES_ES = [
@@ -48,6 +49,7 @@ interface Props {
 
 export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount }: Props) {
   const { locale } = useLocale();
+  const t = useTranslations("dashboard");
   const dateFnsLocale = locale === "en" ? enUS : es;
 
   const quotes = locale === "en" ? QUOTES_EN : QUOTES_ES;
@@ -97,23 +99,10 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
 
       {/* Summary */}
       <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-        {locale === "en" ? (
-          <>
-            You have{" "}
-            <span style={{ color: "var(--text-primary)" }}>{habitsCount}</span>
-            {" "}habits and{" "}
-            <span style={{ color: "var(--text-primary)" }}>{tasksCount}</span>
-            {" "}tasks for today
-          </>
-        ) : (
-          <>
-            Tienes{" "}
-            <span style={{ color: "var(--text-primary)" }}>{habitsCount}</span>
-            {" "}hábitos y{" "}
-            <span style={{ color: "var(--text-primary)" }}>{tasksCount}</span>
-            {" "}tareas para hoy
-          </>
-        )}
+        {t("motivational_summary", {
+          habits: t("motivational_habits_count", { count: habitsCount }),
+          tasks: t("motivational_tasks_count", { count: tasksCount }),
+        })}
       </p>
     </div>
   );

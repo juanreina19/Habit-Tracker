@@ -4,11 +4,12 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { ClipboardPen, Repeat, Filter, Pencil, Check } from "lucide-react";
+import { ClipboardPen, Repeat, Filter, Pencil, Check, GripVertical } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useSortDragSensors } from "@/shared/hooks/useSortDragSensors";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
@@ -147,10 +148,7 @@ export function EnfoqueTab({
     });
   }, [timedItems, untimedItems]);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
+  const sensors = useSortDragSensors();
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
@@ -423,16 +421,35 @@ function AgendaCard({ item, userId, typeTaskLabel, onToggleTask, onEditTask, onD
   return null;
 }
 
+/**
+ * En puntero fino (mouse) toda la fila sigue siendo zona de drag, como hoy.
+ * En puntero grueso (touch) el listener se retira de la fila — de lo contrario
+ * cualquier tap/scroll sobre la card se interpreta como inicio de drag — y se
+ * mueve a un handle dedicado. No se promueve a un hook compartido: un solo
+ * consumidor hoy (esta función).
+ */
+function useIsCoarsePointer(): boolean {
+  const [isCoarse, setIsCoarse] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse)");
+    setIsCoarse(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsCoarse(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isCoarse;
+}
+
 function SortableAgendaItem({ item, ...cardProps }: AgendaCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const isCoarsePointer = useIsCoarsePointer();
   const timeParts = item.time?.split(" ") ?? [];
   return (
     <div
       ref={setNodeRef}
-      {...attributes}
-      {...listeners}
+      {...(isCoarsePointer ? {} : { ...attributes, ...listeners })}
       style={{ transform: CSS.Transform.toString(transform), transition: isDragging ? transition : undefined, opacity: isDragging ? 0.5 : 1 }}
-      className="flex items-center touch-none cursor-grab active:cursor-grabbing"
+      className={`flex items-center ${isCoarsePointer ? "" : "touch-none cursor-grab active:cursor-grabbing"}`}
     >
       <div className="w-14 flex-shrink-0 text-right pr-3">
         {timeParts[0] && (
@@ -446,6 +463,18 @@ function SortableAgendaItem({ item, ...cardProps }: AgendaCardProps) {
       <div className="flex-1 min-w-0 py-1 pl-2">
         <AgendaCard item={item} {...cardProps} />
       </div>
+      {isCoarsePointer && (
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="flex-shrink-0 touch-none cursor-grab active:cursor-grabbing p-2 -mr-1"
+          style={{ color: "var(--text-muted)" }}
+          aria-label="Reordenar"
+        >
+          <GripVertical size={16} strokeWidth={1.5} />
+        </button>
+      )}
     </div>
   );
 }

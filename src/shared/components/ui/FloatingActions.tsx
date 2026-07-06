@@ -5,11 +5,13 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, ClipboardPen, Repeat } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useQuickAddStore } from "@/shared/store/quickAddStore";
 
 export function FloatingActions() {
   const pathname = usePathname();
   const t = useTranslations("quickAdd");
   const [open, setOpen] = useState(false);
+  const openQuickAdd = useQuickAddStore((s) => s.open);
 
   useEffect(() => {
     if (!open) return;
@@ -22,15 +24,16 @@ export function FloatingActions() {
 
   const handleSelect = (type: "task" | "habit") => {
     setOpen(false);
-    window.dispatchEvent(new CustomEvent("quick-add", { detail: type }));
+    openQuickAdd(type);
   };
 
   return (
     <div
-      className="fixed z-30 right-5 bottom-[calc(env(safe-area-inset-bottom)+96px)] lg:right-8 lg:bottom-8"
+      className="fixed z-30 right-5 lg:right-8"
+      style={{ bottom: "var(--fab-bottom)" }}
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Menu — appears above FAB */}
+      {/* Menu — appears above FAB, siempre por encima del botón de Focus (z-30) */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -38,8 +41,8 @@ export function FloatingActions() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed z-30 right-5 lg:right-8 min-w-[180px] rounded-md p-1.5 bottom-[calc(env(safe-area-inset-bottom)+228px)] lg:bottom-[148px]"
-            style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+            className="fixed z-40 right-5 lg:right-8 min-w-[180px] rounded-md p-1.5"
+            style={{ background: "var(--bg)", border: "1px solid var(--border)", bottom: "var(--fab-menu-bottom)" }}
           >
             <button
               type="button"
