@@ -10,8 +10,8 @@ export const DEFAULT_FOCUS_DURATION_MIN = 25;
 export const DEFAULT_SHORT_BREAK_MIN = 5;
 export const DEFAULT_LONG_BREAK_MIN = 15;
 export const DEFAULT_LONG_BREAK_INTERVAL = 4;
-export const DEFAULT_AUTO_START_SHORT_BREAK = false;
-export const DEFAULT_AUTO_START_LONG_BREAK = false;
+export const DEFAULT_AUTO_START_SHORT_BREAK = true;
+export const DEFAULT_AUTO_START_LONG_BREAK = true;
 
 export function normalizePhase(phase: string | null): FocusPhase {
   return phase === 'short_break' || phase === 'long_break' ? phase : 'focus';

@@ -121,6 +121,16 @@ function ToggleSwitch({ checked, onChange, label }: { checked: boolean; onChange
   );
 }
 
+/**
+ * Se pide solo la primera vez (permission === "default") y solo cuando el
+ * usuario activa un auto-start — es el momento en que el aviso de cambio de
+ * fase empieza a tener utilidad real, en vez de pedirlo al abrir Focus.
+ */
+function requestNotificationPermissionIfNeeded() {
+  if (typeof window === "undefined" || !("Notification" in window)) return;
+  if (Notification.permission === "default") void Notification.requestPermission();
+}
+
 export function FocusModeSettingsDialog({ open, onClose, session, onSave }: Props) {
   const t = useTranslations("focus");
   const [focusDurationMin, setFocusDurationMin] = useState(String(session.focusDurationMin));
@@ -216,7 +226,10 @@ export function FocusModeSettingsDialog({ open, onClose, session, onSave }: Prop
               </div>
               <ToggleSwitch
                 checked={autoStartShortBreak}
-                onChange={() => setAutoStartShortBreak((p) => !p)}
+                onChange={() => setAutoStartShortBreak((p) => {
+                  if (!p) requestNotificationPermissionIfNeeded();
+                  return !p;
+                })}
                 label={t("auto_start_short_break_label")}
               />
             </div>
@@ -230,7 +243,10 @@ export function FocusModeSettingsDialog({ open, onClose, session, onSave }: Prop
               </div>
               <ToggleSwitch
                 checked={autoStartLongBreak}
-                onChange={() => setAutoStartLongBreak((p) => !p)}
+                onChange={() => setAutoStartLongBreak((p) => {
+                  if (!p) requestNotificationPermissionIfNeeded();
+                  return !p;
+                })}
                 label={t("auto_start_long_break_label")}
               />
             </div>

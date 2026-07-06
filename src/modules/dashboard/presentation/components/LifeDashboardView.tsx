@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDashboard } from "../hooks/useDashboard";
 import { MotivationalHeader } from "./MotivationalHeader";
@@ -62,16 +62,9 @@ export default function LifeDashboardView({ userId }: Props) {
     dashboard.createTask({ title });
   };
 
-  const openCreateRef = useCallback(() => openCreate(), []);
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const type = (e as CustomEvent).detail;
-      if (type === "task") openCreateRef();
-      if (type === "habit") setHabitDialogOpen(true);
-    };
-    window.addEventListener("quick-add", handler);
-    return () => window.removeEventListener("quick-add", handler);
-  }, [openCreateRef]);
+  // La creación rápida vía el FAB global ahora la maneja GlobalQuickAddDialogs
+  // (montado en el layout, escucha quickAddStore) — este componente conserva
+  // sus propios TaskFormDialog/HabitFormDialog solo para editar/eliminar.
 
   if (dashboard.isLoading) return <DashboardSkeleton />;
 
@@ -82,7 +75,7 @@ export default function LifeDashboardView({ userId }: Props) {
           date={viewDate}
           onDateChange={setViewDate}
           habitsCount={dashboard.habitsProgress.total}
-          tasksCount={dashboard.todayTasks.length}
+          tasksCount={dashboard.todayCount}
         />
 
         <HomeTabBar active={activeTab} onChange={setActiveTab} />
