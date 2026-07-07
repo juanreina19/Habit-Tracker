@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useId } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { TaskSupabaseRepository } from "../../infrastructure/supabase/TaskSupabaseRepository";
 import { SubtaskSupabaseRepository } from "../../infrastructure/supabase/SubtaskSupabaseRepository";
@@ -22,6 +22,11 @@ export function useTasks(userId: UUID) {
 
   const getRepo = useCallback(() => new TaskSupabaseRepository(createClient()), []);
   const getSubtaskRepo = useCallback(() => new SubtaskSupabaseRepository(createClient()), []);
+  // Sufijo único por instancia: useTasks ahora puede montarse más de una vez en simultáneo
+  // (p.ej. useDashboard + QuickAddTaskDialog, ambos globales/por página), y el cliente Supabase
+  // reutiliza el mismo canal para topics iguales — un segundo subscribe() sobre el mismo canal
+  // lanza "cannot add postgres_changes callbacks after subscribe()". Mismo patrón que useTodayTasks.ts.
+  const instanceId = useId();
 
   // Generación del fetch — descarta resultados de fetches obsoletos que resuelven fuera de orden
   // (evita que una respuesta vieja pise el estado de una más reciente).
@@ -71,14 +76,14 @@ export function useTasks(userId: UUID) {
     // Sin filtro user_id: igual que en useHabits.ts, el filtrado por usuario en postgres_changes
     // requiere RLS específico para Realtime que no está configurado. Recibimos cambios de todos
     // los usuarios pero el refetch ya está RLS-scoped (TaskSupabaseRepository filtra por user_id).
-    const ch = client.channel(`tasks-all-${userId}`)
+    const ch = client.channel(`tasks-all-${userId}-${instanceId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "tasks" }, refetch)
       .on("postgres_changes", { event: "*", schema: "public", table: "task_completions" }, refetch)
       .on("postgres_changes", { event: "*", schema: "public", table: "subtasks" }, refetch)
       .subscribe();
 
     return () => { clearTimeout(debounce); client.removeChannel(ch); };
-  }, [userId]);
+  }, [userId, instanceId]);
 
   const createTask = useCallback(async (input: CreateTaskInput): Promise<void> => {
     const created = await new CreateTaskUseCase(getRepo()).execute(userId, input);
