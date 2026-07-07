@@ -26,6 +26,12 @@ export function useFocusMode(userId: UUID) {
   const [loading, setLoading] = useState(true);
   const activeRef = useRef<FocusModeSession | null>(null);
   useEffect(() => { activeRef.current = active; }, [active]);
+  // El intervalo de abajo dispara advancePhase() una vez por segundo mientras el tiempo
+  // esté agotado; advancePhase es async (lee y escribe en Supabase) y activeRef no se
+  // actualiza hasta que el primer llamado resuelve. Sin este guard, un round-trip de red
+  // >1s produce llamadas superpuestas que hacen avanzar la fase dos veces seguidas
+  // (foco→break→foco), lo que se percibe como "el timer se reinicia" en vez de pasar al break.
+  const advancingRef = useRef(false);
 
   const getRepo = useCallback(() => new FocusModeSessionSupabaseRepository(createClient()), []);
 
@@ -163,58 +169,66 @@ export function useFocusMode(userId: UUID) {
 
   /** Avanza a la siguiente fase del ciclo (foco→descanso o descanso→foco). Se repite indefinidamente. */
   const advancePhase = useCallback(async () => {
-    // Releer la fuente de verdad: si otro dispositivo ya avanzó esta sesión, solo sincronizamos.
-    const current = await getRepo().get(userId);
-    if (!current) {
-      setActive(null);
-      return;
-    }
-
-    const local = activeRef.current;
-    if (local && (current.phase !== local.phase || current.sessionIndex !== local.sessionIndex)) {
-      setActive(current);
-      return;
-    }
-
-    const now = new Date().toISOString();
-    let next: FocusModeSession;
-
-    if (current.phase === 'focus') {
-      const isLongBreak = current.sessionIndex % current.longBreakInterval === 0;
-      const autoStart = isLongBreak ? current.autoStartLongBreak : current.autoStartShortBreak;
-      next = {
-        ...current,
-        phase: isLongBreak ? 'long_break' : 'short_break',
-        durationMin: isLongBreak ? current.longBreakMin : current.shortBreakMin,
-        accumulatedSec: 0,
-        startedAt: now,
-        pausedAt: autoStart ? null : now,
-      };
-    } else {
-      const autoStart = current.phase === 'long_break' ? current.autoStartLongBreak : current.autoStartShortBreak;
-      next = {
-        ...current,
-        phase: 'focus',
-        sessionIndex: current.sessionIndex + 1,
-        durationMin: current.focusDurationMin,
-        accumulatedSec: 0,
-        startedAt: now,
-        pausedAt: autoStart ? null : now,
-      };
-    }
-
+    // Reentrancia: si ya hay un avance en curso (disparado por el intervalo o por Skip
+    // manual), no iniciar uno segundo — ver comentario junto a advancingRef.
+    if (advancingRef.current) return;
+    advancingRef.current = true;
     try {
-      await getRepo().update(userId, {
-        phase: next.phase,
-        sessionIndex: next.sessionIndex,
-        durationMin: next.durationMin,
-        accumulatedSec: next.accumulatedSec,
-        startedAt: next.startedAt,
-        pausedAt: next.pausedAt,
-      });
-      setActive(next);
-    } catch {
-      // Realtime/loadActive reflejará el estado real en el próximo refresco.
+      // Releer la fuente de verdad: si otro dispositivo ya avanzó esta sesión, solo sincronizamos.
+      const current = await getRepo().get(userId);
+      if (!current) {
+        setActive(null);
+        return;
+      }
+
+      const local = activeRef.current;
+      if (local && (current.phase !== local.phase || current.sessionIndex !== local.sessionIndex)) {
+        setActive(current);
+        return;
+      }
+
+      const now = new Date().toISOString();
+      let next: FocusModeSession;
+
+      if (current.phase === 'focus') {
+        const isLongBreak = current.sessionIndex % current.longBreakInterval === 0;
+        const autoStart = isLongBreak ? current.autoStartLongBreak : current.autoStartShortBreak;
+        next = {
+          ...current,
+          phase: isLongBreak ? 'long_break' : 'short_break',
+          durationMin: isLongBreak ? current.longBreakMin : current.shortBreakMin,
+          accumulatedSec: 0,
+          startedAt: now,
+          pausedAt: autoStart ? null : now,
+        };
+      } else {
+        const autoStart = current.phase === 'long_break' ? current.autoStartLongBreak : current.autoStartShortBreak;
+        next = {
+          ...current,
+          phase: 'focus',
+          sessionIndex: current.sessionIndex + 1,
+          durationMin: current.focusDurationMin,
+          accumulatedSec: 0,
+          startedAt: now,
+          pausedAt: autoStart ? null : now,
+        };
+      }
+
+      try {
+        await getRepo().update(userId, {
+          phase: next.phase,
+          sessionIndex: next.sessionIndex,
+          durationMin: next.durationMin,
+          accumulatedSec: next.accumulatedSec,
+          startedAt: next.startedAt,
+          pausedAt: next.pausedAt,
+        });
+        setActive(next);
+      } catch {
+        // Realtime/loadActive reflejará el estado real en el próximo refresco.
+      }
+    } finally {
+      advancingRef.current = false;
     }
   }, [userId, getRepo]);
 
