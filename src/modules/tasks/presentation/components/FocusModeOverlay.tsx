@@ -4,10 +4,9 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { X, Play, Pause, Settings, SkipForward, RotateCcw, Clock, Flame, Coffee, Moon, Flag, Maximize2, Minimize2, GripVertical, type LucideIcon } from "lucide-react";
-import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { DndContext, closestCenter, PointerSensor, KeyboardSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useSortDragSensors } from "@/shared/hooks/useSortDragSensors";
 import type { FocusModeSession, FocusPhase } from "../../domain/entities/FocusModeSession";
 import { getElapsedSec } from "../../domain/entities/FocusModeSession";
 import type { TaskWithStatus } from "../../domain/entities/Task";
@@ -120,7 +119,10 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
   const [orderedTasks, setOrderedTasks] = useState(tasks);
   useEffect(() => { setOrderedTasks(tasks); }, [tasks]);
 
-  const sensors = useSortDragSensors();
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -135,6 +137,16 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
   };
 
   useEffect(() => { const id = setInterval(() => forceTick((n) => n + 1), 1000); return () => clearInterval(id); }, []);
+
+  // El overlay es fixed inset-0 con su propio scroll (hide-scrollbar); sin esto, el fondo
+  // detrás sigue siendo scrolleable y su scrollbar nativa aparece/desaparece cuando el
+  // contenido de esa página cambia de alto (p.ej. al completar una tarea), lo que se ve
+  // como que "el lado derecho se expande". Se bloquea mientras el overlay está montado.
+  useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prevOverflow; };
+  }, []);
 
   const prevPhaseRef = useRef(session.phase);
   useEffect(() => {

@@ -326,7 +326,7 @@
     "done": "Hecho",
     "collapse": "Colapsar",
     "expand": "Expandir",
-    "motivational_summary": "Tienes {habits} y {tasks} para hoy",
+    "motivational_summary": "Tienes <n>{habits}</n> y <n>{tasks}</n> para hoy",
     "motivational_habits_count": "{count, plural, =1 {1 hábito} other {{count} hábitos}}",
     "motivational_tasks_count": "{count, plural, =1 {1 tarea} other {{count} tareas}}",
     "tab_focus": "Enfoque",

@@ -97,11 +97,15 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
         </span>
       </p>
 
-      {/* Summary */}
+      {/* Summary — el número usa --text-primary (blanco en oscuro / negro en claro) para
+          resaltar sobre el resto de la frase en --text-secondary. t.rich (no t()) porque
+          necesitamos envolver los conteos ya pluralizados en un <span> con color propio,
+          sin hardcodear los conectores ("Tienes"/"You have", etc.) por idioma. */}
       <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-        {t("motivational_summary", {
+        {t.rich("motivational_summary", {
           habits: t("motivational_habits_count", { count: habitsCount }),
           tasks: t("motivational_tasks_count", { count: tasksCount }),
+          n: (chunks) => <span style={{ color: "var(--text-primary)" }}>{chunks}</span>,
         })}
       </p>
     </div>

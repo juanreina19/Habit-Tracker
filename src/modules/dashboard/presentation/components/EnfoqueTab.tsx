@@ -1,15 +1,11 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Reorder, useDragControls } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { ClipboardPen, Repeat, Filter, Pencil, Check, GripVertical } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { DndContext, closestCenter, type DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { useSortDragSensors } from "@/shared/hooks/useSortDragSensors";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
@@ -148,15 +144,9 @@ export function EnfoqueTab({
     });
   }, [timedItems, untimedItems]);
 
-  const sensors = useSortDragSensors();
-
-  const handleDragEnd = ({ active, over }: DragEndEvent) => {
-    if (!over || active.id === over.id) return;
-    setOrderedItems(prev => {
-      const next = arrayMove(prev, prev.findIndex(i => i.id === active.id), prev.findIndex(i => i.id === over.id));
-      localStorage.setItem(storageKey, JSON.stringify(next.map(i => i.id)));
-      return next;
-    });
+  const handleReorder = (next: AgendaItem[]) => {
+    setOrderedItems(next);
+    localStorage.setItem(storageKey, JSON.stringify(next.map(i => i.id)));
   };
 
   const allDone = useMemo(
@@ -262,25 +252,23 @@ export function EnfoqueTab({
             />
           )}
 
-          {/* All items — timed and untimed — unified sortable list */}
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={orderedItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
-              {orderedItems.map((item) => (
-                <SortableAgendaItem
-                  key={item.id}
-                  item={item}
-                  userId={userId}
-                  typeTaskLabel={t("type_task")}
-                  onToggleTask={guardedToggleTask}
-                  onEditTask={onEditTask}
-                  onDeleteTask={onDeleteTask}
-                  onCompleteHabit={guardedCompleteHabit}
-                  onUncheckHabit={guardedUncheckHabit}
-                  onEditHabit={onEditHabit}
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
+          {/* All items — timed and untimed — unified reorderable list */}
+          <Reorder.Group as="div" axis="y" values={orderedItems} onReorder={handleReorder}>
+            {orderedItems.map((item) => (
+              <AgendaReorderItem
+                key={item.id}
+                item={item}
+                userId={userId}
+                typeTaskLabel={t("type_task")}
+                onToggleTask={guardedToggleTask}
+                onEditTask={onEditTask}
+                onDeleteTask={onDeleteTask}
+                onCompleteHabit={guardedCompleteHabit}
+                onUncheckHabit={guardedUncheckHabit}
+                onEditHabit={onEditHabit}
+              />
+            ))}
+          </Reorder.Group>
 
           {orderedItems.length === 0 && (
             <p className="text-xs py-4 text-center" style={{ color: "var(--text-muted)" }}>—</p>
@@ -423,10 +411,10 @@ function AgendaCard({ item, userId, typeTaskLabel, onToggleTask, onEditTask, onD
 
 /**
  * En puntero fino (mouse) toda la fila sigue siendo zona de drag, como hoy.
- * En puntero grueso (touch) el listener se retira de la fila — de lo contrario
- * cualquier tap/scroll sobre la card se interpreta como inicio de drag — y se
- * mueve a un handle dedicado. No se promueve a un hook compartido: un solo
- * consumidor hoy (esta función).
+ * En puntero grueso (touch) el drag solo se activa desde un handle dedicado
+ * — de lo contrario cualquier tap/scroll sobre la card se interpreta como
+ * inicio de drag. No se promueve a un hook compartido: un solo consumidor
+ * hoy (esta función).
  */
 function useIsCoarsePointer(): boolean {
   const [isCoarse, setIsCoarse] = useState(false);
@@ -440,15 +428,25 @@ function useIsCoarsePointer(): boolean {
   return isCoarse;
 }
 
-function SortableAgendaItem({ item, ...cardProps }: AgendaCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+/**
+ * Drag vía framer-motion (Reorder), mismo mecanismo que HabitReorderItem en
+ * HabitsView.tsx — no dnd-kit. dnd-kit's PointerSensor solo captura el touch
+ * después de superar la `distance` del activationConstraint, y mientras
+ * decide, el navegador puede disparar su propio gesto de "mantener presionado"
+ * (selección de texto / menú copiar-pegar) antes de que el drag empiece: se
+ * siente como que hay que "sostener" la card. dragControls.start(e) captura
+ * el puntero de inmediato en el pointerdown del handle, sin esa espera.
+ */
+function AgendaReorderItem({ item, ...cardProps }: AgendaCardProps) {
+  const dragControls = useDragControls();
   const isCoarsePointer = useIsCoarsePointer();
   const timeParts = item.time?.split(" ") ?? [];
   return (
-    <div
-      ref={setNodeRef}
-      {...(isCoarsePointer ? {} : { ...attributes, ...listeners })}
-      style={{ transform: CSS.Transform.toString(transform), transition: isDragging ? transition : undefined, opacity: isDragging ? 0.5 : 1 }}
+    <Reorder.Item
+      as="div"
+      value={item}
+      dragControls={dragControls}
+      dragListener={!isCoarsePointer}
       className={`flex items-center ${isCoarsePointer ? "" : "touch-none cursor-grab active:cursor-grabbing"}`}
     >
       <div className="w-14 flex-shrink-0 text-right pr-3">
@@ -466,8 +464,7 @@ function SortableAgendaItem({ item, ...cardProps }: AgendaCardProps) {
       {isCoarsePointer && (
         <button
           type="button"
-          {...attributes}
-          {...listeners}
+          onPointerDown={(e) => dragControls.start(e)}
           className="flex-shrink-0 touch-none cursor-grab active:cursor-grabbing p-2 -mr-1"
           style={{ color: "var(--text-muted)" }}
           aria-label="Reordenar"
@@ -475,7 +472,7 @@ function SortableAgendaItem({ item, ...cardProps }: AgendaCardProps) {
           <GripVertical size={16} strokeWidth={1.5} />
         </button>
       )}
-    </div>
+    </Reorder.Item>
   );
 }
 
