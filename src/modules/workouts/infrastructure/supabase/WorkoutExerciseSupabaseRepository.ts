@@ -118,6 +118,16 @@ export class WorkoutExerciseSupabaseRepository implements IWorkoutExerciseReposi
     return (data ?? []).map(mapCatalogItem);
   }
 
+  async listCatalog(userId: UUID): Promise<ExerciseCatalogItem[]> {
+    const { data, error } = await this.client
+      .from("exercise_catalog")
+      .select("*")
+      .eq("user_id", userId)
+      .order("name", { ascending: true });
+    if (error) throw error;
+    return (data ?? []).map(mapCatalogItem);
+  }
+
   async upsertCatalogEntry(userId: UUID, name: string, defaultType: ExerciseType | null): Promise<ExerciseCatalogItem> {
     const trimmed = name.trim();
 

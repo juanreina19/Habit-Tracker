@@ -1,18 +1,23 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { ChevronDown, Pencil, Trash2 } from "lucide-react";
-import { SectionHeader } from "@/shared/components/ui/SectionHeader";
+import { createClient } from "@/shared/lib/supabase/client";
+import { WorkoutExerciseSupabaseRepository } from "../../infrastructure/supabase/WorkoutExerciseSupabaseRepository";
 import { ExerciseRow } from "./ExerciseRow";
 import { DAY_LETTERS } from "@/shared/constants/dayLabels";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import type { WorkoutWithStatus } from "../../domain/entities/Workout";
+import type { ExerciseCatalogItem } from "../../domain/entities/WorkoutExercise";
 import type { Category } from "@/modules/categories/domain/entities/Category";
 import type { UUID } from "@/shared/types/database.types";
 
+type ViewMode = "templates" | "exercises";
+
 interface Props {
+  userId: UUID;
   workouts: WorkoutWithStatus[];
   categories: Category[];
   onEdit: (workout: WorkoutWithStatus) => void;
@@ -20,16 +25,31 @@ interface Props {
 }
 
 /**
- * Lista de templates en acordeón — cada fila se expande in-place mostrando
- * sus ejercicios debajo (mismo patrón que SubjectCard.tsx en Studies), no un
- * master-detail de 2 columnas. Agrupado por Categoría (reutilizando
- * useCategories) para no caer en "un montón sin organizar" — la queja real
- * detectada en Nike Training Club. No es una tabla gigante.
+ * Templates (acordeón, mismo patrón que SubjectCard.tsx en Studies) y
+ * Exercises (el catálogo guardado, solo lectura) como dos pestañas de una
+ * misma sección — Exercises a la izquierda de Templates. La línea divisoria
+ * va arriba de las pestañas (border-top), no al lado del texto como el
+ * SectionHeader compartido.
  */
-export function TemplatesExercisesPanel({ workouts, categories, onEdit, onDelete }: Props) {
+export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, onDelete }: Props) {
   const t = useTranslations("workouts");
+  const [viewMode, setViewMode] = useState<ViewMode>("templates");
   const [expandedId, setExpandedId] = useState<UUID | null>(null);
+  const [catalog, setCatalog] = useState<ExerciseCatalogItem[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+
+  const getRepo = useCallback(() => new WorkoutExerciseSupabaseRepository(createClient()), []);
+
+  useEffect(() => {
+    if (viewMode !== "exercises") return;
+    let cancelled = false;
+    setCatalogLoading(true);
+    getRepo().listCatalog(userId).then((items) => {
+      if (!cancelled) { setCatalog(items); setCatalogLoading(false); }
+    }).catch(() => { if (!cancelled) setCatalogLoading(false); });
+    return () => { cancelled = true; };
+  }, [viewMode, userId, getRepo]);
 
   const grouped = useMemo(() => {
     const groups = new Map<string, WorkoutWithStatus[]>();
@@ -43,83 +63,122 @@ export function TemplatesExercisesPanel({ workouts, categories, onEdit, onDelete
 
   return (
     <div>
-      <SectionHeader label={t("templates").toUpperCase()} />
-      <div className="flex flex-col gap-4 mt-3">
-        {workouts.length === 0 ? (
-          <p className="text-sm text-center py-6" style={{ color: "var(--text-muted)" }}>{t("no_workouts_hint")}</p>
-        ) : (
-          Array.from(grouped.entries()).map(([key, items]) => (
-            <div key={key}>
-              <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>
-                {key === "uncategorized" ? "—" : categoryMap.get(key)?.name ?? "—"}
-              </p>
-              <div className="flex flex-col gap-1.5">
-                {items.map((w) => {
-                  const isExpanded = w.id === expandedId;
-                  const dayLabel = w.dayOfWeek ? DAY_LETTERS[w.dayOfWeek - 1] : t("any_day");
-                  const timeLabel = w.startTime ? formatTaskTime(w.startTime) : null;
-                  const subtitle = [dayLabel, timeLabel, `${w.exercises.length} ${t("exercises_label").toLowerCase()}`]
-                    .filter(Boolean)
-                    .join(" · ");
-
-                  return (
-                    <div key={w.id} className="rounded-lg" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
-                      <div
-                        onClick={() => setExpandedId(isExpanded ? null : w.id)}
-                        className="group flex items-center gap-3 p-3 cursor-pointer"
-                      >
-                        <motion.span
-                          animate={{ rotate: isExpanded ? 180 : 0 }}
-                          transition={{ duration: 0.15 }}
-                          className="flex-shrink-0"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          <ChevronDown size={14} strokeWidth={1.5} />
-                        </motion.span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{w.name}</p>
-                          <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>{subtitle}</p>
-                        </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                          <button type="button" onClick={(e) => { e.stopPropagation(); onEdit(w); }}
-                            className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
-                            style={{ color: "var(--text-secondary)" }} aria-label={t("edit_workout")}>
-                            <Pencil size={13} strokeWidth={1.5} />
-                          </button>
-                          <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(w); }}
-                            className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
-                            style={{ color: "var(--danger)" }} aria-label={t("delete")}>
-                            <Trash2 size={13} strokeWidth={1.5} />
-                          </button>
-                        </div>
-                      </div>
-                      <AnimatePresence initial={false}>
-                        {isExpanded && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="overflow-hidden"
-                          >
-                            <div className="px-3 pb-3 pt-1 flex flex-col gap-1" style={{ borderTop: "1px solid var(--border)" }}>
-                              {w.exercises.length === 0 ? (
-                                <p className="text-sm py-2" style={{ color: "var(--text-muted)" }}>{t("no_exercises")}</p>
-                              ) : (
-                                w.exercises.map((ex) => <ExerciseRow key={ex.id} exercise={ex} />)
-                              )}
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))
-        )}
+      <div className="flex items-center gap-4" style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}>
+        <button
+          type="button"
+          onClick={() => setViewMode("exercises")}
+          className="text-[11px] uppercase tracking-[0.12em] transition-colors"
+          style={{ color: viewMode === "exercises" ? "var(--text-primary)" : "var(--text-muted)" }}
+        >
+          {t("exercises_label")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewMode("templates")}
+          className="text-[11px] uppercase tracking-[0.12em] transition-colors"
+          style={{ color: viewMode === "templates" ? "var(--text-primary)" : "var(--text-muted)" }}
+        >
+          {t("templates")}
+        </button>
       </div>
+
+      {viewMode === "exercises" ? (
+        <div className="flex flex-col mt-3">
+          {catalogLoading ? (
+            <p className="text-sm text-center py-6" style={{ color: "var(--text-muted)" }}>…</p>
+          ) : catalog.length === 0 ? (
+            <p className="text-sm text-center py-6" style={{ color: "var(--text-muted)" }}>{t("no_saved_exercises")}</p>
+          ) : (
+            catalog.map((item) => (
+              <div key={item.id} className="flex items-center gap-2.5 py-1.5" style={{ borderBottom: "1px solid var(--border)" }}>
+                <span className="flex-1 text-sm truncate" style={{ color: "var(--text-primary)" }}>{item.name}</span>
+                {item.defaultType && (
+                  <span className="text-[10px] uppercase tracking-wide flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+                    {item.defaultType === "strength" ? t("type_strength") : t("type_cardio")}
+                  </span>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4 mt-3">
+          {workouts.length === 0 ? (
+            <p className="text-sm text-center py-6" style={{ color: "var(--text-muted)" }}>{t("no_workouts_hint")}</p>
+          ) : (
+            Array.from(grouped.entries()).map(([key, items]) => (
+              <div key={key}>
+                <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>
+                  {key === "uncategorized" ? "—" : categoryMap.get(key)?.name ?? "—"}
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  {items.map((w) => {
+                    const isExpanded = w.id === expandedId;
+                    const dayLabel = w.dayOfWeek ? DAY_LETTERS[w.dayOfWeek - 1] : t("any_day");
+                    const timeLabel = w.startTime ? formatTaskTime(w.startTime) : null;
+                    const subtitle = [dayLabel, timeLabel, `${w.exercises.length} ${t("exercises_label").toLowerCase()}`]
+                      .filter(Boolean)
+                      .join(" · ");
+
+                    return (
+                      <div key={w.id} className="rounded-lg" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+                        <div
+                          onClick={() => setExpandedId(isExpanded ? null : w.id)}
+                          className="group flex items-center gap-3 p-2.5 cursor-pointer"
+                        >
+                          <motion.span
+                            animate={{ rotate: isExpanded ? 180 : 0 }}
+                            transition={{ duration: 0.15 }}
+                            className="flex-shrink-0"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            <ChevronDown size={14} strokeWidth={1.5} />
+                          </motion.span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm truncate" style={{ color: "var(--text-primary)" }}>{w.name}</p>
+                            <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>{subtitle}</p>
+                          </div>
+                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                            <button type="button" onClick={(e) => { e.stopPropagation(); onEdit(w); }}
+                              className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
+                              style={{ color: "var(--text-secondary)" }} aria-label={t("edit_workout")}>
+                              <Pencil size={13} strokeWidth={1.5} />
+                            </button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(w); }}
+                              className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
+                              style={{ color: "var(--danger)" }} aria-label={t("delete")}>
+                              <Trash2 size={13} strokeWidth={1.5} />
+                            </button>
+                          </div>
+                        </div>
+                        <AnimatePresence initial={false}>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="px-2.5 pb-2.5 pt-1 flex flex-col gap-1" style={{ borderTop: "1px solid var(--border)" }}>
+                                {w.exercises.length === 0 ? (
+                                  <p className="text-sm py-2" style={{ color: "var(--text-muted)" }}>{t("no_exercises")}</p>
+                                ) : (
+                                  w.exercises.map((ex) => <ExerciseRow key={ex.id} exercise={ex} />)
+                                )}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 }

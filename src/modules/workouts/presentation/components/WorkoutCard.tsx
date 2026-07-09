@@ -39,7 +39,7 @@ export function WorkoutCard({ workout, compact = false, selected = false, onTogg
   return (
     <div
       onClick={onClick}
-      className={`group rounded-lg flex items-center gap-3 card-border-hover transition-colors ${compact ? "p-3" : "p-4"} ${onClick ? "cursor-pointer" : ""}`}
+      className={`group rounded-lg flex items-center gap-3 card-border-hover transition-colors ${compact ? "p-2.5" : "p-3.5"} ${onClick ? "cursor-pointer" : ""}`}
       style={{
         background: selected ? "var(--surface-hover)" : "var(--bg)",
         border: "1px solid var(--border)",
@@ -57,7 +57,7 @@ export function WorkoutCard({ workout, compact = false, selected = false, onTogg
 
       <div className="flex-1 min-w-0">
         <p
-          className={`font-medium truncate ${compact ? "text-sm" : "text-base"}`}
+          className={`truncate ${compact ? "text-sm" : "text-base"}`}
           style={{ color: "var(--text-primary)", textDecoration: workout.isCompletedToday ? "line-through" : "none" }}
         >
           {workout.name}

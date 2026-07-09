@@ -207,12 +207,12 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                   <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{t("delete_workout_confirm")}</p>
                   <div className="flex gap-3">
                     <button onClick={() => setConfirmDelete(false)}
-                      className="flex-1 py-3 rounded-md text-sm font-medium transition-opacity active:opacity-70"
+                      className="flex-1 py-3 rounded-md text-sm transition-opacity active:opacity-70"
                       style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}>
                       {t("cancel")}
                     </button>
                     <button onClick={handleDelete} disabled={isDeleting}
-                      className="flex-1 py-3 rounded-md text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-50"
+                      className="flex-1 py-3 rounded-md text-sm transition-opacity active:opacity-70 disabled:opacity-50"
                       style={{ background: "var(--danger)", color: "#ffffff" }}>
                       {isDeleting ? "…" : t("delete")}
                     </button>
@@ -246,7 +246,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         key={mode}
                         type="button"
                         onClick={() => setAddMode(mode)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-medium transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs transition-colors"
                         style={{
                           background: addMode === mode ? "var(--text-primary)" : "var(--surface-elevated)",
                           color: addMode === mode ? "var(--bg)" : "var(--text-secondary)",
@@ -298,7 +298,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setDayPickerOpen((p) => !p); setTimePickerOpen(false); setCatOpen(false); }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] transition-colors"
                         style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                       >
                         <span className="w-1.5 h-1.5 rounded-full" style={{ background: selectedDay ? "var(--accent)" : "var(--text-muted)" }} />
@@ -316,7 +316,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                               key={day}
                               type="button"
                               onClick={() => handleSelectDay(day)}
-                              className="w-7 h-7 rounded-md text-xs font-medium transition-colors"
+                              className="w-7 h-7 rounded-md text-xs transition-colors"
                               style={{
                                 background: selectedDay === day ? "var(--text-primary)" : "transparent",
                                 color: selectedDay === day ? "var(--bg)" : "var(--text-secondary)",
@@ -333,7 +333,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setTimePickerOpen((p) => !p); setDayPickerOpen(false); setCatOpen(false); }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] transition-colors"
                         style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                       >
                         <span className="w-1.5 h-1.5 rounded-full" style={{ background: startTime ? "var(--accent)" : "var(--text-muted)" }} />
@@ -362,7 +362,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); setCatOpen((p) => !p); setDayPickerOpen(false); setTimePickerOpen(false); }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] transition-colors"
                           style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                         >
                           <span className="w-1.5 h-1.5 rounded-full" style={{ background: categories.find((c) => c.id === categoryId)?.color ?? "var(--text-muted)" }} />
@@ -410,7 +410,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                       <button
                         onClick={handleSave}
                         disabled={isSaving || !name.trim()}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-30"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm transition-opacity active:opacity-70 disabled:opacity-30"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
                         {isSaving ? t("saving") : <>{t("save")} →</>}

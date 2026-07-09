@@ -48,7 +48,7 @@ export default function WorkoutsView({ userId }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between mb-1">
           <div>
-            <h1 className="text-xl font-medium" style={{ color: "var(--text-primary)" }}>
+            <h1 className="text-xl" style={{ color: "var(--text-primary)" }}>
               {t("title")}
             </h1>
             <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
@@ -58,7 +58,7 @@ export default function WorkoutsView({ userId }: Props) {
           <button
             type="button"
             onClick={openCreate}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold transition-opacity active:opacity-70"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-opacity active:opacity-70"
             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
           >
             <Plus size={14} strokeWidth={1} />
@@ -68,7 +68,7 @@ export default function WorkoutsView({ userId }: Props) {
 
         <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-6 mt-6">
           {/* Columna izquierda */}
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-5 lg:pr-3">
             <WeeklyScheduleStrip workouts={workoutsHook.workouts} selectedDay={selectedDay} onSelectDay={setSelectedDay} />
 
             {/* Workout(s) del día seleccionado — jerarquía visual principal */}
@@ -79,7 +79,7 @@ export default function WorkoutsView({ userId }: Props) {
                 </div>
               ) : (
                 dayWorkouts.map((w) => (
-                  <div key={w.id} className="rounded-lg p-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+                  <div key={w.id} className="rounded-lg p-3.5" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
                     <WorkoutCard
                       workout={w}
                       onToggleComplete={() => workoutsHook.toggleWorkoutCompletion(w)}
@@ -100,6 +100,7 @@ export default function WorkoutsView({ userId }: Props) {
 
             {/* Templates | Exercises — menor prioridad, va debajo */}
             <TemplatesExercisesPanel
+              userId={userId}
               workouts={workoutsHook.workouts}
               categories={categories}
               onEdit={openEdit}
@@ -109,8 +110,8 @@ export default function WorkoutsView({ userId }: Props) {
 
           {/* Columna derecha — widgets pequeños, se posponen (no se ocultan) en móvil.
               Línea vertical separando las columnas (lg:border-l) + un poco más de
-              espacio antes del contenido (lg:pl-6). */}
-          <div className="mt-6 lg:mt-0 lg:pl-6 lg:border-l lg:border-l-[var(--border)]">
+              espacio antes del contenido (lg:pl-8). */}
+          <div className="mt-6 lg:mt-0 lg:pl-8 lg:border-l lg:border-l-[var(--border)]">
             <WorkoutStatsPanel stats={workoutsHook.stats} />
           </div>
         </div>
