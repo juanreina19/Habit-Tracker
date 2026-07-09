@@ -4,6 +4,7 @@
     "planner": "Planificador",
     "habits": "Hábitos",
     "studies": "Estudios",
+    "workouts": "Entrenamientos",
     "settings": "Ajustes",
     "quick_add": "Crear"
   },
@@ -355,7 +356,8 @@
   "quickAdd": {
     "new_task": "Nueva tarea",
     "new_habit": "Nuevo hábito",
-    "new_study": "Sesión de estudio"
+    "new_study": "Sesión de estudio",
+    "new_workout": "Nuevo entrenamiento"
   },
   "planner": {
     "title": "Planificador",
@@ -404,5 +406,47 @@
     "saving": "Guardando…",
     "delete": "Eliminar",
     "coming_soon": "Próximamente"
+  },
+  "workouts": {
+    "title": "Entrenamientos",
+    "subtitle": "Sigue tus rutinas programadas, sin registrar peso ni series.",
+    "add_workout": "Nuevo entrenamiento",
+    "edit_workout": "Editar entrenamiento",
+    "workout_name": "Nombre",
+    "workout_name_placeholder": "Ej: Push A",
+    "type_label": "Tipo",
+    "type_strength": "Fuerza",
+    "type_cardio": "Cardio",
+    "type_mixed": "Mixto",
+    "day_label": "Día",
+    "start_time_label": "Hora",
+    "estimated_duration_label": "Duración estimada",
+    "duration_unit": "min",
+    "exercises_label": "Ejercicios",
+    "add_exercise": "Añadir ejercicio",
+    "exercise_name_placeholder": "Nombre del ejercicio",
+    "sets_label": "Series",
+    "sets_placeholder": "Series (opcional)",
+    "notes_placeholder": "Notas (opcional)",
+    "no_exercises": "Sin ejercicios todavía",
+    "no_exercises_hint": "Añade el primer ejercicio de este entrenamiento.",
+    "mark_complete": "Marcar completado",
+    "completed_today": "Completado hoy",
+    "templates": "Plantillas",
+    "no_workouts": "Sin entrenamientos aún",
+    "no_workouts_hint": "Crea tu primer entrenamiento para empezar a seguir tu rutina.",
+    "no_workout_today": "Sin entrenamiento este día",
+    "delete_workout_confirm": "¿Eliminar este entrenamiento y todos sus ejercicios?",
+    "stats_streak": "Racha",
+    "stats_weekly_consistency": "Consistencia semanal",
+    "stats_monthly": "Progreso mensual",
+    "stats_recent": "Recientes",
+    "stats_strength_cardio": "Fuerza / Cardio",
+    "stats_next_workout": "Próximo entrenamiento",
+    "no_recent_workouts": "Sin entrenamientos recientes",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "delete": "Eliminar"
   }
 }

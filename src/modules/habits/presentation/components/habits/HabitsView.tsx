@@ -12,6 +12,7 @@ import { refreshTodayHabitsInStore } from "../../hooks/useHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { HabitFormDialog } from "../settings/HabitFormDialog";
 import { CategoryFormDialog } from "@/modules/categories/presentation/components/CategoryFormDialog";
+import { DAY_LETTERS } from "@/shared/constants/dayLabels";
 import CalendarView from "../CalendarView";
 import type { Habit } from "../../../domain/entities/Habit";
 import type { CreateHabitInput, UpdateHabitInput } from "../../../domain/repositories/IHabitRepository";
@@ -294,7 +295,7 @@ function HabitReorderItem({
         </div>
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            {habit.activeDays.map((d) => ["L","M","X","J","V","S","D"][d - 1]).join(" ")}
+            {habit.activeDays.map((d) => DAY_LETTERS[d - 1]).join(" ")}
           </span>
           {habit.estimatedMinutes && (
             <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{habit.estimatedMinutes} min</span>

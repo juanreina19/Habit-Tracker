@@ -9,6 +9,7 @@ import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
 import { HABIT_EMOJIS } from "@/shared/components/ui/EmojiPicker";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { IconPicker } from "@/shared/components/ui/IconPicker";
+import { DAY_LETTERS } from "@/shared/constants/dayLabels";
 import type { Habit } from "../../../domain/entities/Habit";
 import type { CreateHabitInput, UpdateHabitInput } from "../../../domain/repositories/IHabitRepository";
 import type { Category } from "@/modules/categories/domain/entities/Category";
@@ -281,7 +282,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                           <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-secondary)" }}>
                             {activeDays.length === 7
                               ? "L M X J V S D"
-                              : activeDays.map((d) => ["L","M","X","J","V","S","D"][d - 1]).join(" ")}
+                              : activeDays.map((d) => DAY_LETTERS[d - 1]).join(" ")}
                           </p>
                         </div>
                         <ChevronRight size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />

@@ -215,6 +215,50 @@ export interface DbStudySession {
   created_at: ISOTimestamp;
 }
 
+export interface DbWorkout {
+  id: UUID;
+  user_id: UUID;
+  category_id: UUID | null;
+  name: string;
+  type: "strength" | "cardio" | "mixed";
+  day_of_week: number; // 1..7, 1=lunes..7=domingo
+  start_time: string | null; // "HH:mm:ss"
+  estimated_duration_min: number | null;
+  order: number;
+  is_active: boolean;
+  created_at: ISOTimestamp;
+}
+
+export interface DbExerciseCatalogItem {
+  id: UUID;
+  user_id: UUID;
+  name: string;
+  default_type: "strength" | "cardio" | null;
+  created_at: ISOTimestamp;
+}
+
+export interface DbWorkoutExercise {
+  id: UUID;
+  workout_id: UUID;
+  user_id: UUID;
+  catalog_exercise_id: UUID | null;
+  name: string;
+  type: "strength" | "cardio";
+  order: number;
+  sets: number | null;
+  notes: string | null;
+  created_at: ISOTimestamp;
+}
+
+export interface DbWorkoutCompletion {
+  id: UUID;
+  workout_id: UUID;
+  user_id: UUID;
+  completed_at: ISODate;
+  duration_min: number | null;
+  created_at: ISOTimestamp;
+}
+
 // ─── Helper para Supabase client tipado ──────────────────────────────────────
 
 export interface Database {
@@ -303,6 +347,26 @@ export interface Database {
       study_sessions: {
         Row: DbStudySession;
         Insert: Omit<DbStudySession, "id" | "created_at">;
+        Update: never;
+      };
+      workouts: {
+        Row: DbWorkout;
+        Insert: Omit<DbWorkout, "id" | "created_at">;
+        Update: Partial<Omit<DbWorkout, "id" | "user_id" | "created_at">>;
+      };
+      exercise_catalog: {
+        Row: DbExerciseCatalogItem;
+        Insert: Omit<DbExerciseCatalogItem, "id" | "created_at">;
+        Update: Partial<Omit<DbExerciseCatalogItem, "id" | "user_id" | "created_at">>;
+      };
+      workout_exercises: {
+        Row: DbWorkoutExercise;
+        Insert: Omit<DbWorkoutExercise, "id" | "created_at">;
+        Update: Partial<Omit<DbWorkoutExercise, "id" | "workout_id" | "user_id" | "created_at">>;
+      };
+      workout_completions: {
+        Row: DbWorkoutCompletion;
+        Insert: Omit<DbWorkoutCompletion, "id" | "created_at">;
         Update: never;
       };
     };

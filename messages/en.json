@@ -4,6 +4,7 @@
     "planner": "Planner",
     "habits": "Habits",
     "studies": "Studies",
+    "workouts": "Workouts",
     "settings": "Settings",
     "quick_add": "Quick add"
   },
@@ -355,7 +356,8 @@
   "quickAdd": {
     "new_task": "New task",
     "new_habit": "New habit",
-    "new_study": "Study session"
+    "new_study": "Study session",
+    "new_workout": "New workout"
   },
   "planner": {
     "title": "Planner",
@@ -404,5 +406,47 @@
     "saving": "Saving…",
     "delete": "Delete",
     "coming_soon": "Coming soon"
+  },
+  "workouts": {
+    "title": "Workouts",
+    "subtitle": "Follow your scheduled routines, no weight or set logging.",
+    "add_workout": "New workout",
+    "edit_workout": "Edit workout",
+    "workout_name": "Name",
+    "workout_name_placeholder": "e.g. Push A",
+    "type_label": "Type",
+    "type_strength": "Strength",
+    "type_cardio": "Cardio",
+    "type_mixed": "Mixed",
+    "day_label": "Day",
+    "start_time_label": "Time",
+    "estimated_duration_label": "Estimated duration",
+    "duration_unit": "min",
+    "exercises_label": "Exercises",
+    "add_exercise": "Add exercise",
+    "exercise_name_placeholder": "Exercise name",
+    "sets_label": "Sets",
+    "sets_placeholder": "Sets (optional)",
+    "notes_placeholder": "Notes (optional)",
+    "no_exercises": "No exercises yet",
+    "no_exercises_hint": "Add the first exercise for this workout.",
+    "mark_complete": "Mark complete",
+    "completed_today": "Completed today",
+    "templates": "Templates",
+    "no_workouts": "No workouts yet",
+    "no_workouts_hint": "Create your first workout to start following your routine.",
+    "no_workout_today": "No workout on this day",
+    "delete_workout_confirm": "Delete this workout and all its exercises?",
+    "stats_streak": "Streak",
+    "stats_weekly_consistency": "Weekly consistency",
+    "stats_monthly": "Monthly progress",
+    "stats_recent": "Recent",
+    "stats_strength_cardio": "Strength / Cardio",
+    "stats_next_workout": "Next workout",
+    "no_recent_workouts": "No recent workouts",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving…",
+    "delete": "Delete"
   }
 }
