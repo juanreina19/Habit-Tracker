@@ -1,10 +1,10 @@
 import { create } from "zustand";
 
-export type QuickAddTarget = "task" | "habit" | null;
+export type QuickAddDialog = "task" | "habit" | "workout" | null;
 
 interface QuickAddStore {
-  target: QuickAddTarget;
-  open: (target: "task" | "habit") => void;
+  dialog: QuickAddDialog;
+  open: (dialog: "task" | "habit" | "workout") => void;
   close: () => void;
 }
 
@@ -16,9 +16,13 @@ interface QuickAddStore {
  * tenía forma de saber si algún receptor estaba montado, lo que causaba que
  * el FAB no abriera nada en rutas donde no había un listener local. Sin
  * `persist` — es estado efímero de UI, no datos de negocio.
+ *
+ * "workout" ya está en la unión desde ahora (sin ningún emisor todavía) para
+ * no tener que volver a tocar este store y sus dos consumidores cuando el
+ * módulo Workouts añada su propia opción de creación rápida en el FAB.
  */
 export const useQuickAddStore = create<QuickAddStore>((set) => ({
-  target: null,
-  open: (target) => set({ target }),
-  close: () => set({ target: null }),
+  dialog: null,
+  open: (dialog) => set({ dialog }),
+  close: () => set({ dialog: null }),
 }));

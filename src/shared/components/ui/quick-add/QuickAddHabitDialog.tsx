@@ -15,12 +15,12 @@ interface Props {
 export function QuickAddHabitDialog({ userId }: Props) {
   const { create } = useSettingsHabits(userId);
   const { categories } = useCategories(userId);
-  const target = useQuickAddStore((s) => s.target);
+  const dialog = useQuickAddStore((s) => s.dialog);
   const close = useQuickAddStore((s) => s.close);
 
   return (
     <HabitFormDialog
-      open={target === "habit"}
+      open={dialog === "habit"}
       onClose={close}
       habit={null}
       categories={categories}
