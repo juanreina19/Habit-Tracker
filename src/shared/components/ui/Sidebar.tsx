@@ -65,7 +65,7 @@ export default function Sidebar() {
                       style={{ background: "var(--sidebar-active-color)" }}
                     />
                   )}
-                  <Icon size={20} strokeWidth={1} />
+                  <Icon size={20} strokeWidth={2} />
                 </Link>
               </Tooltip>
             );
@@ -85,7 +85,7 @@ export default function Sidebar() {
               className="sidebar-link w-full flex items-center justify-center py-2 rounded-md transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
-              {theme === "dark" ? <Sun size={20} strokeWidth={1.5} /> : <Moon size={20} strokeWidth={1.5} />}
+              {theme === "dark" ? <Sun size={20} strokeWidth={2} /> : <Moon size={20} strokeWidth={2} />}
             </button>
           </Tooltip>
 
@@ -96,7 +96,7 @@ export default function Sidebar() {
               className={`sidebar-link relative flex items-center justify-center py-2 rounded-md ${pathname.startsWith("/settings") ? "sidebar-active" : ""}`}
               style={{ color: pathname.startsWith("/settings") ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
             >
-              <Settings2 size={20} strokeWidth={1} />
+              <Settings2 size={20} strokeWidth={2} />
             </Link>
           </Tooltip>
 
@@ -110,7 +110,7 @@ export default function Sidebar() {
               className="sidebar-link flex items-center justify-center py-2 rounded-md transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
-              <User size={20} strokeWidth={1.5} />
+              <User size={20} strokeWidth={2} />
             </Link>
           </Tooltip>
 
@@ -123,7 +123,7 @@ export default function Sidebar() {
                 className="sidebar-link w-full flex items-center justify-center py-2 rounded-md transition-colors disabled:opacity-40"
                 style={{ color: "var(--text-secondary)" }}
               >
-                <LogOut size={20} strokeWidth={1.5} />
+                <LogOut size={20} strokeWidth={2} />
               </button>
             </Tooltip>
 

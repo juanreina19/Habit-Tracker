@@ -133,13 +133,13 @@ export default function StatsView({ userId, userCreatedAt }: Props) {
                   y={weekTrends.reduce((sum, w) => sum + w.completionRate, 0) / weekTrends.length}
                   stroke={trendRefLineColor}
                   strokeDasharray="4 4"
-                  strokeWidth={1}
+                  strokeWidth={2}
                 />
                 <Area
                   type="monotone"
                   dataKey="completionRate"
                   stroke={trendLineColor}
-                  strokeWidth={1}
+                  strokeWidth={2}
                   fill="url(#weeklyTrendFill)"
                   dot={{ r: 3, fill: trendLineColor, strokeWidth: 0 }}
                   activeDot={{ r: 5, fill: trendLineColor }}

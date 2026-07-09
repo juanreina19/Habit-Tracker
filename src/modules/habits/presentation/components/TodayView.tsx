@@ -187,7 +187,7 @@ export default function TodayView({ userId }: Props) {
               style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
               aria-label={t("new_habit")}
             >
-              <Plus size={22} strokeWidth={1} />
+              <Plus size={22} strokeWidth={2} />
             </button>
           </div>
         </div>
@@ -220,7 +220,7 @@ export default function TodayView({ userId }: Props) {
               className="flex items-center gap-2 px-4 py-2 rounded-full transition-opacity active:opacity-70"
               style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
             >
-              <Plus size={18} strokeWidth={1} />
+              <Plus size={18} strokeWidth={2} />
               <span className="text-sm font-semibold">{t("new_habit")}</span>
             </button>
           </div>
@@ -472,7 +472,7 @@ function HabitRow({
         <div className="flex items-center gap-3 mt-0.5 flex-wrap">
           {habit.startTime && (
             <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
-              <Clock size={11} strokeWidth={1} />
+              <Clock size={11} strokeWidth={2} />
               <span>
                 {formatTaskTime(habit.startTime)}
                 {habit.estimatedMinutes ? ` – ${calcEndTime(habit.startTime, habit.estimatedMinutes)}` : ""}
@@ -516,7 +516,7 @@ function HabitRow({
           className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 p-1 rounded-sm active:opacity-70"
           style={{ color: "var(--text-muted)" }}
         >
-          <Pencil size={14} strokeWidth={1.5} />
+          <Pencil size={14} strokeWidth={2} />
         </button>
       )}
     </motion.div>

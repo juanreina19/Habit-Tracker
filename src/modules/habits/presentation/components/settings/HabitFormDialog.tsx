@@ -605,7 +605,7 @@ function CategoryField({ categories, categoryId, setCategoryId, t }: {
             border: `1.5px solid ${categoryId === null ? "rgba(255,255,255,0.15)" : "var(--surface-elevated)"}`,
           }}
         >
-          <Ban size={14} strokeWidth={1.5} />
+          <Ban size={14} strokeWidth={2} />
         </button>
         {categories.map((cat) => (
           <button

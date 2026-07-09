@@ -252,7 +252,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                           color: addMode === mode ? "var(--bg)" : "var(--text-secondary)",
                         }}
                       >
-                        <Icon size={13} strokeWidth={1.5} />
+                        <Icon size={13} strokeWidth={2} />
                         {label}
                       </button>
                     ))}

@@ -73,7 +73,7 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
                 className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70"
                 style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
               >
-                <X size={16} strokeWidth={1.5} />
+                <X size={16} strokeWidth={2} />
               </button>
             </div>
 

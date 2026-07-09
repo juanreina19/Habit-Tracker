@@ -39,7 +39,7 @@ export function WorkoutCard({ workout, compact = false, selected = false, onTogg
   return (
     <div
       onClick={onClick}
-      className={`group rounded-lg flex items-center gap-3 card-border-hover transition-colors ${compact ? "p-2.5" : "p-3.5"} ${onClick ? "cursor-pointer" : ""}`}
+      className={`group rounded-lg flex items-center gap-2.5 card-border-hover transition-colors ${compact ? "p-2" : "p-3"} ${onClick ? "cursor-pointer" : ""}`}
       style={{
         background: selected ? "var(--surface-hover)" : "var(--bg)",
         border: "1px solid var(--border)",
@@ -75,14 +75,14 @@ export function WorkoutCard({ workout, compact = false, selected = false, onTogg
             <button type="button" onClick={(e) => { e.stopPropagation(); onEdit(); }}
               className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
               style={{ color: "var(--text-secondary)" }} aria-label={t("edit_workout")}>
-              <Pencil size={13} strokeWidth={1.5} />
+              <Pencil size={13} strokeWidth={2} />
             </button>
           )}
           {onDelete && (
             <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(); }}
               className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
               style={{ color: "var(--danger)" }} aria-label={t("delete")}>
-              <Trash2 size={13} strokeWidth={1.5} />
+              <Trash2 size={13} strokeWidth={2} />
             </button>
           )}
         </div>

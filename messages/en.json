@@ -354,10 +354,10 @@
     "type_habit": "Habit"
   },
   "quickAdd": {
-    "new_task": "New task",
-    "new_habit": "New habit",
+    "new_task": "Task",
+    "new_habit": "Habit",
     "new_study": "Study session",
-    "new_workout": "New workout"
+    "new_workout": "Workout"
   },
   "planner": {
     "title": "Planner",
@@ -410,7 +410,7 @@
   "workouts": {
     "title": "Workouts",
     "subtitle": "Follow your scheduled routines, no weight or set logging.",
-    "add_workout": "New workout",
+    "add_workout": "New Template",
     "edit_workout": "Edit workout",
     "workout_name": "Name",
     "workout_name_placeholder": "e.g. Push A",

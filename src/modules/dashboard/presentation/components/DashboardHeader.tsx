@@ -96,7 +96,7 @@ export function DashboardHeader({ habitsProgress, focusSession, onOpenFocusOverl
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold transition-opacity active:opacity-70"
           style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
         >
-          <Plus size={14} strokeWidth={1} />
+          <Plus size={14} strokeWidth={2} />
           <span className="hidden lg:inline">{t("new_task")}</span>
         </button>
       </div>

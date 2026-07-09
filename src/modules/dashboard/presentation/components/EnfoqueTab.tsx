@@ -178,7 +178,7 @@ export function EnfoqueTab({
                   color: anyFilterActive ? "var(--bg)" : "var(--text-muted)",
                 }}
               >
-                <Filter size={10} strokeWidth={1.5} />
+                <Filter size={10} strokeWidth={2} />
                 {t("filter_label")}
               </button>
             </DropdownMenu.Trigger>
@@ -314,7 +314,7 @@ export function EnfoqueTab({
                         border: done ? "2px solid var(--accent)" : "1px solid var(--border)",
                       }}
                     >
-                      <ClipboardPen size={10} strokeWidth={1.5} style={{ color: done ? "#FFFFFF" : "var(--text-muted)" }} />
+                      <ClipboardPen size={10} strokeWidth={2} style={{ color: done ? "#FFFFFF" : "var(--text-muted)" }} />
                     </div>
                   </div>
 
@@ -360,8 +360,8 @@ function AgendaNode({ item }: { item: AgendaItem }) {
         }}
       >
         {item.type === "habit"
-          ? <Repeat size={11} strokeWidth={1.5} style={{ color: item.completed ? "#FFFFFF" : "var(--text-muted)" }} />
-          : <ClipboardPen size={11} strokeWidth={1.5} style={{ color: item.completed ? "#FFFFFF" : "var(--text-muted)" }} />
+          ? <Repeat size={11} strokeWidth={2} style={{ color: item.completed ? "#FFFFFF" : "var(--text-muted)" }} />
+          : <ClipboardPen size={11} strokeWidth={2} style={{ color: item.completed ? "#FFFFFF" : "var(--text-muted)" }} />
         }
       </div>
     </div>
@@ -469,7 +469,7 @@ function AgendaReorderItem({ item, ...cardProps }: AgendaCardProps) {
           style={{ color: "var(--text-muted)" }}
           aria-label="Reordenar"
         >
-          <GripVertical size={16} strokeWidth={1.5} />
+          <GripVertical size={16} strokeWidth={2} />
         </button>
       )}
     </Reorder.Item>
@@ -560,7 +560,7 @@ function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; o
           className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 p-1 rounded-sm active:opacity-70"
           style={{ color: "var(--text-muted)" }}
         >
-          <Pencil size={12} strokeWidth={1.5} />
+          <Pencil size={12} strokeWidth={2} />
         </button>
       )}
     </div>

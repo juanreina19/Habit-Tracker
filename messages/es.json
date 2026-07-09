@@ -354,10 +354,10 @@
     "type_habit": "Hábito"
   },
   "quickAdd": {
-    "new_task": "Nueva tarea",
-    "new_habit": "Nuevo hábito",
+    "new_task": "Tarea",
+    "new_habit": "Hábito",
     "new_study": "Sesión de estudio",
-    "new_workout": "Nuevo entrenamiento"
+    "new_workout": "Entrenamiento"
   },
   "planner": {
     "title": "Planificador",
@@ -410,7 +410,7 @@
   "workouts": {
     "title": "Entrenamientos",
     "subtitle": "Sigue tus rutinas programadas, sin registrar peso ni series.",
-    "add_workout": "Nuevo entrenamiento",
+    "add_workout": "Nueva plantilla",
     "edit_workout": "Editar entrenamiento",
     "workout_name": "Nombre",
     "workout_name_placeholder": "Ej: Push A",

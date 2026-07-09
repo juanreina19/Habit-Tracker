@@ -52,7 +52,7 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <ClipboardPen size={16} strokeWidth={1.5} />
+              <ClipboardPen size={16} strokeWidth={2} />
               {t("new_task")}
             </button>
             <button
@@ -63,7 +63,7 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <Repeat size={16} strokeWidth={1.5} />
+              <Repeat size={16} strokeWidth={2} />
               {t("new_habit")}
             </button>
             <button
@@ -74,7 +74,7 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <Dumbbell size={16} strokeWidth={1.5} />
+              <Dumbbell size={16} strokeWidth={2} />
               {t("new_workout")}
             </button>
           </motion.div>
@@ -96,7 +96,7 @@ export function FloatingActions() {
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Plus size={22} strokeWidth={1} />
+          <Plus size={22} strokeWidth={2} />
         </motion.div>
       </button>
     </div>

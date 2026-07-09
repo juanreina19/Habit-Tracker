@@ -37,7 +37,7 @@ export function InlineTaskInput({ onCreateTask, placeholder }: Props) {
           cursor: value.trim() ? "pointer" : "default",
         }}
       >
-        <Plus size={14} strokeWidth={1} />
+        <Plus size={14} strokeWidth={2} />
       </button>
       <input
         ref={inputRef}

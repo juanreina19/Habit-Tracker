@@ -44,7 +44,7 @@ function SortableTaskRow({ task, toggleTask, showHandle }: { task: TaskWithStatu
         <button type="button" {...attributes} {...listeners}
           className="flex-shrink-0 touch-none cursor-grab active:cursor-grabbing"
           style={{ color: "var(--text-muted)" }}>
-          <GripVertical size={14} strokeWidth={1.5} />
+          <GripVertical size={14} strokeWidth={2} />
         </button>
       )}
       <TaskCheckbox done={done} size={TASK_CHECKBOX_SIZE.card} animated variant="focus"
@@ -57,7 +57,7 @@ function SortableTaskRow({ task, toggleTask, showHandle }: { task: TaskWithStatu
       </span>
       {task.startTime && (
         <span className="flex items-center gap-1 flex-shrink-0 text-xs" style={{ color: "var(--text-secondary)" }}>
-          <Clock size={12} strokeWidth={1.5} />{formatTaskTime(task.startTime)}
+          <Clock size={12} strokeWidth={2} />{formatTaskTime(task.startTime)}
         </span>
       )}
     </div>
@@ -104,7 +104,7 @@ function IconButton({ icon: Icon, onClick, label, primary, disabled, size = 56 }
     <button onClick={onClick} disabled={disabled} aria-label={label}
       className="rounded-full flex items-center justify-center transition-opacity active:opacity-70 disabled:opacity-50"
       style={{ width: size, height: size, background: primary ? "var(--btn-primary-bg)" : "var(--surface-elevated)", color: primary ? "var(--btn-primary-text)" : "var(--text-secondary)" }}>
-      <Icon size={Math.round(size * 0.42)} strokeWidth={1.5} />
+      <Icon size={Math.round(size * 0.42)} strokeWidth={2} />
     </button>
   );
 }
@@ -185,19 +185,19 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
           <button type="button" onClick={onClose} aria-label={t("close_session")}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
             style={{ color: "var(--text-secondary)" }}>
-            <X size={20} strokeWidth={1.5} />
+            <X size={20} strokeWidth={2} />
           </button>
           <button type="button" onClick={() => setSettingsOpen(true)} aria-label={t("settings_label")}
             className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
             style={{ color: "var(--text-secondary)" }}>
-            <Settings size={18} strokeWidth={1.5} />
+            <Settings size={18} strokeWidth={2} />
           </button>
           <div className="flex-1" />
           <div className="hidden lg:block">
             <button type="button" onClick={() => setExpanded(p => !p)}
               className="w-8 h-8 rounded-full flex items-center justify-center transition-opacity active:opacity-70"
               style={{ color: "var(--text-muted)" }}>
-              {expanded ? <Minimize2 size={16} strokeWidth={1.5} /> : <Maximize2 size={16} strokeWidth={1.5} />}
+              {expanded ? <Minimize2 size={16} strokeWidth={2} /> : <Maximize2 size={16} strokeWidth={2} />}
             </button>
           </div>
         </div>
@@ -213,7 +213,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
             <div className="flex flex-col items-center justify-center gap-6 flex-1">
               <span className="flex items-center gap-1.5 text-xs font-normal uppercase tracking-wider px-2.5 py-1 rounded-full"
                 style={{ color: phaseColor, background: `${phaseColor}15` }}>
-                <PhaseIcon size={13} strokeWidth={1.5} />
+                <PhaseIcon size={13} strokeWidth={2} />
                 {t(PHASE_LABEL_KEY[session.phase])}
               </span>
 
@@ -242,7 +242,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
                 <button type="button" onClick={onEndSession}
                   className="hidden lg:flex items-center justify-center gap-2 py-3 px-8 rounded-md text-sm font-normal transition-opacity active:opacity-70"
                   style={{ background: "var(--bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
-                  <Flag size={14} strokeWidth={1.5} />
+                  <Flag size={14} strokeWidth={2} />
                   {t("end_flow")}
                 </button>
               )}
@@ -283,7 +283,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
                 <button type="button" onClick={onEndSession}
                   className="flex items-center justify-center gap-2 w-full py-3 rounded-md text-sm font-normal mt-4 transition-opacity active:opacity-70"
                   style={{ background: "var(--bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
-                  <Flag size={14} strokeWidth={1.5} />
+                  <Flag size={14} strokeWidth={2} />
                   {t("end_flow")}
                 </button>
               </>
@@ -297,7 +297,7 @@ export function FocusModeOverlay({ session, tasks, toggleTask, onPause, onResume
             <button type="button" onClick={onEndSession}
               className="flex items-center justify-center gap-2 w-full py-3 rounded-md text-sm font-normal transition-opacity active:opacity-70"
               style={{ background: "var(--bg)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
-              <Flag size={14} strokeWidth={1.5} />
+              <Flag size={14} strokeWidth={2} />
               {t("end_flow")}
             </button>
           </div>

@@ -88,7 +88,7 @@ export function StudyStatsPanel({ stats, sessions, subjects }: Props) {
                 type="monotone"
                 dataKey="sessions"
                 stroke="var(--accent)"
-                strokeWidth={1.5}
+                strokeWidth={2}
                 strokeDasharray="4 4"
                 dot={false}
               />
