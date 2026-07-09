@@ -37,7 +37,7 @@ export function SavedExercisesPicker({ searchCatalog, onSelect }: Props) {
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t("exercise_name_placeholder")}
         className="w-full rounded-md px-3 py-2.5 text-sm outline-none"
-        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
+        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
       />
       {results.length > 0 && (
         <div className="flex flex-col gap-1 max-h-40 overflow-y-auto hide-scrollbar">

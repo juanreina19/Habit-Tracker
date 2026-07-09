@@ -66,7 +66,7 @@ export default function WorkoutsView({ userId }: Props) {
           </button>
         </div>
 
-        <div className="lg:grid lg:grid-cols-[1fr_320px] lg:gap-6 mt-6">
+        <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-6 mt-6">
           {/* Columna izquierda */}
           <div className="flex flex-col gap-5">
             <WeeklyScheduleStrip workouts={workoutsHook.workouts} selectedDay={selectedDay} onSelectDay={setSelectedDay} />
@@ -107,8 +107,10 @@ export default function WorkoutsView({ userId }: Props) {
             />
           </div>
 
-          {/* Columna derecha — widgets pequeños, se posponen (no se ocultan) en móvil */}
-          <div className="mt-6 lg:mt-0">
+          {/* Columna derecha — widgets pequeños, se posponen (no se ocultan) en móvil.
+              Línea vertical separando las columnas (lg:border-l) + un poco más de
+              espacio antes del contenido (lg:pl-6). */}
+          <div className="mt-6 lg:mt-0 lg:pl-6 lg:border-l lg:border-l-[var(--border)]">
             <WorkoutStatsPanel stats={workoutsHook.stats} />
           </div>
         </div>

@@ -271,7 +271,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddExercise(); } }}
                         placeholder={t("add_exercise_placeholder")}
                         className="flex-1 rounded-md px-3 py-2.5 text-sm outline-none"
-                        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1.5px solid transparent" }}
+                        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
                       />
                     </div>
                   )}
