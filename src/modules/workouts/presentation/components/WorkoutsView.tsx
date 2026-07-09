@@ -66,7 +66,7 @@ export default function WorkoutsView({ userId }: Props) {
           </button>
         </div>
 
-        <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-6 mt-6">
+        <div className="lg:grid lg:grid-cols-[1fr_345px] lg:gap-6 mt-6">
           {/* Columna izquierda */}
           <div className="flex flex-col gap-5 lg:pl-6 lg:pr-10">
             <WeeklyScheduleStrip workouts={workoutsHook.workouts} selectedDay={selectedDay} onSelectDay={setSelectedDay} />
@@ -87,9 +87,9 @@ export default function WorkoutsView({ userId }: Props) {
                       onDelete={() => handleDelete(w)}
                     />
                     {w.exercises.length > 0 && (
-                      <div className="flex flex-col gap-1 mt-3 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
+                      <div className="flex flex-col gap-2 mt-3 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
                         {w.exercises.map((ex) => (
-                          <ExerciseRow key={ex.id} exercise={ex} />
+                          <ExerciseRow key={ex.id} exercise={ex} variant="card" />
                         ))}
                       </div>
                     )}
