@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { Search } from "lucide-react";
+import { Tooltip } from "@/shared/components/ui/Tooltip";
 import type { ExerciseCatalogItem } from "../../domain/entities/WorkoutExercise";
 
 interface Props {
@@ -31,14 +33,24 @@ export function SavedExercisesPicker({ searchCatalog, onSelect }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder={t("exercise_name_placeholder")}
-        className="w-full rounded-md px-3 py-2.5 text-sm outline-none"
-        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
-      />
+      <div className="relative">
+        <Tooltip label={t("saved_search_hint")} side="top">
+          <Search
+            size={14}
+            strokeWidth={2}
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ color: "var(--text-muted)" }}
+          />
+        </Tooltip>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("exercise_name_placeholder")}
+          className="w-full rounded-md pl-9 pr-3 py-2.5 text-sm outline-none"
+          style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
+        />
+      </div>
       {results.length > 0 && (
         <div className="flex flex-col gap-1 max-h-40 overflow-y-auto hide-scrollbar">
           {results.map((item) => (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { DAY_LETTERS } from "@/shared/constants/dayLabels";
+import { DAY_LETTER_KEYS } from "@/shared/constants/dayLabels";
 import { dayOfWeek } from "@/shared/lib/utils/dates";
 import type { Workout } from "../../domain/entities/Workout";
 
@@ -29,7 +29,8 @@ export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Prop
         {t("schedule_label")}
       </p>
       <div className="flex gap-1.5">
-        {DAY_LETTERS.map((letter, idx) => {
+        {DAY_LETTER_KEYS.map((key, idx) => {
+          const letter = t(key as Parameters<typeof t>[0]);
           const day = idx + 1;
           const isSelected = day === selectedDay;
           const isToday = day === todayDow;
