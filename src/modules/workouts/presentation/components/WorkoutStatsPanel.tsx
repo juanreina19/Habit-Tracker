@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import { DAY_ABBR_KEYS } from "@/shared/constants/dayLabels";
 import { EXERCISE_TYPE_COLORS } from "../constants/workoutColors";
@@ -82,18 +82,21 @@ export function WorkoutStatsPanel({ stats }: Props) {
         )}
       </div>
 
-      {/* Progreso mensual — 4 líneas guía horizontales, una por semana del
-          mes. Usan ReferenceLine (recharts) en vez de divs absolutos: se
-          posicionan respecto al sistema de coordenadas real del gráfico, así
-          nunca invaden el área reservada para las etiquetas del XAxis. El
-          dominio del eje Y queda fijo en [0,4] para que la barra suba
-          exactamente hasta el bloque/semana que corresponda. */}
+      {/* Progreso mensual — una sola línea base (axisLine real de Recharts,
+          no un div/ReferenceLine decorativo) justo arriba de la fila de
+          meses. El dominio del eje Y queda fijo en [0,4] para que la barra
+          suba exactamente hasta el bloque/semana que corresponda. */}
       <div style={sectionStyle}>
         <StatTitle>{t("stats_monthly")}</StatTitle>
         <div className="relative h-24 mt-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.monthlyCounts} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
-              <XAxis dataKey="month" tick={{ fontSize: 10, fill: "var(--text-muted)" }} axisLine={false} tickLine={false} />
+              <XAxis
+                dataKey="month"
+                tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+                axisLine={{ stroke: "var(--text-secondary)", strokeWidth: 0.75 }}
+                tickLine={false}
+              />
               <YAxis hide domain={[0, 4]} />
               <Tooltip
                 contentStyle={{
@@ -104,10 +107,6 @@ export function WorkoutStatsPanel({ stats }: Props) {
                   color: "var(--text-primary)",
                 }}
               />
-              <ReferenceLine y={1} stroke="var(--text-secondary)" strokeWidth={0.75} />
-              <ReferenceLine y={2} stroke="var(--text-secondary)" strokeWidth={0.75} />
-              <ReferenceLine y={3} stroke="var(--text-secondary)" strokeWidth={0.75} />
-              <ReferenceLine y={4} stroke="var(--text-secondary)" strokeWidth={0.75} />
               <Bar dataKey="count" fill="var(--text-primary)" radius={[3, 3, 0, 0]} maxBarSize={18} />
             </BarChart>
           </ResponsiveContainer>

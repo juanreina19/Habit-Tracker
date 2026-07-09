@@ -46,35 +46,37 @@ export default function Sidebar() {
           </span>
         </div>
         {/* Divider */}
-        <div className="mx-4 h-px" style={{ background: "var(--border)" }} />
+        <div className="mx-5 h-px" style={{ background: "var(--border)" }} />
 
         {/* Nav items */}
         <nav className="flex-1 px-2.5 py-4 flex flex-col gap-1">
           {NAV_ROUTES.map(({ href, key, Icon }) => {
             const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
-              <Tooltip key={href} label={t(key as Parameters<typeof t>[0])}>
-                <Link
-                  href={href}
-                  className={`sidebar-link relative flex items-center justify-center w-9 mx-auto py-2 rounded-md ${isActive ? "sidebar-active" : ""}`}
-                  style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
-                >
-                  {isActive && (
-                    <span
-                      className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full"
-                      style={{ background: "var(--sidebar-active-color)" }}
-                    />
-                  )}
-                  <Icon size={20} strokeWidth={2} />
-                </Link>
-              </Tooltip>
+              <div key={href} className="relative">
+                <Tooltip label={t(key as Parameters<typeof t>[0])}>
+                  <Link
+                    href={href}
+                    className={`sidebar-link flex items-center justify-center w-9 mx-auto py-2 rounded-md ${isActive ? "sidebar-active" : ""}`}
+                    style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
+                  >
+                    <Icon size={18} strokeWidth={2} />
+                  </Link>
+                </Tooltip>
+                {isActive && (
+                  <span
+                    className="absolute -left-2.5 top-2.5 bottom-2.5 w-[1.5px] rounded-full"
+                    style={{ background: "var(--sidebar-active-color)" }}
+                  />
+                )}
+              </div>
             );
           })}
 
         </nav>
 
         {/* Divider */}
-        <div className="mx-4 h-px" style={{ background: "var(--border)" }} />
+        <div className="mx-5 h-px" style={{ background: "var(--border)" }} />
 
         {/* Bottom section — theme, settings, profile, logout */}
         <div className="px-2.5 py-3 flex flex-col gap-1">
@@ -85,23 +87,31 @@ export default function Sidebar() {
               className="sidebar-link w-9 mx-auto flex items-center justify-center py-2 rounded-md transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
-              {theme === "dark" ? <Sun size={20} strokeWidth={2} /> : <Moon size={20} strokeWidth={2} />}
+              {theme === "dark" ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
             </button>
           </Tooltip>
 
           {/* Settings */}
-          <Tooltip label={t("settings")}>
-            <Link
-              href="/settings"
-              className={`sidebar-link relative flex items-center justify-center w-9 mx-auto py-2 rounded-md ${pathname.startsWith("/settings") ? "sidebar-active" : ""}`}
-              style={{ color: pathname.startsWith("/settings") ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
-            >
-              <Settings2 size={20} strokeWidth={2} />
-            </Link>
-          </Tooltip>
+          <div className="relative">
+            <Tooltip label={t("settings")}>
+              <Link
+                href="/settings"
+                className={`sidebar-link flex items-center justify-center w-9 mx-auto py-2 rounded-md ${pathname.startsWith("/settings") ? "sidebar-active" : ""}`}
+                style={{ color: pathname.startsWith("/settings") ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
+              >
+                <Settings2 size={18} strokeWidth={2} />
+              </Link>
+            </Tooltip>
+            {pathname.startsWith("/settings") && (
+              <span
+                className="absolute -left-2.5 top-2.5 bottom-2.5 w-[1.5px] rounded-full"
+                style={{ background: "var(--sidebar-active-color)" }}
+              />
+            )}
+          </div>
 
           {/* Divider */}
-          <div className="mx-3 my-1 h-px" style={{ background: "var(--border)" }} />
+          <div className="mx-4 my-1 h-px" style={{ background: "var(--border)" }} />
 
           {/* Profile */}
           <Tooltip label={ts("my_profile")}>
@@ -110,7 +120,7 @@ export default function Sidebar() {
               className="sidebar-link w-9 mx-auto flex items-center justify-center py-2 rounded-md transition-colors"
               style={{ color: "var(--text-secondary)" }}
             >
-              <User size={20} strokeWidth={2} />
+              <User size={18} strokeWidth={2} />
             </Link>
           </Tooltip>
 
@@ -123,35 +133,42 @@ export default function Sidebar() {
                 className="sidebar-link w-9 mx-auto flex items-center justify-center py-2 rounded-md transition-colors disabled:opacity-40"
                 style={{ color: "var(--text-secondary)" }}
               >
-                <LogOut size={20} strokeWidth={2} />
+                <LogOut size={18} strokeWidth={2} />
               </button>
             </Tooltip>
 
-            {/* Confirm logout popover */}
+            {/* Confirm logout modal — centrado en pantalla, no popover pegado
+                al botón; mismo patrón de fixed inset-0 + backdrop ya usado
+                en HabitsView.tsx, con bg de fondo (no surface) + borde sutil. */}
             {confirmLogout && (
               <div
-                className="absolute left-full bottom-0 ml-2 z-50 rounded-md p-3 w-48 flex flex-col gap-2"
-                style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-6"
+                style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
               >
-                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                  {ts("sign_out_confirm")}
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setConfirmLogout(false)}
-                    className="flex-1 py-1.5 rounded-md text-xs font-medium"
-                    style={{ background: "var(--surface)", color: "var(--text-secondary)" }}
-                  >
-                    {ts("cancel")}
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    disabled={loggingOut}
-                    className="flex-1 py-1.5 rounded-md text-xs font-semibold disabled:opacity-50"
-                    style={{ background: "var(--danger)", color: "#fff" }}
-                  >
-                    {loggingOut ? "…" : ts("sign_out")}
-                  </button>
+                <div
+                  className="w-full max-w-sm rounded-xl p-6"
+                  style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                >
+                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                    {ts("sign_out_confirm")}
+                  </p>
+                  <div className="flex gap-3 mt-6">
+                    <button
+                      onClick={() => setConfirmLogout(false)}
+                      className="flex-1 py-2 rounded-md text-sm"
+                      style={{ background: "var(--surface)", color: "var(--text-secondary)" }}
+                    >
+                      {ts("cancel")}
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      disabled={loggingOut}
+                      className="flex-1 py-2 rounded-md text-sm disabled:opacity-50"
+                      style={{ background: "var(--danger)", color: "#fff" }}
+                    >
+                      {loggingOut ? "…" : ts("sign_out")}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
