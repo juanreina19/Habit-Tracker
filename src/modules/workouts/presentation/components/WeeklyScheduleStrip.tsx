@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { DAY_LETTERS } from "@/shared/constants/dayLabels";
 import { dayOfWeek } from "@/shared/lib/utils/dates";
 import type { Workout } from "../../domain/entities/Workout";
@@ -12,18 +13,19 @@ interface Props {
 
 /**
  * Versión real y atada a datos del strip semanal decorativo de
- * StudiesView.tsx (mismo estilo visual exacto: contenedor rounded-lg,
- * pastilla por día) — a diferencia de aquel, cada día es clicable, resalta
- * el día SELECCIONADO (no solo hoy), y muestra si ese día tiene algo
- * programado. Siempre visible arriba de la pantalla (nunca escondido en un
- * submenú, lección de la queja real sobre Boostcamp).
+ * StudiesView.tsx (mismo contenedor bg+borde delgado) — a diferencia de
+ * aquel, cada día es clicable, resalta el día SELECCIONADO (no solo hoy), y
+ * muestra si ese día tiene algo programado. Siempre visible arriba de la
+ * pantalla (nunca escondido en un submenú, lección de la queja real sobre
+ * Boostcamp).
  */
 export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Props) {
+  const t = useTranslations("workouts");
   const todayDow = dayOfWeek(new Date());
 
   return (
-    <div className="rounded-lg p-4" style={{ background: "var(--surface)" }}>
-      <div className="flex gap-2">
+    <div className="rounded-lg p-3" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+      <div className="flex gap-1.5">
         {DAY_LETTERS.map((letter, idx) => {
           const day = idx + 1;
           const isSelected = day === selectedDay;
@@ -35,19 +37,15 @@ export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Prop
               key={day}
               type="button"
               onClick={() => onSelectDay(day)}
-              className="flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-lg transition-colors"
+              className="flex-1 flex flex-col items-center gap-1 py-1.5 rounded-md transition-colors"
               style={{
-                background: isSelected ? "var(--btn-primary-bg)" : "transparent",
+                background: isSelected ? "var(--surface-hover)" : "transparent",
               }}
             >
               <span
                 className={`text-sm ${isSelected ? "font-semibold" : "font-medium"}`}
                 style={{
-                  color: isSelected
-                    ? "var(--btn-primary-text)"
-                    : isToday
-                    ? "var(--accent)"
-                    : "var(--text-secondary)",
+                  color: isSelected ? "var(--text-primary)" : isToday ? "var(--accent)" : "var(--text-secondary)",
                 }}
               >
                 {letter}
@@ -55,10 +53,15 @@ export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Prop
               <span
                 className="w-1 h-1 rounded-full"
                 style={{
-                  background: hasWorkout ? (isSelected ? "var(--btn-primary-text)" : "var(--accent)") : "var(--text-muted)",
+                  background: hasWorkout ? "var(--accent)" : "var(--text-muted)",
                   opacity: hasWorkout ? 1 : 0.3,
                 }}
               />
+              {isSelected && isToday && (
+                <span className="text-[9px] leading-none" style={{ color: "var(--text-muted)" }}>
+                  {t("today_label")}
+                </span>
+              )}
             </button>
           );
         })}

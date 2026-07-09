@@ -1,13 +1,8 @@
-import type { WorkoutType } from "../../domain/entities/Workout";
 import type { ExerciseType } from "../../domain/entities/WorkoutExercise";
 
-export const WORKOUT_TYPE_COLORS: Record<WorkoutType, string> = {
-  strength: "var(--info)",
-  cardio: "var(--warning)",
-  mixed: "var(--purple)",
-};
-
+/** Blanco/negro según tema para Fuerza (resalta), gris apagado para Cardio
+ *  (contrasta sin ser llamativo) — sin azul/naranja, per feedback de diseño. */
 export const EXERCISE_TYPE_COLORS: Record<ExerciseType, string> = {
-  strength: "var(--info)",
-  cardio: "var(--warning)",
+  strength: "var(--text-primary)",
+  cardio: "var(--text-muted)",
 };

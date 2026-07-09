@@ -9,7 +9,7 @@ export class UpdateWorkoutUseCase {
     if (input.name !== undefined && !input.name.trim()) {
       throw new Error("Workout name cannot be empty");
     }
-    if (input.dayOfWeek !== undefined && (input.dayOfWeek < 1 || input.dayOfWeek > 7)) {
+    if (input.dayOfWeek != null && (input.dayOfWeek < 1 || input.dayOfWeek > 7)) {
       throw new Error("dayOfWeek must be between 1 (Monday) and 7 (Sunday)");
     }
 

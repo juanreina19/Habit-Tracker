@@ -1,24 +1,23 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { EXERCISE_TYPE_COLORS } from "../constants/workoutColors";
 import type { WorkoutExercise } from "../../domain/entities/WorkoutExercise";
 
 interface Props {
-  exercise: Pick<WorkoutExercise, "id" | "name" | "type" | "sets">;
+  exercise: Pick<WorkoutExercise, "id" | "name" | "sets" | "reps">;
 }
 
-/** Fila de solo lectura — reutilizada por TemplatesExercisesPanel (detalle)
- *  y por la card "hero" del día seleccionado en WorkoutsView. */
+/** Fila de solo lectura — reutilizada por TemplatesExercisesPanel (acordeón)
+ *  y por la card "hero" del día seleccionado en WorkoutsView. Estilo plano
+ *  ("Bench Press … 3x10"), sin dot de color, separador delgado entre filas. */
 export function ExerciseRow({ exercise }: Props) {
-  const t = useTranslations("workouts");
+  const setsReps = exercise.sets && exercise.reps ? `${exercise.sets}x${exercise.reps}` : null;
+
   return (
-    <div className="flex items-center gap-2.5 py-1">
-      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: EXERCISE_TYPE_COLORS[exercise.type] }} />
+    <div className="flex items-center gap-2.5 py-1.5" style={{ borderBottom: "1px solid var(--border)" }}>
       <span className="flex-1 text-sm truncate" style={{ color: "var(--text-primary)" }}>{exercise.name}</span>
-      {exercise.sets && (
-        <span className="text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-          {exercise.sets} {t("sets_label").toLowerCase()}
+      {setsReps && (
+        <span className="text-xs flex-shrink-0 tabular-nums" style={{ color: "var(--text-muted)" }}>
+          {setsReps}
         </span>
       )}
     </div>

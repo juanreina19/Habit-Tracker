@@ -1,15 +1,12 @@
 import type { UUID, ISOTimestamp } from "@/shared/types/database.types";
 import type { WorkoutExercise } from "./WorkoutExercise";
 
-export type WorkoutType = "strength" | "cardio" | "mixed";
-
 export interface Workout {
   id: UUID;
   userId: UUID;
   categoryId: UUID | null;
   name: string;
-  type: WorkoutType;
-  dayOfWeek: number;      // 1..7, 1=lunes..7=domingo — misma convención que Habit.activeDays
+  dayOfWeek: number | null;  // 1..7, 1=lunes..7=domingo, null="cualquier día" (sin programar)
   startTime: string | null;   // "HH:mm"
   estimatedDurationMin: number | null;
   order: number;          // desambigua si dos workouts comparten dayOfWeek (ej. AM/PM)
@@ -28,8 +25,7 @@ export interface WorkoutWithStatus extends Workout {
 export interface CreateWorkoutInput {
   categoryId?: UUID | null;
   name: string;
-  type: WorkoutType;
-  dayOfWeek: number;
+  dayOfWeek?: number | null;
   startTime?: string | null;
   estimatedDurationMin?: number | null;
 }
@@ -37,8 +33,7 @@ export interface CreateWorkoutInput {
 export interface UpdateWorkoutInput {
   categoryId?: UUID | null;
   name?: string;
-  type?: WorkoutType;
-  dayOfWeek?: number;
+  dayOfWeek?: number | null;
   startTime?: string | null;
   estimatedDurationMin?: number | null;
   order?: number;
