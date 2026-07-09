@@ -68,7 +68,7 @@ export default function WorkoutsView({ userId }: Props) {
 
         <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-6 mt-6">
           {/* Columna izquierda */}
-          <div className="flex flex-col gap-5 lg:pr-10">
+          <div className="flex flex-col gap-5 lg:pl-6 lg:pr-10">
             <WeeklyScheduleStrip workouts={workoutsHook.workouts} selectedDay={selectedDay} onSelectDay={setSelectedDay} />
 
             {/* Workout(s) del día seleccionado — jerarquía visual principal */}
