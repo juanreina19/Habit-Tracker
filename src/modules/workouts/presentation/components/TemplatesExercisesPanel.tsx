@@ -7,7 +7,7 @@ import { ChevronDown, Dumbbell, Pencil, Trash2 } from "lucide-react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { WorkoutExerciseSupabaseRepository } from "../../infrastructure/supabase/WorkoutExerciseSupabaseRepository";
 import { ExerciseRow } from "./ExerciseRow";
-import { DAY_LETTERS } from "@/shared/constants/dayLabels";
+import { DAY_ABBR_KEYS } from "@/shared/constants/dayLabels";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import type { WorkoutWithStatus } from "../../domain/entities/Workout";
 import type { ExerciseCatalogItem } from "../../domain/entities/WorkoutExercise";
@@ -27,8 +27,7 @@ interface Props {
 /**
  * Templates (acordeón, mismo patrón que SubjectCard.tsx en Studies) y
  * Exercises (el catálogo guardado, solo lectura) como dos pestañas de una
- * misma sección — Templates a la izquierda, Exercises a la derecha. Sin
- * línea divisoria (solo espaciado), igual criterio que el strip semanal.
+ * misma sección — Templates a la izquierda, Exercises a la derecha.
  */
 export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, onDelete }: Props) {
   const t = useTranslations("workouts");
@@ -61,7 +60,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
   }, [workouts]);
 
   return (
-    <div>
+    <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1rem" }}>
       <div className="flex items-center gap-4">
         <button
           type="button"
@@ -107,13 +106,15 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
           ) : (
             Array.from(grouped.entries()).map(([key, items]) => (
               <div key={key}>
-                <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>
-                  {key === "uncategorized" ? "—" : categoryMap.get(key)?.name ?? "—"}
-                </p>
+                {key !== "uncategorized" && (
+                  <p className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--text-muted)" }}>
+                    {categoryMap.get(key)?.name ?? "—"}
+                  </p>
+                )}
                 <div className="flex flex-col gap-1.5">
                   {items.map((w) => {
                     const isExpanded = w.id === expandedId;
-                    const dayLabel = w.dayOfWeek ? DAY_LETTERS[w.dayOfWeek - 1] : t("any_day");
+                    const dayLabel = w.dayOfWeek ? t(DAY_ABBR_KEYS[w.dayOfWeek - 1] as Parameters<typeof t>[0]) : t("any_day");
                     const timeLabel = w.startTime ? formatTaskTime(w.startTime) : null;
                     const subtitle = [dayLabel, timeLabel, `${w.exercises.length} ${t("exercises_label").toLowerCase()}`]
                       .filter(Boolean)
