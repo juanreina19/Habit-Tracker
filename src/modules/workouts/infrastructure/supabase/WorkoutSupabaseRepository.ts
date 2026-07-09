@@ -58,7 +58,6 @@ export class WorkoutSupabaseRepository implements IWorkoutRepository {
         .select("*, workout_exercises(*)")
         .eq("user_id", userId)
         .eq("is_active", true)
-        .order("day_of_week", { ascending: true })
         .order("order", { ascending: true }),
       this.client
         .from("workout_completions")
@@ -87,7 +86,7 @@ export class WorkoutSupabaseRepository implements IWorkoutRepository {
         user_id: userId,
         category_id: input.categoryId ?? null,
         name: input.name.trim(),
-        day_of_week: input.dayOfWeek ?? null,
+        day_of_week: input.dayOfWeek ?? [],
         start_time: input.startTime ?? null,
         estimated_duration_min: input.estimatedDurationMin ?? null,
       })

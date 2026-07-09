@@ -73,7 +73,9 @@ export function WorkoutStatsPanel({ stats }: Props) {
           <div className="flex items-center gap-2 mt-2">
             <p className="text-sm flex-1 min-w-0 truncate" style={{ color: "var(--text-primary)" }}>{stats.nextWorkout.name}</p>
             <span className="text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-              {stats.nextWorkout.dayOfWeek ? t(DAY_ABBR_KEYS[stats.nextWorkout.dayOfWeek - 1] as Parameters<typeof t>[0]) : t("any_day")}
+              {stats.nextWorkout.dayOfWeek.length > 0
+                ? stats.nextWorkout.dayOfWeek.map((d) => t(DAY_ABBR_KEYS[d - 1] as Parameters<typeof t>[0])).join(", ")
+                : t("any_day")}
               {stats.nextWorkout.startTime ? ` · ${formatTaskTime(stats.nextWorkout.startTime)}` : ""}
             </span>
           </div>
@@ -122,8 +124,14 @@ export function WorkoutStatsPanel({ stats }: Props) {
             <div style={{ width: `${stats.cardioPct}%`, background: EXERCISE_TYPE_COLORS.cardio }} />
           </div>
           <div className="flex items-center justify-between mt-2 text-[11px]" style={{ color: "var(--text-muted)" }}>
-            <span>{t("type_strength")} {stats.strengthPct}%</span>
-            <span>{t("type_cardio")} {stats.cardioPct}%</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: EXERCISE_TYPE_COLORS.strength }} />
+              {t("type_strength")} {stats.strengthPct}%
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: EXERCISE_TYPE_COLORS.cardio }} />
+              {t("type_cardio")} {stats.cardioPct}%
+            </span>
           </div>
         </div>
       )}
@@ -135,8 +143,10 @@ export function WorkoutStatsPanel({ stats }: Props) {
           <div className="flex flex-col gap-2 mt-3">
             {stats.topExercises.map((ex) => (
               <div key={ex.name} className="flex items-center gap-3">
-                <span className="text-xs w-20 flex-shrink-0 truncate" style={{ color: "var(--text-primary)" }}>{ex.name}</span>
-                <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+                <span className="text-xs flex-1 min-w-0 truncate" style={{ color: "var(--text-primary)" }}>
+                  {ex.name.charAt(0).toUpperCase() + ex.name.slice(1)}
+                </span>
+                <div className="w-16 h-1.5 rounded-full overflow-hidden flex-shrink-0" style={{ background: "var(--border)" }}>
                   <div
                     className="h-full rounded-full"
                     style={{ width: `${(ex.count / maxTopExerciseCount) * 100}%`, background: "var(--text-primary)" }}

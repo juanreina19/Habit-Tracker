@@ -32,7 +32,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
   const isEdit = !!workout;
 
   const [name, setName] = useState("");
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [startTime, setStartTime] = useState("");
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [catOpen, setCatOpen] = useState(false);
@@ -59,7 +59,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
   useEffect(() => {
     if (!open) return;
     setName(workout?.name ?? "");
-    setSelectedDay(workout?.dayOfWeek ?? null);
+    setSelectedDays(workout?.dayOfWeek ?? []);
     setStartTime(workout?.startTime?.slice(0, 5) ?? "");
     setCategoryId(workout?.categoryId ?? null);
     setNameError("");
@@ -129,8 +129,8 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
     }
   };
 
-  const handleSelectDay = (day: number) => {
-    setSelectedDay((prev) => (prev === day ? null : day));
+  const toggleDay = (day: number) => {
+    setSelectedDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort((a, b) => a - b)));
   };
 
   const handleSave = async () => {
@@ -141,7 +141,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
     try {
       const commonInput = {
         name: trimmed,
-        dayOfWeek: selectedDay,
+        dayOfWeek: selectedDays,
         startTime: startTime || null,
         categoryId: categoryId ?? null,
       };
@@ -174,7 +174,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
     }
   };
 
-  const dayPillLabel = selectedDay ? DAY_LETTERS[selectedDay - 1] : t("any_day");
+  const dayPillLabel = selectedDays.length > 0 ? selectedDays.map((d) => DAY_LETTERS[d - 1]).join(" ") : t("any_day");
   const timePillLabel = startTime || t("time_free");
 
   return (
@@ -248,8 +248,9 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         onClick={() => setAddMode(mode)}
                         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs transition-colors"
                         style={{
-                          background: addMode === mode ? "var(--text-primary)" : "var(--surface-elevated)",
-                          color: addMode === mode ? "var(--bg)" : "var(--text-secondary)",
+                          background: addMode === mode ? "var(--surface-hover)" : "var(--bg)",
+                          color: addMode === mode ? "var(--text-primary)" : "var(--text-secondary)",
+                          border: "1px solid var(--border)",
                         }}
                       >
                         <Icon size={13} strokeWidth={2} />
@@ -301,25 +302,26 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] transition-colors"
                         style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                       >
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: selectedDay ? "var(--accent)" : "var(--text-muted)" }} />
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: selectedDays.length > 0 ? "var(--accent)" : "var(--text-muted)" }} />
                         <span style={{ color: "var(--text-muted)" }}>{t("day_label").toUpperCase()}</span>
                         {dayPillLabel}
                       </button>
                       {dayPickerOpen && (
                         <div
-                          className="absolute left-0 top-full mt-1 z-10 rounded-lg p-2 flex gap-1"
-                          style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                          className="absolute left-0 top-full mt-1 z-10 rounded-2xl p-2 flex gap-1"
+                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           {ALL_DAYS.map((day) => (
                             <button
                               key={day}
                               type="button"
-                              onClick={() => handleSelectDay(day)}
-                              className="w-7 h-7 rounded-md text-xs transition-colors"
+                              onClick={() => toggleDay(day)}
+                              className="w-7 h-7 rounded-full text-xs transition-colors"
                               style={{
-                                background: selectedDay === day ? "var(--text-primary)" : "transparent",
-                                color: selectedDay === day ? "var(--bg)" : "var(--text-secondary)",
+                                background: selectedDays.includes(day) ? "var(--text-primary)" : "transparent",
+                                color: selectedDays.includes(day) ? "var(--bg)" : "var(--text-secondary)",
+                                border: "1px solid var(--border)",
                               }}
                             >
                               {DAY_LETTERS[day - 1]}

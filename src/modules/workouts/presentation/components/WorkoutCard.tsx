@@ -29,7 +29,7 @@ export function WorkoutCard({ workout, compact = false, selected = false, onTogg
   const t = useTranslations("workouts");
   const exerciseCount = workout.exercises.length;
 
-  const dayLabel = workout.dayOfWeek ? DAY_LETTERS[workout.dayOfWeek - 1] : t("any_day");
+  const dayLabel = workout.dayOfWeek.length > 0 ? workout.dayOfWeek.map((d) => DAY_LETTERS[d - 1]).join(" ") : t("any_day");
   const timeLabel = workout.startTime ? formatTaskTime(workout.startTime) : null;
 
   const subtitle = compact
