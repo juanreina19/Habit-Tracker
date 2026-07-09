@@ -55,7 +55,7 @@ export default function BottomNav() {
                 isActive ? "opacity-100" : "opacity-35 active:opacity-60"
               )}
             >
-              <Icon size={22} strokeWidth={1} />
+              <Icon size={22} strokeWidth={2} />
               <span
                 className="text-[9px] font-medium tracking-wide"
                 style={{ color: isActive ? "var(--text-primary)" : "var(--text-secondary)" }}

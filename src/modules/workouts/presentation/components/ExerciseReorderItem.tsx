@@ -60,7 +60,7 @@ export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onCh
           className="cursor-grab active:cursor-grabbing flex-shrink-0 touch-none"
           style={{ color: "var(--text-muted)" }}
         >
-          <GripVertical size={16} strokeWidth={1.5} />
+          <GripVertical size={16} strokeWidth={2} />
         </div>
 
         <button
@@ -70,7 +70,7 @@ export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onCh
           style={{ color: "var(--text-muted)", transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }}
           aria-label={t("exercise_name_placeholder")}
         >
-          <ChevronDown size={14} strokeWidth={1.5} />
+          <ChevronDown size={14} strokeWidth={2} />
         </button>
 
         <button type="button" onClick={() => setExpanded((p) => !p)} className="flex-1 min-w-0 text-left">
@@ -83,7 +83,7 @@ export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onCh
         </span>
 
         <button type="button" onClick={onDelete} className="flex-shrink-0 transition-opacity active:opacity-60" style={{ color: "var(--text-muted)" }} aria-label={t("delete")}>
-          <Trash2 size={14} strokeWidth={1.5} />
+          <Trash2 size={14} strokeWidth={2} />
         </button>
       </div>
 

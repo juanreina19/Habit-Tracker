@@ -279,14 +279,14 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
           className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-opacity active:opacity-60"
           style={{ color: "var(--text-muted)" }}
         >
-          <Eye size={15} strokeWidth={1} />
+          <Eye size={15} strokeWidth={2} />
         </button>
       </div>
 
       {/* Fila 2 — horario, en su propia línea (solo si existe) */}
       {task.startTime && (
         <div className="flex items-center gap-1 pl-[26px]" style={{ color: "var(--text-secondary)" }}>
-          <Clock size={11} strokeWidth={1} />
+          <Clock size={11} strokeWidth={2} />
           <span className="text-xs whitespace-nowrap">
             {formatTaskTime(task.startTime)}{task.endTime ? ` – ${formatTaskTime(task.endTime)}` : ""}
           </span>

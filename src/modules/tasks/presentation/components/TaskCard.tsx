@@ -46,7 +46,7 @@ function DueDate({ dueDate, done }: { dueDate: string; done: boolean }) {
   }
   return (
     <span className="flex items-center gap-1" style={{ color }}>
-      <Clock size={11} strokeWidth={1} />
+      <Clock size={11} strokeWidth={2} />
       <span className="text-xs">{label}</span>
     </span>
   );
@@ -60,7 +60,7 @@ function RecurrenceBadge({ days }: { days: number[] }) {
     : days.map(d => tDays(`d${d}` as Parameters<typeof tDays>[0])).join(" ");
   return (
     <span className="flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
-      <CalendarDays size={11} strokeWidth={1} />
+      <CalendarDays size={11} strokeWidth={2} />
       <span className="text-xs">{label}</span>
     </span>
   );
@@ -72,7 +72,7 @@ function TimeBadge({ startTime, endTime }: { startTime: string; endTime?: string
   const label = end ? `${start} – ${end}` : start;
   return (
     <span className="flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
-      <Clock size={11} strokeWidth={1} />
+      <Clock size={11} strokeWidth={2} />
       <span className="text-xs">{label}</span>
     </span>
   );
@@ -89,7 +89,7 @@ function SubtaskBadge({ completed, total, open, onToggle }: {
       className="flex items-center gap-1 rounded active:opacity-70"
       style={{ color: open ? "var(--text-primary)" : "var(--text-secondary)" }}
     >
-      <ListChecks size={11} strokeWidth={1} />
+      <ListChecks size={11} strokeWidth={2} />
       <span className="text-xs">{completed}/{total}</span>
     </button>
   );
@@ -219,7 +219,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, us
             className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 p-1 rounded-sm active:opacity-70"
             style={{ color: "var(--text-muted)" }}
           >
-            <Pencil size={12} strokeWidth={1} />
+            <Pencil size={12} strokeWidth={2} />
           </button>
         )}
 
@@ -235,7 +235,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, us
               className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors active:opacity-60"
               style={{ color: "var(--text-muted)" }}
             >
-              <MoreVertical size={16} strokeWidth={1} />
+              <MoreVertical size={16} strokeWidth={2} />
             </button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
@@ -251,7 +251,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, us
                   style={{ color: "var(--text-primary)" }}
                   onSelect={onEdit}
                 >
-                  <Pencil size={14} strokeWidth={1} />
+                  <Pencil size={14} strokeWidth={2} />
                   {t("menu_edit")}
                 </DropdownMenu.Item>
               )}
@@ -264,7 +264,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, us
                   style={{ color: "var(--danger)" }}
                   onSelect={onDelete}
                 >
-                  <Trash2 size={14} strokeWidth={1} />
+                  <Trash2 size={14} strokeWidth={2} />
                   {t("menu_delete")}
                 </DropdownMenu.Item>
               )}

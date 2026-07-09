@@ -23,7 +23,7 @@ export function FocusModeButton({ onClick }: Props) {
         border: "1px solid var(--border)",
       }}
     >
-      <Zap size={20} strokeWidth={1} fill="currentColor" />
+      <Zap size={20} strokeWidth={2} fill="currentColor" />
     </button>
   );
 }

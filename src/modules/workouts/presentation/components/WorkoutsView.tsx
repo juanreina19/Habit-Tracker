@@ -44,7 +44,7 @@ export default function WorkoutsView({ userId }: Props) {
 
   return (
     <>
-      <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-10">
+      <div className="px-5 pt-14 pb-6 lg:pt-8 lg:px-14">
         {/* Header */}
         <div className="flex items-center justify-between mb-1">
           <div>
@@ -61,7 +61,7 @@ export default function WorkoutsView({ userId }: Props) {
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-opacity active:opacity-70"
             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
           >
-            <Plus size={14} strokeWidth={1} />
+            <Plus size={14} strokeWidth={2} />
             <span className="hidden lg:inline">{t("add_workout")}</span>
           </button>
         </div>
@@ -79,7 +79,7 @@ export default function WorkoutsView({ userId }: Props) {
                 </div>
               ) : (
                 dayWorkouts.map((w) => (
-                  <div key={w.id} className="rounded-lg p-3.5" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+                  <div key={w.id} className="rounded-lg p-3" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
                     <WorkoutCard
                       workout={w}
                       onToggleComplete={() => workoutsHook.toggleWorkoutCompletion(w)}

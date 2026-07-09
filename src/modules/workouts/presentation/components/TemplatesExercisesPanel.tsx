@@ -121,8 +121,8 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
 
                     return (
                       <div key={w.id} className="rounded-lg" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
-                        <div className="group flex items-center gap-3 p-2.5">
-                          <Dumbbell size={16} strokeWidth={1.5} className="flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                        <div className="group flex items-center gap-2.5 p-2">
+                          <Dumbbell size={16} strokeWidth={2} className="flex-shrink-0" style={{ color: "var(--text-muted)" }} />
                           <button
                             type="button"
                             onClick={() => setExpandedId(isExpanded ? null : w.id)}
@@ -141,17 +141,17 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
                               style={{ color: "var(--text-muted)" }}
                               aria-label={t("exercises_label")}
                             >
-                              <ChevronDown size={14} strokeWidth={1.5} />
+                              <ChevronDown size={14} strokeWidth={2} />
                             </motion.button>
                             <button type="button" onClick={() => onEdit(w)}
                               className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
                               style={{ color: "var(--text-secondary)" }} aria-label={t("edit_workout")}>
-                              <Pencil size={13} strokeWidth={1.5} />
+                              <Pencil size={13} strokeWidth={2} />
                             </button>
                             <button type="button" onClick={() => onDelete(w)}
                               className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
                               style={{ color: "var(--danger)" }} aria-label={t("delete")}>
-                              <Trash2 size={13} strokeWidth={1.5} />
+                              <Trash2 size={13} strokeWidth={2} />
                             </button>
                           </div>
                         </div>
