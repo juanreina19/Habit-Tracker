@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
-import { X, Trash2, Dumbbell, Zap, BookmarkCheck, Save } from "lucide-react";
+import { X, Trash2, Dumbbell, Zap, BookmarkCheck, Save, Plus } from "lucide-react";
 import { useWorkoutExercises } from "../hooks/useWorkoutExercises";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { ExerciseReorderItem, type ExerciseDraft } from "./ExerciseReorderItem";
@@ -219,7 +219,14 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                   </div>
                 </motion.div>
               ) : (
-                <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-5">
+                <motion.div
+                  key="form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col gap-5"
+                  onClick={() => { setDayPickerOpen(false); setTimePickerOpen(false); setCatOpen(false); }}
+                >
                   {/* Nombre */}
                   <div>
                     <input
@@ -236,7 +243,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                   </div>
 
                   {/* Modo de agregar ejercicio — Fuerza / Cardio / Guardados */}
-                  <div className="flex gap-2">
+                  <div className="flex rounded-md overflow-hidden divide-x divide-[var(--border)]" style={{ border: "1px solid var(--border)" }}>
                     {([
                       { mode: "strength" as const, Icon: Dumbbell, label: t("type_strength") },
                       { mode: "cardio" as const, Icon: Zap, label: t("type_cardio") },
@@ -246,11 +253,10 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         key={mode}
                         type="button"
                         onClick={() => setAddMode(mode)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs transition-colors"
                         style={{
                           background: addMode === mode ? "var(--surface-hover)" : "var(--bg)",
                           color: addMode === mode ? "var(--text-primary)" : "var(--text-secondary)",
-                          border: "1px solid var(--border)",
                         }}
                       >
                         <Icon size={13} strokeWidth={2} />
@@ -264,15 +270,27 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                   {addMode === "saved" ? (
                     <SavedExercisesPicker searchCatalog={searchCatalog} onSelect={handleSelectSaved} />
                   ) : (
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={handleAddExercise}
+                        className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center transition-opacity"
+                        style={{
+                          background: newExerciseName.trim() ? "var(--text-muted)" : "var(--border)",
+                          color: newExerciseName.trim() ? "var(--bg)" : "var(--text-muted)",
+                          cursor: newExerciseName.trim() ? "pointer" : "default",
+                        }}
+                      >
+                        <Plus size={10} strokeWidth={2} />
+                      </button>
                       <input
                         type="text"
                         value={newExerciseName}
                         onChange={(e) => setNewExerciseName(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddExercise(); } }}
                         placeholder={t("add_exercise_placeholder")}
-                        className="flex-1 rounded-md px-3 py-2.5 text-sm outline-none"
-                        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
+                        className="flex-1 py-1 text-sm outline-none bg-transparent"
+                        style={{ color: "var(--text-muted)" }}
                       />
                     </div>
                   )}
@@ -344,8 +362,8 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                       </button>
                       {timePickerOpen && (
                         <div
-                          className="absolute left-0 top-full mt-1 z-10 rounded-lg p-2"
-                          style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                          className="absolute left-0 top-full mt-1 z-10 rounded-2xl p-2 flex flex-col gap-2"
+                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <input
@@ -353,8 +371,16 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
                             className="rounded-md px-2 py-1.5 text-sm outline-none"
-                            style={{ background: "var(--bg)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                            style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
                           />
+                          <button
+                            type="button"
+                            onClick={() => setTimePickerOpen(false)}
+                            className="rounded-md py-1.5 text-xs"
+                            style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+                          >
+                            {t("confirm_time")}
+                          </button>
                         </div>
                       )}
                     </div>
