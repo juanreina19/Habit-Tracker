@@ -11,7 +11,6 @@ function mapWorkout(row: DbWorkout): Workout {
     userId: row.user_id,
     categoryId: row.category_id,
     name: row.name,
-    type: row.type,
     dayOfWeek: row.day_of_week,
     startTime: row.start_time,
     estimatedDurationMin: row.estimated_duration_min,
@@ -31,6 +30,7 @@ function mapExercise(row: DbWorkoutExercise): WorkoutExercise {
     type: row.type,
     order: row.order,
     sets: row.sets,
+    reps: row.reps,
     notes: row.notes,
     createdAt: row.created_at,
   };
@@ -87,8 +87,7 @@ export class WorkoutSupabaseRepository implements IWorkoutRepository {
         user_id: userId,
         category_id: input.categoryId ?? null,
         name: input.name.trim(),
-        type: input.type,
-        day_of_week: input.dayOfWeek,
+        day_of_week: input.dayOfWeek ?? null,
         start_time: input.startTime ?? null,
         estimated_duration_min: input.estimatedDurationMin ?? null,
       })
@@ -102,7 +101,6 @@ export class WorkoutSupabaseRepository implements IWorkoutRepository {
     const patch: Record<string, unknown> = {};
     if (input.categoryId !== undefined) patch.category_id = input.categoryId;
     if (input.name !== undefined) patch.name = input.name.trim();
-    if (input.type !== undefined) patch.type = input.type;
     if (input.dayOfWeek !== undefined) patch.day_of_week = input.dayOfWeek;
     if (input.startTime !== undefined) patch.start_time = input.startTime;
     if (input.estimatedDurationMin !== undefined) patch.estimated_duration_min = input.estimatedDurationMin;

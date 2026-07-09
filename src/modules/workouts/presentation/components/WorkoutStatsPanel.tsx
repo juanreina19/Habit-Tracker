@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import { DAY_LETTERS } from "@/shared/constants/dayLabels";
-import { WORKOUT_TYPE_COLORS } from "../constants/workoutColors";
+import { EXERCISE_TYPE_COLORS } from "../constants/workoutColors";
 import type { WorkoutWithStatus } from "../../domain/entities/Workout";
 
 interface WorkoutStats {
@@ -16,6 +16,7 @@ interface WorkoutStats {
   strengthPct: number;
   cardioPct: number;
   nextWorkout: WorkoutWithStatus | null;
+  topExercises: { name: string; count: number }[];
 }
 
 interface Props {
@@ -26,10 +27,11 @@ interface Props {
  * Panel de widgets pequeños — un solo sitio de uso, mismo precedente "una
  * pantalla, un panel de stats" que StudyStatsPanel.tsx. Nada de dashboards
  * grandes: solo lo pedido (progreso mensual, recientes, %fuerza/cardio,
- * próximo entrenamiento, racha, consistencia semanal).
+ * próximo entrenamiento, racha, consistencia semanal, ejercicios principales).
  */
 export function WorkoutStatsPanel({ stats }: Props) {
   const t = useTranslations("workouts");
+  const maxTopExerciseCount = stats.topExercises[0]?.count ?? 1;
 
   return (
     <div className="flex flex-col gap-4">
@@ -54,16 +56,15 @@ export function WorkoutStatsPanel({ stats }: Props) {
       </div>
 
       {/* Próximo entrenamiento */}
-      <div className="rounded-lg p-4" style={{ background: "var(--surface)" }}>
+      <div className="rounded-lg p-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-secondary)" }}>
           {t("stats_next_workout")}
         </p>
         {stats.nextWorkout ? (
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: WORKOUT_TYPE_COLORS[stats.nextWorkout.type] }} />
             <p className="text-sm flex-1 min-w-0 truncate" style={{ color: "var(--text-primary)" }}>{stats.nextWorkout.name}</p>
             <span className="text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-              {DAY_LETTERS[stats.nextWorkout.dayOfWeek - 1]}
+              {stats.nextWorkout.dayOfWeek ? DAY_LETTERS[stats.nextWorkout.dayOfWeek - 1] : t("any_day")}
               {stats.nextWorkout.startTime ? ` · ${formatTaskTime(stats.nextWorkout.startTime)}` : ""}
             </span>
           </div>
@@ -91,7 +92,7 @@ export function WorkoutStatsPanel({ stats }: Props) {
                   color: "var(--text-primary)",
                 }}
               />
-              <Bar dataKey="count" fill="var(--accent)" radius={[3, 3, 0, 0]} maxBarSize={18} />
+              <Bar dataKey="count" fill="var(--text-primary)" radius={[3, 3, 0, 0]} maxBarSize={18} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -99,13 +100,13 @@ export function WorkoutStatsPanel({ stats }: Props) {
 
       {/* % Fuerza / Cardio — a nivel de ejercicio, para que Mixed se reparta bien */}
       {(stats.strengthPct > 0 || stats.cardioPct > 0) && (
-        <div className="rounded-lg p-4" style={{ background: "var(--surface)" }}>
+        <div className="rounded-lg p-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
             {t("stats_strength_cardio")}
           </p>
           <div className="h-2 rounded-full overflow-hidden flex" style={{ background: "var(--border)" }}>
-            <div style={{ width: `${stats.strengthPct}%`, background: WORKOUT_TYPE_COLORS.strength }} />
-            <div style={{ width: `${stats.cardioPct}%`, background: WORKOUT_TYPE_COLORS.cardio }} />
+            <div style={{ width: `${stats.strengthPct}%`, background: EXERCISE_TYPE_COLORS.strength }} />
+            <div style={{ width: `${stats.cardioPct}%`, background: EXERCISE_TYPE_COLORS.cardio }} />
           </div>
           <div className="flex items-center justify-between mt-2 text-[11px]" style={{ color: "var(--text-muted)" }}>
             <span>{t("type_strength")} {stats.strengthPct}%</span>
@@ -114,8 +115,31 @@ export function WorkoutStatsPanel({ stats }: Props) {
         </div>
       )}
 
+      {/* Ejercicios principales */}
+      {stats.topExercises.length > 0 && (
+        <div className="rounded-lg p-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
+            {t("stats_top_exercises")}
+          </p>
+          <div className="flex flex-col gap-2">
+            {stats.topExercises.map((ex) => (
+              <div key={ex.name} className="flex items-center gap-3">
+                <span className="text-xs w-20 flex-shrink-0 truncate" style={{ color: "var(--text-primary)" }}>{ex.name}</span>
+                <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "var(--border)" }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${(ex.count / maxTopExerciseCount) * 100}%`, background: "var(--text-primary)" }}
+                  />
+                </div>
+                <span className="text-xs flex-shrink-0 tabular-nums" style={{ color: "var(--text-muted)" }}>{ex.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Recientes */}
-      <div className="rounded-lg p-4" style={{ background: "var(--surface)" }}>
+      <div className="rounded-lg p-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("stats_recent")}
         </p>
@@ -124,7 +148,7 @@ export function WorkoutStatsPanel({ stats }: Props) {
         ) : (
           <div className="flex flex-col gap-2">
             {stats.recentCompletions.map((c, idx) => (
-              <div key={`${c.workoutId}-${c.completedAt}-${idx}`} className="flex items-center gap-3 px-3 py-2 rounded-md" style={{ background: "var(--surface-elevated)" }}>
+              <div key={`${c.workoutId}-${c.completedAt}-${idx}`} className="flex items-center gap-3 px-3 py-2 rounded-md" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate" style={{ color: "var(--text-primary)" }}>{c.workoutName}</p>
                 </div>

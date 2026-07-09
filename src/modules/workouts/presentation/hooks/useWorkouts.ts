@@ -159,7 +159,9 @@ export function useWorkouts(userId: UUID) {
     const cardioPct = totalExercises > 0 ? 100 - strengthPct : 0;
 
     // Próximo entrenamiento: hoy si aún no se completó, si no el siguiente
-    // día activo hacia adelante (hasta 7 días).
+    // día activo hacia adelante (hasta 7 días). Un workout con dayOfWeek
+    // null ("cualquier día") nunca coincide con un dow específico, así que
+    // queda fuera de esta sugerencia sin necesitar un filtro aparte.
     const todayDow = dayOfWeek(new Date());
     let nextWorkout: WorkoutWithStatus | null = null;
     for (let offset = 0; offset < 7; offset++) {
@@ -170,7 +172,15 @@ export function useWorkouts(userId: UUID) {
       if (candidates.length > 0) { nextWorkout = candidates[0]; break; }
     }
 
-    return { streak, weeklyConsistencyPct, monthlyCounts, recentCompletions, strengthPct, cardioPct, nextWorkout };
+    // Top exercises: los más repetidos entre todos los templates, por nombre.
+    const countByName = new Map<string, number>();
+    for (const ex of allExercises) countByName.set(ex.name, (countByName.get(ex.name) ?? 0) + 1);
+    const topExercises = Array.from(countByName.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    return { streak, weeklyConsistencyPct, monthlyCounts, recentCompletions, strengthPct, cardioPct, nextWorkout, topExercises };
   }, [workouts, completions]);
 
   return {

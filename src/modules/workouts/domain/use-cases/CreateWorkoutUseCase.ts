@@ -8,7 +8,8 @@ export class CreateWorkoutUseCase {
   async execute(userId: UUID, input: CreateWorkoutInput): Promise<Workout> {
     const trimmed = input.name.trim();
     if (!trimmed) throw new Error("Workout name cannot be empty");
-    if (input.dayOfWeek < 1 || input.dayOfWeek > 7) {
+    // dayOfWeek es opcional ("cualquier día" por defecto) — solo se valida el rango si viene.
+    if (input.dayOfWeek != null && (input.dayOfWeek < 1 || input.dayOfWeek > 7)) {
       throw new Error("dayOfWeek must be between 1 (Monday) and 7 (Sunday)");
     }
 

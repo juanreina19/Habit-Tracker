@@ -74,15 +74,14 @@ export default function WorkoutsView({ userId }: Props) {
             {/* Workout(s) del día seleccionado — jerarquía visual principal */}
             <div className="flex flex-col gap-3">
               {dayWorkouts.length === 0 ? (
-                <div className="rounded-lg p-6 text-center" style={{ background: "var(--surface)" }}>
+                <div className="rounded-lg p-6 text-center" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
                   <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("no_workout_today")}</p>
                 </div>
               ) : (
                 dayWorkouts.map((w) => (
-                  <div key={w.id} className="rounded-lg p-4" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+                  <div key={w.id} className="rounded-lg p-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
                     <WorkoutCard
                       workout={w}
-                      category={w.categoryId ? categories.find((c) => c.id === w.categoryId) ?? null : null}
                       onToggleComplete={() => workoutsHook.toggleWorkoutCompletion(w)}
                       onEdit={() => openEdit(w)}
                       onDelete={() => handleDelete(w)}
