@@ -3,15 +3,21 @@
 -- habits.active_days). Array vacío = "cualquier día" (reemplaza el NULL
 -- usado desde 003_workouts_v2).
 
+-- El CHECK original (BETWEEN 1 AND 7, para un INT escalar) debe eliminarse
+-- ANTES de cambiar el tipo de columna: Postgres revalida los CHECK
+-- existentes contra el tipo nuevo durante el propio ALTER COLUMN TYPE, y
+-- BETWEEN (>=/<=) no está definido para int[] — de ahí el error
+-- "operator does not exist: integer[] >= integer" si se deja para después.
+ALTER TABLE workouts DROP CONSTRAINT IF EXISTS workouts_day_of_week_check;
+
 ALTER TABLE workouts ALTER COLUMN day_of_week TYPE INT[] USING (
   CASE WHEN day_of_week IS NULL THEN '{}'::INT[] ELSE ARRAY[day_of_week] END
 );
 ALTER TABLE workouts ALTER COLUMN day_of_week SET DEFAULT '{}';
 ALTER TABLE workouts ALTER COLUMN day_of_week SET NOT NULL;
 
--- El CHECK original (BETWEEN 1 AND 7, para un INT escalar) ya no aplica a
--- un arreglo; se recrea validando que cada elemento esté en rango 1-7.
-ALTER TABLE workouts DROP CONSTRAINT IF EXISTS workouts_day_of_week_check;
+-- Se recrea el CHECK ya adaptado a un arreglo, validando que cada
+-- elemento esté en rango 1-7.
 ALTER TABLE workouts ADD CONSTRAINT workouts_day_of_week_check
   CHECK (day_of_week <@ ARRAY[1,2,3,4,5,6,7]);
 
