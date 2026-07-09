@@ -129,14 +129,23 @@ export function useWorkouts(userId: UUID) {
     const todayStr = getToday();
     const { streak, weeklyConsistencyPct } = calculateWorkoutConsistency(workouts, completions, todayStr);
 
-    // Progreso mensual: últimos 6 meses, conteo de completions por mes.
+    // Progreso mensual: últimos 6 meses. "count" no es el total de completions
+    // sino cuántas de las 4 semanas del mes (días 1-7, 8-14, 15-21, 22-fin)
+    // tuvieron al menos una — así el valor siempre cae en 0-4, alineado con
+    // las 4 líneas guía del gráfico (cada bloque = 1 semana).
     const now = new Date();
     const monthlyCounts = Array.from({ length: 6 }, (_, idx) => {
       const d = subMonths(now, 5 - idx);
       const monthKey = format(d, "yyyy-MM");
+      const weeksWithActivity = new Set<number>();
+      for (const c of completions) {
+        if (c.completedAt.slice(0, 7) !== monthKey) continue;
+        const dayOfMonth = Number(c.completedAt.slice(8, 10));
+        weeksWithActivity.add(Math.min(3, Math.floor((dayOfMonth - 1) / 7)));
+      }
       return {
         month: format(d, "MMM"),
-        count: completions.filter((c) => c.completedAt.slice(0, 7) === monthKey).length,
+        count: weeksWithActivity.size,
       };
     });
 

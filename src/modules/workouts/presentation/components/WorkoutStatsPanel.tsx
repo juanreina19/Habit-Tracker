@@ -82,22 +82,25 @@ export function WorkoutStatsPanel({ stats }: Props) {
         )}
       </div>
 
-      {/* Progreso mensual — barras simples con 4 líneas guía horizontales
-          (puramente decorativas, no atadas a datos — evita depender de los
+      {/* Progreso mensual — 4 bloques horizontales, uno por semana del mes
+          (puramente decorativos, no atados a datos — evita depender de los
           ticks auto-calculados del eje Y de recharts para tener siempre
-          exactamente 4). */}
+          exactamente 4). Las líneas terminan antes de la fila de meses
+          (bottom-[18px], no inset-0) para no cruzar las etiquetas. El
+          dominio del eje Y queda fijo en [0,4] para que la barra suba
+          exactamente hasta el bloque/semana que corresponda. */}
       <div style={sectionStyle}>
         <StatTitle>{t("stats_monthly")}</StatTitle>
         <div className="relative h-24 mt-2">
-          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+          <div className="absolute inset-x-0 top-0 bottom-[18px] flex flex-col justify-between pointer-events-none">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="w-full h-px" style={{ background: "var(--border)" }} />
+              <div key={i} className="w-full h-px" style={{ background: "var(--text-muted)" }} />
             ))}
           </div>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={stats.monthlyCounts}>
+            <BarChart data={stats.monthlyCounts} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
               <XAxis dataKey="month" tick={{ fontSize: 10, fill: "var(--text-muted)" }} axisLine={false} tickLine={false} />
-              <YAxis hide />
+              <YAxis hide domain={[0, 4]} />
               <Tooltip
                 contentStyle={{
                   background: "var(--surface-elevated)",

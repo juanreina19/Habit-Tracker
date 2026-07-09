@@ -13,18 +13,21 @@ interface Props {
 
 /**
  * Versión real y atada a datos del strip semanal decorativo de
- * StudiesView.tsx (mismo contenedor bg+borde delgado) — a diferencia de
- * aquel, cada día es clicable, resalta el día SELECCIONADO (no solo hoy), y
- * muestra si ese día tiene algo programado. Siempre visible arriba de la
- * pantalla (nunca escondido en un submenú, lección de la queja real sobre
- * Boostcamp).
+ * StudiesView.tsx — a diferencia de aquel, cada día es clicable, resalta el
+ * día SELECCIONADO (no solo hoy), y muestra si ese día tiene algo
+ * programado. Siempre visible arriba de la pantalla (nunca escondido en un
+ * submenú, lección de la queja real sobre Boostcamp). Sin borde externo ni
+ * línea divisoria — solo el subtítulo "Schedule" arriba a la izquierda.
  */
 export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Props) {
   const t = useTranslations("workouts");
   const todayDow = dayOfWeek(new Date());
 
   return (
-    <div className="rounded-lg p-2" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+    <div>
+      <p className="text-[11px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-muted)" }}>
+        {t("schedule_label")}
+      </p>
       <div className="flex gap-1">
         {DAY_LETTERS.map((letter, idx) => {
           const day = idx + 1;
