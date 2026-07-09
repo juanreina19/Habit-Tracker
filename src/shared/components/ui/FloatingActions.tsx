@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, ClipboardPen, Repeat } from "lucide-react";
+import { Plus, ClipboardPen, Repeat, Dumbbell } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useQuickAddStore } from "@/shared/store/quickAddStore";
 
@@ -22,7 +22,7 @@ export function FloatingActions() {
 
   if (pathname.startsWith("/settings") || pathname.startsWith("/profile")) return null;
 
-  const handleSelect = (type: "task" | "habit") => {
+  const handleSelect = (type: "task" | "habit" | "workout") => {
     setOpen(false);
     openQuickAdd(type);
   };
@@ -65,6 +65,17 @@ export function FloatingActions() {
             >
               <Repeat size={16} strokeWidth={1.5} />
               {t("new_habit")}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSelect("workout")}
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-normal transition-colors"
+              style={{ color: "var(--text-primary)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            >
+              <Dumbbell size={16} strokeWidth={1.5} />
+              {t("new_workout")}
             </button>
           </motion.div>
         )}
