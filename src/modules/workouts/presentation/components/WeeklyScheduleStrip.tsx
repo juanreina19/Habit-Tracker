@@ -33,7 +33,7 @@ export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Prop
           const day = idx + 1;
           const isSelected = day === selectedDay;
           const isToday = day === todayDow;
-          const hasWorkout = workouts.some((w) => w.isActive && w.dayOfWeek === day);
+          const hasWorkout = workouts.some((w) => w.isActive && w.dayOfWeek.includes(day));
 
           return (
             <button

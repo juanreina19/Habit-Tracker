@@ -27,13 +27,13 @@ export function calculateWorkoutConsistency(
   const completedSet = new Set(completions.map((c) => `${c.workoutId}:${c.completedAt}`));
 
   const isDayFullyDone = (isoDate: ISODate, dow: number): boolean => {
-    const scheduled = activeWorkouts.filter((w) => w.dayOfWeek === dow);
+    const scheduled = activeWorkouts.filter((w) => w.dayOfWeek.includes(dow));
     if (scheduled.length === 0) return true; // día sin nada programado: no cuenta ni rompe
     return scheduled.every((w) => completedSet.has(`${w.id}:${isoDate}`));
   };
 
   const hasAnyScheduled = (dow: number): boolean =>
-    activeWorkouts.some((w) => w.dayOfWeek === dow);
+    activeWorkouts.some((w) => w.dayOfWeek.includes(dow));
 
   // Racha: recorrido hacia atrás desde hoy. Días sin nada programado no
   // rompen la racha; un día programado sin completar sí la rompe (incluido
@@ -62,7 +62,7 @@ export function calculateWorkoutConsistency(
   for (let i = 0; i < 7; i++) {
     const isoDate = toISODate(d);
     const dow = dayOfWeek(d);
-    const scheduled = activeWorkouts.filter((w) => w.dayOfWeek === dow);
+    const scheduled = activeWorkouts.filter((w) => w.dayOfWeek.includes(dow));
     scheduledCount += scheduled.length;
     completedCount += scheduled.filter((w) => completedSet.has(`${w.id}:${isoDate}`)).length;
     d = subDays(d, 1);

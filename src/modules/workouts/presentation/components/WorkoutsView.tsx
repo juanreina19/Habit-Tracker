@@ -38,7 +38,7 @@ export default function WorkoutsView({ userId }: Props) {
   const openEdit = (w: Workout) => { setEditingWorkout(w); setDialogOpen(true); };
   const handleDelete = async (w: WorkoutWithStatus) => { await workoutsHook.deleteWorkout(w.id); };
 
-  const dayWorkouts = workoutsHook.workouts.filter((w) => w.dayOfWeek === selectedDay);
+  const dayWorkouts = workoutsHook.workouts.filter((w) => w.dayOfWeek.includes(selectedDay));
 
   if (workoutsHook.isLoading) return <WorkoutsSkeleton />;
 
@@ -66,7 +66,7 @@ export default function WorkoutsView({ userId }: Props) {
           </button>
         </div>
 
-        <div className="lg:grid lg:grid-cols-[1fr_345px] lg:gap-6 mt-6">
+        <div className="lg:grid lg:grid-cols-[1fr_380px] mt-6">
           {/* Columna izquierda */}
           <div className="flex flex-col gap-5 lg:pl-6 lg:pr-10">
             <WeeklyScheduleStrip workouts={workoutsHook.workouts} selectedDay={selectedDay} onSelectDay={setSelectedDay} />

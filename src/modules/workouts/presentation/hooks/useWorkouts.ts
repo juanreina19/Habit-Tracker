@@ -169,14 +169,14 @@ export function useWorkouts(userId: UUID) {
 
     // Próximo entrenamiento: hoy si aún no se completó, si no el siguiente
     // día activo hacia adelante (hasta 7 días). Un workout con dayOfWeek
-    // null ("cualquier día") nunca coincide con un dow específico, así que
-    // queda fuera de esta sugerencia sin necesitar un filtro aparte.
+    // vacío ([], "cualquier día") nunca coincide con un dow específico, así
+    // que queda fuera de esta sugerencia sin necesitar un filtro aparte.
     const todayDow = dayOfWeek(new Date());
     let nextWorkout: WorkoutWithStatus | null = null;
     for (let offset = 0; offset < 7; offset++) {
       const dow = ((todayDow - 1 + offset) % 7) + 1;
       const candidates = workouts
-        .filter((w) => w.isActive && w.dayOfWeek === dow && (offset > 0 || !w.isCompletedToday))
+        .filter((w) => w.isActive && w.dayOfWeek.includes(dow) && (offset > 0 || !w.isCompletedToday))
         .sort((a, b) => a.order - b.order);
       if (candidates.length > 0) { nextWorkout = candidates[0]; break; }
     }

@@ -114,7 +114,9 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
                 <div className="flex flex-col gap-1.5">
                   {items.map((w) => {
                     const isExpanded = w.id === expandedId;
-                    const dayLabel = w.dayOfWeek ? t(DAY_ABBR_KEYS[w.dayOfWeek - 1] as Parameters<typeof t>[0]) : t("any_day");
+                    const dayLabel = w.dayOfWeek.length > 0
+                      ? w.dayOfWeek.map((d) => t(DAY_ABBR_KEYS[d - 1] as Parameters<typeof t>[0])).join(", ")
+                      : t("any_day");
                     const timeLabel = w.startTime ? formatTaskTime(w.startTime) : null;
                     const subtitle = [dayLabel, timeLabel, `${w.exercises.length} ${t("exercises_label").toLowerCase()}`]
                       .filter(Boolean)

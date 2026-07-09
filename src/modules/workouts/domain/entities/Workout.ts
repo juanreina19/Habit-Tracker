@@ -6,7 +6,7 @@ export interface Workout {
   userId: UUID;
   categoryId: UUID | null;
   name: string;
-  dayOfWeek: number | null;  // 1..7, 1=lunes..7=domingo, null="cualquier día" (sin programar)
+  dayOfWeek: number[];  // 1..7, 1=lunes..7=domingo, []="cualquier día" (mismo criterio que Habit.activeDays)
   startTime: string | null;   // "HH:mm"
   estimatedDurationMin: number | null;
   order: number;          // desambigua si dos workouts comparten dayOfWeek (ej. AM/PM)
@@ -25,7 +25,7 @@ export interface WorkoutWithStatus extends Workout {
 export interface CreateWorkoutInput {
   categoryId?: UUID | null;
   name: string;
-  dayOfWeek?: number | null;
+  dayOfWeek?: number[];
   startTime?: string | null;
   estimatedDurationMin?: number | null;
 }
@@ -33,7 +33,7 @@ export interface CreateWorkoutInput {
 export interface UpdateWorkoutInput {
   categoryId?: UUID | null;
   name?: string;
-  dayOfWeek?: number | null;
+  dayOfWeek?: number[];
   startTime?: string | null;
   estimatedDurationMin?: number | null;
   order?: number;

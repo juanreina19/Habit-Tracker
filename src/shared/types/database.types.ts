@@ -220,7 +220,7 @@ export interface DbWorkout {
   user_id: UUID;
   category_id: UUID | null;
   name: string;
-  day_of_week: number | null; // 1..7, 1=lunes..7=domingo, null="cualquier día"
+  day_of_week: number[]; // 1..7, 1=lunes..7=domingo, []="cualquier día"
   start_time: string | null; // "HH:mm:ss"
   estimated_duration_min: number | null;
   order: number;

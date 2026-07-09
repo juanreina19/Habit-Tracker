@@ -9,8 +9,8 @@ export class UpdateWorkoutUseCase {
     if (input.name !== undefined && !input.name.trim()) {
       throw new Error("Workout name cannot be empty");
     }
-    if (input.dayOfWeek != null && (input.dayOfWeek < 1 || input.dayOfWeek > 7)) {
-      throw new Error("dayOfWeek must be between 1 (Monday) and 7 (Sunday)");
+    if (input.dayOfWeek?.some((d) => d < 1 || d > 7)) {
+      throw new Error("dayOfWeek values must be between 1 (Monday) and 7 (Sunday)");
     }
 
     return this.repo.update(id, input);
