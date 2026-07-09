@@ -49,7 +49,7 @@ export function WorkoutStatsPanel({ stats }: Props) {
       {/* Racha + consistencia semanal */}
       <div className="grid grid-cols-2 gap-3">
         <div className="text-center">
-          <p className="text-3xl font-medium tabular-nums" style={{ color: "var(--text-primary)" }}>
+          <p className="text-3xl tabular-nums" style={{ color: "var(--text-primary)" }}>
             {stats.streak}
           </p>
           <p className="text-[11px] mt-1 uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
@@ -57,7 +57,7 @@ export function WorkoutStatsPanel({ stats }: Props) {
           </p>
         </div>
         <div className="text-center">
-          <p className="text-3xl font-medium tabular-nums" style={{ color: "var(--text-primary)" }}>
+          <p className="text-3xl tabular-nums" style={{ color: "var(--text-primary)" }}>
             {stats.weeklyConsistencyPct}%
           </p>
           <p className="text-[11px] mt-1 uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
@@ -82,10 +82,18 @@ export function WorkoutStatsPanel({ stats }: Props) {
         )}
       </div>
 
-      {/* Progreso mensual — barras simples */}
+      {/* Progreso mensual — barras simples con 4 líneas guía horizontales
+          (puramente decorativas, no atadas a datos — evita depender de los
+          ticks auto-calculados del eje Y de recharts para tener siempre
+          exactamente 4). */}
       <div style={sectionStyle}>
         <StatTitle>{t("stats_monthly")}</StatTitle>
-        <div className="h-24 mt-2">
+        <div className="relative h-24 mt-2">
+          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="w-full h-px" style={{ background: "var(--border)" }} />
+            ))}
+          </div>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.monthlyCounts}>
               <XAxis dataKey="month" tick={{ fontSize: 10, fill: "var(--text-muted)" }} axisLine={false} tickLine={false} />

@@ -8,8 +8,10 @@ export interface IWorkoutExerciseRepository {
   delete(id: UUID): Promise<void>;
   reorder(orderedIds: UUID[]): Promise<void>;
 
-  /** Autocompletado — no es fuente de verdad, solo sugerencias. */
+  /** Autocompletado — no es fuente de verdad, solo sugerencias (limitado). */
   searchCatalog(userId: UUID, query: string): Promise<ExerciseCatalogItem[]>;
+  /** Listado completo del catálogo — para la pestaña "Exercises", no un autocompletado. */
+  listCatalog(userId: UUID): Promise<ExerciseCatalogItem[]>;
   /** Upsert case-insensitive por nombre — se llama internamente al crear un ejercicio. */
   upsertCatalogEntry(userId: UUID, name: string, defaultType: ExerciseType | null): Promise<ExerciseCatalogItem>;
 }
