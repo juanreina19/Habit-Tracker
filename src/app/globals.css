@@ -89,20 +89,21 @@
   /* ── Card hover border ── */
   --border-hover: #363636;
 
-  /* ── Floating actions (FAB, su menú, botón Focus) — offsets derivados unos
-     de otros, ver override de @1024px más abajo. Antes cada componente tenía
-     su propio número mágico independiente; centralizados aquí evita que
-     vuelvan a chocar entre sí. ── */
-  --fab-bottom:          calc(env(safe-area-inset-bottom) + 96px);
-  --fab-menu-bottom:     calc(env(safe-area-inset-bottom) + 228px);
-  --focus-button-bottom: calc(env(safe-area-inset-bottom) + 160px);
+  /* ── Floating actions (botón flotante, su menú, botón Focus) — offsets
+     derivados unos de otros, ver override de @1024px más abajo. Antes cada
+     componente tenía su propio número mágico independiente; centralizados
+     aquí evita que vuelvan a chocar entre sí. Nombres genéricos (no
+     "fab"-específicos): más de un botón flotante puede existir a futuro. ── */
+  --floating-button-bottom: calc(env(safe-area-inset-bottom) + 96px);
+  --floating-menu-offset:   calc(env(safe-area-inset-bottom) + 228px);
+  --focus-button-offset:    calc(env(safe-area-inset-bottom) + 160px);
 }
 
 @media (min-width: 1024px) {
   :root {
-    --fab-bottom:          32px;
-    --fab-menu-bottom:     148px;
-    --focus-button-bottom: 88px;
+    --floating-button-bottom: 32px;
+    --floating-menu-offset:   148px;
+    --focus-button-offset:    88px;
   }
 }
 

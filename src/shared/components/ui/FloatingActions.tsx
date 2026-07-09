@@ -30,7 +30,7 @@ export function FloatingActions() {
   return (
     <div
       className="fixed z-30 right-5 lg:right-8"
-      style={{ bottom: "var(--fab-bottom)" }}
+      style={{ bottom: "var(--floating-button-bottom)" }}
       onClick={(e) => e.stopPropagation()}
     >
       {/* Menu — appears above FAB, siempre por encima del botón de Focus (z-30) */}
@@ -42,7 +42,7 @@ export function FloatingActions() {
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="fixed z-40 right-5 lg:right-8 min-w-[180px] rounded-md p-1.5"
-            style={{ background: "var(--bg)", border: "1px solid var(--border)", bottom: "var(--fab-menu-bottom)" }}
+            style={{ background: "var(--bg)", border: "1px solid var(--border)", bottom: "var(--floating-menu-offset)" }}
           >
             <button
               type="button"

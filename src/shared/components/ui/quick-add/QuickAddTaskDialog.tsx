@@ -12,12 +12,12 @@ interface Props {
 /** Solo sabe crear tareas desde el FAB global — no edita ni elimina. */
 export function QuickAddTaskDialog({ userId }: Props) {
   const { createTask } = useTasks(userId);
-  const target = useQuickAddStore((s) => s.target);
+  const dialog = useQuickAddStore((s) => s.dialog);
   const close = useQuickAddStore((s) => s.close);
 
   return (
     <TaskFormDialog
-      open={target === "task"}
+      open={dialog === "task"}
       onClose={close}
       task={null}
       userId={userId}
