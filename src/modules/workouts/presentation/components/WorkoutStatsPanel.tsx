@@ -2,9 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, ReferenceLine } from "recharts";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
-import { DAY_LETTERS } from "@/shared/constants/dayLabels";
+import { DAY_ABBR_KEYS } from "@/shared/constants/dayLabels";
 import { EXERCISE_TYPE_COLORS } from "../constants/workoutColors";
 import type { WorkoutWithStatus } from "../../domain/entities/Workout";
 
@@ -73,7 +73,7 @@ export function WorkoutStatsPanel({ stats }: Props) {
           <div className="flex items-center gap-2 mt-2">
             <p className="text-sm flex-1 min-w-0 truncate" style={{ color: "var(--text-primary)" }}>{stats.nextWorkout.name}</p>
             <span className="text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-              {stats.nextWorkout.dayOfWeek ? DAY_LETTERS[stats.nextWorkout.dayOfWeek - 1] : t("any_day")}
+              {stats.nextWorkout.dayOfWeek ? t(DAY_ABBR_KEYS[stats.nextWorkout.dayOfWeek - 1] as Parameters<typeof t>[0]) : t("any_day")}
               {stats.nextWorkout.startTime ? ` · ${formatTaskTime(stats.nextWorkout.startTime)}` : ""}
             </span>
           </div>
@@ -82,21 +82,15 @@ export function WorkoutStatsPanel({ stats }: Props) {
         )}
       </div>
 
-      {/* Progreso mensual — 4 bloques horizontales, uno por semana del mes
-          (puramente decorativos, no atados a datos — evita depender de los
-          ticks auto-calculados del eje Y de recharts para tener siempre
-          exactamente 4). Las líneas terminan antes de la fila de meses
-          (bottom-[18px], no inset-0) para no cruzar las etiquetas. El
+      {/* Progreso mensual — 4 líneas guía horizontales, una por semana del
+          mes. Usan ReferenceLine (recharts) en vez de divs absolutos: se
+          posicionan respecto al sistema de coordenadas real del gráfico, así
+          nunca invaden el área reservada para las etiquetas del XAxis. El
           dominio del eje Y queda fijo en [0,4] para que la barra suba
           exactamente hasta el bloque/semana que corresponda. */}
       <div style={sectionStyle}>
         <StatTitle>{t("stats_monthly")}</StatTitle>
         <div className="relative h-24 mt-2">
-          <div className="absolute inset-x-0 top-0 bottom-[18px] flex flex-col justify-between pointer-events-none">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="w-full h-px" style={{ background: "var(--text-muted)" }} />
-            ))}
-          </div>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.monthlyCounts} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
               <XAxis dataKey="month" tick={{ fontSize: 10, fill: "var(--text-muted)" }} axisLine={false} tickLine={false} />
@@ -110,6 +104,10 @@ export function WorkoutStatsPanel({ stats }: Props) {
                   color: "var(--text-primary)",
                 }}
               />
+              <ReferenceLine y={1} stroke="var(--text-secondary)" strokeWidth={0.75} />
+              <ReferenceLine y={2} stroke="var(--text-secondary)" strokeWidth={0.75} />
+              <ReferenceLine y={3} stroke="var(--text-secondary)" strokeWidth={0.75} />
+              <ReferenceLine y={4} stroke="var(--text-secondary)" strokeWidth={0.75} />
               <Bar dataKey="count" fill="var(--text-primary)" radius={[3, 3, 0, 0]} maxBarSize={18} />
             </BarChart>
           </ResponsiveContainer>
