@@ -419,6 +419,7 @@
     "type_cardio": "Cardio",
     "type_mixed": "Mixed",
     "day_label": "Day",
+    "schedule_label": "Schedule",
     "start_time_label": "Time",
     "estimated_duration_label": "Estimated duration",
     "duration_unit": "min",

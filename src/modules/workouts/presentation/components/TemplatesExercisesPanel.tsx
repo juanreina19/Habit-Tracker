@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, Dumbbell, Pencil, Trash2 } from "lucide-react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { WorkoutExerciseSupabaseRepository } from "../../infrastructure/supabase/WorkoutExerciseSupabaseRepository";
 import { ExerciseRow } from "./ExerciseRow";
@@ -27,9 +27,8 @@ interface Props {
 /**
  * Templates (acordeón, mismo patrón que SubjectCard.tsx en Studies) y
  * Exercises (el catálogo guardado, solo lectura) como dos pestañas de una
- * misma sección — Exercises a la izquierda de Templates. La línea divisoria
- * va arriba de las pestañas (border-top), no al lado del texto como el
- * SectionHeader compartido.
+ * misma sección — Templates a la izquierda, Exercises a la derecha. Sin
+ * línea divisoria (solo espaciado), igual criterio que el strip semanal.
  */
 export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, onDelete }: Props) {
   const t = useTranslations("workouts");
@@ -63,15 +62,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
 
   return (
     <div>
-      <div className="flex items-center gap-4" style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}>
-        <button
-          type="button"
-          onClick={() => setViewMode("exercises")}
-          className="text-[11px] uppercase tracking-[0.12em] transition-colors"
-          style={{ color: viewMode === "exercises" ? "var(--text-primary)" : "var(--text-muted)" }}
-        >
-          {t("exercises_label")}
-        </button>
+      <div className="flex items-center gap-4">
         <button
           type="button"
           onClick={() => setViewMode("templates")}
@@ -79,6 +70,14 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
           style={{ color: viewMode === "templates" ? "var(--text-primary)" : "var(--text-muted)" }}
         >
           {t("templates")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setViewMode("exercises")}
+          className="text-[11px] uppercase tracking-[0.12em] transition-colors"
+          style={{ color: viewMode === "exercises" ? "var(--text-primary)" : "var(--text-muted)" }}
+        >
+          {t("exercises_label")}
         </button>
       </div>
 
@@ -122,29 +121,34 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
 
                     return (
                       <div key={w.id} className="rounded-lg" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
-                        <div
-                          onClick={() => setExpandedId(isExpanded ? null : w.id)}
-                          className="group flex items-center gap-3 p-2.5 cursor-pointer"
-                        >
-                          <motion.span
-                            animate={{ rotate: isExpanded ? 180 : 0 }}
-                            transition={{ duration: 0.15 }}
-                            className="flex-shrink-0"
-                            style={{ color: "var(--text-muted)" }}
+                        <div className="group flex items-center gap-3 p-2.5">
+                          <Dumbbell size={16} strokeWidth={1.5} className="flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+                          <button
+                            type="button"
+                            onClick={() => setExpandedId(isExpanded ? null : w.id)}
+                            className="flex-1 min-w-0 text-left"
                           >
-                            <ChevronDown size={14} strokeWidth={1.5} />
-                          </motion.span>
-                          <div className="flex-1 min-w-0">
                             <p className="text-sm truncate" style={{ color: "var(--text-primary)" }}>{w.name}</p>
                             <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>{subtitle}</p>
-                          </div>
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                            <button type="button" onClick={(e) => { e.stopPropagation(); onEdit(w); }}
+                          </button>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <motion.button
+                              type="button"
+                              onClick={() => setExpandedId(isExpanded ? null : w.id)}
+                              animate={{ rotate: isExpanded ? 180 : 0 }}
+                              transition={{ duration: 0.15 }}
+                              className="w-7 h-7 rounded-md flex items-center justify-center"
+                              style={{ color: "var(--text-muted)" }}
+                              aria-label={t("exercises_label")}
+                            >
+                              <ChevronDown size={14} strokeWidth={1.5} />
+                            </motion.button>
+                            <button type="button" onClick={() => onEdit(w)}
                               className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
                               style={{ color: "var(--text-secondary)" }} aria-label={t("edit_workout")}>
                               <Pencil size={13} strokeWidth={1.5} />
                             </button>
-                            <button type="button" onClick={(e) => { e.stopPropagation(); onDelete(w); }}
+                            <button type="button" onClick={() => onDelete(w)}
                               className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70"
                               style={{ color: "var(--danger)" }} aria-label={t("delete")}>
                               <Trash2 size={13} strokeWidth={1.5} />
