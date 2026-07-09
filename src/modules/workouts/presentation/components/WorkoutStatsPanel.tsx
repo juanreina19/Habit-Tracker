@@ -23,15 +23,26 @@ interface Props {
   stats: WorkoutStats;
 }
 
+/** Título de sección — sin negrita, gris apagado (var(--text-muted), no
+ *  --text-secondary) para que se lea como metadata, no como encabezado. */
+function StatTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="text-[11px] uppercase tracking-[0.12em]" style={{ color: "var(--text-muted)" }}>
+      {children}
+    </p>
+  );
+}
+
 /**
  * Panel de widgets pequeños — un solo sitio de uso, mismo precedente "una
- * pantalla, un panel de stats" que StudyStatsPanel.tsx. Nada de dashboards
- * grandes: solo lo pedido (progreso mensual, recientes, %fuerza/cardio,
- * próximo entrenamiento, racha, consistencia semanal, ejercicios principales).
+ * pantalla, un panel de stats" que StudyStatsPanel.tsx. Las secciones no
+ * son cajas con borde propio — fluyen en una sola columna, separadas por
+ * una línea horizontal entre ellas (border-top), no un grid de cards.
  */
 export function WorkoutStatsPanel({ stats }: Props) {
   const t = useTranslations("workouts");
   const maxTopExerciseCount = stats.topExercises[0]?.count ?? 1;
+  const sectionStyle = { borderTop: "1px solid var(--border)", paddingTop: "1rem" };
 
   return (
     <div className="flex flex-col gap-4">
@@ -41,7 +52,7 @@ export function WorkoutStatsPanel({ stats }: Props) {
           <p className="text-3xl font-medium tabular-nums" style={{ color: "var(--text-primary)" }}>
             {stats.streak}
           </p>
-          <p className="text-[11px] mt-1 uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-[11px] mt-1 uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
             {t("stats_streak")}
           </p>
         </div>
@@ -49,19 +60,17 @@ export function WorkoutStatsPanel({ stats }: Props) {
           <p className="text-3xl font-medium tabular-nums" style={{ color: "var(--text-primary)" }}>
             {stats.weeklyConsistencyPct}%
           </p>
-          <p className="text-[11px] mt-1 uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-[11px] mt-1 uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
             {t("stats_weekly_consistency")}
           </p>
         </div>
       </div>
 
       {/* Próximo entrenamiento */}
-      <div className="rounded-lg p-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-secondary)" }}>
-          {t("stats_next_workout")}
-        </p>
+      <div style={sectionStyle}>
+        <StatTitle>{t("stats_next_workout")}</StatTitle>
         {stats.nextWorkout ? (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-2">
             <p className="text-sm flex-1 min-w-0 truncate" style={{ color: "var(--text-primary)" }}>{stats.nextWorkout.name}</p>
             <span className="text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }}>
               {stats.nextWorkout.dayOfWeek ? DAY_LETTERS[stats.nextWorkout.dayOfWeek - 1] : t("any_day")}
@@ -69,16 +78,14 @@ export function WorkoutStatsPanel({ stats }: Props) {
             </span>
           </div>
         ) : (
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("no_workouts")}</p>
+          <p className="text-sm mt-2" style={{ color: "var(--text-muted)" }}>{t("no_workouts")}</p>
         )}
       </div>
 
       {/* Progreso mensual — barras simples */}
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-2" style={{ color: "var(--text-secondary)" }}>
-          {t("stats_monthly")}
-        </p>
-        <div className="h-24">
+      <div style={sectionStyle}>
+        <StatTitle>{t("stats_monthly")}</StatTitle>
+        <div className="h-24 mt-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.monthlyCounts}>
               <XAxis dataKey="month" tick={{ fontSize: 10, fill: "var(--text-muted)" }} axisLine={false} tickLine={false} />
@@ -100,11 +107,9 @@ export function WorkoutStatsPanel({ stats }: Props) {
 
       {/* % Fuerza / Cardio — a nivel de ejercicio, para que Mixed se reparta bien */}
       {(stats.strengthPct > 0 || stats.cardioPct > 0) && (
-        <div className="rounded-lg p-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
-            {t("stats_strength_cardio")}
-          </p>
-          <div className="h-2 rounded-full overflow-hidden flex" style={{ background: "var(--border)" }}>
+        <div style={sectionStyle}>
+          <StatTitle>{t("stats_strength_cardio")}</StatTitle>
+          <div className="h-2 rounded-full overflow-hidden flex mt-3" style={{ background: "var(--border)" }}>
             <div style={{ width: `${stats.strengthPct}%`, background: EXERCISE_TYPE_COLORS.strength }} />
             <div style={{ width: `${stats.cardioPct}%`, background: EXERCISE_TYPE_COLORS.cardio }} />
           </div>
@@ -117,11 +122,9 @@ export function WorkoutStatsPanel({ stats }: Props) {
 
       {/* Ejercicios principales */}
       {stats.topExercises.length > 0 && (
-        <div className="rounded-lg p-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
-            {t("stats_top_exercises")}
-          </p>
-          <div className="flex flex-col gap-2">
+        <div style={sectionStyle}>
+          <StatTitle>{t("stats_top_exercises")}</StatTitle>
+          <div className="flex flex-col gap-2 mt-3">
             {stats.topExercises.map((ex) => (
               <div key={ex.name} className="flex items-center gap-3">
                 <span className="text-xs w-20 flex-shrink-0 truncate" style={{ color: "var(--text-primary)" }}>{ex.name}</span>
@@ -139,14 +142,12 @@ export function WorkoutStatsPanel({ stats }: Props) {
       )}
 
       {/* Recientes */}
-      <div className="rounded-lg p-4" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
-          {t("stats_recent")}
-        </p>
+      <div style={sectionStyle}>
+        <StatTitle>{t("stats_recent")}</StatTitle>
         {stats.recentCompletions.length === 0 ? (
           <p className="text-sm text-center py-4" style={{ color: "var(--text-muted)" }}>{t("no_recent_workouts")}</p>
         ) : (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 mt-2">
             {stats.recentCompletions.map((c, idx) => (
               <div key={`${c.workoutId}-${c.completedAt}-${idx}`} className="flex items-center gap-3 px-3 py-2 rounded-md" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
                 <div className="flex-1 min-w-0">
