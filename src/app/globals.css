@@ -39,7 +39,7 @@
   --nav-border: rgba(255,255,255,0.10);
 
   /* ── Sidebar ── */
-  --sidebar-width:        69px;
+  --sidebar-width:        64px;
   --sidebar-active-bg:    rgba(255, 255, 255, 0.08);
   --sidebar-hover-bg:     rgba(255, 255, 255, 0.04);
   --sidebar-active-color: #e8e8e8;

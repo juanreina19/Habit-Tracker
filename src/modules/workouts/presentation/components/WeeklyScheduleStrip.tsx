@@ -40,13 +40,13 @@ export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Prop
               key={day}
               type="button"
               onClick={() => onSelectDay(day)}
-              className="w-11 h-11 flex flex-col items-center justify-center gap-1 rounded-md transition-colors"
+              className="flex-1 aspect-square flex flex-col items-center justify-center gap-1 rounded-md transition-colors"
               style={{
                 background: isSelected ? "var(--surface-hover)" : "transparent",
               }}
             >
               <span
-                className="text-xs"
+                className="text-sm"
                 style={{
                   color: isSelected ? "var(--text-primary)" : isToday ? "var(--accent)" : "var(--text-secondary)",
                 }}
