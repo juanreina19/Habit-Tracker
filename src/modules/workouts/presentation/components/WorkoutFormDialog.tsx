@@ -243,7 +243,10 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                   </div>
 
                   {/* Modo de agregar ejercicio — Fuerza / Cardio / Guardados */}
-                  <div className="flex rounded-md overflow-hidden" style={{ border: "1px solid var(--border)" }}>
+                  <div
+                    className="inline-flex self-center rounded-md overflow-hidden"
+                    style={{ border: "1px solid var(--border)", background: "var(--bg)", padding: "2px" }}
+                  >
                     {([
                       { mode: "strength" as const, Icon: Dumbbell, label: t("type_strength") },
                       { mode: "cardio" as const, Icon: Zap, label: t("type_cardio") },
@@ -253,13 +256,13 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         key={mode}
                         type="button"
                         onClick={() => setAddMode(mode)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs transition-colors"
+                        className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-md text-xs transition-colors"
                         style={{
                           background: addMode === mode ? "var(--surface-hover)" : "var(--bg)",
-                          color: addMode === mode ? "var(--text-primary)" : "var(--text-secondary)",
+                          color: addMode === mode ? "var(--text-primary)" : "var(--text-muted)",
                         }}
                       >
-                        <Icon size={13} strokeWidth={2} />
+                        <Icon size={13} strokeWidth={2} color={addMode === mode ? "var(--text-primary)" : "var(--text-muted)"} />
                         {label}
                       </button>
                     ))}
@@ -276,12 +279,12 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         onClick={handleAddExercise}
                         className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center transition-opacity"
                         style={{
-                          background: newExerciseName.trim() ? "var(--text-muted)" : "var(--border)",
-                          color: newExerciseName.trim() ? "var(--bg)" : "var(--text-muted)",
+                          background: newExerciseName.trim() ? "var(--btn-primary-bg)" : "var(--border)",
+                          color: newExerciseName.trim() ? "var(--btn-primary-text)" : "var(--text-muted)",
                           cursor: newExerciseName.trim() ? "pointer" : "default",
                         }}
                       >
-                        <Plus size={10} strokeWidth={2} />
+                        <Plus size={10} strokeWidth={2} color={newExerciseName.trim() ? "var(--btn-primary-text)" : "var(--text-muted)"} />
                       </button>
                       <input
                         type="text"
@@ -289,7 +292,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         onChange={(e) => setNewExerciseName(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddExercise(); } }}
                         placeholder={t("add_exercise_placeholder")}
-                        className="flex-1 py-1 text-sm outline-none bg-transparent"
+                        className="flex-1 py-1 text-sm outline-none bg-transparent placeholder:text-[var(--text-muted)] placeholder:opacity-100"
                         style={{ color: "var(--text-muted)" }}
                       />
                     </div>
@@ -312,7 +315,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                   )}
 
                   {/* Metadata — pills estilo Tasks: DÍAS, HORA, Categoría */}
-                  <div className="flex flex-wrap gap-1.5 py-2" style={{ borderTop: "1px solid var(--border)" }}>
+                  <div className="flex flex-wrap gap-1.5 py-2 mt-2 justify-center">
                     <div className="relative">
                       <button
                         type="button"
