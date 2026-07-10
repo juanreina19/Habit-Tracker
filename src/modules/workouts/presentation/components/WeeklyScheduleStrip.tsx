@@ -41,7 +41,7 @@ export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Prop
               key={day}
               type="button"
               onClick={() => onSelectDay(day)}
-              className="flex-1 aspect-square flex flex-col items-center justify-center gap-1 rounded-md transition-colors"
+              className="relative flex-1 aspect-square flex flex-col items-center justify-center gap-1 rounded-md transition-colors"
               style={{
                 background: isSelected ? "var(--surface-hover)" : "transparent",
               }}
@@ -57,11 +57,11 @@ export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Prop
               <span
                 className="w-1.5 h-1.5 rounded-full"
                 style={{
-                  background: hasWorkout ? "var(--text-secondary)" : "var(--text-disabled)",
+                  background: isToday ? "var(--btn-primary-bg)" : hasWorkout ? "var(--text-secondary)" : "var(--text-muted-darker)",
                 }}
               />
               {isSelected && isToday && (
-                <span className="text-[9px] leading-none" style={{ color: "var(--text-muted)" }}>
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] leading-none" style={{ color: "var(--text-muted)" }}>
                   {t("today_label")}
                 </span>
               )}

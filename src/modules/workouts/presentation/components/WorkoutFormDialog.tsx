@@ -244,8 +244,8 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
 
                   {/* Modo de agregar ejercicio — Fuerza / Cardio / Guardados */}
                   <div
-                    className="flex rounded-md overflow-hidden"
-                    style={{ border: "1px solid var(--border)", background: "var(--bg)", padding: "2px" }}
+                    className="flex rounded-sm overflow-hidden"
+                    style={{ border: "1px solid var(--border)", background: "var(--bg)", padding: "4px" }}
                   >
                     {([
                       { mode: "strength" as const, Icon: Dumbbell, label: t("type_strength") },
@@ -256,7 +256,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         key={mode}
                         type="button"
                         onClick={() => setAddMode(mode)}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded text-xs transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[2px] text-xs transition-colors"
                         style={{
                           background: addMode === mode ? "var(--surface-hover)" : "var(--bg)",
                           color: addMode === mode ? "var(--text-primary)" : "var(--text-muted-darker)",
@@ -442,7 +442,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                       <button
                         onClick={handleSave}
                         disabled={isSaving || !name.trim()}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm transition-opacity active:opacity-70 disabled:opacity-30"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-sm text-sm transition-opacity active:opacity-70 disabled:opacity-30"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
                         {isSaving ? t("saving") : <>{t("save")} →</>}

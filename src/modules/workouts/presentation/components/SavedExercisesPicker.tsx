@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { Search, Info } from "lucide-react";
+import { Search, Info, Plus } from "lucide-react";
 import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 import type { ExerciseCatalogItem } from "../../domain/entities/WorkoutExercise";
 
@@ -87,12 +87,18 @@ export function SavedExercisesPicker({ searchCatalog, onSelect }: Props) {
             <button
               key={item.id}
               type="button"
-              onClick={() => onSelect(item)}
-              className="flex items-center w-full px-3 py-2 rounded-md text-sm text-left transition-colors"
-              style={{ background: "var(--bg)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+              onClick={() => { onSelect(item); setQuery(""); }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 rounded-md text-sm text-left transition-colors"
+              style={{ background: "var(--bg)", color: "var(--text-primary)" }}
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg)")}
             >
+              <span
+                className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center"
+                style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+              >
+                <Plus size={10} strokeWidth={2} />
+              </span>
               {item.name}
             </button>
           ))}
