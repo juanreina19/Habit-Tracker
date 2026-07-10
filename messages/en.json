@@ -433,6 +433,7 @@
     "confirm_time": "Confirm",
     "sets_label": "Sets",
     "reps_label": "Reps",
+    "reps_short": "reps",
     "sets_placeholder": "Sets (optional)",
     "notes_placeholder": "Notes (optional)",
     "no_exercises": "No exercises yet",

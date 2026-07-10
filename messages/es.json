@@ -433,6 +433,7 @@
     "confirm_time": "Confirmar",
     "sets_label": "Series",
     "reps_label": "Repeticiones",
+    "reps_short": "reps",
     "sets_placeholder": "Series (opcional)",
     "notes_placeholder": "Notas (opcional)",
     "no_exercises": "Sin ejercicios todavía",

@@ -111,7 +111,7 @@ export class WorkoutExerciseSupabaseRepository implements IWorkoutExerciseReposi
       .from("exercise_catalog")
       .select("*")
       .eq("user_id", userId)
-      .ilike("name", `%${query}%`)
+      .ilike("name", `${query}%`)
       .order("name", { ascending: true })
       .limit(8);
     if (error) throw error;
