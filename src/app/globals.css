@@ -160,13 +160,13 @@
 /* ── Reset ── */
 * { box-sizing: border-box; padding: 0; margin: 0; }
 
-/* ── Peso de fuente global — 300 (light) en toda la app, sin excepciones.
+/* ── Peso de fuente global — 350 en toda la app, sin excepciones.
    !important es deliberado: las clases de Tailwind (font-medium,
    font-semibold, font-bold) tienen la misma especificidad que un
    selector universal y ganarían por orden de carga si no se fuerza
    aquí; el pedido explícito fue "ningún módulo, vista, etc. sin
    aplicar esto". ── */
-* { font-weight: 300 !important; }
+* { font-weight: 350 !important; }
 
 /* ── Base typography ── */
 html, body {
