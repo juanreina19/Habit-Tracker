@@ -243,7 +243,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                   </div>
 
                   {/* Modo de agregar ejercicio — Fuerza / Cardio / Guardados */}
-                  <div className="flex rounded-md overflow-hidden divide-x divide-[var(--border)]" style={{ border: "1px solid var(--border)" }}>
+                  <div className="flex rounded-md overflow-hidden" style={{ border: "1px solid var(--border)" }}>
                     {([
                       { mode: "strength" as const, Icon: Dumbbell, label: t("type_strength") },
                       { mode: "cardio" as const, Icon: Zap, label: t("type_cardio") },

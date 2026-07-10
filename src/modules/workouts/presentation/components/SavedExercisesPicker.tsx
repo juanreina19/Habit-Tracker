@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
-import { Tooltip } from "@/shared/components/ui/Tooltip";
+import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 import type { ExerciseCatalogItem } from "../../domain/entities/WorkoutExercise";
 
 interface Props {
@@ -34,14 +34,16 @@ export function SavedExercisesPicker({ searchCatalog, onSelect }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <div className="relative">
-        <Tooltip label={t("saved_search_hint")} side="top">
-          <Search
-            size={14}
-            strokeWidth={2}
-            className="absolute left-3 top-1/2 -translate-y-1/2"
-            style={{ color: "var(--text-muted)" }}
-          />
-        </Tooltip>
+        <TooltipProvider>
+          <Tooltip label={t("saved_search_hint")} side="top">
+            <Search
+              size={14}
+              strokeWidth={2}
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+              style={{ color: "var(--text-muted)" }}
+            />
+          </Tooltip>
+        </TooltipProvider>
         <input
           type="text"
           value={query}
