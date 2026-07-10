@@ -187,7 +187,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
           className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
-          style={{ background: "var(--bg)", border: "1px solid var(--border)", maxHeight: "90dvh" }}
+          style={{ background: "var(--bg)", maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto px-6 pt-3 pb-6 hide-scrollbar" style={{ maxHeight: "90dvh" }}>
             <div className="flex items-center justify-end mb-0.5 -mr-3">
@@ -236,7 +236,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                       onKeyDown={(e) => { if (e.key === "Enter" && !isEdit && name.trim()) { e.preventDefault(); handleSave(); } }}
                       placeholder={t("workout_name_placeholder")}
                       autoFocus
-                      className="w-full text-2xl font-normal outline-none bg-transparent"
+                      className="w-full text-2xl font-normal outline-none bg-transparent placeholder:text-[var(--text-muted-darker)] placeholder:opacity-100"
                       style={{ color: "var(--text-primary)" }}
                     />
                     {nameError && <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{nameError}</p>}
@@ -244,7 +244,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
 
                   {/* Modo de agregar ejercicio — Fuerza / Cardio / Guardados */}
                   <div
-                    className="inline-flex self-center rounded-md overflow-hidden"
+                    className="flex rounded-md overflow-hidden"
                     style={{ border: "1px solid var(--border)", background: "var(--bg)", padding: "2px" }}
                   >
                     {([
@@ -256,13 +256,13 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         key={mode}
                         type="button"
                         onClick={() => setAddMode(mode)}
-                        className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-md text-xs transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded text-xs transition-colors"
                         style={{
                           background: addMode === mode ? "var(--surface-hover)" : "var(--bg)",
-                          color: addMode === mode ? "var(--text-primary)" : "var(--text-muted)",
+                          color: addMode === mode ? "var(--text-primary)" : "var(--text-muted-darker)",
                         }}
                       >
-                        <Icon size={13} strokeWidth={2} color={addMode === mode ? "var(--text-primary)" : "var(--text-muted)"} />
+                        <Icon size={13} strokeWidth={2} color={addMode === mode ? "var(--text-primary)" : "var(--text-muted-darker)"} />
                         {label}
                       </button>
                     ))}
@@ -292,8 +292,8 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         onChange={(e) => setNewExerciseName(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddExercise(); } }}
                         placeholder={t("add_exercise_placeholder")}
-                        className="flex-1 py-1 text-sm outline-none bg-transparent placeholder:text-[var(--text-muted)] placeholder:opacity-100"
-                        style={{ color: "var(--text-muted)" }}
+                        className="flex-1 py-1 text-sm outline-none bg-transparent placeholder:text-[var(--text-muted-darker)] placeholder:opacity-100"
+                        style={{ color: "var(--text-muted-darker)" }}
                       />
                     </div>
                   )}
@@ -315,7 +315,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                   )}
 
                   {/* Metadata — pills estilo Tasks: DÍAS, HORA, Categoría */}
-                  <div className="flex flex-wrap gap-1.5 py-2 mt-2 justify-center">
+                  <div className="flex flex-wrap gap-1.5 py-2 mt-2">
                     <div className="relative">
                       <button
                         type="button"
@@ -397,6 +397,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                           style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                         >
                           <span className="w-1.5 h-1.5 rounded-full" style={{ background: categories.find((c) => c.id === categoryId)?.color ?? "var(--text-muted)" }} />
+                          <span style={{ color: "var(--text-muted)" }}>{t("category_label").toUpperCase()}</span>
                           {categories.find((c) => c.id === categoryId)?.name ?? "—"}
                         </button>
                         {catOpen && (
