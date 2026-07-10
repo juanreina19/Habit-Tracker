@@ -437,6 +437,7 @@
     "no_exercises": "Sin ejercicios todavía",
     "no_exercises_hint": "Añade el primer ejercicio de este entrenamiento.",
     "no_saved_exercises": "Sin ejercicios guardados todavía",
+    "no_exercises_found": "No se encontró ningún ejercicio",
     "mark_complete": "Marcar completado",
     "completed_today": "Completado hoy",
     "templates": "Plantillas",
