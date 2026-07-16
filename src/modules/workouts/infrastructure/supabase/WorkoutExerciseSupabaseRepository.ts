@@ -20,6 +20,7 @@ function mapExercise(row: DbWorkoutExercise): WorkoutExercise {
     order: row.order,
     sets: row.sets,
     reps: row.reps,
+    durationMin: row.duration_min,
     notes: row.notes,
     createdAt: row.created_at,
   };
@@ -66,6 +67,7 @@ export class WorkoutExerciseSupabaseRepository implements IWorkoutExerciseReposi
         order: count ?? 0,
         sets: input.sets ?? null,
         reps: input.reps ?? null,
+        duration_min: input.durationMin ?? null,
         notes: input.notes ?? null,
       })
       .select()
@@ -81,6 +83,7 @@ export class WorkoutExerciseSupabaseRepository implements IWorkoutExerciseReposi
     if (input.order !== undefined) patch.order = input.order;
     if (input.sets !== undefined) patch.sets = input.sets;
     if (input.reps !== undefined) patch.reps = input.reps;
+    if (input.durationMin !== undefined) patch.duration_min = input.durationMin;
     if (input.notes !== undefined) patch.notes = input.notes;
 
     const { data, error } = await this.client
@@ -151,5 +154,25 @@ export class WorkoutExerciseSupabaseRepository implements IWorkoutExerciseReposi
       .single();
     if (error) throw error;
     return mapCatalogItem(data);
+  }
+
+  async updateCatalogEntry(id: UUID, input: { name?: string; defaultType?: ExerciseType | null }): Promise<ExerciseCatalogItem> {
+    const patch: Record<string, unknown> = {};
+    if (input.name !== undefined) patch.name = input.name.trim();
+    if (input.defaultType !== undefined) patch.default_type = input.defaultType;
+
+    const { data, error } = await this.client
+      .from("exercise_catalog")
+      .update(patch)
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return mapCatalogItem(data);
+  }
+
+  async deleteCatalogEntry(id: UUID): Promise<void> {
+    const { error } = await this.client.from("exercise_catalog").delete().eq("id", id);
+    if (error) throw error;
   }
 }

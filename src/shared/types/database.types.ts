@@ -246,6 +246,7 @@ export interface DbWorkoutExercise {
   order: number;
   sets: number | null;
   reps: number | null;
+  duration_min: number | null;
   notes: string | null;
   created_at: ISOTimestamp;
 }

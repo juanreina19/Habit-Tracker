@@ -3,18 +3,21 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { ChevronDown, Dumbbell, Pencil, Trash2 } from "lucide-react";
+import { ChevronDown, Dumbbell, Pencil, Trash2, Check, X } from "lucide-react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { WorkoutExerciseSupabaseRepository } from "../../infrastructure/supabase/WorkoutExerciseSupabaseRepository";
+import { UpdateExerciseCatalogUseCase } from "../../domain/use-cases/UpdateExerciseCatalogUseCase";
+import { DeleteExerciseCatalogUseCase } from "../../domain/use-cases/DeleteExerciseCatalogUseCase";
 import { ExerciseRow } from "./ExerciseRow";
 import { DAY_ABBR_KEYS } from "@/shared/constants/dayLabels";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import type { WorkoutWithStatus } from "../../domain/entities/Workout";
-import type { ExerciseCatalogItem } from "../../domain/entities/WorkoutExercise";
+import type { ExerciseCatalogItem, ExerciseType } from "../../domain/entities/WorkoutExercise";
 import type { Category } from "@/modules/categories/domain/entities/Category";
 import type { UUID } from "@/shared/types/database.types";
 
 type ViewMode = "templates" | "exercises";
+type CatalogFilter = "all" | ExerciseType;
 
 interface Props {
   userId: UUID;
@@ -35,9 +38,42 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
   const [expandedId, setExpandedId] = useState<UUID | null>(null);
   const [catalog, setCatalog] = useState<ExerciseCatalogItem[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogFilter, setCatalogFilter] = useState<CatalogFilter>("all");
+  const [editingCatalogId, setEditingCatalogId] = useState<UUID | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editType, setEditType] = useState<ExerciseType | null>(null);
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
   const getRepo = useCallback(() => new WorkoutExerciseSupabaseRepository(createClient()), []);
+
+  const filteredCatalog = useMemo(
+    () => (catalogFilter === "all" ? catalog : catalog.filter((item) => item.defaultType === catalogFilter)),
+    [catalog, catalogFilter]
+  );
+
+  const startEditCatalog = (item: ExerciseCatalogItem) => {
+    setEditingCatalogId(item.id);
+    setEditName(item.name);
+    setEditType(item.defaultType);
+  };
+
+  const cancelEditCatalog = () => {
+    setEditingCatalogId(null);
+    setEditName("");
+    setEditType(null);
+  };
+
+  const saveEditCatalog = async () => {
+    if (!editingCatalogId || !editName.trim()) return;
+    const updated = await new UpdateExerciseCatalogUseCase(getRepo()).execute(editingCatalogId, { name: editName, defaultType: editType });
+    setCatalog((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+    cancelEditCatalog();
+  };
+
+  const handleDeleteCatalog = async (id: UUID) => {
+    setCatalog((prev) => prev.filter((item) => item.id !== id));
+    await new DeleteExerciseCatalogUseCase(getRepo()).execute(id);
+  };
 
   useEffect(() => {
     if (viewMode !== "exercises") return;
@@ -82,21 +118,83 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
 
       {viewMode === "exercises" ? (
         <div className="flex flex-col mt-3">
+          <div className="flex gap-1.5 mb-3">
+            {(["all", "strength", "cardio"] as const).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setCatalogFilter(f)}
+                className="px-3 py-1 rounded-full text-[11px] transition-colors"
+                style={{
+                  background: catalogFilter === f ? "var(--surface-hover)" : "transparent",
+                  color: catalogFilter === f ? "var(--text-primary)" : "var(--text-muted)",
+                  border: "1px solid var(--border)",
+                }}
+              >
+                {f === "all" ? t("filter_all") : f === "strength" ? t("type_strength") : t("type_cardio")}
+              </button>
+            ))}
+          </div>
+
           {catalogLoading ? (
             <p className="text-sm text-center py-6" style={{ color: "var(--text-muted)" }}>…</p>
-          ) : catalog.length === 0 ? (
+          ) : filteredCatalog.length === 0 ? (
             <p className="text-sm text-center py-6" style={{ color: "var(--text-muted)" }}>{t("no_saved_exercises")}</p>
           ) : (
-            catalog.map((item) => (
-              <div key={item.id} className="flex items-center gap-2.5 py-1.5" style={{ borderBottom: "1px solid var(--border)" }}>
-                <span className="flex-1 text-sm truncate" style={{ color: "var(--text-primary)" }}>{item.name}</span>
-                {item.defaultType && (
-                  <span className="text-[10px] uppercase tracking-wide flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-                    {item.defaultType === "strength" ? t("type_strength") : t("type_cardio")}
-                  </span>
-                )}
-              </div>
-            ))
+            <div className="flex flex-col gap-1.5">
+              {filteredCatalog.map((item) => (
+                <div key={item.id} className="rounded-md p-2 flex items-center gap-2.5" style={{ border: "1px solid var(--border)" }}>
+                  {editingCatalogId === item.id ? (
+                    <>
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") saveEditCatalog(); if (e.key === "Escape") cancelEditCatalog(); }}
+                        autoFocus
+                        className="flex-1 min-w-0 rounded-md px-2 py-1 text-sm outline-none"
+                        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
+                      />
+                      <div className="flex gap-1 flex-shrink-0">
+                        <button type="button" onClick={() => setEditType("strength")}
+                          className="w-2.5 h-2.5 rounded-full transition-transform"
+                          style={{ background: "var(--text-primary)", opacity: editType === "strength" ? 1 : 0.25, transform: editType === "strength" ? "scale(1.2)" : "scale(1)" }}
+                          aria-label={t("type_strength")} />
+                        <button type="button" onClick={() => setEditType("cardio")}
+                          className="w-2.5 h-2.5 rounded-full transition-transform"
+                          style={{ background: "var(--text-muted)", opacity: editType === "cardio" ? 1 : 0.25, transform: editType === "cardio" ? "scale(1.2)" : "scale(1)" }}
+                          aria-label={t("type_cardio")} />
+                      </div>
+                      <button type="button" onClick={saveEditCatalog} className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ color: "var(--text-primary)" }} aria-label={t("save")}>
+                        <Check size={14} strokeWidth={2} />
+                      </button>
+                      <button type="button" onClick={cancelEditCatalog} className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ color: "var(--text-muted)" }} aria-label={t("cancel")}>
+                        <X size={14} strokeWidth={2} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <span className="flex-1 min-w-0 text-sm truncate" style={{ color: "var(--text-primary)" }}>{item.name}</span>
+                      {item.defaultType && (
+                        <span className="text-[10px] uppercase tracking-wide flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+                          {item.defaultType === "strength" ? t("type_strength") : t("type_cardio")}
+                        </span>
+                      )}
+                      <button type="button" onClick={() => startEditCatalog(item)}
+                        className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70 flex-shrink-0"
+                        style={{ color: "var(--text-secondary)" }} aria-label={t("edit_exercise")}>
+                        <Pencil size={13} strokeWidth={2} />
+                      </button>
+                      <button type="button" onClick={() => handleDeleteCatalog(item.id)}
+                        className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70 flex-shrink-0"
+                        style={{ color: "var(--danger)" }} aria-label={t("delete")}>
+                        <Trash2 size={13} strokeWidth={2} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
           )}
         </div>
       ) : (
@@ -167,7 +265,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
                               transition={{ duration: 0.2 }}
                               className="overflow-hidden"
                             >
-                              <div className="px-2.5 pb-2.5 pt-1 flex flex-col gap-1" style={{ borderTop: "1px solid var(--border)" }}>
+                              <div className="pl-[26px] pr-2.5 pb-2.5 pt-1 flex flex-col gap-1" style={{ borderTop: "1px solid var(--border)" }}>
                                 {w.exercises.length === 0 ? (
                                   <p className="text-sm py-2" style={{ color: "var(--text-muted)" }}>{t("no_exercises")}</p>
                                 ) : (
