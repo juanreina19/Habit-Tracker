@@ -26,6 +26,8 @@ export interface WorkoutExercise {
   order: number;
   sets: number | null;     // objetivo de plan (estilo "3x10"), nunca un registro de lo realizado
   reps: number | null;     // ídem — nunca peso/RM/volumen
+  durationMin: number | null; // alternativa a reps para ejercicios por tiempo ("5 min" de bici) —
+                              // el modo se infiere de cuál de los dos está poblado, no hay campo aparte
   notes: string | null;    // opcional, texto libre
   createdAt: ISOTimestamp;
 }
@@ -37,6 +39,7 @@ export interface CreateWorkoutExerciseInput {
   type: ExerciseType;
   sets?: number | null;
   reps?: number | null;
+  durationMin?: number | null;
   notes?: string | null;
 }
 
@@ -46,5 +49,6 @@ export interface UpdateWorkoutExerciseInput {
   order?: number;
   sets?: number | null;
   reps?: number | null;
+  durationMin?: number | null;
   notes?: string | null;
 }

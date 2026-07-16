@@ -14,4 +14,8 @@ export interface IWorkoutExerciseRepository {
   listCatalog(userId: UUID): Promise<ExerciseCatalogItem[]>;
   /** Upsert case-insensitive por nombre — se llama internamente al crear un ejercicio. */
   upsertCatalogEntry(userId: UUID, name: string, defaultType: ExerciseType | null): Promise<ExerciseCatalogItem>;
+  /** Edita nombre/tipo del catálogo — no cascada a ejercicios ya creados (denormalizados a propósito). */
+  updateCatalogEntry(id: UUID, input: { name?: string; defaultType?: ExerciseType | null }): Promise<ExerciseCatalogItem>;
+  /** Seguro de borrar: workout_exercises.catalog_exercise_id es ON DELETE SET NULL. */
+  deleteCatalogEntry(id: UUID): Promise<void>;
 }

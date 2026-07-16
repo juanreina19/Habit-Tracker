@@ -75,7 +75,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
   }, [open, workout]);
 
   const displayExercises: ExerciseDraft[] = isEdit
-    ? exercises.map((e) => ({ id: e.id, name: e.name, type: e.type, sets: e.sets, reps: e.reps, notes: e.notes }))
+    ? exercises.map((e) => ({ id: e.id, name: e.name, type: e.type, sets: e.sets, reps: e.reps, durationMin: e.durationMin, notes: e.notes }))
     : localExercises;
 
   const handleAddExercise = async () => {
@@ -86,7 +86,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
     if (isEdit && workout) {
       await createExercise({ workoutId: workout.id, name: value, type });
     } else {
-      setLocalExercises((prev) => [...prev, { id: crypto.randomUUID(), name: value, type, sets: null, reps: null, notes: null }]);
+      setLocalExercises((prev) => [...prev, { id: crypto.randomUUID(), name: value, type, sets: null, reps: null, durationMin: null, notes: null }]);
     }
     setNewExerciseName("");
   };
@@ -96,7 +96,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
     if (isEdit && workout) {
       await createExercise({ workoutId: workout.id, catalogExerciseId: item.id, name: item.name, type });
     } else {
-      setLocalExercises((prev) => [...prev, { id: crypto.randomUUID(), name: item.name, type, sets: null, reps: null, notes: null }]);
+      setLocalExercises((prev) => [...prev, { id: crypto.randomUUID(), name: item.name, type, sets: null, reps: null, durationMin: null, notes: null }]);
     }
   };
 
@@ -118,6 +118,11 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
   const handleChangeExerciseReps = (id: string, reps: number | null) => {
     if (isEdit) updateExercise(id, { reps });
     else setLocalExercises((prev) => prev.map((e) => (e.id === id ? { ...e, reps } : e)));
+  };
+
+  const handleChangeExerciseDuration = (id: string, durationMin: number | null) => {
+    if (isEdit) updateExercise(id, { durationMin });
+    else setLocalExercises((prev) => prev.map((e) => (e.id === id ? { ...e, durationMin } : e)));
   };
 
   const handleReorderExercises = (next: ExerciseDraft[]) => {
@@ -152,7 +157,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
         const created = await onCreate(commonInput);
         if (created) {
           for (const ex of localExercises) {
-            await createExercise({ workoutId: created.id, name: ex.name, type: ex.type, sets: ex.sets, reps: ex.reps, notes: ex.notes });
+            await createExercise({ workoutId: created.id, name: ex.name, type: ex.type, sets: ex.sets, reps: ex.reps, durationMin: ex.durationMin, notes: ex.notes });
           }
         }
       }
@@ -308,6 +313,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                           onChangeType={(t2) => handleChangeExerciseType(ex.id, t2)}
                           onChangeSets={(sets) => handleChangeExerciseSets(ex.id, sets)}
                           onChangeReps={(reps) => handleChangeExerciseReps(ex.id, reps)}
+                          onChangeDuration={(durationMin) => handleChangeExerciseDuration(ex.id, durationMin)}
                           onDelete={() => handleDeleteExercise(ex.id)}
                         />
                       ))}

@@ -15,6 +15,7 @@ export interface ExerciseDraft {
   type: ExerciseType;
   sets: number | null;
   reps: number | null;
+  durationMin: number | null;
   notes: string | null;
 }
 
@@ -23,6 +24,7 @@ interface Props {
   onChangeType: (type: ExerciseType) => void;
   onChangeSets: (sets: number | null) => void;
   onChangeReps: (reps: number | null) => void;
+  onChangeDuration: (durationMin: number | null) => void;
   onDelete: () => void;
 }
 
@@ -35,14 +37,20 @@ interface Props {
  * EnfoqueTab — no dnd-kit (evita reintroducir el bug de "hay que sostener"
  * en móvil).
  */
-export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onChangeReps, onDelete }: Props) {
+export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onChangeReps, onChangeDuration, onDelete }: Props) {
   const t = useTranslations("workouts");
   const dragControls = useDragControls();
   const [expanded, setExpanded] = useState(false);
 
-  const subtitle = exercise.sets && exercise.reps
-    ? `${exercise.sets} ${t("sets_label").toLowerCase()} x ${exercise.reps} ${t("reps_short")}`
-    : null;
+  // El modo se infiere de cuál campo está poblado, no hay un flag de modo
+  // separado que se pueda desincronizar.
+  const isTimeMode = exercise.durationMin != null;
+
+  const subtitle = isTimeMode
+    ? `${exercise.durationMin} ${t("duration_min_short")}`
+    : exercise.sets && exercise.reps
+      ? `${exercise.sets} ${t("sets_label").toLowerCase()} x ${exercise.reps} ${t("reps_short")}`
+      : null;
 
   return (
     <Reorder.Item
@@ -72,63 +80,107 @@ export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onCh
           <span className="text-[10px] uppercase tracking-wide flex-shrink-0" style={{ color: "var(--text-muted)" }}>
             {exercise.type === "strength" ? t("type_strength") : t("type_cardio")}
           </span>
-
-          <button type="button" onClick={onDelete} className="flex-shrink-0 transition-opacity active:opacity-60" style={{ color: "var(--text-muted)" }} aria-label={t("delete")}>
-            <Trash2 size={14} strokeWidth={2} />
-          </button>
         </div>
 
         {expanded && (
-          <div className="flex items-center gap-2 px-2.5 pb-2.5 pt-1" style={{ borderTop: "1px solid var(--border)" }}>
-            <div className="flex-1">
-              <label className="text-[9px] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>
-                {t("sets_label")}
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={exercise.sets ?? ""}
-                onChange={(e) => onChangeSets(e.target.value ? Number(e.target.value) : null)}
-                className="w-full rounded-md px-2.5 py-1.5 text-sm outline-none"
-                style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
-              />
-            </div>
-            <div className="flex-1">
-              <label className="text-[9px] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>
-                {t("reps_label")}
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={exercise.reps ?? ""}
-                onChange={(e) => onChangeReps(e.target.value ? Number(e.target.value) : null)}
-                className="w-full rounded-md px-2.5 py-1.5 text-sm outline-none"
-                style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
-              />
-            </div>
-            <div className="flex gap-1 self-end pb-1.5">
+          <div className="flex flex-col gap-2 px-2.5 pb-2.5 pt-1" style={{ borderTop: "1px solid var(--border)" }}>
+            {/* Modo Reps / Tiempo */}
+            <div className="inline-flex self-start rounded-sm overflow-hidden" style={{ border: "1px solid var(--border)", padding: "2px" }}>
               <button
                 type="button"
-                onClick={() => onChangeType("strength")}
-                className="w-2.5 h-2.5 rounded-full transition-transform"
+                onClick={() => onChangeDuration(null)}
+                className="px-2.5 py-1 rounded-[2px] text-[10px] uppercase tracking-wide transition-colors"
                 style={{
-                  background: EXERCISE_TYPE_COLORS.strength,
-                  opacity: exercise.type === "strength" ? 1 : 0.25,
-                  transform: exercise.type === "strength" ? "scale(1.2)" : "scale(1)",
+                  background: !isTimeMode ? "var(--surface-hover)" : "transparent",
+                  color: !isTimeMode ? "var(--text-primary)" : "var(--text-muted-darker)",
                 }}
-                aria-label={t("type_strength")}
-              />
+              >
+                {t("mode_reps")}
+              </button>
               <button
                 type="button"
-                onClick={() => onChangeType("cardio")}
-                className="w-2.5 h-2.5 rounded-full transition-transform"
+                onClick={() => { onChangeReps(null); onChangeDuration(exercise.durationMin ?? 5); }}
+                className="px-2.5 py-1 rounded-[2px] text-[10px] uppercase tracking-wide transition-colors"
                 style={{
-                  background: EXERCISE_TYPE_COLORS.cardio,
-                  opacity: exercise.type === "cardio" ? 1 : 0.25,
-                  transform: exercise.type === "cardio" ? "scale(1.2)" : "scale(1)",
+                  background: isTimeMode ? "var(--surface-hover)" : "transparent",
+                  color: isTimeMode ? "var(--text-primary)" : "var(--text-muted-darker)",
                 }}
-                aria-label={t("type_cardio")}
-              />
+              >
+                {t("mode_time")}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="flex-1">
+                <label className="text-[9px] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>
+                  {t("sets_label")}
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={exercise.sets ?? ""}
+                  onChange={(e) => onChangeSets(e.target.value ? Number(e.target.value) : null)}
+                  className="w-full rounded-md px-2.5 py-1.5 text-sm outline-none"
+                  style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
+                />
+              </div>
+              <div className="flex-1">
+                <label className="text-[9px] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>
+                  {isTimeMode ? t("duration_label") : t("reps_label")}
+                </label>
+                {isTimeMode ? (
+                  <input
+                    type="number"
+                    min={1}
+                    value={exercise.durationMin ?? ""}
+                    onChange={(e) => onChangeDuration(e.target.value ? Number(e.target.value) : null)}
+                    className="w-full rounded-md px-2.5 py-1.5 text-sm outline-none"
+                    style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
+                  />
+                ) : (
+                  <input
+                    type="number"
+                    min={1}
+                    value={exercise.reps ?? ""}
+                    onChange={(e) => onChangeReps(e.target.value ? Number(e.target.value) : null)}
+                    className="w-full rounded-md px-2.5 py-1.5 text-sm outline-none"
+                    style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
+                  />
+                )}
+              </div>
+              <div className="flex gap-1 self-end pb-1.5">
+                <button
+                  type="button"
+                  onClick={() => onChangeType("strength")}
+                  className="w-2.5 h-2.5 rounded-full transition-transform"
+                  style={{
+                    background: EXERCISE_TYPE_COLORS.strength,
+                    opacity: exercise.type === "strength" ? 1 : 0.25,
+                    transform: exercise.type === "strength" ? "scale(1.2)" : "scale(1)",
+                  }}
+                  aria-label={t("type_strength")}
+                />
+                <button
+                  type="button"
+                  onClick={() => onChangeType("cardio")}
+                  className="w-2.5 h-2.5 rounded-full transition-transform"
+                  style={{
+                    background: EXERCISE_TYPE_COLORS.cardio,
+                    opacity: exercise.type === "cardio" ? 1 : 0.25,
+                    transform: exercise.type === "cardio" ? "scale(1.2)" : "scale(1)",
+                  }}
+                  aria-label={t("type_cardio")}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={onDelete}
+                className="flex-shrink-0 self-end pb-2 transition-opacity active:opacity-60"
+                style={{ color: "var(--danger)" }}
+                aria-label={t("delete")}
+              >
+                <Trash2 size={14} strokeWidth={2} />
+              </button>
             </div>
           </div>
         )}
