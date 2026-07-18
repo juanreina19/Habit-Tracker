@@ -98,18 +98,32 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
         </span>
       </p>
 
-      {/* Summary — el número usa --text-primary (blanco en oscuro / negro en claro) para
-          resaltar sobre el resto de la frase en --text-secondary. t.rich (no t()) porque
-          necesitamos envolver los conteos ya pluralizados en un <span> con color propio,
-          sin hardcodear los conectores ("Tienes"/"You have", etc.) por idioma. */}
-      <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-        {t.rich(workoutsCount > 0 ? "motivational_summary_with_workouts" : "motivational_summary", {
-          habits: t("motivational_habits_count", { count: habitsCount }),
-          tasks: t("motivational_tasks_count", { count: tasksCount }),
-          workouts: t("motivational_workouts_count", { count: workoutsCount }),
-          n: (chunks) => <span style={{ color: "var(--text-primary)" }}>{chunks}</span>,
-        })}
-      </p>
+      {/* Summary — se arma dinámicamente (0 a 3 partes) en vez de un template
+          fijo, para poder omitir por completo cualquier conteo en 0 (ej. no
+          decir "0 tareas" si no hay tareas hoy) sin dejar conectores sueltos. */}
+      {(() => {
+        const parts = [
+          habitsCount > 0 ? t("motivational_habits_count", { count: habitsCount }) : null,
+          tasksCount > 0 ? t("motivational_tasks_count", { count: tasksCount }) : null,
+          workoutsCount > 0 ? t("motivational_workouts_count", { count: workoutsCount }) : null,
+        ].filter((p): p is string => p !== null);
+
+        if (parts.length === 0) return null;
+
+        return (
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+            {t("motivational_prefix")}{" "}
+            {parts.map((part, i) => (
+              <span key={i}>
+                <span style={{ color: "var(--text-primary)" }}>{part}</span>
+                {i < parts.length - 2 && ", "}
+                {i === parts.length - 2 && ` ${t("motivational_and")} `}
+              </span>
+            ))}
+            {" "}{t("motivational_suffix")}
+          </p>
+        );
+      })()}
     </div>
   );
 }

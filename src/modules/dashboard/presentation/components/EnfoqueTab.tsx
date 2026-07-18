@@ -188,9 +188,16 @@ export function EnfoqueTab({
   const [showConfetti, setShowConfetti] = useState(false);
   const prevAllDone = useRef(false);
   useEffect(() => {
+    // workoutsHook carga por su cuenta (fetch propio, no atado a useDashboard)
+    // — mientras está cargando, dayWorkouts está vacío y "allDone" puede dar
+    // true de forma prematura (con solo tasks/habits) antes de que el
+    // entrenamiento del día entre a orderedItems. Se espera a que termine de
+    // cargar antes de evaluar la transición, para no disparar el confetti de
+    // más con un entrenamiento del día aún sin marcar.
+    if (workoutsHook.isLoading) return;
     if (!prevAllDone.current && allDone) setShowConfetti(true);
     prevAllDone.current = allDone;
-  }, [allDone]);
+  }, [allDone, workoutsHook.isLoading]);
 
   return (
     <>
