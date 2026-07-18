@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef, useMemo, useId } from "react";
-import { format, subMonths } from "date-fns";
+import { format, subMonths, getDaysInMonth } from "date-fns";
 import { createClient } from "@/shared/lib/supabase/client";
 import { WorkoutSupabaseRepository } from "../../infrastructure/supabase/WorkoutSupabaseRepository";
 import { CreateWorkoutUseCase } from "../../domain/use-cases/CreateWorkoutUseCase";
@@ -129,23 +129,21 @@ export function useWorkouts(userId: UUID) {
     const todayStr = getToday();
     const { streak, weeklyConsistencyPct } = calculateWorkoutConsistency(workouts, completions, todayStr);
 
-    // Progreso mensual: últimos 6 meses. "count" no es el total de completions
-    // sino cuántas de las 4 semanas del mes (días 1-7, 8-14, 15-21, 22-fin)
-    // tuvieron al menos una — así el valor siempre cae en 0-4, alineado con
-    // las 4 líneas guía del gráfico (cada bloque = 1 semana).
+    // Progreso mensual: últimos 6 meses. "count" es el % de días del mes con
+    // al menos una completion (días distintos con actividad ÷ días del mes),
+    // 0-100 — reemplaza el conteo de "semanas con actividad" (0-4) anterior.
     const now = new Date();
     const monthlyCounts = Array.from({ length: 6 }, (_, idx) => {
       const d = subMonths(now, 5 - idx);
       const monthKey = format(d, "yyyy-MM");
-      const weeksWithActivity = new Set<number>();
+      const daysWithActivity = new Set<string>();
       for (const c of completions) {
         if (c.completedAt.slice(0, 7) !== monthKey) continue;
-        const dayOfMonth = Number(c.completedAt.slice(8, 10));
-        weeksWithActivity.add(Math.min(3, Math.floor((dayOfMonth - 1) / 7)));
+        daysWithActivity.add(c.completedAt);
       }
       return {
         month: format(d, "MMM"),
-        count: weeksWithActivity.size,
+        count: Math.round((daysWithActivity.size / getDaysInMonth(d)) * 100),
       };
     });
 

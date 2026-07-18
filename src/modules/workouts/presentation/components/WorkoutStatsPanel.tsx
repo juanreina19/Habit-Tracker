@@ -84,10 +84,11 @@ export function WorkoutStatsPanel({ stats }: Props) {
         )}
       </div>
 
-      {/* Progreso mensual — una sola línea base (axisLine real de Recharts,
-          no un div/ReferenceLine decorativo) justo arriba de la fila de
-          meses. El dominio del eje Y queda fijo en [0,4] para que la barra
-          suba exactamente hasta el bloque/semana que corresponda. */}
+      {/* Progreso mensual — % de días del mes con al menos una completion
+          (0-100). Una sola línea base (axisLine real de Recharts) justo
+          arriba de la fila de meses. cursor={false} en el Tooltip evita que
+          Recharts resalte toda la banda de la columna — solo la barra en sí
+          reacciona al hover vía activeBar. */}
       <div style={sectionStyle}>
         <StatTitle>{t("stats_monthly")}</StatTitle>
         <div className="relative h-24 mt-2">
@@ -99,8 +100,10 @@ export function WorkoutStatsPanel({ stats }: Props) {
                 axisLine={{ stroke: "var(--text-secondary)", strokeWidth: 0.75 }}
                 tickLine={false}
               />
-              <YAxis hide domain={[0, 4]} />
+              <YAxis hide domain={[0, 100]} />
               <Tooltip
+                cursor={false}
+                formatter={(value: number) => [`${value}%`, t("stats_monthly")]}
                 contentStyle={{
                   background: "var(--surface-elevated)",
                   border: "1px solid var(--border)",
@@ -109,7 +112,7 @@ export function WorkoutStatsPanel({ stats }: Props) {
                   color: "var(--text-primary)",
                 }}
               />
-              <Bar dataKey="count" fill="var(--text-primary)" radius={[3, 3, 0, 0]} maxBarSize={18} />
+              <Bar dataKey="count" fill="var(--text-primary)" radius={[3, 3, 0, 0]} maxBarSize={18} activeBar={{ fill: "var(--text-secondary)" }} />
             </BarChart>
           </ResponsiveContainer>
         </div>
