@@ -95,7 +95,7 @@ export default function WorkoutsView({ userId }: Props) {
                   </div>
                 ) : (
                   dayWorkouts.map((w) => (
-                    <div key={w.id} className="rounded-lg p-3" style={{ background: "var(--bg)" }}>
+                    <div key={w.id} className="rounded-lg p-3" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
                       <WorkoutCard
                         workout={w}
                         onEdit={() => openEdit(w)}
