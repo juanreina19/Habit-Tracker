@@ -7,8 +7,8 @@ import type { WorkoutExercise } from "../../domain/entities/WorkoutExercise";
 interface Props {
   exercise: Pick<WorkoutExercise, "id" | "name" | "sets" | "reps" | "durationSec">;
   /** "line" (default): fila plana con separador — usado por el acordeón de
-   *  TemplatesExercisesPanel. "card": cada ejercicio en su propia card
-   *  bg+borde — usado por la card "hero" del día seleccionado en WorkoutsView. */
+   *  TemplatesExercisesPanel. "card": cada ejercicio con su propio bg, sin
+   *  borde — usado por la card "hero" del día seleccionado en WorkoutsView. */
   variant?: "line" | "card";
 }
 
@@ -26,7 +26,7 @@ export function ExerciseRow({ exercise, variant = "line" }: Props) {
   return (
     <div
       className={variant === "card" ? "flex items-center gap-2.5 p-2.5 rounded-lg" : "flex items-center gap-2 py-1"}
-      style={variant === "card" ? { background: "var(--bg)", border: "1px solid var(--border)" } : undefined}
+      style={variant === "card" ? { background: "var(--bg)" } : undefined}
     >
       {variant === "line" && (
         <Dot size={14} strokeWidth={2} className="flex-shrink-0" style={{ color: "var(--text-muted)" }} />

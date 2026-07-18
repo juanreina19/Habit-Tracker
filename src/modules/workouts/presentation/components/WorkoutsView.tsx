@@ -93,7 +93,7 @@ export default function WorkoutsView({ userId }: Props) {
                       onDelete={() => requestDelete(w)}
                     />
                     {w.exercises.length > 0 && (
-                      <div className="flex flex-col gap-2 mt-3 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
+                      <div className="flex flex-col gap-2 mt-3">
                         {w.exercises.map((ex) => (
                           <ExerciseRow key={ex.id} exercise={ex} variant="card" />
                         ))}

@@ -9,14 +9,13 @@ import { useWorkoutExercises } from "../hooks/useWorkoutExercises";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { ExerciseReorderItem, type ExerciseDraft } from "./ExerciseReorderItem";
 import { SavedExercisesPicker } from "./SavedExercisesPicker";
+import { TimePickerPopover } from "./TimePickerPopover";
 import { DAY_LETTERS } from "@/shared/constants/dayLabels";
 import type { Workout, CreateWorkoutInput, UpdateWorkoutInput } from "../../domain/entities/Workout";
 import type { ExerciseType } from "../../domain/entities/WorkoutExercise";
 import type { UUID } from "@/shared/types/database.types";
 
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
-const HOURS_12 = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
-const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
 type AddMode = "strength" | "cardio" | "saved";
 type Period = "AM" | "PM";
 
@@ -393,45 +392,22 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                           style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {/* Desktop: un solo control (hora 12h + minuto + AM/PM) con un
-                              único borde compartido — móvil mantiene el input nativo, cuyo
-                              picker de SO ya es buena UX. */}
-                          <div
-                            className="hidden lg:flex items-center rounded-md overflow-hidden divide-x divide-[var(--border)]"
-                            style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
-                          >
+                          {/* Desktop: picker custom de 3 columnas (hora 12h / minuto / AM-PM),
+                              estilo oscuro de la app en toda la lista, no solo el control
+                              cerrado — móvil mantiene el input nativo, cuyo picker de SO ya
+                              es buena UX. */}
+                          <div className="hidden lg:block">
                             {(() => {
                               const { hour, minute, period } = to12h(startTime);
                               return (
-                                <>
-                                  <select
-                                    value={hour}
-                                    onChange={(e) => setStartTime(from12h(e.target.value, minute || "00", period))}
-                                    className="px-2 py-1.5 text-sm outline-none bg-transparent"
-                                    style={{ color: "var(--text-primary)" }}
-                                  >
-                                    <option value="" disabled>--</option>
-                                    {HOURS_12.map((h) => <option key={h} value={h}>{h}</option>)}
-                                  </select>
-                                  <select
-                                    value={minute}
-                                    onChange={(e) => setStartTime(from12h(hour || "12", e.target.value, period))}
-                                    className="px-2 py-1.5 text-sm outline-none bg-transparent"
-                                    style={{ color: "var(--text-primary)" }}
-                                  >
-                                    <option value="" disabled>--</option>
-                                    {MINUTES.map((m) => <option key={m} value={m}>{m}</option>)}
-                                  </select>
-                                  <select
-                                    value={period}
-                                    onChange={(e) => setStartTime(from12h(hour || "12", minute || "00", e.target.value as Period))}
-                                    className="px-2 py-1.5 text-sm outline-none bg-transparent"
-                                    style={{ color: "var(--text-primary)" }}
-                                  >
-                                    <option value="AM">AM</option>
-                                    <option value="PM">PM</option>
-                                  </select>
-                                </>
+                                <TimePickerPopover
+                                  hour={hour}
+                                  minute={minute}
+                                  period={period}
+                                  onChangeHour={(h) => setStartTime(from12h(h, minute || "00", period))}
+                                  onChangeMinute={(m) => setStartTime(from12h(hour || "12", m, period))}
+                                  onChangePeriod={(p) => setStartTime(from12h(hour || "12", minute || "00", p))}
+                                />
                               );
                             })()}
                           </div>
