@@ -20,7 +20,6 @@ export function FocusModeButton({ onClick }: Props) {
         background: "#000000",
         color: "#FFFFFF",
         boxShadow: "var(--shadow-md)",
-        border: "1px solid var(--border)",
       }}
     >
       <Zap size={20} strokeWidth={2} fill="currentColor" />

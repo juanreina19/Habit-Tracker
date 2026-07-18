@@ -14,6 +14,7 @@ import { useHabits } from "../hooks/useHabits";
 import { useTodayTasks } from "@/modules/tasks/presentation/hooks/useTodayTasks";
 import { TaskCard } from "@/modules/tasks/presentation/components/TaskCard";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
+import { useTimeFormat, type TimeFormat } from "@/shared/components/TimeFormatProvider";
 import { today as todayISODate } from "@/shared/lib/utils/dates";
 import { useSettingsHabits } from "../hooks/useSettingsHabits";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
@@ -25,12 +26,12 @@ import type { UUID } from "@/shared/types/database.types";
 import type { HabitWithStatus } from "../../domain/entities/Habit";
 import type { CreateHabitInput } from "../../domain/repositories/IHabitRepository";
 
-function calcEndTime(start: string, minutes: number): string {
+function calcEndTime(start: string, minutes: number, format: TimeFormat): string {
   const [h, m] = start.split(":").map(Number);
   const total = h * 60 + m + minutes;
   const endH = Math.floor(total / 60) % 24;
   const endM = total % 60;
-  return formatTaskTime(`${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`);
+  return formatTaskTime(`${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`, format);
 }
 
 function isHabitLocked(habit: HabitWithStatus): boolean {
@@ -405,6 +406,7 @@ function HabitRow({
   onEdit?: () => void;
 }) {
   const t = useTranslations("today");
+  const { format } = useTimeFormat();
   const expired = locked && !habit.isCompletedToday;
   const done = habit.isCompletedToday;
 
@@ -474,8 +476,8 @@ function HabitRow({
             <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-secondary)" }}>
               <Clock size={11} strokeWidth={2} />
               <span>
-                {formatTaskTime(habit.startTime)}
-                {habit.estimatedMinutes ? ` – ${calcEndTime(habit.startTime, habit.estimatedMinutes)}` : ""}
+                {formatTaskTime(habit.startTime, format)}
+                {habit.estimatedMinutes ? ` – ${calcEndTime(habit.startTime, habit.estimatedMinutes, format)}` : ""}
               </span>
             </span>
           )}

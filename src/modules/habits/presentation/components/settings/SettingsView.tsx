@@ -4,8 +4,9 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Bell, BellOff, User, Sun, Moon, Languages, BarChart2 } from "lucide-react";
+import { Bell, BellOff, User, Sun, Moon, Languages, BarChart2, Clock } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
+import { useTimeFormat, type TimeFormat } from "@/shared/components/TimeFormatProvider";
 import { useLocale, type Locale } from "@/shared/i18n/useLocale";
 import { useBrowserNotifications } from "@/shared/hooks/useBrowserNotifications";
 import { createClient } from "@/shared/lib/supabase/client";
@@ -21,6 +22,7 @@ export default function SettingsView({ userId }: Props) {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const { locale, setLocale } = useLocale();
+  const { format: timeFormat, setFormat: setTimeFormat } = useTimeFormat();
   const t = useTranslations("settings");
   const [showStats, setShowStats] = useState(false);
 
@@ -133,6 +135,44 @@ export default function SettingsView({ userId }: Props) {
                   {l === "es" ? "Español" : "English"}
                 </span>
                 {locale === l && (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 8l3.5 3.5L13 4" stroke="#4CAF82" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Time format */}
+      <motion.div
+        className="mt-8"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 1.5 * 0.05, ease: "easeOut" }}
+      >
+        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
+          {t("time_format")}
+        </p>
+        <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)" }}>
+          {(["12h", "24h"] as TimeFormat[]).map((f, idx) => (
+            <div key={f}>
+              {idx > 0 && <div style={{ height: 1, background: "var(--border)" }} />}
+              <button
+                onClick={() => setTimeFormat(f)}
+                className="w-full px-5 py-4 flex items-center gap-4 transition-opacity active:opacity-60"
+              >
+                <div
+                  className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
+                  style={{ background: timeFormat === f ? "rgba(76,207,130,0.15)" : "var(--surface-elevated)" }}
+                >
+                  <Clock size={16} color={timeFormat === f ? "#4CAF82" : "var(--text-muted)"} />
+                </div>
+                <span className="flex-1 text-sm font-medium text-left" style={{ color: "var(--text-primary)" }}>
+                  {f === "12h" ? t("time_format_12h") : t("time_format_24h")}
+                </span>
+                {timeFormat === f && (
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M3 8l3.5 3.5L13 4" stroke="#4CAF82" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>

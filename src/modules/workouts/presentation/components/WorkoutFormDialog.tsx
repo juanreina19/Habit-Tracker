@@ -11,28 +11,13 @@ import { ExerciseReorderItem, type ExerciseDraft } from "./ExerciseReorderItem";
 import { SavedExercisesPicker } from "./SavedExercisesPicker";
 import { TimePickerPopover } from "./TimePickerPopover";
 import { DAY_LETTERS } from "@/shared/constants/dayLabels";
+import { to12h, from12h } from "@/shared/lib/utils/time12h";
 import type { Workout, CreateWorkoutInput, UpdateWorkoutInput } from "../../domain/entities/Workout";
 import type { ExerciseType } from "../../domain/entities/WorkoutExercise";
 import type { UUID } from "@/shared/types/database.types";
 
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
 type AddMode = "strength" | "cardio" | "saved";
-type Period = "AM" | "PM";
-
-/** startTime se guarda como "HH:MM" 24h — estos helpers solo convierten
- *  para la UI del picker de 12h con AM/PM, sin cambiar el esquema. */
-function to12h(time24: string): { hour: string; minute: string; period: Period } {
-  if (!time24) return { hour: "", minute: "", period: "AM" };
-  const [h, m] = time24.split(":").map(Number);
-  const period: Period = h >= 12 ? "PM" : "AM";
-  const hour12 = h % 12 === 0 ? 12 : h % 12;
-  return { hour: String(hour12).padStart(2, "0"), minute: String(m).padStart(2, "0"), period };
-}
-function from12h(hour: string, minute: string, period: Period): string {
-  let h = Number(hour) % 12;
-  if (period === "PM") h += 12;
-  return `${String(h).padStart(2, "0")}:${minute}`;
-}
 
 interface Props {
   open: boolean;

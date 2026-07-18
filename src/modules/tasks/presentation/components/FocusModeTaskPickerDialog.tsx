@@ -5,6 +5,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
 import { X, Zap, Clock } from "lucide-react";
 import { useTodayTasks } from "../hooks/useTodayTasks";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import { isTaskDone, formatTaskTime } from "../../domain/entities/Task";
 import { PRIORITY_COLORS } from "../constants/taskColors";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
@@ -20,6 +21,7 @@ interface Props {
 
 export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Props) {
   const t = useTranslations("focus");
+  const { format } = useTimeFormat();
   const { tasks } = useTodayTasks(userId);
   const [selected, setSelected] = useState<Set<UUID>>(new Set());
   const [duration, setDuration] = useState(25);
@@ -112,7 +114,7 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
                       {task.startTime && (
                         <span className="flex items-center gap-1 flex-shrink-0 text-xs" style={{ color: "var(--text-secondary)" }}>
                           <Clock size={13} />
-                          {formatTaskTime(task.startTime)}
+                          {formatTaskTime(task.startTime, format)}
                         </span>
                       )}
                     </button>

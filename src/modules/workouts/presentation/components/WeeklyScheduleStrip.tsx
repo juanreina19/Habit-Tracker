@@ -47,22 +47,22 @@ export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Prop
               }}
             >
               <span
-                className="text-sm"
+                className="text-sm leading-none"
                 style={{
-                  color: isSelected ? "var(--text-primary)" : isToday ? "var(--accent)" : "var(--text-secondary)",
+                  color: isSelected ? "var(--text-primary)" : isToday ? "var(--btn-primary-bg)" : "var(--text-secondary)",
                 }}
               >
                 {letter}
               </span>
               <span
-                className="w-1.5 h-1.5 rounded-full"
+                className="w-2 h-2 rounded-full"
                 style={{
                   background: isToday ? "var(--btn-primary-bg)" : hasWorkout ? "var(--text-secondary)" : "var(--text-muted-darker)",
                 }}
               />
               <span
-                className="text-[9px] leading-none"
-                style={{ color: "var(--text-muted)", visibility: isSelected && isToday ? "visible" : "hidden" }}
+                className="text-[11px] leading-none mt-1"
+                style={{ color: "var(--text-muted)", visibility: isToday ? "visible" : "hidden" }}
               >
                 {t("today_label")}
               </span>

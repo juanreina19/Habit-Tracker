@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 import { useWorkouts } from "../hooks/useWorkouts";
@@ -79,30 +80,39 @@ export default function WorkoutsView({ userId }: Props) {
             <WeeklyScheduleStrip workouts={workoutsHook.workouts} selectedDay={selectedDay} onSelectDay={setSelectedDay} />
 
             {/* Workout(s) del día seleccionado — jerarquía visual principal */}
-            <div className="flex flex-col gap-3">
-              {dayWorkouts.length === 0 ? (
-                <div className="rounded-lg p-6 text-center" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
-                  <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("no_workout_today")}</p>
-                </div>
-              ) : (
-                dayWorkouts.map((w) => (
-                  <div key={w.id} className="rounded-lg p-3" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
-                    <WorkoutCard
-                      workout={w}
-                      onEdit={() => openEdit(w)}
-                      onDelete={() => requestDelete(w)}
-                    />
-                    {w.exercises.length > 0 && (
-                      <div className="flex flex-col gap-2 mt-3">
-                        {w.exercises.map((ex) => (
-                          <ExerciseRow key={ex.id} exercise={ex} variant="card" />
-                        ))}
-                      </div>
-                    )}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedDay}
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-col gap-3"
+              >
+                {dayWorkouts.length === 0 ? (
+                  <div className="rounded-lg p-6 text-center" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+                    <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("no_workout_today")}</p>
                   </div>
-                ))
-              )}
-            </div>
+                ) : (
+                  dayWorkouts.map((w) => (
+                    <div key={w.id} className="rounded-lg p-3" style={{ background: "var(--bg)" }}>
+                      <WorkoutCard
+                        workout={w}
+                        onEdit={() => openEdit(w)}
+                        onDelete={() => requestDelete(w)}
+                      />
+                      {w.exercises.length > 0 && (
+                        <div className="flex flex-col gap-2 mt-3 pl-3">
+                          {w.exercises.map((ex) => (
+                            <ExerciseRow key={ex.id} exercise={ex} variant="card" />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </motion.div>
+            </AnimatePresence>
 
             {/* Templates | Exercises — menor prioridad, va debajo */}
             <TemplatesExercisesPanel

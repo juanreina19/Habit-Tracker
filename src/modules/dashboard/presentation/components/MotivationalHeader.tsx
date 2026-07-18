@@ -45,9 +45,10 @@ interface Props {
   onDateChange: (date: Date) => void;
   habitsCount: number;
   tasksCount: number;
+  workoutsCount: number;
 }
 
-export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount }: Props) {
+export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount, workoutsCount }: Props) {
   const { locale } = useLocale();
   const t = useTranslations("dashboard");
   const dateFnsLocale = locale === "en" ? enUS : es;
@@ -102,9 +103,10 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
           necesitamos envolver los conteos ya pluralizados en un <span> con color propio,
           sin hardcodear los conectores ("Tienes"/"You have", etc.) por idioma. */}
       <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-        {t.rich("motivational_summary", {
+        {t.rich(workoutsCount > 0 ? "motivational_summary_with_workouts" : "motivational_summary", {
           habits: t("motivational_habits_count", { count: habitsCount }),
           tasks: t("motivational_tasks_count", { count: tasksCount }),
+          workouts: t("motivational_workouts_count", { count: workoutsCount }),
           n: (chunks) => <span style={{ color: "var(--text-primary)" }}>{chunks}</span>,
         })}
       </p>

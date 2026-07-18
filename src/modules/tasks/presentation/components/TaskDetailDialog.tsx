@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { useLocale } from "@/shared/i18n/useLocale";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import { PRIORITY_COLORS } from "../constants/taskColors";
 import { isRecurring, formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
@@ -41,6 +42,7 @@ export function TaskDetailDialog({ open, onClose, entry, userId }: Props) {
   const t = useTranslations("tasks");
   const tDays = useTranslations("dayLabels");
   const { locale } = useLocale();
+  const { format: timeFormat } = useTimeFormat();
   const dateFnsLocale = locale === "en" ? enUS : es;
   const { subtasks, toggleSubtask } = useSubtasks(userId, entry?.task.id ?? null);
 
@@ -72,7 +74,7 @@ export function TaskDetailDialog({ open, onClose, entry, userId }: Props) {
     : t("recurrence_once");
 
   const timeLabel = task.startTime
-    ? `${formatTaskTime(task.startTime)}${task.endTime ? ` – ${formatTaskTime(task.endTime)}` : ""}`
+    ? `${formatTaskTime(task.startTime, timeFormat)}${task.endTime ? ` – ${formatTaskTime(task.endTime, timeFormat)}` : ""}`
     : t("no_time");
 
   const dateLabel = format(parseLocalDate(dateISO), "EEEE d 'de' MMMM", { locale: dateFnsLocale });

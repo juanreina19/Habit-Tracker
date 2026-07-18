@@ -8,6 +8,7 @@ import { Clock, CalendarDays, ListChecks, MoreVertical, Pencil, Trash2, Star } f
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useTranslations } from "next-intl";
 import { useLocale } from "@/shared/i18n/useLocale";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import { today } from "@/shared/lib/utils/dates";
 import { isTaskDone, isRecurring, formatTaskTime, isTaskTimeExpired } from "../../domain/entities/Task";
 import type { TaskWithStatus, TaskPriority } from "../../domain/entities/Task";
@@ -67,8 +68,9 @@ function RecurrenceBadge({ days }: { days: number[] }) {
 }
 
 function TimeBadge({ startTime, endTime }: { startTime: string; endTime?: string | null }) {
-  const start = formatTaskTime(startTime);
-  const end = endTime ? formatTaskTime(endTime) : null;
+  const { format: timeFormat } = useTimeFormat();
+  const start = formatTaskTime(startTime, timeFormat);
+  const end = endTime ? formatTaskTime(endTime, timeFormat) : null;
   const label = end ? `${start} – ${end}` : start;
   return (
     <span className="flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>

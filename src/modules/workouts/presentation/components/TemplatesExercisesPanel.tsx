@@ -10,8 +10,10 @@ import { UpdateExerciseCatalogUseCase } from "../../domain/use-cases/UpdateExerc
 import { DeleteExerciseCatalogUseCase } from "../../domain/use-cases/DeleteExerciseCatalogUseCase";
 import { ExerciseRow } from "./ExerciseRow";
 import { Loader } from "@/shared/components/ui/Loader";
+import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 import { DAY_ABBR_KEYS } from "@/shared/constants/dayLabels";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import type { WorkoutWithStatus } from "../../domain/entities/Workout";
 import type { ExerciseCatalogItem, ExerciseType } from "../../domain/entities/WorkoutExercise";
 import type { Category } from "@/modules/categories/domain/entities/Category";
@@ -35,6 +37,7 @@ interface Props {
  */
 export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, onDelete }: Props) {
   const t = useTranslations("workouts");
+  const { format } = useTimeFormat();
   const [viewMode, setViewMode] = useState<ViewMode>("templates");
   const [expandedId, setExpandedId] = useState<UUID | null>(null);
   const [catalog, setCatalog] = useState<ExerciseCatalogItem[]>([]);
@@ -177,16 +180,22 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
                         className="flex-1 min-w-0 rounded-md px-2 py-1 text-sm outline-none"
                         style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
                       />
-                      <div className="flex gap-1 flex-shrink-0">
-                        <button type="button" onClick={() => setEditType("strength")}
-                          className="w-2.5 h-2.5 rounded-full transition-transform"
-                          style={{ background: "var(--text-primary)", opacity: editType === "strength" ? 1 : 0.25, transform: editType === "strength" ? "scale(1.2)" : "scale(1)" }}
-                          aria-label={t("type_strength")} />
-                        <button type="button" onClick={() => setEditType("cardio")}
-                          className="w-2.5 h-2.5 rounded-full transition-transform"
-                          style={{ background: "var(--text-muted)", opacity: editType === "cardio" ? 1 : 0.25, transform: editType === "cardio" ? "scale(1.2)" : "scale(1)" }}
-                          aria-label={t("type_cardio")} />
-                      </div>
+                      <TooltipProvider>
+                        <div className="flex gap-1 flex-shrink-0">
+                          <Tooltip label={t("type_strength")} side="top">
+                            <button type="button" onClick={() => setEditType("strength")}
+                              className="w-2.5 h-2.5 rounded-full transition-transform"
+                              style={{ background: "var(--text-primary)", opacity: editType === "strength" ? 1 : 0.25, transform: editType === "strength" ? "scale(1.2)" : "scale(1)" }}
+                              aria-label={t("type_strength")} />
+                          </Tooltip>
+                          <Tooltip label={t("type_cardio")} side="top">
+                            <button type="button" onClick={() => setEditType("cardio")}
+                              className="w-2.5 h-2.5 rounded-full transition-transform"
+                              style={{ background: "var(--text-muted)", opacity: editType === "cardio" ? 1 : 0.25, transform: editType === "cardio" ? "scale(1.2)" : "scale(1)" }}
+                              aria-label={t("type_cardio")} />
+                          </Tooltip>
+                        </div>
+                      </TooltipProvider>
                       <button type="button" onClick={saveEditCatalog} className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ color: "var(--text-primary)" }} aria-label={t("save")}>
                         <Check size={14} strokeWidth={2} />
                       </button>
@@ -237,7 +246,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
                     const dayLabel = w.dayOfWeek.length > 0
                       ? w.dayOfWeek.map((d) => t(DAY_ABBR_KEYS[d - 1] as Parameters<typeof t>[0])).join(", ")
                       : t("any_day");
-                    const timeLabel = w.startTime ? formatTaskTime(w.startTime) : null;
+                    const timeLabel = w.startTime ? formatTaskTime(w.startTime, format) : null;
                     const subtitle = [dayLabel, timeLabel, `${w.exercises.length} ${t("exercises_label").toLowerCase()}`]
                       .filter(Boolean)
                       .join(" · ");

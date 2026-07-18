@@ -52,7 +52,9 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <ClipboardPen size={16} strokeWidth={2} />
+              <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--surface-elevated)" }}>
+                <ClipboardPen size={14} strokeWidth={2} />
+              </span>
               {t("new_task")}
             </button>
             <button
@@ -63,7 +65,9 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <Repeat size={16} strokeWidth={2} />
+              <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--surface-elevated)" }}>
+                <Repeat size={14} strokeWidth={2} />
+              </span>
               {t("new_habit")}
             </button>
             <button
@@ -74,7 +78,9 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <Dumbbell size={16} strokeWidth={2} />
+              <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--surface-elevated)" }}>
+                <Dumbbell size={14} strokeWidth={2} />
+              </span>
               {t("new_workout")}
             </button>
           </motion.div>

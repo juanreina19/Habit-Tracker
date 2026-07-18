@@ -12,6 +12,7 @@ import { WorkoutAgendaCard } from "./WorkoutAgendaCard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
 import { Confetti } from "@/shared/components/ui/Confetti";
 import { isTaskDone, formatTaskTime } from "@/modules/tasks/domain/entities/Task";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import { today as getToday, isTimePast, dayOfWeek } from "@/shared/lib/utils/dates";
 import { useWorkouts } from "@/modules/workouts/presentation/hooks/useWorkouts";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
@@ -54,9 +55,10 @@ export function EnfoqueTab({
 }: Props) {
   const toggleOverdue = onToggleOverdueTask ?? onToggleTask;
   const t = useTranslations("dashboard");
+  const { format: timeFormat } = useTimeFormat();
   const [urgencyFilter, setUrgencyFilter] = useState(false);
   const [timeFilter, setTimeFilter] = useState(false);
-  const [typeFilter, setTypeFilter] = useState<"task" | "habit" | null>(null);
+  const [typeFilter, setTypeFilter] = useState<"task" | "habit" | "workout" | null>(null);
   const anyFilterActive = urgencyFilter || timeFilter || typeFilter !== null;
 
   // Workouts tiene su propio hook (fetch + Realtime propios), igual que
@@ -93,11 +95,11 @@ export function EnfoqueTab({
     for (const task of todayNonOverdue) {
       if (urgencyFilter && task.priority !== "urgent" && task.priority !== "high") continue;
       if (timeFilter && !task.startTime) continue;
-      if (typeFilter === "habit") continue;
+      if (typeFilter === "habit" || typeFilter === "workout") continue;
       items.push({
         type: "task",
         id: task.id,
-        time: task.startTime ? formatTaskTime(task.startTime) : null,
+        time: task.startTime ? formatTaskTime(task.startTime, timeFormat) : null,
         rawTime: task.startTime?.slice(0, 5) ?? null,
         completed: isTaskDone(task),
         task,
@@ -106,11 +108,11 @@ export function EnfoqueTab({
 
     for (const habit of habits) {
       if (timeFilter && !habit.startTime) continue;
-      if (typeFilter === "task") continue;
+      if (typeFilter === "task" || typeFilter === "workout") continue;
       items.push({
         type: "habit",
         id: habit.id,
-        time: habit.startTime ? formatTaskTime(habit.startTime) : null,
+        time: habit.startTime ? formatTaskTime(habit.startTime, timeFormat) : null,
         rawTime: habit.startTime?.slice(0, 5) ?? null,
         completed: habit.isCompletedToday,
         habit,
@@ -119,10 +121,11 @@ export function EnfoqueTab({
 
     for (const workout of dayWorkouts) {
       if (timeFilter && !workout.startTime) continue;
+      if (typeFilter === "task" || typeFilter === "habit") continue;
       items.push({
         type: "workout",
         id: workout.id,
-        time: workout.startTime ? formatTaskTime(workout.startTime) : null,
+        time: workout.startTime ? formatTaskTime(workout.startTime, timeFormat) : null,
         rawTime: workout.startTime?.slice(0, 5) ?? null,
         completed: workout.isCompletedToday,
         workout,
@@ -259,6 +262,16 @@ export function EnfoqueTab({
                 >
                   {t("type_task")}
                   {typeFilter === "task" && <Check size={10} strokeWidth={2} />}
+                </DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem
+                  checked={typeFilter === "workout"}
+                  onCheckedChange={(checked) => setTypeFilter(checked ? "workout" : null)}
+                  onSelect={(e) => e.preventDefault()}
+                  className="flex items-center justify-between gap-2 px-3 py-1.5 text-xs cursor-pointer outline-none data-[highlighted]:opacity-70"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {t("type_workout")}
+                  {typeFilter === "workout" && <Check size={10} strokeWidth={2} />}
                 </DropdownMenu.CheckboxItem>
               </DropdownMenu.Content>
             </DropdownMenu.Portal>

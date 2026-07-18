@@ -7,6 +7,7 @@ import { DashboardColumn } from "./DashboardColumn";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 
 interface Props {
   habits: HabitWithStatus[];
@@ -17,6 +18,7 @@ interface Props {
 export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) {
   const t = useTranslations("dashboard");
   const router = useRouter();
+  const { format } = useTimeFormat();
 
   const todayHabits = habits.filter(h => {
     const today = new Date();
@@ -28,13 +30,13 @@ export function DashboardHabitsColumn({ habits, onComplete, onUncheck }: Props) 
 
   const formatTime = (startTime: string | null, estimatedMinutes: number | null): string | null => {
     if (!startTime) return null;
-    const start = formatTaskTime(startTime);
+    const start = formatTaskTime(startTime, format);
     if (!estimatedMinutes) return start;
     const [h, m] = startTime.split(":").map(Number);
     const endMin = h * 60 + m + estimatedMinutes;
     const endH = Math.floor(endMin / 60) % 24;
     const endM = endMin % 60;
-    return `${start} – ${formatTaskTime(`${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`)}`;
+    return `${start} – ${formatTaskTime(`${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`, format)}`;
   };
 
   return (
