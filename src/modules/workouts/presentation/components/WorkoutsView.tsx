@@ -33,10 +33,17 @@ export default function WorkoutsView({ userId }: Props) {
   const [selectedDay, setSelectedDay] = useState(() => dayOfWeek(new Date()));
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState<Workout | null>(null);
+  const [deletingWorkout, setDeletingWorkout] = useState<WorkoutWithStatus | null>(null);
 
   const openCreate = () => { setEditingWorkout(null); setDialogOpen(true); };
   const openEdit = (w: Workout) => { setEditingWorkout(w); setDialogOpen(true); };
-  const handleDelete = async (w: WorkoutWithStatus) => { await workoutsHook.deleteWorkout(w.id); };
+  const requestDelete = (w: WorkoutWithStatus) => setDeletingWorkout(w);
+  const confirmDeleteWorkout = async () => {
+    if (!deletingWorkout) return;
+    const w = deletingWorkout;
+    setDeletingWorkout(null);
+    await workoutsHook.deleteWorkout(w.id);
+  };
 
   const dayWorkouts = workoutsHook.workouts.filter((w) => w.dayOfWeek.includes(selectedDay));
 
@@ -82,9 +89,8 @@ export default function WorkoutsView({ userId }: Props) {
                   <div key={w.id} className="rounded-lg p-3" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
                     <WorkoutCard
                       workout={w}
-                      onToggleComplete={() => workoutsHook.toggleWorkoutCompletion(w)}
                       onEdit={() => openEdit(w)}
-                      onDelete={() => handleDelete(w)}
+                      onDelete={() => requestDelete(w)}
                     />
                     {w.exercises.length > 0 && (
                       <div className="flex flex-col gap-2 mt-3 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
@@ -104,7 +110,7 @@ export default function WorkoutsView({ userId }: Props) {
               workouts={workoutsHook.workouts}
               categories={categories}
               onEdit={openEdit}
-              onDelete={handleDelete}
+              onDelete={requestDelete}
             />
           </div>
 
@@ -126,6 +132,40 @@ export default function WorkoutsView({ userId }: Props) {
         onUpdate={workoutsHook.updateWorkout}
         onDelete={workoutsHook.deleteWorkout}
       />
+
+      {deletingWorkout && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
+          onClick={() => setDeletingWorkout(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl p-6"
+            style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm" style={{ color: "var(--text-primary)" }}>
+              {t("delete_workout_confirm")}
+            </p>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setDeletingWorkout(null)}
+                className="flex-1 py-2 rounded-md text-sm"
+                style={{ background: "var(--surface)", color: "var(--text-secondary)" }}
+              >
+                {t("cancel")}
+              </button>
+              <button
+                onClick={confirmDeleteWorkout}
+                className="flex-1 py-2 rounded-md text-sm"
+                style={{ background: "var(--danger)", color: "#fff" }}
+              >
+                {t("delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -20,7 +20,7 @@ function mapExercise(row: DbWorkoutExercise): WorkoutExercise {
     order: row.order,
     sets: row.sets,
     reps: row.reps,
-    durationMin: row.duration_min,
+    durationSec: row.duration_sec,
     notes: row.notes,
     createdAt: row.created_at,
   };
@@ -67,7 +67,7 @@ export class WorkoutExerciseSupabaseRepository implements IWorkoutExerciseReposi
         order: count ?? 0,
         sets: input.sets ?? null,
         reps: input.reps ?? null,
-        duration_min: input.durationMin ?? null,
+        duration_sec: input.durationSec ?? null,
         notes: input.notes ?? null,
       })
       .select()
@@ -83,7 +83,7 @@ export class WorkoutExerciseSupabaseRepository implements IWorkoutExerciseReposi
     if (input.order !== undefined) patch.order = input.order;
     if (input.sets !== undefined) patch.sets = input.sets;
     if (input.reps !== undefined) patch.reps = input.reps;
-    if (input.durationMin !== undefined) patch.duration_min = input.durationMin;
+    if (input.durationSec !== undefined) patch.duration_sec = input.durationSec;
     if (input.notes !== undefined) patch.notes = input.notes;
 
     const { data, error } = await this.client

@@ -232,7 +232,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
                   </p>
                 )}
                 <div className="flex flex-col gap-1.5">
-                  {items.map((w) => {
+                  {items.map((w, idx) => {
                     const isExpanded = w.id === expandedId;
                     const dayLabel = w.dayOfWeek.length > 0
                       ? w.dayOfWeek.map((d) => t(DAY_ABBR_KEYS[d - 1] as Parameters<typeof t>[0])).join(", ")
@@ -243,7 +243,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
                       .join(" · ");
 
                     return (
-                      <div key={w.id} style={{ borderBottom: "1px solid var(--border)" }}>
+                      <div key={w.id} style={idx === items.length - 1 ? undefined : { borderBottom: "1px solid var(--border)" }}>
                         <div className="group flex items-center gap-2.5 py-2">
                           <Dumbbell size={16} strokeWidth={2} className="flex-shrink-0 self-start mt-0.5" style={{ color: "var(--text-muted)" }} />
                           <button

@@ -15,9 +15,25 @@ import type { ExerciseType } from "../../domain/entities/WorkoutExercise";
 import type { UUID } from "@/shared/types/database.types";
 
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
-const HOURS = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, "0"));
+const HOURS_12 = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0"));
 const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
 type AddMode = "strength" | "cardio" | "saved";
+type Period = "AM" | "PM";
+
+/** startTime se guarda como "HH:MM" 24h — estos helpers solo convierten
+ *  para la UI del picker de 12h con AM/PM, sin cambiar el esquema. */
+function to12h(time24: string): { hour: string; minute: string; period: Period } {
+  if (!time24) return { hour: "", minute: "", period: "AM" };
+  const [h, m] = time24.split(":").map(Number);
+  const period: Period = h >= 12 ? "PM" : "AM";
+  const hour12 = h % 12 === 0 ? 12 : h % 12;
+  return { hour: String(hour12).padStart(2, "0"), minute: String(m).padStart(2, "0"), period };
+}
+function from12h(hour: string, minute: string, period: Period): string {
+  let h = Number(hour) % 12;
+  if (period === "PM") h += 12;
+  return `${String(h).padStart(2, "0")}:${minute}`;
+}
 
 interface Props {
   open: boolean;
@@ -77,7 +93,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
   }, [open, workout]);
 
   const displayExercises: ExerciseDraft[] = isEdit
-    ? exercises.map((e) => ({ id: e.id, name: e.name, type: e.type, sets: e.sets, reps: e.reps, durationMin: e.durationMin, notes: e.notes }))
+    ? exercises.map((e) => ({ id: e.id, name: e.name, type: e.type, sets: e.sets, reps: e.reps, durationSec: e.durationSec, notes: e.notes }))
     : localExercises;
 
   const handleAddExercise = async () => {
@@ -88,7 +104,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
     if (isEdit && workout) {
       await createExercise({ workoutId: workout.id, name: value, type });
     } else {
-      setLocalExercises((prev) => [...prev, { id: crypto.randomUUID(), name: value, type, sets: null, reps: null, durationMin: null, notes: null }]);
+      setLocalExercises((prev) => [...prev, { id: crypto.randomUUID(), name: value, type, sets: null, reps: null, durationSec: null, notes: null }]);
     }
     setNewExerciseName("");
   };
@@ -98,7 +114,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
     if (isEdit && workout) {
       await createExercise({ workoutId: workout.id, catalogExerciseId: item.id, name: item.name, type });
     } else {
-      setLocalExercises((prev) => [...prev, { id: crypto.randomUUID(), name: item.name, type, sets: null, reps: null, durationMin: null, notes: null }]);
+      setLocalExercises((prev) => [...prev, { id: crypto.randomUUID(), name: item.name, type, sets: null, reps: null, durationSec: null, notes: null }]);
     }
   };
 
@@ -122,9 +138,9 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
     else setLocalExercises((prev) => prev.map((e) => (e.id === id ? { ...e, reps } : e)));
   };
 
-  const handleChangeExerciseDuration = (id: string, durationMin: number | null) => {
-    if (isEdit) updateExercise(id, { durationMin });
-    else setLocalExercises((prev) => prev.map((e) => (e.id === id ? { ...e, durationMin } : e)));
+  const handleChangeExerciseDuration = (id: string, durationSec: number | null) => {
+    if (isEdit) updateExercise(id, { durationSec });
+    else setLocalExercises((prev) => prev.map((e) => (e.id === id ? { ...e, durationSec } : e)));
   };
 
   const handleReorderExercises = (next: ExerciseDraft[]) => {
@@ -159,7 +175,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
         const created = await onCreate(commonInput);
         if (created) {
           for (const ex of localExercises) {
-            await createExercise({ workoutId: created.id, name: ex.name, type: ex.type, sets: ex.sets, reps: ex.reps, durationMin: ex.durationMin, notes: ex.notes });
+            await createExercise({ workoutId: created.id, name: ex.name, type: ex.type, sets: ex.sets, reps: ex.reps, durationSec: ex.durationSec, notes: ex.notes });
           }
         }
       }
@@ -315,7 +331,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                           onChangeType={(t2) => handleChangeExerciseType(ex.id, t2)}
                           onChangeSets={(sets) => handleChangeExerciseSets(ex.id, sets)}
                           onChangeReps={(reps) => handleChangeExerciseReps(ex.id, reps)}
-                          onChangeDuration={(durationMin) => handleChangeExerciseDuration(ex.id, durationMin)}
+                          onChangeDuration={(durationSec) => handleChangeExerciseDuration(ex.id, durationSec)}
                           onDelete={() => handleDeleteExercise(ex.id)}
                         />
                       ))}
@@ -377,28 +393,47 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                           style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {/* Desktop: 2 selects nativos estilizados (hora / minuto) — móvil
-                              mantiene el input nativo, cuyo picker de SO ya es buena UX. */}
-                          <div className="hidden lg:flex items-center gap-1.5">
-                            <select
-                              value={startTime ? startTime.split(":")[0] : ""}
-                              onChange={(e) => setStartTime(`${e.target.value}:${startTime ? startTime.split(":")[1] : "00"}`)}
-                              className="rounded-md px-2 py-1.5 text-sm outline-none"
-                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
-                            >
-                              <option value="" disabled>--</option>
-                              {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
-                            </select>
-                            <span style={{ color: "var(--text-muted)" }}>:</span>
-                            <select
-                              value={startTime ? startTime.split(":")[1] : ""}
-                              onChange={(e) => setStartTime(`${startTime ? startTime.split(":")[0] : "00"}:${e.target.value}`)}
-                              className="rounded-md px-2 py-1.5 text-sm outline-none"
-                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
-                            >
-                              <option value="" disabled>--</option>
-                              {MINUTES.map((m) => <option key={m} value={m}>{m}</option>)}
-                            </select>
+                          {/* Desktop: un solo control (hora 12h + minuto + AM/PM) con un
+                              único borde compartido — móvil mantiene el input nativo, cuyo
+                              picker de SO ya es buena UX. */}
+                          <div
+                            className="hidden lg:flex items-center rounded-md overflow-hidden divide-x divide-[var(--border)]"
+                            style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                          >
+                            {(() => {
+                              const { hour, minute, period } = to12h(startTime);
+                              return (
+                                <>
+                                  <select
+                                    value={hour}
+                                    onChange={(e) => setStartTime(from12h(e.target.value, minute || "00", period))}
+                                    className="px-2 py-1.5 text-sm outline-none bg-transparent"
+                                    style={{ color: "var(--text-primary)" }}
+                                  >
+                                    <option value="" disabled>--</option>
+                                    {HOURS_12.map((h) => <option key={h} value={h}>{h}</option>)}
+                                  </select>
+                                  <select
+                                    value={minute}
+                                    onChange={(e) => setStartTime(from12h(hour || "12", e.target.value, period))}
+                                    className="px-2 py-1.5 text-sm outline-none bg-transparent"
+                                    style={{ color: "var(--text-primary)" }}
+                                  >
+                                    <option value="" disabled>--</option>
+                                    {MINUTES.map((m) => <option key={m} value={m}>{m}</option>)}
+                                  </select>
+                                  <select
+                                    value={period}
+                                    onChange={(e) => setStartTime(from12h(hour || "12", minute || "00", e.target.value as Period))}
+                                    className="px-2 py-1.5 text-sm outline-none bg-transparent"
+                                    style={{ color: "var(--text-primary)" }}
+                                  >
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                  </select>
+                                </>
+                              );
+                            })()}
                           </div>
                           <input
                             type="time"
@@ -410,11 +445,11 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                           <button
                             type="button"
                             onClick={() => setTimePickerOpen(false)}
-                            className="flex items-center justify-center gap-1.5 rounded-sm py-1.5 text-xs"
+                            className="self-start flex items-center justify-center gap-1.5 rounded-sm px-4 py-1.5 text-xs"
                             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                           >
-                            <CornerDownLeft size={12} strokeWidth={2} />
                             {t("confirm_time")}
+                            <CornerDownLeft size={12} strokeWidth={2} />
                           </button>
                         </div>
                       )}

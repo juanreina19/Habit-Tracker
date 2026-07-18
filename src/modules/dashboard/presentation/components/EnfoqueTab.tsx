@@ -4,16 +4,19 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, Reorder, useDragControls } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { ClipboardPen, Repeat, Filter, Pencil, Check, GripVertical } from "lucide-react";
+import { ClipboardPen, Repeat, Dumbbell, Filter, Pencil, Check, GripVertical } from "lucide-react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { TaskCardDashboard } from "./TaskCardDashboard";
+import { WorkoutAgendaCard } from "./WorkoutAgendaCard";
 import { SectionHeader } from "@/shared/components/ui/SectionHeader";
 import { Confetti } from "@/shared/components/ui/Confetti";
 import { isTaskDone, formatTaskTime } from "@/modules/tasks/domain/entities/Task";
-import { today as getToday, isTimePast } from "@/shared/lib/utils/dates";
+import { today as getToday, isTimePast, dayOfWeek } from "@/shared/lib/utils/dates";
+import { useWorkouts } from "@/modules/workouts/presentation/hooks/useWorkouts";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
+import type { WorkoutWithStatus } from "@/modules/workouts/domain/entities/Workout";
 import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
@@ -34,13 +37,14 @@ interface Props {
 }
 
 interface AgendaItem {
-  type: "task" | "habit";
+  type: "task" | "habit" | "workout";
   id: string;
   time: string | null;
   rawTime: string | null;
   completed: boolean;
   task?: TaskWithStatus;
   habit?: HabitWithStatus;
+  workout?: WorkoutWithStatus;
 }
 
 export function EnfoqueTab({
@@ -55,10 +59,23 @@ export function EnfoqueTab({
   const [typeFilter, setTypeFilter] = useState<"task" | "habit" | null>(null);
   const anyFilterActive = urgencyFilter || timeFilter || typeFilter !== null;
 
+  // Workouts tiene su propio hook (fetch + Realtime propios), igual que
+  // useWorkoutExercises respecto al modal — no se acopla a useDashboard,
+  // que es específico de tasks/categories.
+  const workoutsHook = useWorkouts(userId);
+  const viewDow = dayOfWeek(viewDate ?? new Date());
+  const dayWorkouts = useMemo(
+    () => workoutsHook.workouts.filter((w) => w.isActive && w.dayOfWeek.includes(viewDow)),
+    [workoutsHook.workouts, viewDow],
+  );
+
   const guardedToggleTask    = isToday ? onToggleTask    : () => {};
   const guardedToggleOverdue = isToday ? toggleOverdue   : () => {};
   const guardedCompleteHabit = isToday ? onCompleteHabit : () => {};
   const guardedUncheckHabit  = isToday ? onUncheckHabit  : () => {};
+  const guardedToggleWorkout = isToday
+    ? (w: WorkoutWithStatus) => workoutsHook.toggleWorkoutCompletion(w)
+    : () => {};
 
   const storageKey = useMemo(
     () => `agenda-order-${userId}-${format(viewDate ?? new Date(), "yyyy-MM-dd")}`,
@@ -100,6 +117,18 @@ export function EnfoqueTab({
       });
     }
 
+    for (const workout of dayWorkouts) {
+      if (timeFilter && !workout.startTime) continue;
+      items.push({
+        type: "workout",
+        id: workout.id,
+        time: workout.startTime ? formatTaskTime(workout.startTime) : null,
+        rawTime: workout.startTime?.slice(0, 5) ?? null,
+        completed: workout.isCompletedToday,
+        workout,
+      });
+    }
+
     const sorted = items.sort((a, b) => {
       if (a.rawTime && !b.rawTime) return -1;
       if (!a.rawTime && b.rawTime) return 1;
@@ -111,7 +140,7 @@ export function EnfoqueTab({
       timedItems: sorted.filter(i => i.rawTime !== null),
       untimedItems: sorted.filter(i => i.rawTime === null),
     };
-  }, [todayNonOverdue, habits, urgencyFilter, timeFilter, typeFilter]);
+  }, [todayNonOverdue, habits, dayWorkouts, urgencyFilter, timeFilter, typeFilter]);
 
   const sortedOverdue = useMemo(
     () => [...overdue].sort((a, b) => {
@@ -266,6 +295,7 @@ export function EnfoqueTab({
                 onCompleteHabit={guardedCompleteHabit}
                 onUncheckHabit={guardedUncheckHabit}
                 onEditHabit={onEditHabit}
+                onToggleWorkout={guardedToggleWorkout}
               />
             ))}
           </Reorder.Group>
@@ -361,7 +391,9 @@ function AgendaNode({ item }: { item: AgendaItem }) {
       >
         {item.type === "habit"
           ? <Repeat size={11} strokeWidth={2} style={{ color: item.completed ? "#FFFFFF" : "var(--text-muted)" }} />
-          : <ClipboardPen size={11} strokeWidth={2} style={{ color: item.completed ? "#FFFFFF" : "var(--text-muted)" }} />
+          : item.type === "workout"
+            ? <Dumbbell size={11} strokeWidth={2} style={{ color: item.completed ? "#FFFFFF" : "var(--text-muted)" }} />
+            : <ClipboardPen size={11} strokeWidth={2} style={{ color: item.completed ? "#FFFFFF" : "var(--text-muted)" }} />
         }
       </div>
     </div>
@@ -378,9 +410,10 @@ interface AgendaCardProps {
   onCompleteHabit: (habitId: string) => void;
   onUncheckHabit: (habitId: string) => void;
   onEditHabit?: (habitId: string) => void;
+  onToggleWorkout: (workout: WorkoutWithStatus) => void;
 }
 
-function AgendaCard({ item, userId, typeTaskLabel, onToggleTask, onEditTask, onDeleteTask, onCompleteHabit, onUncheckHabit, onEditHabit }: AgendaCardProps) {
+function AgendaCard({ item, userId, typeTaskLabel, onToggleTask, onEditTask, onDeleteTask, onCompleteHabit, onUncheckHabit, onEditHabit, onToggleWorkout }: AgendaCardProps) {
   if (item.type === "task" && item.task) {
     return (
       <TaskCardDashboard
@@ -403,6 +436,14 @@ function AgendaCard({ item, userId, typeTaskLabel, onToggleTask, onEditTask, onD
           else onCompleteHabit(item.habit!.id);
         }}
         onEdit={onEditHabit ? () => onEditHabit(item.habit!.id) : undefined}
+      />
+    );
+  }
+  if (item.type === "workout" && item.workout) {
+    return (
+      <WorkoutAgendaCard
+        workout={item.workout}
+        onToggle={() => onToggleWorkout(item.workout!)}
       />
     );
   }

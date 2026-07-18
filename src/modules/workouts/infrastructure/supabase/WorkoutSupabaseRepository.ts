@@ -31,7 +31,7 @@ function mapExercise(row: DbWorkoutExercise): WorkoutExercise {
     order: row.order,
     sets: row.sets,
     reps: row.reps,
-    durationMin: row.duration_min,
+    durationSec: row.duration_sec,
     notes: row.notes,
     createdAt: row.created_at,
   };

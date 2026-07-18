@@ -9,6 +9,7 @@ import { useTheme } from "@/shared/components/ThemeProvider";
 import { useLocale, type Locale } from "@/shared/i18n/useLocale";
 import { useBrowserNotifications } from "@/shared/hooks/useBrowserNotifications";
 import { createClient } from "@/shared/lib/supabase/client";
+import { Loader } from "@/shared/components/ui/Loader";
 import StatsView from "../StatsView";
 import type { UUID } from "@/shared/types/database.types";
 
@@ -242,7 +243,7 @@ function NotificationsSection() {
           >
             {isLoading ? (
               <span className="absolute inset-0 flex items-center justify-center">
-                <span className="w-3 h-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                <Loader size={14} color="#ffffff" />
               </span>
             ) : (
               <span
