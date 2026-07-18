@@ -36,9 +36,11 @@ export const isRecurring = (t: Task): boolean =>
 export const isTaskDone = (t: Task | TaskWithStatus): boolean =>
   'isCompletedToday' in t ? (t as TaskWithStatus).isCompletedToday : t.completedAt !== null;
 
-/** Formatea un string de tiempo "HH:MM:SS" → "h:MM AM/PM" para display. */
-export const formatTaskTime = (t: string): string => {
+/** Formatea un string de tiempo "HH:MM:SS" → "h:MM AM/PM" (12h, default) o
+ *  "HH:MM" (24h) para display, según la preferencia leída de useTimeFormat(). */
+export const formatTaskTime = (t: string, format: "12h" | "24h" = "12h"): string => {
   const [h, m] = t.slice(0, 5).split(":").map(Number);
+  if (format === "24h") return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   const period = h >= 12 ? "PM" : "AM";
   const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
   return `${h12}:${String(m).padStart(2, "0")} ${period}`;

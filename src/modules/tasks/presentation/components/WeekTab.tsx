@@ -12,6 +12,7 @@ import { TaskDetailDialog, type TaskDetailEntry } from "./TaskDetailDialog";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { useLocale } from "@/shared/i18n/useLocale";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import { isRecurring, formatTaskTime } from "../../domain/entities/Task";
 import { toISODate, today } from "@/shared/lib/utils/dates";
 import type { Task, TaskWithStatus, TaskPriority } from "../../domain/entities/Task";
@@ -213,6 +214,7 @@ export function WeekTab({ userId, tasks }: Props) {
 
 function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; status: DayTaskStatus; dateISO: string; onViewDetail: () => void }) {
   const t = useTranslations("tasks");
+  const { format: timeFormat } = useTimeFormat();
   const isPastDay = dateISO < today();
   // "Atrasada" solo aplica a tareas únicas: una instancia recurrente no completada
   // en un día pasado no tiene un estado de "vencimiento" en el dominio (no es
@@ -288,7 +290,7 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
         <div className="flex items-center gap-1 pl-[26px]" style={{ color: "var(--text-secondary)" }}>
           <Clock size={11} strokeWidth={2} />
           <span className="text-xs whitespace-nowrap">
-            {formatTaskTime(task.startTime)}{task.endTime ? ` – ${formatTaskTime(task.endTime)}` : ""}
+            {formatTaskTime(task.startTime, timeFormat)}{task.endTime ? ` – ${formatTaskTime(task.endTime, timeFormat)}` : ""}
           </span>
         </div>
       )}

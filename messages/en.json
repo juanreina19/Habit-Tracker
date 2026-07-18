@@ -113,6 +113,9 @@
     "sign_out_confirm": "Do you want to sign out?",
     "cancel": "Cancel",
     "language": "Language",
+    "time_format": "Time format",
+    "time_format_12h": "12-hour (9:00 PM)",
+    "time_format_24h": "24-hour (21:00)",
     "statistics": "Statistics",
     "view_statistics": "View Statistics",
     "statistics_desc": "Streaks, completion rates, achievements"
@@ -208,6 +211,7 @@
     "end_time_label": "End (optional)",
     "time_end_error": "End time must be after start",
     "time_expired": "Overdue",
+    "confirm_time": "Confirm",
     "tab_today": "Today",
     "tab_week": "Week",
     "tab_all": "All",
@@ -328,8 +332,10 @@
     "collapse": "Collapse",
     "expand": "Expand",
     "motivational_summary": "You have <n>{habits}</n> and <n>{tasks}</n> for today",
+    "motivational_summary_with_workouts": "You have <n>{habits}</n>, <n>{tasks}</n>, and <n>{workouts}</n> for today",
     "motivational_habits_count": "{count, plural, =1 {1 habit} other {{count} habits}}",
     "motivational_tasks_count": "{count, plural, =1 {1 task} other {{count} tasks}}",
+    "motivational_workouts_count": "{count, plural, =1 {1 workout} other {{count} workouts}}",
     "tab_focus": "Focus",
     "tab_board": "Board",
     "tab_eisenhower": "Eisenhower",
@@ -351,7 +357,8 @@
     "coming_soon": "Coming soon",
     "no_urgent": "No urgent tasks",
     "type_task": "Task",
-    "type_habit": "Habit"
+    "type_habit": "Habit",
+    "type_workout": "Workout"
   },
   "quickAdd": {
     "new_task": "Task",

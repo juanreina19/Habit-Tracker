@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDashboard } from "../hooks/useDashboard";
+import { useWorkouts } from "@/modules/workouts/presentation/hooks/useWorkouts";
+import { dayOfWeek } from "@/shared/lib/utils/dates";
 import { MotivationalHeader } from "./MotivationalHeader";
 import { HomeTabBar, type HomeTab } from "./HomeTabBar";
 import { EnfoqueTab } from "./EnfoqueTab";
@@ -28,6 +30,12 @@ export default function LifeDashboardView({ userId }: Props) {
   const [viewDate, setViewDate] = useState(() => new Date());
 
   const dashboard = useDashboard(userId, viewDate);
+  const workoutsHook = useWorkouts(userId);
+  const viewDow = dayOfWeek(viewDate);
+  const workoutsCount = useMemo(
+    () => workoutsHook.workouts.filter((w) => w.isActive && w.dayOfWeek.includes(viewDow)).length,
+    [workoutsHook.workouts, viewDow]
+  );
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskWithStatus | null>(null);
@@ -76,6 +84,7 @@ export default function LifeDashboardView({ userId }: Props) {
           onDateChange={setViewDate}
           habitsCount={dashboard.habitsProgress.total}
           tasksCount={dashboard.todayCount}
+          workoutsCount={workoutsCount}
         />
 
         <HomeTabBar active={activeTab} onChange={setActiveTab} />

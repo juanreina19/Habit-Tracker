@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Pencil, Trash2 } from "lucide-react";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "@/modules/tasks/presentation/components/TaskCheckbox";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import { DAY_LETTERS } from "@/shared/constants/dayLabels";
 import type { WorkoutWithStatus } from "../../domain/entities/Workout";
 
@@ -27,10 +28,11 @@ interface Props {
  */
 export function WorkoutCard({ workout, compact = false, selected = false, onToggleComplete, onEdit, onDelete, onClick }: Props) {
   const t = useTranslations("workouts");
+  const { format } = useTimeFormat();
   const exerciseCount = workout.exercises.length;
 
   const dayLabel = workout.dayOfWeek.length > 0 ? workout.dayOfWeek.map((d) => DAY_LETTERS[d - 1]).join(" ") : t("any_day");
-  const timeLabel = workout.startTime ? formatTaskTime(workout.startTime) : null;
+  const timeLabel = workout.startTime ? formatTaskTime(workout.startTime, format) : null;
 
   const subtitle = compact
     ? [dayLabel, timeLabel, `${exerciseCount} ${t("exercises_label").toLowerCase()}`].filter(Boolean).join(" · ")

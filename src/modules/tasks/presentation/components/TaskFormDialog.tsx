@@ -4,15 +4,19 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
-import { Plus, X, Trash2, ChevronRight, Star, Save } from "lucide-react";
+import { Plus, X, Trash2, ChevronRight, Star, Save, CornerDownLeft } from "lucide-react";
 import { formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
+import { to12h, from12h } from "@/shared/lib/utils/time12h";
 import type { Task, CreateTaskInput, UpdateTaskInput, TaskPriority } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 import { PRIORITY_COLORS } from "../constants/taskColors";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { IconPickerDialog } from "@/shared/components/ui/IconPickerDialog";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
+import { DatePickerPopover } from "./DatePickerPopover";
+import { TimePickerPopover } from "@/modules/workouts/presentation/components/TimePickerPopover";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import { useSubtasks } from "../hooks/useSubtasks";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 
@@ -37,6 +41,7 @@ export function TaskFormDialog({
   const t = useTranslations("tasks");
   const tDays = useTranslations("dayLabels");
   const tCat = useTranslations("iconCategories");
+  const { format: timeFormat } = useTimeFormat();
   const isEdit = !!task;
 
   const [title, setTitle]             = useState("");
@@ -44,13 +49,11 @@ export function TaskFormDialog({
   const [priority, setPriority]       = useState<TaskPriority>("medium");
   const [dueDate, setDueDate]         = useState("");
 
-  // Recurrencia
-  const [isRecurring, setIsRecurring]         = useState(false);
-  const [recurrenceDays, setRecurrenceDays]   = useState<number[]>([1,2,3,4,5,6,7]);
-  const [daysError, setDaysError]             = useState("");
+  // Recurrencia — sin bool separado: "repite" se infiere de recurrenceDays.length>0,
+  // igual que selectedDays en WorkoutFormDialog. Vacío = una vez (comportamiento actual).
+  const [recurrenceDays, setRecurrenceDays]   = useState<number[]>([]);
 
-  // Horario
-  const [hasSchedule, setHasSchedule] = useState(false);
+  // Horario — hasSchedule también se infiere (startTime truthy), mismo criterio que Workouts.
   const [startTime, setStartTime]     = useState("");
   const [endTime, setEndTime]         = useState("");
   const [timeError, setTimeError]     = useState("");
@@ -61,6 +64,12 @@ export function TaskFormDialog({
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const [catOpen, setCatOpen] = useState(false);
   const [priOpen, setPriOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [repeatPickerOpen, setRepeatPickerOpen] = useState(false);
+  const [timePickerOpen, setTimePickerOpen] = useState(false);
+
+  const isRecurring = recurrenceDays.length > 0;
+  const hasSchedule = !!startTime;
 
   const { categories } = useCategories(userId);
 
@@ -80,12 +89,8 @@ export function TaskFormDialog({
       setPriority(task?.priority ?? "medium");
       setDueDate(task?.dueDate ? task.dueDate.split("T")[0] : "");
 
-      const hasRec = Array.isArray(task?.recurrenceDays) && (task?.recurrenceDays?.length ?? 0) > 0;
-      setIsRecurring(hasRec);
-      setRecurrenceDays(task?.recurrenceDays?.length ? task.recurrenceDays : [1,2,3,4,5,6,7]);
+      setRecurrenceDays(task?.recurrenceDays?.length ? task.recurrenceDays : []);
 
-      const hasSched = !!task?.startTime;
-      setHasSchedule(hasSched);
       setStartTime(task?.startTime?.slice(0, 5) ?? "");
       setEndTime(task?.endTime?.slice(0, 5) ?? "");
 
@@ -94,7 +99,6 @@ export function TaskFormDialog({
       setIcon(task?.icon ?? null);
 
       setTitleError("");
-      setDaysError("");
       setTimeError("");
       setIsSaving(false);
       setIsDeleting(false);
@@ -103,18 +107,23 @@ export function TaskFormDialog({
       setLocalSubtasks([]);
       setCatOpen(false);
       setPriOpen(false);
+      setDatePickerOpen(false);
+      setRepeatPickerOpen(false);
+      setTimePickerOpen(false);
     }
   }, [open, task, defaultConfirmDelete]);
 
   useEffect(() => {
-    if (!catOpen && !priOpen) return;
-    const handler = (e: MouseEvent) => {
+    if (!catOpen && !priOpen && !repeatPickerOpen && !timePickerOpen) return;
+    const handler = () => {
       setCatOpen(false);
       setPriOpen(false);
+      setRepeatPickerOpen(false);
+      setTimePickerOpen(false);
     };
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
-  }, [catOpen, priOpen]);
+  }, [catOpen, priOpen, repeatPickerOpen, timePickerOpen]);
 
   const toggleDay = (day: number) => {
     setRecurrenceDays(prev =>
@@ -122,14 +131,12 @@ export function TaskFormDialog({
         ? prev.filter(d => d !== day)
         : [...prev, day].sort((a, b) => a - b)
     );
-    setDaysError("");
   };
 
   const handleSave = async () => {
     const trimmed = title.trim();
     if (!trimmed) { setTitleError(t("title_error")); return; }
-    if (isRecurring && recurrenceDays.length === 0) { setDaysError(t("recurrence_days_error")); return; }
-    if (hasSchedule && endTime && startTime && endTime <= startTime) {
+    if (startTime && endTime && endTime <= startTime) {
       setTimeError(t("time_end_error")); return;
     }
 
@@ -142,8 +149,8 @@ export function TaskFormDialog({
         categoryId:      categoryId ?? null,
         dueDate:         isRecurring ? null : (dueDate || null),
         recurrenceDays:  isRecurring ? recurrenceDays : null,
-        startTime:       hasSchedule && startTime ? startTime : null,
-        endTime:         hasSchedule && startTime && endTime ? endTime : null,
+        startTime:       startTime || null,
+        endTime:         startTime && endTime ? endTime : null,
         icon:            icon ?? null,
         isImportant,
       } as const;
@@ -457,8 +464,8 @@ export function TaskFormDialog({
                         </button>
                         {catOpen && (
                           <div
-                            className="absolute left-0 top-full mt-1 z-10 rounded-lg p-1 min-w-[140px]"
-                            style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                            className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-1 min-w-[140px]"
+                            style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button
@@ -489,11 +496,7 @@ export function TaskFormDialog({
                     {/* Date pill */}
                     <button
                       type="button"
-                      onClick={() => {
-                        const input = document.getElementById("task-date-input") as HTMLInputElement | null;
-                        if (!input) return;
-                        try { input.showPicker?.(); } catch { input.click(); }
-                      }}
+                      onClick={(e) => { e.stopPropagation(); setDatePickerOpen(true); }}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                       style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                     >
@@ -502,29 +505,130 @@ export function TaskFormDialog({
                       {dueDate || t("form_free")}
                     </button>
 
-                    {/* Repeat pill */}
-                    <button
-                      type="button"
-                      onClick={() => setIsRecurring(prev => !prev)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
-                      style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: isRecurring ? "var(--info)" : "var(--text-muted)" }} />
-                      <span style={{ color: "var(--text-muted)" }}>REPEAT</span>
-                      {isRecurring ? t("recurrence_repeat") : t("recurrence_once")}
-                    </button>
+                    {/* Repeat pill — abre popover de días, mismo patrón que el
+                        selector de DÍAS de WorkoutFormDialog. Sin días
+                        seleccionados => una vez (comportamiento actual). */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setRepeatPickerOpen(p => !p); setCatOpen(false); setPriOpen(false); setTimePickerOpen(false); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
+                        style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: isRecurring ? "var(--info)" : "var(--text-muted)" }} />
+                        <span style={{ color: "var(--text-muted)" }}>REPEAT</span>
+                        {isRecurring ? t("recurrence_repeat") : t("recurrence_once")}
+                      </button>
+                      {repeatPickerOpen && (
+                        <div
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex gap-1"
+                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {ALL_DAYS.map((day) => {
+                            const on = recurrenceDays.includes(day);
+                            return (
+                              <button
+                                key={day}
+                                type="button"
+                                onClick={() => toggleDay(day)}
+                                className="w-8 h-8 rounded-full text-xs transition-colors"
+                                style={{
+                                  background: on ? "var(--text-primary)" : "transparent",
+                                  color: on ? "var(--bg)" : "var(--text-secondary)",
+                                  border: "1px solid var(--border)",
+                                }}
+                              >
+                                {tDays(`d${day}` as Parameters<typeof tDays>[0])}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
 
-                    {/* Time pill */}
-                    <button
-                      type="button"
-                      onClick={() => { setHasSchedule(p => !p); setTimeError(""); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
-                      style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: hasSchedule && startTime ? "var(--purple)" : "var(--text-muted)" }} />
-                      <span style={{ color: "var(--text-muted)" }}>TIME</span>
-                      {hasSchedule && startTime ? startTime : t("form_free")}
-                    </button>
+                    {/* Time pill — abre popover con hora inicio + fin (opcional),
+                        mismo patrón (TimePickerPopover) que WorkoutFormDialog. */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setTimePickerOpen(p => !p); setCatOpen(false); setPriOpen(false); setRepeatPickerOpen(false); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
+                        style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: startTime ? "var(--purple)" : "var(--text-muted)" }} />
+                        <span style={{ color: "var(--text-muted)" }}>TIME</span>
+                        {startTime ? formatTaskTime(startTime, timeFormat) : t("form_free")}
+                      </button>
+                      {timePickerOpen && (
+                        <div
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex flex-col gap-3"
+                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                              {t("start_time_label")}
+                            </span>
+                            <div className="hidden lg:block">
+                              {(() => {
+                                const { hour, minute, period } = to12h(startTime);
+                                return (
+                                  <TimePickerPopover
+                                    hour={hour} minute={minute} period={period}
+                                    onChangeHour={(h) => { setStartTime(from12h(h, minute || "00", period)); setTimeError(""); }}
+                                    onChangeMinute={(m) => { setStartTime(from12h(hour || "12", m, period)); setTimeError(""); }}
+                                    onChangePeriod={(p) => { setStartTime(from12h(hour || "12", minute || "00", p)); setTimeError(""); }}
+                                  />
+                                );
+                              })()}
+                            </div>
+                            <input
+                              type="time"
+                              value={startTime}
+                              onChange={(e) => { setStartTime(e.target.value); setTimeError(""); }}
+                              className="lg:hidden rounded-md px-2 py-1.5 text-sm outline-none"
+                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                              {t("end_time_label")}
+                            </span>
+                            <div className="hidden lg:block">
+                              {(() => {
+                                const { hour, minute, period } = to12h(endTime);
+                                return (
+                                  <TimePickerPopover
+                                    hour={hour} minute={minute} period={period}
+                                    onChangeHour={(h) => { setEndTime(from12h(h, minute || "00", period)); setTimeError(""); }}
+                                    onChangeMinute={(m) => { setEndTime(from12h(hour || "12", m, period)); setTimeError(""); }}
+                                    onChangePeriod={(p) => { setEndTime(from12h(hour || "12", minute || "00", p)); setTimeError(""); }}
+                                  />
+                                );
+                              })()}
+                            </div>
+                            <input
+                              type="time"
+                              value={endTime}
+                              onChange={(e) => { setEndTime(e.target.value); setTimeError(""); }}
+                              className="lg:hidden rounded-md px-2 py-1.5 text-sm outline-none"
+                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                            />
+                          </div>
+                          {timeError && <p className="text-xs" style={{ color: "var(--danger)" }}>{timeError}</p>}
+                          <button
+                            type="button"
+                            onClick={() => setTimePickerOpen(false)}
+                            className="self-start flex items-center justify-center gap-1.5 rounded-sm px-4 py-1.5 text-xs"
+                            style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
+                          >
+                            {t("confirm_time")}
+                            <CornerDownLeft size={12} strokeWidth={2} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
 
                     {/* Priority pill — dropdown selector */}
                     <div className="relative">
@@ -539,8 +643,8 @@ export function TaskFormDialog({
                       </button>
                       {priOpen && (
                         <div
-                          className="absolute left-0 top-full mt-1 z-10 rounded-lg p-1 min-w-[140px]"
-                          style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-1 min-w-[140px]"
+                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           {PRIORITIES.map((p) => (
@@ -573,97 +677,13 @@ export function TaskFormDialog({
                     )}
                   </div>
 
-                  {/* Hidden date input for native picker */}
-                  <input
-                    id="task-date-input"
-                    type="date"
+                  <DatePickerPopover
+                    open={datePickerOpen}
                     value={dueDate}
-                    min={isEdit ? undefined : today()}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    style={{ position: "absolute", opacity: 0, width: 0, height: 0, pointerEvents: "none" }}
-                    tabIndex={-1}
+                    minDate={isEdit ? undefined : today()}
+                    onSelect={setDueDate}
+                    onClose={() => setDatePickerOpen(false)}
                   />
-
-                  {/* Recurrence days — shown when recurring is active */}
-                  <AnimatePresence>
-                    {isRecurring && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex gap-2">
-                          {ALL_DAYS.map((day) => {
-                            const on = recurrenceDays.includes(day);
-                            return (
-                              <button
-                                key={day}
-                                type="button"
-                                onClick={() => toggleDay(day)}
-                                className="flex-1 py-2 rounded-md text-xs font-medium transition-colors duration-200 active:scale-95"
-                                style={{
-                                  background: on ? "var(--text-primary)" : "var(--surface-elevated)",
-                                  color:      on ? "var(--bg)" : "var(--text-secondary)",
-                                }}
-                              >
-                                {tDays(`d${day}` as Parameters<typeof tDays>[0])}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {daysError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{daysError}</p>}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Time inputs — shown when schedule is active */}
-                  <AnimatePresence>
-                    {hasSchedule && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex gap-3">
-                          <div className="flex-1">
-                            <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>
-                              {t("start_time_label")}
-                            </label>
-                            <input
-                              type="time"
-                              value={startTime}
-                              onChange={(e) => { setStartTime(e.target.value); setTimeError(""); }}
-                              className="w-full rounded-md px-3 py-2.5 text-sm outline-none"
-                              style={{
-                                background: "var(--surface-elevated)",
-                                color: "var(--text-primary)",
-                                border: `1.5px solid ${timeError ? "var(--danger)" : "transparent"}`,
-                              }}
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <label className="text-[10px] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>
-                              {t("end_time_label")}
-                            </label>
-                            <input
-                              type="time"
-                              value={endTime}
-                              onChange={(e) => { setEndTime(e.target.value); setTimeError(""); }}
-                              className="w-full rounded-md px-3 py-2.5 text-sm outline-none"
-                              style={{
-                                background: "var(--surface-elevated)",
-                                color: "var(--text-primary)",
-                                border: `1.5px solid ${timeError ? "var(--danger)" : "transparent"}`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                        {timeError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{timeError}</p>}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
 
                   {/* Icon — compact row */}
                   <button

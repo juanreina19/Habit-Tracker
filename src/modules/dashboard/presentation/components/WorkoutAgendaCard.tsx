@@ -62,8 +62,8 @@ export function WorkoutAgendaCard({ workout, onToggle }: Props) {
           {workout.exercises.map((ex) => {
             const amount = exerciseAmount(ex, t);
             return (
-              <div key={ex.id} className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--text-muted)" }}>
-                <Dumbbell size={11} strokeWidth={2} className="flex-shrink-0" />
+              <div key={ex.id} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+                <Dumbbell size={13} strokeWidth={2} className="flex-shrink-0" />
                 <span className="truncate">
                   {ex.name}
                   {amount && <> · {amount}</>}

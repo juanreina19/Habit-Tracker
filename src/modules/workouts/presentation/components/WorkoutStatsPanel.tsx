@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import { DAY_ABBR_KEYS } from "@/shared/constants/dayLabels";
 import { EXERCISE_TYPE_COLORS } from "../constants/workoutColors";
 import type { WorkoutWithStatus } from "../../domain/entities/Workout";
@@ -41,6 +42,7 @@ function StatTitle({ children }: { children: React.ReactNode }) {
  */
 export function WorkoutStatsPanel({ stats }: Props) {
   const t = useTranslations("workouts");
+  const { format: timeFormat } = useTimeFormat();
   const maxTopExerciseCount = stats.topExercises[0]?.count ?? 1;
   const sectionStyle = { borderTop: "1px solid var(--border)", paddingTop: "1rem" };
 
@@ -76,7 +78,7 @@ export function WorkoutStatsPanel({ stats }: Props) {
               {stats.nextWorkout.dayOfWeek.length > 0
                 ? stats.nextWorkout.dayOfWeek.map((d) => t(DAY_ABBR_KEYS[d - 1] as Parameters<typeof t>[0])).join(", ")
                 : t("any_day")}
-              {stats.nextWorkout.startTime ? ` · ${formatTaskTime(stats.nextWorkout.startTime)}` : ""}
+              {stats.nextWorkout.startTime ? ` · ${formatTaskTime(stats.nextWorkout.startTime, timeFormat)}` : ""}
             </span>
           </div>
         ) : (

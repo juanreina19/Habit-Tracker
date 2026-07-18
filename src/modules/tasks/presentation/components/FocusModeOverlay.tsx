@@ -11,6 +11,7 @@ import type { FocusModeSession, FocusPhase } from "../../domain/entities/FocusMo
 import { getElapsedSec } from "../../domain/entities/FocusModeSession";
 import type { TaskWithStatus } from "../../domain/entities/Task";
 import { isTaskDone, formatTaskTime } from "../../domain/entities/Task";
+import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import { PRIORITY_COLORS } from "../constants/taskColors";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
@@ -33,6 +34,7 @@ interface Props {
 
 function SortableTaskRow({ task, toggleTask, showHandle }: { task: TaskWithStatus; toggleTask: () => void; showHandle: boolean }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
+  const { format } = useTimeFormat();
   const done = isTaskDone(task);
   return (
     <div
@@ -57,7 +59,7 @@ function SortableTaskRow({ task, toggleTask, showHandle }: { task: TaskWithStatu
       </span>
       {task.startTime && (
         <span className="flex items-center gap-1 flex-shrink-0 text-xs" style={{ color: "var(--text-secondary)" }}>
-          <Clock size={12} strokeWidth={2} />{formatTaskTime(task.startTime)}
+          <Clock size={12} strokeWidth={2} />{formatTaskTime(task.startTime, format)}
         </span>
       )}
     </div>

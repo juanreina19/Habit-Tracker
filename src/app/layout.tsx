@@ -6,6 +6,7 @@ import { Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { PWARegistration } from "@/shared/components/PWARegistration";
 import { ThemeProvider } from "@/shared/components/ThemeProvider";
+import { TimeFormatProvider } from "@/shared/components/TimeFormatProvider";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -49,9 +50,11 @@ export default async function RootLayout({
       </head>
       <body>
         <ThemeProvider>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            {children}
-          </NextIntlClientProvider>
+          <TimeFormatProvider>
+            <NextIntlClientProvider locale={locale} messages={messages}>
+              {children}
+            </NextIntlClientProvider>
+          </TimeFormatProvider>
         </ThemeProvider>
         <PWARegistration />
       </body>

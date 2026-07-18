@@ -113,6 +113,9 @@
     "sign_out_confirm": "¿Deseas cerrar sesión?",
     "cancel": "Cancelar",
     "language": "Idioma",
+    "time_format": "Formato de hora",
+    "time_format_12h": "12 horas (9:00 PM)",
+    "time_format_24h": "24 horas (21:00)",
     "statistics": "Estadísticas",
     "view_statistics": "Ver estadísticas",
     "statistics_desc": "Rachas, tasas de completado, logros"
@@ -208,6 +211,7 @@
     "end_time_label": "Fin (opcional)",
     "time_end_error": "La hora de fin debe ser posterior al inicio",
     "time_expired": "Atrasada",
+    "confirm_time": "Confirmar",
     "tab_today": "Hoy",
     "tab_week": "Semana",
     "tab_all": "Todas",
@@ -328,8 +332,10 @@
     "collapse": "Colapsar",
     "expand": "Expandir",
     "motivational_summary": "Tienes <n>{habits}</n> y <n>{tasks}</n> para hoy",
+    "motivational_summary_with_workouts": "Tienes <n>{habits}</n>, <n>{tasks}</n> y <n>{workouts}</n> para hoy",
     "motivational_habits_count": "{count, plural, =1 {1 hábito} other {{count} hábitos}}",
     "motivational_tasks_count": "{count, plural, =1 {1 tarea} other {{count} tareas}}",
+    "motivational_workouts_count": "{count, plural, =1 {1 entrenamiento} other {{count} entrenamientos}}",
     "tab_focus": "Enfoque",
     "tab_board": "Tablero",
     "tab_eisenhower": "Eisenhower",
@@ -351,7 +357,8 @@
     "coming_soon": "Próximamente",
     "no_urgent": "Sin tareas urgentes",
     "type_task": "Tarea",
-    "type_habit": "Hábito"
+    "type_habit": "Hábito",
+    "type_workout": "Entrenamiento"
   },
   "quickAdd": {
     "new_task": "Tarea",
