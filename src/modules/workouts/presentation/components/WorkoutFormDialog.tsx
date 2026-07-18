@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, Reorder } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
-import { X, Trash2, Dumbbell, Zap, BookmarkCheck, Save, Plus } from "lucide-react";
+import { X, Trash2, Dumbbell, Zap, BookmarkCheck, Save, Plus, CornerDownLeft } from "lucide-react";
 import { useWorkoutExercises } from "../hooks/useWorkoutExercises";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { ExerciseReorderItem, type ExerciseDraft } from "./ExerciseReorderItem";
@@ -15,6 +15,8 @@ import type { ExerciseType } from "../../domain/entities/WorkoutExercise";
 import type { UUID } from "@/shared/types/database.types";
 
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
+const HOURS = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, "0"));
+const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, "0"));
 type AddMode = "strength" | "cardio" | "saved";
 
 interface Props {
@@ -335,7 +337,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                       </button>
                       {dayPickerOpen && (
                         <div
-                          className="absolute left-0 top-full mt-1 z-10 rounded-2xl p-2 flex gap-1"
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex gap-1"
                           style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -344,7 +346,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                               key={day}
                               type="button"
                               onClick={() => toggleDay(day)}
-                              className="w-7 h-7 rounded-full text-xs transition-colors"
+                              className="w-8 h-8 rounded-full text-xs transition-colors"
                               style={{
                                 background: selectedDays.includes(day) ? "var(--text-primary)" : "transparent",
                                 color: selectedDays.includes(day) ? "var(--bg)" : "var(--text-secondary)",
@@ -371,23 +373,47 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                       </button>
                       {timePickerOpen && (
                         <div
-                          className="absolute left-0 top-full mt-1 z-10 rounded-2xl p-2 flex flex-col gap-2"
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex flex-col gap-2"
                           style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                           onClick={(e) => e.stopPropagation()}
                         >
+                          {/* Desktop: 2 selects nativos estilizados (hora / minuto) — móvil
+                              mantiene el input nativo, cuyo picker de SO ya es buena UX. */}
+                          <div className="hidden lg:flex items-center gap-1.5">
+                            <select
+                              value={startTime ? startTime.split(":")[0] : ""}
+                              onChange={(e) => setStartTime(`${e.target.value}:${startTime ? startTime.split(":")[1] : "00"}`)}
+                              className="rounded-md px-2 py-1.5 text-sm outline-none"
+                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                            >
+                              <option value="" disabled>--</option>
+                              {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
+                            </select>
+                            <span style={{ color: "var(--text-muted)" }}>:</span>
+                            <select
+                              value={startTime ? startTime.split(":")[1] : ""}
+                              onChange={(e) => setStartTime(`${startTime ? startTime.split(":")[0] : "00"}:${e.target.value}`)}
+                              className="rounded-md px-2 py-1.5 text-sm outline-none"
+                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                            >
+                              <option value="" disabled>--</option>
+                              {MINUTES.map((m) => <option key={m} value={m}>{m}</option>)}
+                            </select>
+                          </div>
                           <input
                             type="time"
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
-                            className="rounded-md px-2 py-1.5 text-sm outline-none"
+                            className="lg:hidden rounded-md px-2 py-1.5 text-sm outline-none"
                             style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
                           />
                           <button
                             type="button"
                             onClick={() => setTimePickerOpen(false)}
-                            className="rounded-md py-1.5 text-xs"
+                            className="flex items-center justify-center gap-1.5 rounded-sm py-1.5 text-xs"
                             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                           >
+                            <CornerDownLeft size={12} strokeWidth={2} />
                             {t("confirm_time")}
                           </button>
                         </div>
@@ -408,8 +434,8 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         </button>
                         {catOpen && (
                           <div
-                            className="absolute left-0 top-full mt-1 z-10 rounded-lg p-1 min-w-[140px]"
-                            style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                            className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-1 min-w-[140px]"
+                            style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button type="button" onClick={() => { setCategoryId(null); setCatOpen(false); }}

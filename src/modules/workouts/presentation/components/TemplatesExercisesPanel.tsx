@@ -9,6 +9,7 @@ import { WorkoutExerciseSupabaseRepository } from "../../infrastructure/supabase
 import { UpdateExerciseCatalogUseCase } from "../../domain/use-cases/UpdateExerciseCatalogUseCase";
 import { DeleteExerciseCatalogUseCase } from "../../domain/use-cases/DeleteExerciseCatalogUseCase";
 import { ExerciseRow } from "./ExerciseRow";
+import { Loader } from "@/shared/components/ui/Loader";
 import { DAY_ABBR_KEYS } from "@/shared/constants/dayLabels";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import type { WorkoutWithStatus } from "../../domain/entities/Workout";
@@ -42,6 +43,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
   const [editingCatalogId, setEditingCatalogId] = useState<UUID | null>(null);
   const [editName, setEditName] = useState("");
   const [editType, setEditType] = useState<ExerciseType | null>(null);
+  const [deletingCatalogItem, setDeletingCatalogItem] = useState<ExerciseCatalogItem | null>(null);
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
 
   const getRepo = useCallback(() => new WorkoutExerciseSupabaseRepository(createClient()), []);
@@ -50,6 +52,20 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
     () => (catalogFilter === "all" ? catalog : catalog.filter((item) => item.defaultType === catalogFilter)),
     [catalog, catalogFilter]
   );
+
+  // Qué plantillas usan cada ejercicio del catálogo — para advertir antes de borrar.
+  const templatesByCatalogId = useMemo(() => {
+    const map = new Map<UUID, string[]>();
+    for (const w of workouts) {
+      for (const ex of w.exercises) {
+        if (!ex.catalogExerciseId) continue;
+        const names = map.get(ex.catalogExerciseId) ?? [];
+        if (!names.includes(w.name)) names.push(w.name);
+        map.set(ex.catalogExerciseId, names);
+      }
+    }
+    return map;
+  }, [workouts]);
 
   const startEditCatalog = (item: ExerciseCatalogItem) => {
     setEditingCatalogId(item.id);
@@ -70,7 +86,10 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
     cancelEditCatalog();
   };
 
-  const handleDeleteCatalog = async (id: UUID) => {
+  const confirmDeleteCatalog = async () => {
+    if (!deletingCatalogItem) return;
+    const id = deletingCatalogItem.id;
+    setDeletingCatalogItem(null);
     setCatalog((prev) => prev.filter((item) => item.id !== id));
     await new DeleteExerciseCatalogUseCase(getRepo()).execute(id);
   };
@@ -96,6 +115,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
   }, [workouts]);
 
   return (
+    <>
     <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1rem" }}>
       <div className="flex items-center gap-4">
         <button
@@ -137,7 +157,9 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
           </div>
 
           {catalogLoading ? (
-            <p className="text-sm text-center py-6" style={{ color: "var(--text-muted)" }}>…</p>
+            <div className="flex justify-center py-6">
+              <Loader size={32} />
+            </div>
           ) : filteredCatalog.length === 0 ? (
             <p className="text-sm text-center py-6" style={{ color: "var(--text-muted)" }}>{t("no_saved_exercises")}</p>
           ) : (
@@ -185,7 +207,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
                         style={{ color: "var(--text-secondary)" }} aria-label={t("edit_exercise")}>
                         <Pencil size={13} strokeWidth={2} />
                       </button>
-                      <button type="button" onClick={() => handleDeleteCatalog(item.id)}
+                      <button type="button" onClick={() => setDeletingCatalogItem(item)}
                         className="w-7 h-7 rounded-md flex items-center justify-center transition-opacity active:opacity-70 flex-shrink-0"
                         style={{ color: "var(--danger)" }} aria-label={t("delete")}>
                         <Trash2 size={13} strokeWidth={2} />
@@ -265,7 +287,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
                               transition={{ duration: 0.2 }}
                               className="overflow-hidden"
                             >
-                              <div className="pl-[26px] pr-2.5 pb-2.5 pt-1 flex flex-col gap-1" style={{ borderTop: "1px solid var(--border)" }}>
+                              <div className="pl-[26px] pr-2.5 pb-2.5 pt-1 flex flex-col gap-1">
                                 {w.exercises.length === 0 ? (
                                   <p className="text-sm py-2" style={{ color: "var(--text-muted)" }}>{t("no_exercises")}</p>
                                 ) : (
@@ -285,5 +307,50 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
         </div>
       )}
     </div>
+
+    {deletingCatalogItem && (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-6"
+        style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
+        onClick={() => setDeletingCatalogItem(null)}
+      >
+        <div
+          className="w-full max-w-sm rounded-xl p-6"
+          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <p className="text-sm" style={{ color: "var(--text-primary)" }}>
+            {t("delete_exercise_title")}
+          </p>
+          {(() => {
+            const usedIn = templatesByCatalogId.get(deletingCatalogItem.id) ?? [];
+            if (usedIn.length === 0) return null;
+            return (
+              <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+                {usedIn.length === 1 ? t("delete_exercise_used_in_one") : t("delete_exercise_used_in_many")}{" "}
+                <span style={{ color: "var(--text-secondary)" }}>{usedIn.join(", ")}</span>
+              </p>
+            );
+          })()}
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={() => setDeletingCatalogItem(null)}
+              className="flex-1 py-2 rounded-md text-sm"
+              style={{ background: "var(--surface)", color: "var(--text-secondary)" }}
+            >
+              {t("cancel")}
+            </button>
+            <button
+              onClick={confirmDeleteCatalog}
+              className="flex-1 py-2 rounded-md text-sm"
+              style={{ background: "var(--danger)", color: "#fff" }}
+            >
+              {t("delete")}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

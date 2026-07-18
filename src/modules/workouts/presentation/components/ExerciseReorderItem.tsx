@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Reorder, useDragControls } from "framer-motion";
+import { useState, useEffect } from "react";
+import { AnimatePresence, motion, Reorder, useDragControls } from "framer-motion";
 import { GripVertical, ChevronDown, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 import { EXERCISE_TYPE_COLORS } from "../constants/workoutColors";
 import type { ExerciseType } from "../../domain/entities/WorkoutExercise";
 
@@ -36,6 +37,11 @@ interface Props {
  * mecanismo que HabitReorderItem (HabitsView.tsx) y el drag ya corregido de
  * EnfoqueTab — no dnd-kit (evita reintroducir el bug de "hay que sostener"
  * en móvil).
+ *
+ * Sets/reps/duración usan un buffer local que solo confirma el cambio real
+ * (onChangeX) al perder foco o presionar Enter — evita escribir a Supabase
+ * en cada tecla. El tipo (fuerza/cardio) sigue siendo instantáneo al click,
+ * no necesita confirmación.
  */
 export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onChangeReps, onChangeDuration, onDelete }: Props) {
   const t = useTranslations("workouts");
@@ -45,6 +51,25 @@ export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onCh
   // El modo se infiere de cuál campo está poblado, no hay un flag de modo
   // separado que se pueda desincronizar.
   const isTimeMode = exercise.durationMin != null;
+
+  const [setsInput, setSetsInput] = useState(String(exercise.sets ?? ""));
+  const [repsInput, setRepsInput] = useState(String(exercise.reps ?? ""));
+  const [durationInput, setDurationInput] = useState(String(exercise.durationMin ?? ""));
+
+  // Al abrir la card se resincroniza el buffer local con el valor real —
+  // deliberadamente NO depende de exercise.sets/reps/durationMin (eso
+  // sobrescribiría lo que el usuario está escribiendo mid-edit).
+  useEffect(() => {
+    if (!expanded) return;
+    setSetsInput(String(exercise.sets ?? ""));
+    setRepsInput(String(exercise.reps ?? ""));
+    setDurationInput(String(exercise.durationMin ?? ""));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expanded]);
+
+  const commitSets = () => onChangeSets(setsInput.trim() ? Number(setsInput) : null);
+  const commitReps = () => onChangeReps(repsInput.trim() ? Number(repsInput) : null);
+  const commitDuration = () => onChangeDuration(durationInput.trim() ? Number(durationInput) : null);
 
   const subtitle = isTimeMode
     ? `${exercise.durationMin} ${t("duration_min_short")}`
@@ -82,108 +107,126 @@ export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onCh
           </span>
         </div>
 
-        {expanded && (
-          <div className="flex flex-col gap-2 px-2.5 pb-2.5 pt-1" style={{ borderTop: "1px solid var(--border)" }}>
-            {/* Modo Reps / Tiempo */}
-            <div className="inline-flex self-start rounded-sm overflow-hidden" style={{ border: "1px solid var(--border)", padding: "2px" }}>
-              <button
-                type="button"
-                onClick={() => onChangeDuration(null)}
-                className="px-2.5 py-1 rounded-[2px] text-[10px] uppercase tracking-wide transition-colors"
-                style={{
-                  background: !isTimeMode ? "var(--surface-hover)" : "transparent",
-                  color: !isTimeMode ? "var(--text-primary)" : "var(--text-muted-darker)",
-                }}
-              >
-                {t("mode_reps")}
-              </button>
-              <button
-                type="button"
-                onClick={() => { onChangeReps(null); onChangeDuration(exercise.durationMin ?? 5); }}
-                className="px-2.5 py-1 rounded-[2px] text-[10px] uppercase tracking-wide transition-colors"
-                style={{
-                  background: isTimeMode ? "var(--surface-hover)" : "transparent",
-                  color: isTimeMode ? "var(--text-primary)" : "var(--text-muted-darker)",
-                }}
-              >
-                {t("mode_time")}
-              </button>
-            </div>
+        <AnimatePresence initial={false}>
+          {expanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <div className="flex items-center justify-between gap-3 px-2.5 pb-2.5 pt-1" style={{ borderTop: "1px solid var(--border)" }}>
+                <div className="flex flex-col gap-1.5">
+                  {/* Modo Reps / Tiempo — texto plano, sin caja */}
+                  <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide">
+                    <button type="button" onClick={() => onChangeDuration(null)} style={{ color: !isTimeMode ? "var(--text-primary)" : "var(--text-muted-darker)" }}>
+                      {t("mode_reps")}
+                    </button>
+                    <span style={{ color: "var(--text-muted-darker)" }}>·</span>
+                    <button type="button" onClick={() => { onChangeReps(null); onChangeDuration(exercise.durationMin ?? 5); }} style={{ color: isTimeMode ? "var(--text-primary)" : "var(--text-muted-darker)" }}>
+                      {t("mode_time")}
+                    </button>
+                  </div>
 
-            <div className="flex items-center gap-2">
-              <div className="flex-1">
-                <label className="text-[9px] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>
-                  {t("sets_label")}
-                </label>
-                <input
-                  type="number"
-                  min={1}
-                  value={exercise.sets ?? ""}
-                  onChange={(e) => onChangeSets(e.target.value ? Number(e.target.value) : null)}
-                  className="w-full rounded-md px-2.5 py-1.5 text-sm outline-none"
-                  style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
-                />
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{t("sets_label")}</span>
+                      <input
+                        type="number"
+                        min={1}
+                        value={setsInput}
+                        onChange={(e) => setSetsInput(e.target.value)}
+                        onBlur={commitSets}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                          if (e.key === "Escape") { setSetsInput(String(exercise.sets ?? "")); (e.target as HTMLInputElement).blur(); }
+                        }}
+                        className="w-8 text-sm text-center outline-none bg-transparent"
+                        style={{ color: "var(--text-primary)" }}
+                      />
+                    </div>
+                    <span style={{ color: "var(--text-muted-darker)" }}>x</span>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>{isTimeMode ? t("duration_label") : t("reps_label")}</span>
+                      {isTimeMode ? (
+                        <input
+                          type="number"
+                          min={1}
+                          value={durationInput}
+                          onChange={(e) => setDurationInput(e.target.value)}
+                          onBlur={commitDuration}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                            if (e.key === "Escape") { setDurationInput(String(exercise.durationMin ?? "")); (e.target as HTMLInputElement).blur(); }
+                          }}
+                          className="w-8 text-sm text-center outline-none bg-transparent"
+                          style={{ color: "var(--text-primary)" }}
+                        />
+                      ) : (
+                        <input
+                          type="number"
+                          min={1}
+                          value={repsInput}
+                          onChange={(e) => setRepsInput(e.target.value)}
+                          onBlur={commitReps}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+                            if (e.key === "Escape") { setRepsInput(String(exercise.reps ?? "")); (e.target as HTMLInputElement).blur(); }
+                          }}
+                          className="w-8 text-sm text-center outline-none bg-transparent"
+                          style={{ color: "var(--text-primary)" }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <TooltipProvider>
+                    <div className="flex gap-1.5">
+                      <Tooltip label={t("type_strength")} side="top">
+                        <button
+                          type="button"
+                          onClick={() => onChangeType("strength")}
+                          className="w-2.5 h-2.5 rounded-full transition-transform"
+                          style={{
+                            background: EXERCISE_TYPE_COLORS.strength,
+                            opacity: exercise.type === "strength" ? 1 : 0.25,
+                            transform: exercise.type === "strength" ? "scale(1.2)" : "scale(1)",
+                          }}
+                          aria-label={t("type_strength")}
+                        />
+                      </Tooltip>
+                      <Tooltip label={t("type_cardio")} side="top">
+                        <button
+                          type="button"
+                          onClick={() => onChangeType("cardio")}
+                          className="w-2.5 h-2.5 rounded-full transition-transform"
+                          style={{
+                            background: EXERCISE_TYPE_COLORS.cardio,
+                            opacity: exercise.type === "cardio" ? 1 : 0.25,
+                            transform: exercise.type === "cardio" ? "scale(1.2)" : "scale(1)",
+                          }}
+                          aria-label={t("type_cardio")}
+                        />
+                      </Tooltip>
+                    </div>
+                  </TooltipProvider>
+                  <button
+                    type="button"
+                    onClick={onDelete}
+                    className="transition-opacity active:opacity-60"
+                    style={{ color: "var(--danger)" }}
+                    aria-label={t("delete")}
+                  >
+                    <Trash2 size={14} strokeWidth={2} />
+                  </button>
+                </div>
               </div>
-              <div className="flex-1">
-                <label className="text-[9px] uppercase tracking-wider mb-1 block" style={{ color: "var(--text-muted)" }}>
-                  {isTimeMode ? t("duration_label") : t("reps_label")}
-                </label>
-                {isTimeMode ? (
-                  <input
-                    type="number"
-                    min={1}
-                    value={exercise.durationMin ?? ""}
-                    onChange={(e) => onChangeDuration(e.target.value ? Number(e.target.value) : null)}
-                    className="w-full rounded-md px-2.5 py-1.5 text-sm outline-none"
-                    style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
-                  />
-                ) : (
-                  <input
-                    type="number"
-                    min={1}
-                    value={exercise.reps ?? ""}
-                    onChange={(e) => onChangeReps(e.target.value ? Number(e.target.value) : null)}
-                    className="w-full rounded-md px-2.5 py-1.5 text-sm outline-none"
-                    style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid transparent" }}
-                  />
-                )}
-              </div>
-              <div className="flex gap-1 self-end pb-1.5">
-                <button
-                  type="button"
-                  onClick={() => onChangeType("strength")}
-                  className="w-2.5 h-2.5 rounded-full transition-transform"
-                  style={{
-                    background: EXERCISE_TYPE_COLORS.strength,
-                    opacity: exercise.type === "strength" ? 1 : 0.25,
-                    transform: exercise.type === "strength" ? "scale(1.2)" : "scale(1)",
-                  }}
-                  aria-label={t("type_strength")}
-                />
-                <button
-                  type="button"
-                  onClick={() => onChangeType("cardio")}
-                  className="w-2.5 h-2.5 rounded-full transition-transform"
-                  style={{
-                    background: EXERCISE_TYPE_COLORS.cardio,
-                    opacity: exercise.type === "cardio" ? 1 : 0.25,
-                    transform: exercise.type === "cardio" ? "scale(1.2)" : "scale(1)",
-                  }}
-                  aria-label={t("type_cardio")}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={onDelete}
-                className="flex-shrink-0 self-end pb-2 transition-opacity active:opacity-60"
-                style={{ color: "var(--danger)" }}
-                aria-label={t("delete")}
-              >
-                <Trash2 size={14} strokeWidth={2} />
-              </button>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div

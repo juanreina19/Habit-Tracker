@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { ChevronRight } from "lucide-react";
 import type { WorkoutExercise } from "../../domain/entities/WorkoutExercise";
 
 interface Props {
@@ -26,7 +27,7 @@ export function ExerciseRow({ exercise, variant = "line" }: Props) {
       style={variant === "card" ? { background: "var(--bg)", border: "1px solid var(--border)" } : undefined}
     >
       {variant === "line" && (
-        <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: "var(--text-muted)" }} />
+        <ChevronRight size={12} strokeWidth={2} className="flex-shrink-0" style={{ color: "var(--text-muted)" }} />
       )}
       <span className="flex-1 text-sm truncate" style={{ color: "var(--text-primary)" }}>{exercise.name}</span>
       {setsReps && (
