@@ -6,6 +6,7 @@ import { GripVertical, ChevronDown, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 import { EXERCISE_TYPE_COLORS } from "../constants/workoutColors";
+import { DEFAULT_EXERCISE_REPS } from "../../domain/entities/WorkoutExercise";
 import type { ExerciseType } from "../../domain/entities/WorkoutExercise";
 
 /** Borrador de ejercicio dentro del formulario — id temporal (crypto.randomUUID())
@@ -16,7 +17,7 @@ export interface ExerciseDraft {
   type: ExerciseType;
   sets: number | null;
   reps: number | null;
-  durationMin: number | null;
+  durationSec: number | null;
   notes: string | null;
 }
 
@@ -25,9 +26,11 @@ interface Props {
   onChangeType: (type: ExerciseType) => void;
   onChangeSets: (sets: number | null) => void;
   onChangeReps: (reps: number | null) => void;
-  onChangeDuration: (durationMin: number | null) => void;
+  onChangeDuration: (durationSec: number | null) => void;
   onDelete: () => void;
 }
+
+const DEFAULT_DURATION_SEC = 30;
 
 /**
  * Card colapsable y reordenable de un ejercicio dentro de WorkoutFormDialog
@@ -50,29 +53,42 @@ export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onCh
 
   // El modo se infiere de cuál campo está poblado, no hay un flag de modo
   // separado que se pueda desincronizar.
-  const isTimeMode = exercise.durationMin != null;
+  const isTimeMode = exercise.durationSec != null;
 
   const [setsInput, setSetsInput] = useState(String(exercise.sets ?? ""));
   const [repsInput, setRepsInput] = useState(String(exercise.reps ?? ""));
-  const [durationInput, setDurationInput] = useState(String(exercise.durationMin ?? ""));
+  const [durationInput, setDurationInput] = useState(String(exercise.durationSec ?? ""));
 
-  // Al abrir la card se resincroniza el buffer local con el valor real —
-  // deliberadamente NO depende de exercise.sets/reps/durationMin (eso
-  // sobrescribiría lo que el usuario está escribiendo mid-edit).
+  // Se resincroniza al abrir la card Y al alternar de modo (Reps<->Tiempo) —
+  // sin esto último, el input que aparece tras cambiar de modo mostraba el
+  // buffer viejo/vacío hasta la próxima vez que se cerraba y abría la card.
+  // Deliberadamente NO depende de exercise.sets/reps/durationSec en general
+  // (eso sobrescribiría lo que el usuario está escribiendo mid-edit).
   useEffect(() => {
     if (!expanded) return;
     setSetsInput(String(exercise.sets ?? ""));
     setRepsInput(String(exercise.reps ?? ""));
-    setDurationInput(String(exercise.durationMin ?? ""));
+    setDurationInput(String(exercise.durationSec ?? ""));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expanded]);
+  }, [expanded, isTimeMode]);
 
   const commitSets = () => onChangeSets(setsInput.trim() ? Number(setsInput) : null);
   const commitReps = () => onChangeReps(repsInput.trim() ? Number(repsInput) : null);
   const commitDuration = () => onChangeDuration(durationInput.trim() ? Number(durationInput) : null);
 
+  const switchToReps = () => {
+    onChangeDuration(null);
+    onChangeReps(exercise.reps ?? DEFAULT_EXERCISE_REPS);
+  };
+  const switchToTime = () => {
+    onChangeReps(null);
+    onChangeDuration(exercise.durationSec ?? DEFAULT_DURATION_SEC);
+  };
+
   const subtitle = isTimeMode
-    ? `${exercise.durationMin} ${t("duration_min_short")}`
+    ? exercise.sets && exercise.sets > 1
+      ? `${exercise.sets} ${t("sets_label").toLowerCase()} x ${exercise.durationSec} ${t("seconds_short")}`
+      : `${exercise.durationSec} ${t("seconds_short")}`
     : exercise.sets && exercise.reps
       ? `${exercise.sets} ${t("sets_label").toLowerCase()} x ${exercise.reps} ${t("reps_short")}`
       : null;
@@ -120,11 +136,11 @@ export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onCh
                 <div className="flex flex-col gap-1.5">
                   {/* Modo Reps / Tiempo — texto plano, sin caja */}
                   <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide">
-                    <button type="button" onClick={() => onChangeDuration(null)} style={{ color: !isTimeMode ? "var(--text-primary)" : "var(--text-muted-darker)" }}>
+                    <button type="button" onClick={switchToReps} style={{ color: !isTimeMode ? "var(--text-primary)" : "var(--text-muted-darker)" }}>
                       {t("mode_reps")}
                     </button>
                     <span style={{ color: "var(--text-muted-darker)" }}>·</span>
-                    <button type="button" onClick={() => { onChangeReps(null); onChangeDuration(exercise.durationMin ?? 5); }} style={{ color: isTimeMode ? "var(--text-primary)" : "var(--text-muted-darker)" }}>
+                    <button type="button" onClick={switchToTime} style={{ color: isTimeMode ? "var(--text-primary)" : "var(--text-muted-darker)" }}>
                       {t("mode_time")}
                     </button>
                   </div>
@@ -158,7 +174,7 @@ export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onCh
                           onBlur={commitDuration}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                            if (e.key === "Escape") { setDurationInput(String(exercise.durationMin ?? "")); (e.target as HTMLInputElement).blur(); }
+                            if (e.key === "Escape") { setDurationInput(String(exercise.durationSec ?? "")); (e.target as HTMLInputElement).blur(); }
                           }}
                           className="w-8 text-sm text-center outline-none bg-transparent"
                           style={{ color: "var(--text-primary)" }}

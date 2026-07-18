@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSubtasks } from "../hooks/useSubtasks";
+import { Loader } from "@/shared/components/ui/Loader";
 import type { UUID } from "@/shared/types/database.types";
 
 interface Props {
@@ -35,7 +36,7 @@ export function SubtaskList({ userId, taskId, isOpen, onCountChange }: Props) {
             style={{ overflow: "hidden" }}
           >
             {isLoading ? (
-              <div className="py-1 pl-7 text-xs" style={{ color: "var(--text-muted)" }}>…</div>
+              <div className="flex py-1 pl-7"><Loader size={16} /></div>
             ) : (
               <div className="flex flex-col gap-1 mt-1 pt-1 pl-7">
                 {subtasks.map(sub => (
