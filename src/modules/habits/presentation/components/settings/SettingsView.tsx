@@ -192,6 +192,7 @@ function NotificationsSection() {
   const { permission, isEnabled, reminderTime, enable, disable, setReminderTime, subscribeError, isLoading } =
     useBrowserNotifications();
   const t = useTranslations("settings");
+  const { theme } = useTheme();
 
   const handleToggle = async () => {
     if (isEnabled) disable();
@@ -263,7 +264,7 @@ function NotificationsSection() {
                 background: "var(--surface-elevated)",
                 color: "var(--text-primary)",
                 border: "1px solid var(--border)",
-                colorScheme: "dark",
+                colorScheme: theme,
                 accentColor: "var(--text-primary)",
               }}
             />

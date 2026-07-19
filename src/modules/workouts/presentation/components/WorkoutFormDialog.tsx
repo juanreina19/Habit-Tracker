@@ -9,6 +9,7 @@ import { useWorkoutExercises } from "../hooks/useWorkoutExercises";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { ExerciseReorderItem, type ExerciseDraft } from "./ExerciseReorderItem";
 import { SavedExercisesPicker } from "./SavedExercisesPicker";
+import { useTheme } from "@/shared/components/ThemeProvider";
 import { DAY_LETTERS } from "@/shared/constants/dayLabels";
 import type { Workout, CreateWorkoutInput, UpdateWorkoutInput } from "../../domain/entities/Workout";
 import type { ExerciseType } from "../../domain/entities/WorkoutExercise";
@@ -29,6 +30,7 @@ interface Props {
 
 export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, onUpdate, onDelete }: Props) {
   const t = useTranslations("workouts");
+  const { theme } = useTheme();
   const isEdit = !!workout;
 
   const [name, setName] = useState("");
@@ -378,7 +380,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
                             className="rounded-md px-2 py-1.5 text-sm outline-none glass-panel"
-                            style={{ color: "var(--text-primary)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
+                            style={{ color: "var(--text-primary)", colorScheme: theme, accentColor: "var(--text-primary)" }}
                           />
                           <button
                             type="button"

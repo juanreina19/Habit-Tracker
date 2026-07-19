@@ -15,6 +15,7 @@ import { IconPickerDialog } from "@/shared/components/ui/IconPickerDialog";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
 import { DatePickerPopover } from "./DatePickerPopover";
 import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
+import { useTheme } from "@/shared/components/ThemeProvider";
 import { useSubtasks } from "../hooks/useSubtasks";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 
@@ -40,6 +41,7 @@ export function TaskFormDialog({
   const tDays = useTranslations("dayLabels");
   const tCat = useTranslations("iconCategories");
   const { format: timeFormat } = useTimeFormat();
+  const { theme } = useTheme();
   const isEdit = !!task;
 
   const [title, setTitle]             = useState("");
@@ -570,7 +572,7 @@ export function TaskFormDialog({
                               value={startTime}
                               onChange={(e) => { setStartTime(e.target.value); setTimeError(""); }}
                               className="rounded-md px-2 py-1.5 text-sm outline-none glass-panel"
-                              style={{ color: "var(--text-primary)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
+                              style={{ color: "var(--text-primary)", colorScheme: theme, accentColor: "var(--text-primary)" }}
                             />
                           </div>
                           <div className="flex flex-col gap-1">
@@ -582,7 +584,7 @@ export function TaskFormDialog({
                               value={endTime}
                               onChange={(e) => { setEndTime(e.target.value); setTimeError(""); }}
                               className="rounded-md px-2 py-1.5 text-sm outline-none glass-panel"
-                              style={{ color: "var(--text-primary)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
+                              style={{ color: "var(--text-primary)", colorScheme: theme, accentColor: "var(--text-primary)" }}
                             />
                           </div>
                           {timeError && <p className="text-xs" style={{ color: "var(--danger)" }}>{timeError}</p>}
