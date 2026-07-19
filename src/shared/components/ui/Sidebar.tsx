@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Home, CalendarRange, Repeat, BookOpen, Dumbbell, Settings2, Sun, Moon, LogOut } from "lucide-react";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Home, CalendarRange, Repeat, BookOpen, Dumbbell, Settings2, Sun, Moon, LogOut, MoreVertical } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 import { createClient } from "@/shared/lib/supabase/client";
@@ -18,7 +19,7 @@ const NAV_ROUTES = [
 ];
 
 // Misma receta de sombra que BottomNav — familia visual "dock flotante"
-// compartida entre el nav inferior de mobile y estas 2 pills de desktop.
+// compartida entre el nav inferior de mobile y estas pills de desktop.
 const FLOATING_SHADOW =
   "0 8px 40px rgba(0,0,0,0.45), " +
   "0 2px 8px rgba(0,0,0,0.25), " +
@@ -43,62 +44,93 @@ export default function Sidebar() {
 
   return (
     <TooltipProvider>
-      {/* Vistas — pill flotante, centrada verticalmente en el viewport */}
-      <nav
-        className="hidden lg:flex flex-col fixed left-4 top-1/2 z-40 gap-1 p-1.5 rounded-[28px] glass-panel-strong"
-        style={{ transform: "translateY(-50%)", boxShadow: FLOATING_SHADOW }}
-      >
-        {NAV_ROUTES.map(({ href, key, Icon }) => {
-          const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
-          return (
-            <Tooltip key={href} label={t(key as Parameters<typeof t>[0])}>
-              <Link
-                href={href}
-                className={`sidebar-link flex items-center justify-center w-10 h-10 rounded-full ${isActive ? "sidebar-active" : ""}`}
-                style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
-              >
-                <Icon size={18} strokeWidth={2} />
-              </Link>
-            </Tooltip>
-          );
-        })}
-      </nav>
-
-      {/* Tema / Settings / Logout — pill flotante inferior */}
+      {/* Tema (pill propia) + Vistas — agrupadas y centradas verticalmente
+          como una sola columna, con el toggle de tema arriba del bloque de
+          navegación. */}
       <div
-        className="hidden lg:flex flex-col fixed left-4 bottom-6 z-40 gap-1 p-1.5 rounded-[28px] glass-panel-strong"
+        className="hidden lg:flex flex-col items-center fixed left-4 top-1/2 z-40 gap-3"
+        style={{ transform: "translateY(-50%)" }}
+      >
+        <div className="p-1.5 rounded-full glass-panel-strong" style={{ boxShadow: FLOATING_SHADOW }}>
+          <Tooltip label={theme === "dark" ? ts("theme_light") : ts("theme_dark")}>
+            <button
+              onClick={toggleTheme}
+              className="sidebar-link w-10 h-10 flex items-center justify-center rounded-full transition-colors"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {theme === "dark" ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
+            </button>
+          </Tooltip>
+        </div>
+
+        <nav
+          className="flex flex-col gap-1 p-1.5 rounded-[28px] glass-panel-strong"
+          style={{ boxShadow: FLOATING_SHADOW }}
+        >
+          {NAV_ROUTES.map(({ href, key, Icon }) => {
+            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+            return (
+              <Tooltip key={href} label={t(key as Parameters<typeof t>[0])}>
+                <Link
+                  href={href}
+                  className={`sidebar-link flex items-center justify-center w-10 h-10 rounded-full ${isActive ? "sidebar-active" : ""}`}
+                  style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
+                >
+                  <Icon size={18} strokeWidth={2} />
+                </Link>
+              </Tooltip>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Cuenta — un solo botón que abre un menú con Settings / Cerrar sesión,
+          en vez de 2 botones sueltos abajo. */}
+      <div
+        className="hidden lg:flex fixed left-4 bottom-6 z-40 p-1.5 rounded-full glass-panel-strong"
         style={{ boxShadow: FLOATING_SHADOW }}
       >
-        <Tooltip label={theme === "dark" ? ts("theme_light") : ts("theme_dark")}>
-          <button
-            onClick={toggleTheme}
-            className="sidebar-link w-10 h-10 flex items-center justify-center rounded-full transition-colors"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            {theme === "dark" ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
-          </button>
-        </Tooltip>
-
-        <Tooltip label={t("settings")}>
-          <Link
-            href="/settings"
-            className={`sidebar-link flex items-center justify-center w-10 h-10 rounded-full ${pathname.startsWith("/settings") ? "sidebar-active" : ""}`}
-            style={{ color: pathname.startsWith("/settings") ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
-          >
-            <Settings2 size={18} strokeWidth={2} />
-          </Link>
-        </Tooltip>
-
-        <Tooltip label={ts("sign_out")}>
-          <button
-            onClick={() => setConfirmLogout(true)}
-            disabled={loggingOut}
-            className="sidebar-link w-10 h-10 flex items-center justify-center rounded-full transition-colors disabled:opacity-40"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            <LogOut size={18} strokeWidth={2} />
-          </button>
-        </Tooltip>
+        <DropdownMenu.Root>
+          <Tooltip label={ts("title")}>
+            <DropdownMenu.Trigger asChild>
+              <button
+                type="button"
+                className="sidebar-link w-10 h-10 flex items-center justify-center rounded-full transition-colors"
+                style={{ color: pathname.startsWith("/settings") ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
+              >
+                <MoreVertical size={18} strokeWidth={2} />
+              </button>
+            </DropdownMenu.Trigger>
+          </Tooltip>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              side="right"
+              sideOffset={10}
+              align="end"
+              className="z-50 rounded-lg py-1.5 shadow-lg min-w-[170px] glass-panel-elevated"
+            >
+              <DropdownMenu.Item asChild>
+                <Link
+                  href="/settings"
+                  className="flex items-center gap-2.5 px-3 py-2 text-sm cursor-pointer outline-none data-[highlighted]:opacity-70"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  <Settings2 size={14} strokeWidth={2} />
+                  {t("settings")}
+                </Link>
+              </DropdownMenu.Item>
+              <div className="my-1.5 mx-3 h-px" style={{ background: "var(--border)" }} />
+              <DropdownMenu.Item
+                onSelect={() => setConfirmLogout(true)}
+                className="flex items-center gap-2.5 px-3 py-2 text-sm cursor-pointer outline-none data-[highlighted]:opacity-70"
+                style={{ color: "var(--danger)" }}
+              >
+                <LogOut size={14} strokeWidth={2} />
+                {ts("sign_out")}
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
       </div>
 
       {/* Confirm logout modal — hermano de las pills flotantes, no
