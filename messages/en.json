@@ -58,6 +58,7 @@
     "save": "Save",
     "saving": "Saving…",
     "save_error": "Error saving",
+    "add_habit": "Add habit",
     "delete": "Delete habit",
     "delete_confirm": "Are you sure you want to delete this habit?",
     "save_hint_prefix": "Press",

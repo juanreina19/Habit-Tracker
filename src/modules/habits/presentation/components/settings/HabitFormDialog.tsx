@@ -232,7 +232,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                           style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                         >
                           <span className="w-1.5 h-1.5 rounded-full" style={{ background: categories.find((c) => c.id === categoryId)?.color ?? "var(--text-muted)" }} />
-                          <span style={{ color: "var(--text-muted)" }}>{t("category_label").toUpperCase()}</span>
+                          <span style={{ color: "var(--text-muted)" }}>IN</span>
                           {categories.find((c) => c.id === categoryId)?.name ?? t("no_category")}
                         </button>
                         {catOpen && (
@@ -314,34 +314,32 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                           style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="flex flex-col gap-1">
-                              <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-                                {t("start_label")}
-                              </span>
-                              <input
-                                type="time"
-                                value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
-                                className="rounded-md px-2 py-1.5 text-sm outline-none"
-                                style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark" }}
-                              />
-                            </div>
-                            <div className="flex flex-col gap-1">
-                              <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-                                {t("duration_label")}
-                              </span>
-                              <input
-                                type="number"
-                                value={estimatedMinutes}
-                                onChange={(e) => setEstimatedMinutes(e.target.value)}
-                                placeholder="30"
-                                min={1}
-                                max={480}
-                                className="rounded-md px-2 py-1.5 text-sm outline-none w-full"
-                                style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
-                              />
-                            </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                              {t("start_label")}
+                            </span>
+                            <input
+                              type="time"
+                              value={startTime}
+                              onChange={(e) => setStartTime(e.target.value)}
+                              className="rounded-md px-2 py-1.5 text-sm outline-none"
+                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                              {t("duration_label")}
+                            </span>
+                            <input
+                              type="number"
+                              value={estimatedMinutes}
+                              onChange={(e) => setEstimatedMinutes(e.target.value)}
+                              placeholder="30"
+                              min={1}
+                              max={480}
+                              className="rounded-md px-2 py-1.5 text-sm outline-none w-full"
+                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                            />
                           </div>
                           {endTime && (
                             <p className="text-xs font-medium" style={{ color: "#4CAF82" }}>{t("ends_at", { time: endTime })}</p>
@@ -355,7 +353,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                           <button
                             type="button"
                             onClick={() => setTimeOpen(false)}
-                            className="self-start flex items-center justify-center gap-1.5 rounded-sm px-4 py-1.5 text-xs"
+                            className="self-center flex items-center justify-center gap-1.5 rounded-sm px-4 py-2.5 text-xs"
                             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                           >
                             {t("confirm_time")}
@@ -462,7 +460,8 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                         className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-30"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
-                        {isSaving ? t("saving") : <>{isEdit && <Save size={14} />}{t("save")}</>}
+                        {isSaving ? t("saving") : isEdit ? <><Save size={14} />{t("save")}</> : t("add_habit")}
+                        {!isEdit && <span>→</span>}
                       </button>
                     </div>
                   </div>

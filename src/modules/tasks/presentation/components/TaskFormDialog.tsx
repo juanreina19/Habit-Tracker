@@ -573,7 +573,7 @@ export function TaskFormDialog({
                               value={startTime}
                               onChange={(e) => { setStartTime(e.target.value); setTimeError(""); }}
                               className="rounded-md px-2 py-1.5 text-sm outline-none"
-                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark" }}
+                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
                             />
                           </div>
                           <div className="flex flex-col gap-1">
@@ -585,14 +585,14 @@ export function TaskFormDialog({
                               value={endTime}
                               onChange={(e) => { setEndTime(e.target.value); setTimeError(""); }}
                               className="rounded-md px-2 py-1.5 text-sm outline-none"
-                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark" }}
+                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
                             />
                           </div>
                           {timeError && <p className="text-xs" style={{ color: "var(--danger)" }}>{timeError}</p>}
                           <button
                             type="button"
                             onClick={() => setTimePickerOpen(false)}
-                            className="self-start flex items-center justify-center gap-1.5 rounded-sm px-4 py-1.5 text-xs"
+                            className="self-center flex items-center justify-center gap-1.5 rounded-sm px-4 py-2.5 text-xs"
                             style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                           >
                             {t("confirm_time")}

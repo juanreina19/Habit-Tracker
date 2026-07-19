@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { format, getDayOfYear, addDays, getHours } from "date-fns";
 import { es, enUS } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -61,6 +62,15 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
   const weekday  = format(date, "EEEE", { locale: dateFnsLocale });
   const dateOnly = format(date, locale === "en" ? "MMMM d" : "d 'de' MMMM", { locale: dateFnsLocale });
 
+  // Se arma dinámicamente (0 a 3 partes) en vez de un template fijo, para
+  // poder omitir por completo cualquier conteo en 0 (ej. no decir "0
+  // tareas" si no hay tareas hoy) sin dejar conectores sueltos.
+  const summaryParts = [
+    habitsCount > 0 ? t("motivational_habits_count", { count: habitsCount }) : null,
+    tasksCount > 0 ? t("motivational_tasks_count", { count: tasksCount }) : null,
+    workoutsCount > 0 ? t("motivational_workouts_count", { count: workoutsCount }) : null,
+  ].filter((p): p is string => p !== null);
+
   return (
     <div className="flex flex-col items-center text-center gap-1.5 py-4">
       {/* Date navigation */}
@@ -98,32 +108,32 @@ export function MotivationalHeader({ date, onDateChange, habitsCount, tasksCount
         </span>
       </p>
 
-      {/* Summary — se arma dinámicamente (0 a 3 partes) en vez de un template
-          fijo, para poder omitir por completo cualquier conteo en 0 (ej. no
-          decir "0 tareas" si no hay tareas hoy) sin dejar conectores sueltos. */}
-      {(() => {
-        const parts = [
-          habitsCount > 0 ? t("motivational_habits_count", { count: habitsCount }) : null,
-          tasksCount > 0 ? t("motivational_tasks_count", { count: tasksCount }) : null,
-          workoutsCount > 0 ? t("motivational_workouts_count", { count: workoutsCount }) : null,
-        ].filter((p): p is string => p !== null);
-
-        if (parts.length === 0) return null;
-
-        return (
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+      {/* Summary — con AnimatePresence para que aparezca/desaparezca/cambie
+          con una transición suave al navegar entre días (antes saltaba de
+          golpe cuando un día sin entrenamientos ocultaba esta línea). */}
+      <AnimatePresence mode="wait">
+        {summaryParts.length > 0 && (
+          <motion.p
+            key={format(date, "yyyy-MM-dd")}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="text-xs overflow-hidden"
+            style={{ color: "var(--text-secondary)" }}
+          >
             {t("motivational_prefix")}{" "}
-            {parts.map((part, i) => (
+            {summaryParts.map((part, i) => (
               <span key={i}>
                 <span style={{ color: "var(--text-primary)" }}>{part}</span>
-                {i < parts.length - 2 && ", "}
-                {i === parts.length - 2 && ` ${t("motivational_and")} `}
+                {i < summaryParts.length - 2 && ", "}
+                {i === summaryParts.length - 2 && ` ${t("motivational_and")} `}
               </span>
             ))}
             {" "}{t("motivational_suffix")}
-          </p>
-        );
-      })()}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

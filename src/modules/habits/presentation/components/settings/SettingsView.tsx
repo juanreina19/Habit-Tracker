@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -76,7 +76,7 @@ export default function SettingsView({ userId }: Props) {
         <button
           onClick={() => setShowStats(true)}
           className="w-full rounded-xl overflow-hidden mb-8 text-left transition-opacity active:opacity-70"
-          style={{ background: "var(--surface)" }}
+          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
         >
           <div className="px-5 py-4 flex items-center gap-4">
             <div
@@ -117,37 +117,23 @@ export default function SettingsView({ userId }: Props) {
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("preferences")}
         </p>
-        <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <div className="flex items-center justify-between px-5 py-4">
             <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("language")}</span>
-            <div className="relative">
-              <select
-                value={locale}
-                onChange={(e) => setLocale(e.target.value as Locale)}
-                className="rounded-md pl-3 pr-8 py-1.5 text-sm outline-none appearance-none"
-                style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
-              >
-                <option value="es">Español</option>
-                <option value="en">English</option>
-              </select>
-              <ChevronDown size={14} strokeWidth={2} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--text-muted)" }} />
-            </div>
+            <SettingsSelect
+              value={locale}
+              onChange={(v) => setLocale(v as Locale)}
+              options={[{ value: "es", label: "Español" }, { value: "en", label: "English" }]}
+            />
           </div>
           <div style={{ height: 1, background: "var(--border)" }} />
           <div className="flex items-center justify-between px-5 py-4">
             <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("time_format")}</span>
-            <div className="relative">
-              <select
-                value={timeFormat}
-                onChange={(e) => setTimeFormat(e.target.value as TimeFormat)}
-                className="rounded-md pl-3 pr-8 py-1.5 text-sm outline-none appearance-none"
-                style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
-              >
-                <option value="12h">{t("time_format_12h")}</option>
-                <option value="24h">{t("time_format_24h")}</option>
-              </select>
-              <ChevronDown size={14} strokeWidth={2} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--text-muted)" }} />
-            </div>
+            <SettingsSelect
+              value={timeFormat}
+              onChange={(v) => setTimeFormat(v as TimeFormat)}
+              options={[{ value: "12h", label: t("time_format_12h") }, { value: "24h", label: t("time_format_24h") }]}
+            />
           </div>
         </div>
       </motion.div>
@@ -162,7 +148,7 @@ export default function SettingsView({ userId }: Props) {
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("account")}
         </p>
-        <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <button
             onClick={() => router.push("/profile")}
             className="w-full px-5 py-4 flex items-center justify-between transition-opacity active:opacity-60"
@@ -220,7 +206,7 @@ function NotificationsSection() {
       <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
         {t("notifications")}
       </p>
-      <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)" }}>
+      <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
         <div className="flex items-center gap-4 p-4">
           <div
             className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"
@@ -279,11 +265,68 @@ function NotificationsSection() {
                 color: "var(--text-primary)",
                 border: "1px solid var(--border)",
                 colorScheme: "dark",
+                accentColor: "var(--text-primary)",
               }}
             />
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Reemplaza el <select> nativo — su lista desplegada no se puede estilizar
+ * de forma confiable entre navegadores/SO (aparece con el estilo default
+ * del sistema). Mismo patrón de popover (rounded-2xl, var(--bg)) que ya usan
+ * los pickers de categoría/prioridad en TaskFormDialog/WorkoutFormDialog.
+ */
+function SettingsSelect({ value, onChange, options }: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => setOpen(false);
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [open]);
+
+  const current = options.find((o) => o.value === value);
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); setOpen((p) => !p); }}
+        className="flex items-center gap-1.5 rounded-md pl-3 pr-2.5 py-1.5 text-sm"
+        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+      >
+        {current?.label}
+        <ChevronDown size={14} strokeWidth={2} style={{ color: "var(--text-muted)" }} />
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 z-10 rounded-2xl p-1 min-w-[140px]"
+          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className="w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors"
+              style={{ color: opt.value === value ? "var(--text-primary)" : "var(--text-secondary)" }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

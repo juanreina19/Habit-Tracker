@@ -58,6 +58,7 @@
     "save": "Guardar",
     "saving": "Guardando…",
     "save_error": "Error al guardar",
+    "add_habit": "Agregar hábito",
     "delete": "Eliminar hábito",
     "delete_confirm": "¿Seguro que quieres eliminar este hábito?",
     "save_hint_prefix": "Presiona",
