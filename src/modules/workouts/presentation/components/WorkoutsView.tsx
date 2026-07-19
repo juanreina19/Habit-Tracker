@@ -95,7 +95,7 @@ export default function WorkoutsView({ userId }: Props) {
                   </div>
                 ) : (
                   dayWorkouts.map((w) => (
-                    <div key={w.id} className="rounded-lg p-3 glass-panel">
+                    <div key={w.id} className="rounded-lg p-3 glass-panel-strong">
                       <WorkoutCard
                         workout={w}
                         onEdit={() => openEdit(w)}

@@ -43,7 +43,7 @@ export function WorkoutCard({ workout, compact = false, selected = false, onTogg
       onClick={onClick}
       className={`group rounded-lg flex items-center gap-2.5 card-border-hover transition-colors ${compact ? "p-2" : "p-3"} ${onClick ? "cursor-pointer" : ""}`}
       style={{
-        background: selected ? "var(--surface-hover)" : "var(--bg)",
+        background: selected ? "var(--glass-hover)" : "transparent",
       }}
     >
       {onToggleComplete && (
