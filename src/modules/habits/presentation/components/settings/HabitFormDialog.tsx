@@ -6,17 +6,14 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
 import { X, Trash2, Save, CornerDownLeft } from "lucide-react";
 import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
-import { HABIT_EMOJIS } from "@/shared/components/ui/EmojiPicker";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
-import { IconPicker } from "@/shared/components/ui/IconPicker";
+import { IconPickerDialog } from "@/shared/components/ui/IconPickerDialog";
 import { DAY_LETTERS } from "@/shared/constants/dayLabels";
 import type { Habit } from "../../../domain/entities/Habit";
 import type { CreateHabitInput, UpdateHabitInput } from "../../../domain/repositories/IHabitRepository";
 import type { Category } from "@/modules/categories/domain/entities/Category";
 
 const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
-type IconTab = "emoji" | "svg";
-type TFunc = ReturnType<typeof useTranslations>;
 
 function calcEndTime(start: string, minutes: number): string {
   const [h, m] = start.split(":").map(Number);
@@ -308,7 +305,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                       </button>
                       {timeOpen && (
                         <div
-                          className="absolute left-0 top-full mt-1 z-10 rounded-2xl p-2 flex flex-col gap-2 glass-panel-elevated"
+                          className="absolute left-0 bottom-full mb-1 z-30 rounded-2xl p-2 flex flex-col gap-2 glass-panel-elevated"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex flex-col gap-1">
@@ -420,13 +417,15 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                       {icon ? (icon.startsWith("lucide:") ? icon.slice(7) : icon) : t("no_icon")}
                     </span>
                   </button>
-                  <HabitIconPickerDialog
+                  <IconPickerDialog
                     open={iconPickerOpen}
                     onClose={() => setIconPickerOpen(false)}
                     value={icon}
                     onChange={setIcon}
+                    allowNone
+                    noneLabel={t("no_icon")}
+                    title={t("icon_label")}
                     categoryLabel={(key) => tCat(key as Parameters<typeof tCat>[0])}
-                    t={t}
                   />
 
                   {/* Acciones */}
@@ -457,85 +456,6 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
-  );
-}
-
-// ─── Icon picker (emoji + svg tabs) — mismo shell que IconPickerDialog.tsx,
-// con las 2 pestañas que ya tenía Habit (Tasks no las necesita, solo svg). ──
-
-function HabitIconPickerDialog({ open, onClose, value, onChange, categoryLabel, t }: {
-  open: boolean;
-  onClose: () => void;
-  value: string | null;
-  onChange: (icon: string | null) => void;
-  categoryLabel: (key: string) => string;
-  t: TFunc;
-}) {
-  const [tab, setTab] = useState<IconTab>("emoji");
-
-  useEffect(() => { if (open) setTab("emoji"); }, [open]);
-
-  return (
-    <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} />
-        <Dialog.Content
-          onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden glass-panel-elevated"
-          style={{ maxHeight: "85dvh" }}
-        >
-          <div className="overflow-y-auto p-6" style={{ maxHeight: "85dvh" }}>
-            <div className="flex items-center justify-between mb-5">
-              <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                {t("icon_label")}
-              </Dialog.Title>
-              <button type="button" onClick={onClose} aria-label="close"
-                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70"
-                style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}>
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="flex rounded-md p-1 mb-4" style={{ background: "var(--surface-elevated)" }}>
-              {(["emoji", "svg"] as IconTab[]).map((tabType) => (
-                <button key={tabType} type="button" onClick={() => setTab(tabType)}
-                  className="flex-1 py-2 rounded-sm text-xs font-medium transition-colors"
-                  style={{ background: tab === tabType ? "var(--surface)" : "transparent", color: tab === tabType ? "var(--text-primary)" : "var(--text-secondary)" }}>
-                  {tabType === "emoji" ? t("tab_emoji") : t("tab_svg")}
-                </button>
-              ))}
-            </div>
-
-            {tab === "emoji" ? (
-              <div className="flex flex-wrap gap-2 pb-2">
-                <button type="button" onClick={() => { onChange(null); onClose(); }}
-                  className="w-12 h-12 rounded-md flex items-center justify-center text-xs transition-transform active:scale-90"
-                  style={{ background: !value ? "var(--surface-elevated)" : "transparent", border: `1.5px solid ${!value ? "var(--btn-primary-bg)" : "var(--border)"}`, color: "var(--text-muted)" }}>
-                  {t("no_icon")}
-                </button>
-                {HABIT_EMOJIS.map((emoji) => (
-                  <button key={emoji} type="button" onClick={() => { onChange(value === emoji ? null : emoji); onClose(); }}
-                    className="w-12 h-12 rounded-md flex items-center justify-center text-2xl transition-transform active:scale-90"
-                    style={{ background: value === emoji ? "var(--surface-elevated)" : "transparent", border: `1.5px solid ${value === emoji ? "var(--btn-primary-bg)" : "var(--border)"}` }}>
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <div className="pb-4">
-                <IconPicker
-                  value={value}
-                  onChange={(next) => { onChange(next); onClose(); }}
-                  allowNone
-                  noneLabel={t("no_icon")}
-                  categoryLabel={categoryLabel}
-                />
-              </div>
-            )}
           </div>
         </Dialog.Content>
       </Dialog.Portal>
