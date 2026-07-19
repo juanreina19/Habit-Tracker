@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
@@ -62,6 +63,16 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
   const [timeOpen, setTimeOpen] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
+
+  // El popover de horario vive dentro del contenedor con scroll del modal
+  // (overflow-y-auto) — si se abre hacia arriba con position:absolute y no
+  // hay suficiente aire encima del botón, el navegador lo recorta contra el
+  // borde superior del contenedor y no hay forma de hacer scroll para
+  // alcanzarlo (el scroll no llega a lo que se sale "hacia atrás"). Se
+  // renderiza vía portal a document.body con position:fixed, calculado
+  // desde el botón, para escapar por completo de ese recorte.
+  const timeButtonRef = useRef<HTMLButtonElement>(null);
+  const [timePos, setTimePos] = useState<{ left: number; bottom: number } | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -294,8 +305,20 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                     {/* Horario — hora inicio + duración estimada (opcional) */}
                     <div className="relative">
                       <button
+                        ref={timeButtonRef}
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); setTimeOpen((p) => !p); setCatOpen(false); setDaysOpen(false); setColorOpen(false); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCatOpen(false); setDaysOpen(false); setColorOpen(false);
+                          setTimeOpen((p) => {
+                            const next = !p;
+                            if (next && timeButtonRef.current) {
+                              const rect = timeButtonRef.current.getBoundingClientRect();
+                              setTimePos({ left: rect.left, bottom: window.innerHeight - rect.top + 4 });
+                            }
+                            return next;
+                          });
+                        }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
                         style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                       >
@@ -303,9 +326,10 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                         <span style={{ color: "var(--text-muted)" }}>{t("start_label").toUpperCase()}</span>
                         {startTime || t("no_schedule")}
                       </button>
-                      {timeOpen && (
+                      {timeOpen && timePos && createPortal(
                         <div
-                          className="absolute left-0 bottom-full mb-1 z-30 rounded-2xl p-2 flex flex-col gap-2 glass-panel-elevated"
+                          className="fixed z-[100] rounded-2xl p-2 flex flex-col gap-2 glass-panel-elevated"
+                          style={{ left: timePos.left, bottom: timePos.bottom }}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex flex-col gap-1">
@@ -347,7 +371,8 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                             {t("confirm_time")}
                             <CornerDownLeft size={12} strokeWidth={2} />
                           </button>
-                        </div>
+                        </div>,
+                        document.body
                       )}
                     </div>
 

@@ -209,11 +209,13 @@ html, body {
   -webkit-text-size-adjust: 100%;
 }
 
-/* ── Fondo global: glow púrpura radial arriba + grid de líneas finas que
-   se desvanece — position:fixed a nivel de body, detrás de todo el
-   contenido real por orden de generación (::before/::after se pintan antes
-   que los hijos reales del body). Solo tema oscuro: en .light no se
-   renderiza nada (content:none), el tema claro queda igual que siempre. ── */
+/* ── Fondo global: glow radial arriba + grid de líneas finas que se
+   desvanece — position:fixed a nivel de body, detrás de todo el contenido
+   real por orden de generación (::before/::after se pintan antes que los
+   hijos reales del body). Mismo efecto en ambos temas; solo cambia el color
+   del glow (púrpura en oscuro, beige en claro) y el de las líneas del grid
+   (blancas sobre negro, negras sobre claro) — el --bg de base debajo sigue
+   siendo el que ya tenía cada tema, esto es una capa translúcida encima. ── */
 body::before {
   content: "";
   position: fixed;
@@ -243,9 +245,18 @@ body::after {
      sin bordes duros, no necesita blur propio. */
   filter: blur(1.5px);
 }
-.light body::before,
+.light body::before {
+  background-image: radial-gradient(
+    circle at 50% 0%,
+    rgba(196, 164, 108, 0.35) 0%,
+    rgba(196, 164, 108, 0.12) 50%,
+    transparent 80%
+  );
+}
 .light body::after {
-  content: none;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
 }
 
 /* HiDPI: grayscale antialiasing */
