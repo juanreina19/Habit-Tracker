@@ -75,7 +75,7 @@ export default function SettingsView({ userId }: Props) {
         </p>
         <button
           onClick={() => setShowStats(true)}
-          className="w-full rounded-xl overflow-hidden mb-8 text-left transition-opacity active:opacity-70 glass-panel"
+          className="w-full rounded-xl overflow-hidden mb-8 text-left transition-opacity active:opacity-70 glass-panel-strong"
         >
           <div className="px-5 py-4 flex items-center gap-4">
             <div
@@ -116,7 +116,7 @@ export default function SettingsView({ userId }: Props) {
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("preferences")}
         </p>
-        <div className="rounded-xl overflow-hidden glass-panel">
+        <div className="rounded-xl glass-panel">
           <div className="flex items-center justify-between px-5 py-4">
             <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("language")}</span>
             <SettingsSelect
@@ -205,7 +205,7 @@ function NotificationsSection() {
       <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
         {t("notifications")}
       </p>
-      <div className="rounded-xl overflow-hidden glass-panel">
+      <div className="rounded-xl overflow-hidden glass-panel-strong">
         <div className="flex items-center gap-4 p-4">
           <div
             className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"
@@ -301,8 +301,8 @@ function SettingsSelect({ value, onChange, options }: {
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); setOpen((p) => !p); }}
-        className="flex items-center gap-1.5 rounded-md pl-3 pr-2.5 py-1.5 text-sm"
-        style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
+        className="flex items-center gap-1.5 rounded-md pl-3 pr-2.5 py-1.5 text-sm glass-panel"
+        style={{ color: "var(--text-primary)" }}
       >
         {current?.label}
         <ChevronDown size={14} strokeWidth={2} style={{ color: "var(--text-muted)" }} />

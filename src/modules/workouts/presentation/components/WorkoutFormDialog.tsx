@@ -249,8 +249,8 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
 
                   {/* Modo de agregar ejercicio — Fuerza / Cardio / Guardados */}
                   <div
-                    className="flex rounded-sm overflow-hidden"
-                    style={{ border: "1px solid var(--border)", background: "var(--bg)", padding: "4px" }}
+                    className="flex rounded-sm overflow-hidden glass-panel"
+                    style={{ padding: "4px" }}
                   >
                     {([
                       { mode: "strength" as const, Icon: Dumbbell, label: t("type_strength") },
@@ -263,7 +263,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         onClick={() => setAddMode(mode)}
                         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-[2px] text-xs transition-colors"
                         style={{
-                          background: addMode === mode ? "var(--surface-hover)" : "var(--bg)",
+                          background: addMode === mode ? "var(--glass-hover)" : "transparent",
                           color: addMode === mode ? "var(--text-primary)" : "var(--text-muted-darker)",
                         }}
                       >
@@ -377,8 +377,8 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                             type="time"
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
-                            className="rounded-md px-2 py-1.5 text-sm outline-none"
-                            style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
+                            className="rounded-md px-2 py-1.5 text-sm outline-none glass-panel"
+                            style={{ color: "var(--text-primary)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
                           />
                           <button
                             type="button"

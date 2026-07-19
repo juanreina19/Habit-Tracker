@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
-import { X, Trash2, Save, CornerDownLeft, Info } from "lucide-react";
+import { X, Trash2, Save, CornerDownLeft } from "lucide-react";
 import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
 import { HABIT_EMOJIS } from "@/shared/components/ui/EmojiPicker";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
@@ -233,7 +233,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                         >
                           <span className="w-1.5 h-1.5 rounded-full" style={{ background: categories.find((c) => c.id === categoryId)?.color ?? "var(--text-muted)" }} />
                           <span style={{ color: "var(--text-muted)" }}>IN</span>
-                          {categories.find((c) => c.id === categoryId)?.name ?? t("no_category")}
+                          {categories.find((c) => c.id === categoryId)?.name ?? "—"}
                         </button>
                         {catOpen && (
                           <div
@@ -243,7 +243,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                             <button type="button" onClick={() => { setCategoryId(null); setCatOpen(false); }}
                               className="w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors"
                               style={{ color: !categoryId ? "var(--text-primary)" : "var(--text-secondary)" }}>
-                              {t("no_category")}
+                              —
                             </button>
                             {categories.map((cat) => (
                               <button key={cat.id} type="button" onClick={() => { setCategoryId(cat.id); setCatOpen(false); }}
@@ -319,8 +319,8 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                               type="time"
                               value={startTime}
                               onChange={(e) => setStartTime(e.target.value)}
-                              className="rounded-md px-2 py-1.5 text-sm outline-none"
-                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
+                              className="rounded-md px-2 py-1.5 text-sm outline-none glass-panel"
+                              style={{ color: "var(--text-primary)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
                             />
                           </div>
                           <div className="flex flex-col gap-1">
@@ -334,18 +334,12 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                               placeholder="30"
                               min={1}
                               max={480}
-                              className="rounded-md px-2 py-1.5 text-sm outline-none w-full"
-                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                              className="rounded-md px-2 py-1.5 text-sm outline-none w-full glass-panel"
+                              style={{ color: "var(--text-primary)" }}
                             />
                           </div>
                           {endTime && (
                             <p className="text-xs font-medium" style={{ color: "#4CAF82" }}>{t("ends_at", { time: endTime })}</p>
-                          )}
-                          {startTime && (
-                            <div className="flex items-start gap-2 rounded-md px-2.5 py-2" style={{ background: "rgba(100,160,255,0.08)", border: "1px solid rgba(100,160,255,0.15)" }}>
-                              <Info size={12} className="flex-shrink-0 mt-0.5" color="#88AAFF" />
-                              <p className="text-[11px] leading-relaxed" style={{ color: "#88AAFF" }}>{t("lock_tooltip")}</p>
-                            </div>
                           )}
                           <button
                             type="button"
@@ -410,8 +404,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                   <button
                     type="button"
                     onClick={() => setIconPickerOpen(true)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-opacity active:opacity-70 w-full"
-                    style={{ background: "var(--surface-elevated)" }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-opacity active:opacity-70 w-full glass-panel"
                   >
                     <div
                       className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"

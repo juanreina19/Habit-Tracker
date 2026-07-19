@@ -99,6 +99,12 @@
   --glass-hover:       rgba(255, 255, 255, 0.05);
   --glass-blur:        blur(20px);
 
+  /* ── Glass "iOS" fuerte — reservado para chrome/hero (FAB, Focus Mode,
+     cards destacadas de Settings). Misma receta que ya usan Sidebar/
+     BottomNav; a propósito NO se sobreescribe en .light (igual que esos
+     dos), el chrome fuerte es independiente del tema. ── */
+  --glass-blur-strong: blur(48px) saturate(200%) brightness(1.1);
+
   /* ── Floating actions (botón flotante, su menú, botón Focus) — offsets
      derivados unos de otros, ver override de @1024px más abajo. Antes cada
      componente tenía su propio número mágico independiente; centralizados
@@ -228,6 +234,10 @@ body::after {
   background-position: center top;
   mask-image: radial-gradient(circle at 50% 0%, black 20%, rgba(0, 0, 0, 0.5) 50%, transparent 80%);
   -webkit-mask-image: radial-gradient(circle at 50% 0%, black 20%, rgba(0, 0, 0, 0.5) 50%, transparent 80%);
+  /* Suaviza las líneas de la cuadrícula — un poco de blur para que no se
+     vean tan crudas/nítidas. El glow (::before) ya es un gradiente suave
+     sin bordes duros, no necesita blur propio. */
+  filter: blur(1.5px);
 }
 .light body::before,
 .light body::after {
@@ -361,6 +371,14 @@ button, a, [role="button"] { touch-action: manipulation; }
   border: 1px solid var(--glass-border);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
+}
+/* Reusa var(--nav-bg)/var(--nav-border), ya theme-aware (mismo par que
+   Sidebar/BottomNav) — solo el blur/saturate es el que sube de nivel. */
+.glass-panel-strong {
+  background-color: var(--nav-bg);
+  border: 1px solid var(--nav-border);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
 }
 
 /* ── Focus mode dialog enter animation ── */
