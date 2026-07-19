@@ -52,9 +52,7 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--glass-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--surface-elevated)" }}>
-                <ClipboardPen size={14} strokeWidth={2} />
-              </span>
+              <ClipboardPen size={14} strokeWidth={2} />
               {t("new_task")}
             </button>
             <button
@@ -65,9 +63,7 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--glass-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--surface-elevated)" }}>
-                <Repeat size={14} strokeWidth={2} />
-              </span>
+              <Repeat size={14} strokeWidth={2} />
               {t("new_habit")}
             </button>
             <button
@@ -78,9 +74,7 @@ export function FloatingActions() {
               onMouseEnter={(e) => (e.currentTarget.style.background = "var(--glass-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
-              <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--surface-elevated)" }}>
-                <Dumbbell size={14} strokeWidth={2} />
-              </span>
+              <Dumbbell size={14} strokeWidth={2} />
               {t("new_workout")}
             </button>
           </motion.div>
@@ -91,10 +85,9 @@ export function FloatingActions() {
       <button
         type="button"
         onClick={() => setOpen(p => !p)}
-        className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-95"
+        className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-95 glass-panel-strong"
         style={{
-          background: "#000000",
-          color: "#FFFFFF",
+          color: "var(--text-primary)",
           boxShadow: "var(--shadow-md)",
         }}
       >

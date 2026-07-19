@@ -126,9 +126,9 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
                   key={min}
                   type="button"
                   onClick={() => setDuration(min)}
-                  className="flex-1 py-2 rounded-md text-xs font-normal transition-colors"
+                  className={`flex-1 py-2 rounded-md text-xs font-normal transition-colors ${duration === min ? "" : "glass-panel"}`}
                   style={{
-                    background: duration === min ? "var(--text-primary)" : "var(--surface)",
+                    background: duration === min ? "var(--text-primary)" : undefined,
                     color: duration === min ? "var(--bg)" : "var(--text-muted)",
                   }}
                 >

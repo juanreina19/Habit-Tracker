@@ -141,42 +141,43 @@ export default function Sidebar() {
                 <LogOut size={18} strokeWidth={2} />
               </button>
             </Tooltip>
-
-            {/* Confirm logout modal — centrado en pantalla, no popover pegado
-                al botón; mismo patrón de fixed inset-0 + backdrop ya usado
-                en HabitsView.tsx, con bg de fondo (no surface) + borde sutil. */}
-            {confirmLogout && (
-              <div
-                className="fixed inset-0 z-50 flex items-center justify-center p-6"
-                style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
-              >
-                <div className="w-full max-w-sm rounded-xl p-6 glass-panel-elevated">
-                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                    {ts("sign_out_confirm")}
-                  </p>
-                  <div className="flex gap-3 mt-6">
-                    <button
-                      onClick={() => setConfirmLogout(false)}
-                      className="flex-1 py-2 rounded-md text-sm"
-                      style={{ background: "var(--surface)", color: "var(--text-secondary)" }}
-                    >
-                      {ts("cancel")}
-                    </button>
-                    <button
-                      onClick={handleLogout}
-                      disabled={loggingOut}
-                      className="flex-1 py-2 rounded-md text-sm disabled:opacity-50"
-                      style={{ background: "var(--danger)", color: "#fff" }}
-                    >
-                      {loggingOut ? "…" : ts("sign_out")}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </aside>
+
+      {/* Confirm logout modal — hermano de <aside>, no descendiente: el
+          backdropFilter del propio <aside> crea un containing block nuevo
+          para descendientes fixed, lo que descentraba este modal dentro de
+          la columna angosta del sidebar en vez del viewport completo. */}
+      {confirmLogout && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
+        >
+          <div className="w-full max-w-sm rounded-xl p-6 glass-panel-elevated">
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              {ts("sign_out_confirm")}
+            </p>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setConfirmLogout(false)}
+                className="flex-1 py-2 rounded-md text-sm"
+                style={{ background: "var(--surface)", color: "var(--text-secondary)" }}
+              >
+                {ts("cancel")}
+              </button>
+              <button
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="flex-1 py-2 rounded-md text-sm disabled:opacity-50"
+                style={{ background: "var(--danger)", color: "#fff" }}
+              >
+                {loggingOut ? "…" : ts("sign_out")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </TooltipProvider>
   );
 }

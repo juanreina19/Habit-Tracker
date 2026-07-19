@@ -15,10 +15,9 @@ export function FocusModeButton({ onClick }: Props) {
       type="button"
       onClick={onClick}
       aria-label={t("open_picker")}
-      className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-95"
+      className="w-12 h-12 rounded-full flex items-center justify-center transition-transform active:scale-95 glass-panel-strong"
       style={{
-        background: "#000000",
-        color: "#FFFFFF",
+        color: "var(--text-primary)",
         boxShadow: "var(--shadow-md)",
       }}
     >

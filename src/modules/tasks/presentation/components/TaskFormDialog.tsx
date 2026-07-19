@@ -569,8 +569,8 @@ export function TaskFormDialog({
                               type="time"
                               value={startTime}
                               onChange={(e) => { setStartTime(e.target.value); setTimeError(""); }}
-                              className="rounded-md px-2 py-1.5 text-sm outline-none"
-                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
+                              className="rounded-md px-2 py-1.5 text-sm outline-none glass-panel"
+                              style={{ color: "var(--text-primary)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
                             />
                           </div>
                           <div className="flex flex-col gap-1">
@@ -581,8 +581,8 @@ export function TaskFormDialog({
                               type="time"
                               value={endTime}
                               onChange={(e) => { setEndTime(e.target.value); setTimeError(""); }}
-                              className="rounded-md px-2 py-1.5 text-sm outline-none"
-                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
+                              className="rounded-md px-2 py-1.5 text-sm outline-none glass-panel"
+                              style={{ color: "var(--text-primary)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
                             />
                           </div>
                           {timeError && <p className="text-xs" style={{ color: "var(--danger)" }}>{timeError}</p>}
@@ -657,8 +657,7 @@ export function TaskFormDialog({
                   <button
                     type="button"
                     onClick={() => setIconPickerOpen(true)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-opacity active:opacity-70 w-full"
-                    style={{ background: "var(--surface-elevated)" }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-opacity active:opacity-70 w-full glass-panel"
                   >
                     <div
                       className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
