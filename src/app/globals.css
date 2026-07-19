@@ -40,7 +40,11 @@
   --nav-border: rgba(255,255,255,0.10);
 
   /* ── Sidebar ── */
-  --sidebar-width:        64px;
+  /* Reserva para las 2 pills flotantes (left-4 + ancho de pill ~52px) más
+     un margen de aire antes del contenido — ya no es una columna a ras del
+     borde, así que el contenido necesita más separación que el ancho de
+     pill puro. */
+  --sidebar-width:        96px;
   --sidebar-active-bg:    rgba(255, 255, 255, 0.08);
   --sidebar-hover-bg:     rgba(255, 255, 255, 0.04);
   --sidebar-active-color: #e8e8e8;
