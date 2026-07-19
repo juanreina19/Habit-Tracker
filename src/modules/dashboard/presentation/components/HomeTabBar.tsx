@@ -39,7 +39,7 @@ export function HomeTabBar({ active, onChange }: Props) {
               <motion.div
                 layoutId="home-tab-indicator"
                 className="absolute bottom-0 left-3 right-3 h-[1.5px] rounded-full"
-                style={{ background: "var(--accent)" }}
+                style={{ background: "var(--btn-primary-bg)" }}
                 transition={{ type: "spring", stiffness: 500, damping: 35 }}
               />
             )}

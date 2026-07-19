@@ -359,10 +359,10 @@ export function EnfoqueTab({
                   {/* Node */}
                   <div className="w-6 flex-shrink-0 flex items-center justify-center relative z-10">
                     <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                      className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 ${done ? "" : "glass-panel-strong"}`}
                       style={{
-                        background: done ? "var(--accent)" : "var(--bg)",
-                        border: done ? "2px solid var(--accent)" : "1px solid var(--border)",
+                        background: done ? "var(--accent)" : undefined,
+                        border: done ? "2px solid var(--accent)" : undefined,
                       }}
                     >
                       <ClipboardPen size={10} strokeWidth={2} style={{ color: done ? "#FFFFFF" : "var(--text-muted)" }} />
@@ -404,10 +404,10 @@ function AgendaNode({ item }: { item: AgendaItem }) {
   return (
     <div className="w-6 flex-shrink-0 flex items-center justify-center relative z-10">
       <div
-        className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+        className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${item.completed ? "" : "glass-panel-strong"}`}
         style={{
-          background: item.completed ? "var(--accent)" : "var(--bg)",
-          border: item.completed ? "2px solid var(--accent)" : "1px solid var(--border)",
+          background: item.completed ? "var(--accent)" : undefined,
+          border: item.completed ? "2px solid var(--accent)" : undefined,
         }}
       >
         {item.type === "habit"

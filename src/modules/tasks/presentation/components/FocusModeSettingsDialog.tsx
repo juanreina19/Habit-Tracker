@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useTranslations } from "next-intl";
-import { Info } from "lucide-react";
+import { Info, X } from "lucide-react";
 import type { FocusModeSession } from "../../domain/entities/FocusModeSession";
 import type { FocusModeSettingsInput } from "../hooks/useFocusMode";
 
@@ -48,11 +48,9 @@ function NumberField({
           max={max}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full rounded-md px-3 py-3 text-sm outline-none"
+          className="w-full rounded-md px-3 py-3 text-sm outline-none glass-panel"
           style={{
-            background: "var(--surface-elevated)",
             color: "var(--text-primary)",
-            border: "1.5px solid transparent",
             WebkitAppearance: "none",
             appearance: "none",
           }}
@@ -176,9 +174,21 @@ export function FocusModeSettingsDialog({ open, onClose, session, onSave }: Prop
           style={{ maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto hide-scrollbar p-6 flex flex-col gap-4" style={{ maxHeight: "90dvh" }}>
-            <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-              {t("session_settings_title")}
-            </Dialog.Title>
+            <div className="flex items-center justify-between -mt-1 -mr-1">
+              <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                {t("session_settings_title")}
+              </Dialog.Title>
+              <Dialog.Close asChild>
+                <button
+                  type="button"
+                  aria-label={t("cancel")}
+                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70"
+                  style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
+                >
+                  <X size={16} />
+                </button>
+              </Dialog.Close>
+            </div>
 
             <NumberField
               label={t("focus_duration_label")}
@@ -261,17 +271,10 @@ export function FocusModeSettingsDialog({ open, onClose, session, onSave }: Prop
               </p>
             )}
 
-            <div className="flex gap-3 mt-1">
-              <button
-                onClick={onClose}
-                className="flex-1 py-3 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
-                style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-              >
-                {t("cancel")}
-              </button>
+            <div className="mt-1">
               <button
                 onClick={handleSave}
-                className="flex-1 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70"
+                className="w-full py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70"
                 style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
               >
                 {t("save")}

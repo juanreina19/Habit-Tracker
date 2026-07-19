@@ -29,8 +29,8 @@ export function InlineTaskInput({ onCreateTask, placeholder }: Props) {
         onClick={() => value.trim() ? handleSubmit() : inputRef.current?.focus()}
         className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors"
         style={{
-          background: value.trim() ? "var(--accent)" : "var(--border)",
-          color: value.trim() ? "#fff" : "var(--text-muted)",
+          background: value.trim() ? "var(--btn-primary-bg)" : "var(--border)",
+          color: value.trim() ? "var(--btn-primary-text)" : "var(--text-muted)",
           cursor: value.trim() ? "pointer" : "default",
         }}
       >
