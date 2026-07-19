@@ -70,8 +70,7 @@ export default function WeeklyView({ userId, userCreatedAt, embedded = false }: 
       {/* Global summary banner */}
       {!isLoading && data && (
         <div
-          className="rounded-xl p-5 mb-6 flex items-center gap-5"
-          style={{ background: "var(--surface)" }}
+          className="rounded-xl p-5 mb-6 flex items-center gap-5 glass-panel"
         >
           <GlobalRing percentage={data.globalRate} />
           <div>
@@ -116,7 +115,7 @@ export default function WeeklyView({ userId, userCreatedAt, embedded = false }: 
 
           {/* Habit rows */}
           {data.habits.length === 0 ? (
-            <div className="rounded-xl p-10 text-center" style={{ background: "var(--surface)" }}>
+            <div className="rounded-xl p-10 text-center glass-panel">
               <p className="text-4xl mb-3">📅</p>
               <p className="font-medium" style={{ color: "var(--text-primary)" }}>{t("no_habits_title")}</p>
               <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
@@ -158,8 +157,7 @@ function HabitWeekRow({ progress }: { progress: WeeklyHabitProgress }) {
 
   return (
     <div
-      className="rounded-lg px-4 py-3 flex items-center gap-3"
-      style={{ background: "var(--surface)" }}
+      className="rounded-lg px-4 py-3 flex items-center gap-3 glass-panel"
     >
       <div
         className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"

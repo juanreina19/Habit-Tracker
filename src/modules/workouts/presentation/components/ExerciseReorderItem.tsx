@@ -101,7 +101,7 @@ export function ExerciseReorderItem({ exercise, onChangeType, onChangeSets, onCh
       dragListener={false}
       className="flex items-center gap-2"
     >
-      <div className="flex-1 min-w-0 rounded-md" style={{ background: "var(--bg)" }}>
+      <div className="flex-1 min-w-0 rounded-md glass-panel">
         <div className="flex items-center gap-2.5 p-2.5">
           <button
             type="button"

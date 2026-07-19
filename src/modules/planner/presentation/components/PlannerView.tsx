@@ -117,7 +117,7 @@ export default function PlannerView({ userId }: Props) {
             </p>
           )}
 
-          <div className="relative rounded-lg overflow-hidden" style={{ background: "var(--surface)" }}>
+          <div className="relative rounded-lg overflow-hidden glass-panel">
             {/* Now indicator */}
             <NowIndicator />
 
@@ -170,11 +170,8 @@ function PendingTaskCard({
 }) {
   return (
     <div
-      className="rounded-lg p-2.5 flex items-center gap-2"
-      style={{
-        background: isScheduling ? "var(--accent)15" : "var(--surface)",
-        border: isScheduling ? "1px solid var(--accent)40" : "1px solid transparent",
-      }}
+      className="rounded-lg p-2.5 flex items-center gap-2 glass-panel"
+      style={isScheduling ? { background: "var(--accent)15", border: "1px solid var(--accent)40" } : undefined}
     >
       {/* Priority dot */}
       <span

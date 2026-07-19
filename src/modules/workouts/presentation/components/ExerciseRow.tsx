@@ -25,8 +25,7 @@ export function ExerciseRow({ exercise, variant = "line" }: Props) {
 
   return (
     <div
-      className={variant === "card" ? "flex items-center gap-2.5 p-2.5 rounded-lg" : "flex items-center gap-2 py-1"}
-      style={variant === "card" ? { background: "var(--bg)", border: "1px solid var(--border)" } : undefined}
+      className={variant === "card" ? "flex items-center gap-2.5 p-2.5 rounded-lg glass-panel" : "flex items-center gap-2 py-1"}
     >
       {variant === "line" && (
         <Dot size={14} strokeWidth={2} className="flex-shrink-0" style={{ color: "var(--text-muted)" }} />

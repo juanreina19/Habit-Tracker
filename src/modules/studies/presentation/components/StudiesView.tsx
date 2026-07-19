@@ -86,7 +86,7 @@ export default function StudiesView({ userId }: Props) {
           {/* Left column */}
           <div className="flex flex-col gap-5">
             {/* Schedule week */}
-            <div className="rounded-lg p-4" style={{ background: "var(--surface)" }}>
+            <div className="rounded-lg p-4 glass-panel">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
                 {t("schedule")}
               </p>
@@ -119,7 +119,7 @@ export default function StudiesView({ userId }: Props) {
               </p>
 
               {studies.subjects.length === 0 ? (
-                <div className="rounded-xl p-10 text-center" style={{ background: "var(--surface)" }}>
+                <div className="rounded-xl p-10 text-center glass-panel">
                   <p className="text-4xl mb-3">📚</p>
                   <p className="font-medium" style={{ color: "var(--text-primary)" }}>{t("no_subjects")}</p>
                   <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{t("no_subjects_hint")}</p>
@@ -183,10 +183,7 @@ export default function StudiesView({ userId }: Props) {
           className="fixed inset-0 z-50 flex items-center justify-center p-6"
           style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
         >
-          <div
-            className="w-full max-w-sm rounded-xl p-6"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-          >
+          <div className="w-full max-w-sm rounded-xl p-6 glass-panel-elevated">
             <p className="text-lg font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
               {t("delete")}
             </p>

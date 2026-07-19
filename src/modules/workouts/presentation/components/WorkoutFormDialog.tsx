@@ -191,8 +191,8 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
-          style={{ background: "var(--bg)", maxHeight: "90dvh" }}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden glass-panel-elevated"
+          style={{ maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto px-6 pt-3 pb-6 hide-scrollbar" style={{ maxHeight: "90dvh" }}>
             <div className="flex items-center justify-end mb-0.5 -mr-3">
@@ -335,8 +335,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                       </button>
                       {dayPickerOpen && (
                         <div
-                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex gap-1"
-                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex gap-1 glass-panel-elevated"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {ALL_DAYS.map((day) => (
@@ -371,8 +370,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                       </button>
                       {timePickerOpen && (
                         <div
-                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex flex-col gap-2"
-                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex flex-col gap-2 glass-panel-elevated"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <input
@@ -409,8 +407,7 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                         </button>
                         {catOpen && (
                           <div
-                            className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-1 min-w-[140px]"
-                            style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                            className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-1 min-w-[140px] glass-panel-elevated"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button type="button" onClick={() => { setCategoryId(null); setCatOpen(false); }}

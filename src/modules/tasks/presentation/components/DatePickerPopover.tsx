@@ -43,8 +43,7 @@ export function DatePickerPopover({ open, value, minDate, onSelect, onClose }: P
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xs rounded-xl p-4"
-        style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+        className="w-full max-w-xs rounded-xl p-4 glass-panel-elevated"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-3">

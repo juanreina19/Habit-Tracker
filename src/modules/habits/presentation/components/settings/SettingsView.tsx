@@ -75,8 +75,7 @@ export default function SettingsView({ userId }: Props) {
         </p>
         <button
           onClick={() => setShowStats(true)}
-          className="w-full rounded-xl overflow-hidden mb-8 text-left transition-opacity active:opacity-70"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+          className="w-full rounded-xl overflow-hidden mb-8 text-left transition-opacity active:opacity-70 glass-panel"
         >
           <div className="px-5 py-4 flex items-center gap-4">
             <div
@@ -117,7 +116,7 @@ export default function SettingsView({ userId }: Props) {
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("preferences")}
         </p>
-        <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+        <div className="rounded-xl overflow-hidden glass-panel">
           <div className="flex items-center justify-between px-5 py-4">
             <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("language")}</span>
             <SettingsSelect
@@ -148,7 +147,7 @@ export default function SettingsView({ userId }: Props) {
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("account")}
         </p>
-        <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+        <div className="rounded-xl overflow-hidden glass-panel">
           <button
             onClick={() => router.push("/profile")}
             className="w-full px-5 py-4 flex items-center justify-between transition-opacity active:opacity-60"
@@ -206,7 +205,7 @@ function NotificationsSection() {
       <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
         {t("notifications")}
       </p>
-      <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+      <div className="rounded-xl overflow-hidden glass-panel">
         <div className="flex items-center gap-4 p-4">
           <div
             className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"
@@ -310,8 +309,7 @@ function SettingsSelect({ value, onChange, options }: {
       </button>
       {open && (
         <div
-          className="absolute right-0 top-full mt-1 z-10 rounded-2xl p-1 min-w-[140px]"
-          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+          className="absolute right-0 top-full mt-1 z-10 rounded-2xl p-1 min-w-[140px] glass-panel-elevated"
           onClick={(e) => e.stopPropagation()}
         >
           {options.map((opt) => (

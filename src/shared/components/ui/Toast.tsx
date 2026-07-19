@@ -61,7 +61,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             duration={toast.duration ?? 3000}
             className="flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg"
             style={{
-              background: "#1C1C1C",
+              background: "rgba(28,28,28,0.75)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
               border: "1px solid rgba(255,255,255,0.08)",
               boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
               maxWidth: "calc(100vw - 40px)",

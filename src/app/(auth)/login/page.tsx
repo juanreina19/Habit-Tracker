@@ -18,8 +18,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6"
-      style={{ background: "#000000" }}>
+    <main className="min-h-screen flex flex-col items-center justify-center px-6">
 
       <div className="w-full max-w-sm flex flex-col items-center gap-10">
         <div className="flex flex-col items-center gap-4">
@@ -37,8 +36,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="w-full rounded-xl p-6 flex flex-col gap-4"
-          style={{ background: "#111111" }}>
+        <div className="w-full rounded-xl p-6 flex flex-col gap-4 glass-panel">
 
           <button
             onClick={handleGoogleSignIn}

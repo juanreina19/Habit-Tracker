@@ -265,8 +265,7 @@ function HabitReorderItem({
       value={habit}
       dragControls={dragControls}
       dragListener={false}
-      className="rounded-lg p-4 flex items-center gap-3 touch-none"
-      style={{ background: "var(--surface)" }}
+      className="rounded-lg p-4 flex items-center gap-3 touch-none glass-panel"
     >
       <div
         onPointerDown={(e) => dragControls.start(e)}
@@ -395,8 +394,7 @@ function CategoryReorderItem({
       value={cat}
       dragControls={dragControls}
       dragListener={false}
-      className="rounded-lg p-4 flex items-center gap-3 touch-none"
-      style={{ background: "var(--surface)" }}
+      className="rounded-lg p-4 flex items-center gap-3 touch-none glass-panel"
     >
       <div
         onPointerDown={(e) => dragControls.start(e)}
@@ -457,7 +455,7 @@ function IconButton({
 
 function EmptyState({ message, hint }: { message: string; hint: string }) {
   return (
-    <div className="rounded-xl p-10 text-center" style={{ background: "var(--surface)" }}>
+    <div className="rounded-xl p-10 text-center glass-panel">
       <p className="text-4xl mb-3">✨</p>
       <p className="font-medium" style={{ color: "var(--text-primary)" }}>{message}</p>
       <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{hint}</p>
@@ -488,8 +486,7 @@ function DeleteConfirmDialog({
       style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
     >
       <div
-        className="w-full max-w-sm rounded-xl p-6"
-        style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+        className="w-full max-w-sm rounded-xl p-6 glass-panel-elevated"
       >
         <p className="text-lg font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
           {type === "habit" ? t("delete_habit_title") : t("delete_category_title")}

@@ -101,8 +101,8 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden [animation:dialog-in_0.25s_cubic-bezier(0.16,1,0.3,1)]"
-          style={{ background: "var(--surface)", maxHeight: "85dvh" }}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden [animation:dialog-in_0.25s_cubic-bezier(0.16,1,0.3,1)] glass-panel-elevated"
+          style={{ maxHeight: "85dvh" }}
         >
           <div className="overflow-y-auto" style={{ maxHeight: "85dvh" }}>
             <AnimatePresence mode="wait" custom={slideDir}>

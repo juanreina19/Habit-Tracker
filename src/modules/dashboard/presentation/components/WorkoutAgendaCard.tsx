@@ -36,11 +36,8 @@ export function WorkoutAgendaCard({ workout, onToggle }: Props) {
 
   return (
     <div
-      className="rounded-md p-2.5 card-border-hover"
-      style={{
-        background: "var(--bg)",
-        border: done ? "1px solid transparent" : "1px solid var(--border)",
-      }}
+      className="rounded-md p-2.5 card-border-hover glass-panel"
+      style={done ? { border: "1px solid transparent" } : undefined}
     >
       <div className="flex items-center gap-2">
         <TaskCheckbox done={done} size={TASK_CHECKBOX_SIZE.card} animated onToggle={onToggle} ariaLabel={workout.name} />

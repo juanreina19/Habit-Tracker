@@ -72,7 +72,7 @@ export function DashboardTimeline({ tasks, habits }: Props) {
   const showNow = nowPct >= 0 && nowPct <= 100;
 
   return (
-    <div className="hidden lg:block w-full rounded-lg p-4" style={{ background: "var(--surface)" }}>
+    <div className="hidden lg:block w-full rounded-lg p-4 glass-panel">
       <div className="relative w-full" style={{ height: 56 }}>
         {/* Hour marks */}
         <div className="absolute inset-x-0 top-0 flex">

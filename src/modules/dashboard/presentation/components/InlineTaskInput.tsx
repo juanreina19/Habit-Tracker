@@ -22,10 +22,7 @@ export function InlineTaskInput({ onCreateTask, placeholder }: Props) {
   };
 
   return (
-    <div
-      className="flex items-center gap-3 rounded-lg px-4 py-3"
-      style={{ background: "var(--surface)" }}
-    >
+    <div className="flex items-center gap-3 rounded-lg px-4 py-3 glass-panel">
       <button
         type="button"
         disabled={!value.trim()}

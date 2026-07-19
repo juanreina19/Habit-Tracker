@@ -90,6 +90,15 @@
   /* ── Card hover border ── */
   --border-hover: #363636;
 
+  /* ── Glass panel (cards/modales/popovers) — light theme cae a los
+     valores sólidos de siempre vía override abajo, sin ramas condicionales
+     en componentes. ── */
+  --glass-bg:          rgba(20, 16, 30, 0.55);
+  --glass-bg-elevated: rgba(26, 20, 38, 0.75);
+  --glass-border:      rgba(255, 255, 255, 0.08);
+  --glass-hover:       rgba(255, 255, 255, 0.05);
+  --glass-blur:        blur(20px);
+
   /* ── Floating actions (botón flotante, su menú, botón Focus) — offsets
      derivados unos de otros, ver override de @1024px más abajo. Antes cada
      componente tenía su propio número mágico independiente; centralizados
@@ -155,6 +164,16 @@
 
   /* ── Card hover border ── */
   --border-hover: #d0d0d4;
+
+  /* ── Glass panel — sin glow/grid en claro, cae a lo sólido de siempre.
+     --glass-hover cae a --surface-hover (el mismo valor que ya usan hoy los
+     hovers que se están migrando a esta variable), para no perder el
+     feedback de hover existente en tema claro. ── */
+  --glass-bg:          var(--surface);
+  --glass-bg-elevated: var(--surface-elevated);
+  --glass-border:      var(--border);
+  --glass-hover:       var(--surface-hover);
+  --glass-blur:        none;
 }
 
 /* ── Reset ── */
@@ -178,6 +197,41 @@ html, body {
   font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
   font-optical-sizing: auto;
   -webkit-text-size-adjust: 100%;
+}
+
+/* ── Fondo global: glow púrpura radial arriba + grid de líneas finas que
+   se desvanece — position:fixed a nivel de body, detrás de todo el
+   contenido real por orden de generación (::before/::after se pintan antes
+   que los hijos reales del body). Solo tema oscuro: en .light no se
+   renderiza nada (content:none), el tema claro queda igual que siempre. ── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle at 50% 0%,
+    rgba(109, 40, 217, 0.25) 0%,
+    rgba(109, 40, 217, 0.05) 50%,
+    transparent 80%
+  );
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center top;
+  mask-image: radial-gradient(circle at 50% 0%, black 20%, rgba(0, 0, 0, 0.5) 50%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at 50% 0%, black 20%, rgba(0, 0, 0, 0.5) 50%, transparent 80%);
+}
+.light body::before,
+.light body::after {
+  content: none;
 }
 
 /* HiDPI: grayscale antialiasing */
@@ -286,8 +340,27 @@ button, a, [role="button"] { touch-action: manipulation; }
 @media (min-width: 1024px) {
   .card-border-hover:hover {
     border-color: var(--border-hover) !important;
-    transition: border-color 0.15s ease;
+    background-color: var(--glass-hover);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
   }
+}
+
+/* ── Glass panel — cards/dialogs/popovers. .glass-panel-elevated es la
+   variante más opaca para modales y popovers flotantes (necesitan más
+   contraste para legibilidad que un card de contenido pasivo). En tema
+   claro ambas caen a los valores sólidos de siempre (ver overrides de
+   --glass-* en .light más arriba), sin ninguna rama condicional aquí. ── */
+.glass-panel {
+  background-color: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+.glass-panel-elevated {
+  background-color: var(--glass-bg-elevated);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 /* ── Focus mode dialog enter animation ── */

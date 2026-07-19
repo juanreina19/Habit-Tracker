@@ -464,8 +464,7 @@ function PriorityFilterMenu({ value, onChange }: {
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
         <DropdownMenu.Content
-          className="z-50 min-w-[148px] rounded-lg p-1.5 shadow-xl outline-none"
-          style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+          className="z-50 min-w-[148px] rounded-lg p-1.5 shadow-xl outline-none glass-panel-elevated"
           align="end"
           sideOffset={4}
         >
@@ -649,7 +648,7 @@ function TaskColumn({ userId, title, tasks, toggleTask, onEdit, onDelete, emptyS
 
 function EmptyColumnPlaceholder({ text }: { text: string }) {
   return (
-    <div className="rounded-md py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
+    <div className="rounded-md py-4 text-center text-xs glass-panel" style={{ color: "var(--text-muted)" }}>
       {text}
     </div>
   );

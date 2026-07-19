@@ -27,7 +27,7 @@ export function SubjectCard({ subject, topics, onLoadTopics, onCreateTopic, onDe
   }, [expanded, subject.id, onLoadTopics]);
 
   return (
-    <div className="rounded-lg overflow-hidden" style={{ background: "var(--surface)" }}>
+    <div className="rounded-lg overflow-hidden glass-panel">
       <div className="flex items-center gap-3 p-4">
         <button
           type="button"

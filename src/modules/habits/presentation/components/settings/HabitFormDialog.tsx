@@ -154,8 +154,8 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
-          style={{ background: "var(--bg)", maxHeight: "90dvh" }}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden glass-panel-elevated"
+          style={{ maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto px-6 pt-3 pb-6" style={{ maxHeight: "90dvh" }}>
             <div className="flex items-center justify-end mb-0.5 -mr-3">
@@ -237,8 +237,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                         </button>
                         {catOpen && (
                           <div
-                            className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-1 min-w-[140px]"
-                            style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                            className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-1 min-w-[140px] glass-panel-elevated"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button type="button" onClick={() => { setCategoryId(null); setCatOpen(false); }}
@@ -273,8 +272,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                       </button>
                       {daysOpen && (
                         <div
-                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex gap-1"
-                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex gap-1 glass-panel-elevated"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {ALL_DAYS.map((day) => {
@@ -310,8 +308,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                       </button>
                       {timeOpen && (
                         <div
-                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex flex-col gap-3 w-64"
-                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex flex-col gap-3 w-64 glass-panel-elevated"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex flex-col gap-1">
@@ -377,8 +374,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                       </button>
                       {colorOpen && (
                         <div
-                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-3"
-                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-3 glass-panel-elevated"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="grid grid-cols-6 gap-2">
@@ -496,8 +492,8 @@ function HabitIconPickerDialog({ open, onClose, value, onChange, categoryLabel, 
         <Dialog.Overlay className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
-          style={{ background: "var(--surface)", maxHeight: "85dvh" }}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden glass-panel-elevated"
+          style={{ maxHeight: "85dvh" }}
         >
           <div className="overflow-y-auto p-6" style={{ maxHeight: "85dvh" }}>
             <div className="flex items-center justify-between mb-5">
