@@ -305,7 +305,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                       </button>
                       {timeOpen && (
                         <div
-                          className="absolute left-0 top-full mt-1 z-10 rounded-2xl p-2 flex flex-col gap-2 glass-panel-elevated"
+                          className="absolute left-0 bottom-full mb-1 z-30 rounded-2xl p-2 flex flex-col gap-2 glass-panel-elevated"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="flex flex-col gap-1">
