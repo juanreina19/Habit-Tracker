@@ -44,45 +44,43 @@ export default function Sidebar() {
 
   return (
     <TooltipProvider>
-      {/* Tema (pill propia) + Vistas — agrupadas y centradas verticalmente
-          como una sola columna, con el toggle de tema arriba del bloque de
-          navegación. */}
+      {/* Tema — pill propia, fija arriba del todo (independiente del bloque
+          de vistas centrado). */}
       <div
-        className="hidden lg:flex flex-col items-center fixed left-4 top-1/2 z-40 gap-3"
-        style={{ transform: "translateY(-50%)" }}
+        className="hidden lg:flex fixed left-4 top-6 z-40 p-1.5 rounded-full glass-panel-strong"
+        style={{ boxShadow: FLOATING_SHADOW }}
       >
-        <div className="p-1.5 rounded-full glass-panel-strong" style={{ boxShadow: FLOATING_SHADOW }}>
-          <Tooltip label={theme === "dark" ? ts("theme_light") : ts("theme_dark")}>
-            <button
-              onClick={toggleTheme}
-              className="sidebar-link w-10 h-10 flex items-center justify-center rounded-full transition-colors"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              {theme === "dark" ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
-            </button>
-          </Tooltip>
-        </div>
-
-        <nav
-          className="flex flex-col gap-1 p-1.5 rounded-[28px] glass-panel-strong"
-          style={{ boxShadow: FLOATING_SHADOW }}
-        >
-          {NAV_ROUTES.map(({ href, key, Icon }) => {
-            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
-            return (
-              <Tooltip key={href} label={t(key as Parameters<typeof t>[0])}>
-                <Link
-                  href={href}
-                  className={`sidebar-link flex items-center justify-center w-10 h-10 rounded-full ${isActive ? "sidebar-active" : ""}`}
-                  style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
-                >
-                  <Icon size={18} strokeWidth={2} />
-                </Link>
-              </Tooltip>
-            );
-          })}
-        </nav>
+        <Tooltip label={theme === "dark" ? ts("theme_light") : ts("theme_dark")}>
+          <button
+            onClick={toggleTheme}
+            className="sidebar-link w-10 h-10 flex items-center justify-center rounded-full transition-colors"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {theme === "dark" ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
+          </button>
+        </Tooltip>
       </div>
+
+      {/* Vistas — pill flotante, centrada verticalmente en el viewport */}
+      <nav
+        className="hidden lg:flex flex-col fixed left-4 top-1/2 z-40 gap-1 p-1.5 rounded-[28px] glass-panel-strong"
+        style={{ transform: "translateY(-50%)", boxShadow: FLOATING_SHADOW }}
+      >
+        {NAV_ROUTES.map(({ href, key, Icon }) => {
+          const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          return (
+            <Tooltip key={href} label={t(key as Parameters<typeof t>[0])}>
+              <Link
+                href={href}
+                className={`sidebar-link flex items-center justify-center w-10 h-10 rounded-full ${isActive ? "sidebar-active" : ""}`}
+                style={{ color: isActive ? "var(--sidebar-active-color)" : "var(--text-secondary)" }}
+              >
+                <Icon size={18} strokeWidth={2} />
+              </Link>
+            </Tooltip>
+          );
+        })}
+      </nav>
 
       {/* Cuenta — un solo botón que abre un menú con Settings / Cerrar sesión,
           en vez de 2 botones sueltos abajo. */}
