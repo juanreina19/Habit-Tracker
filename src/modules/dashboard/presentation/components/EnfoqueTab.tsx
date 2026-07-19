@@ -227,8 +227,7 @@ export function EnfoqueTab({
               <DropdownMenu.Content
                 align="end"
                 sideOffset={6}
-                className="z-50 rounded-lg py-1.5 shadow-lg min-w-[170px]"
-                style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+                className="z-50 rounded-lg py-1.5 shadow-lg min-w-[170px] glass-panel-elevated"
               >
                 <DropdownMenu.CheckboxItem
                   checked={urgencyFilter}
@@ -555,11 +554,8 @@ function HabitAgendaRow({ habit, onToggle, onEdit }: { habit: HabitWithStatus; o
 
   return (
     <div
-      className="group w-full rounded-md p-2.5 flex items-center gap-3 card-border-hover"
-      style={{
-        background: "var(--bg)",
-        border: done ? "1px solid transparent" : "1px solid var(--border)",
-      }}
+      className="group w-full rounded-md p-2.5 flex items-center gap-3 card-border-hover glass-panel"
+      style={done ? { border: "1px solid transparent" } : undefined}
     >
       <button
         type="button"

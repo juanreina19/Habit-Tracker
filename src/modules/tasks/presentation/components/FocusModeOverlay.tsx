@@ -39,8 +39,8 @@ function SortableTaskRow({ task, toggleTask, showHandle }: { task: TaskWithStatu
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1, background: "var(--surface)" }}
-      className="flex items-center gap-3 rounded-md p-3"
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }}
+      className="flex items-center gap-3 rounded-md p-3 glass-panel"
     >
       {showHandle && (
         <button type="button" {...attributes} {...listeners}

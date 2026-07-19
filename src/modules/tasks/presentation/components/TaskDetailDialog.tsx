@@ -89,8 +89,8 @@ export function TaskDetailDialog({ open, onClose, entry, userId }: Props) {
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
-          style={{ background: "var(--surface)", maxHeight: "90dvh" }}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden glass-panel-elevated"
+          style={{ maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto p-6" style={{ maxHeight: "90dvh" }}>
             <Dialog.Title className="text-lg font-semibold mb-1 truncate" style={{ color: "var(--text-primary)" }}>

@@ -230,8 +230,7 @@ export default function TodayView({ userId }: Props) {
         {/* Progress ring — mobile (horizontal, compacto) */}
         {totalCount > 0 && (
           <div
-            className="lg:hidden rounded-xl p-5 flex items-center gap-5"
-            style={{ background: "var(--surface)" }}
+            className="lg:hidden rounded-xl p-5 flex items-center gap-5 glass-panel"
           >
             <ProgressRing percentage={completionPercentage} size={72} />
             <div>
@@ -251,8 +250,7 @@ export default function TodayView({ userId }: Props) {
         {/* Progress ring — desktop (vertical, anillo grande) */}
         {totalCount > 0 && (
           <div
-            className="hidden lg:flex flex-col items-center text-center rounded-xl p-6"
-            style={{ background: "var(--surface)" }}
+            className="hidden lg:flex flex-col items-center text-center rounded-xl p-6 glass-panel"
           >
             <ProgressRing percentage={completionPercentage} size={120} />
             <p className="text-2xl font-semibold mt-4" style={{ color: "var(--text-primary)" }}>
@@ -270,7 +268,7 @@ export default function TodayView({ userId }: Props) {
         {/* Habit list grouped by time of day */}
         <div className="flex flex-col gap-3 lg:overflow-y-auto lg:pr-0.5 lg:max-h-[min(620px,60vh)]">
           {totalCount === 0 && (
-            <div className="rounded-xl p-8 text-center" style={{ background: "var(--surface)" }}>
+            <div className="rounded-xl p-8 text-center glass-panel">
               <p className="text-4xl mb-3">✨</p>
               <p className="font-medium" style={{ color: "var(--text-primary)" }}>{t("no_habits_title")}</p>
               <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{t("no_habits_hint")}</p>
@@ -414,10 +412,8 @@ function HabitRow({
     <motion.div
       layout="position"
       onClick={locked ? undefined : onToggle}
-      className="group w-full text-left rounded-lg p-4 flex items-center gap-4 relative overflow-hidden card-border-hover"
+      className="group w-full text-left rounded-lg p-4 flex items-center gap-4 relative overflow-hidden card-border-hover glass-panel"
       style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
         opacity: locked ? 0.5 : 1,
         cursor: locked ? "not-allowed" : "pointer",
         userSelect: "none",

@@ -90,12 +90,12 @@ export default function WorkoutsView({ userId }: Props) {
                 className="flex flex-col gap-3"
               >
                 {dayWorkouts.length === 0 ? (
-                  <div className="rounded-lg p-6 text-center" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+                  <div className="rounded-lg p-6 text-center glass-panel">
                     <p className="text-sm" style={{ color: "var(--text-muted)" }}>{t("no_workout_today")}</p>
                   </div>
                 ) : (
                   dayWorkouts.map((w) => (
-                    <div key={w.id} className="rounded-lg p-3" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+                    <div key={w.id} className="rounded-lg p-3 glass-panel">
                       <WorkoutCard
                         workout={w}
                         onEdit={() => openEdit(w)}
@@ -150,8 +150,7 @@ export default function WorkoutsView({ userId }: Props) {
           onClick={() => setDeletingWorkout(null)}
         >
           <div
-            className="w-full max-w-sm rounded-xl p-6"
-            style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+            className="w-full max-w-sm rounded-xl p-6 glass-panel-elevated"
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-sm" style={{ color: "var(--text-primary)" }}>

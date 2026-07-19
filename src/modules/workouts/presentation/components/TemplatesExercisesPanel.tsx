@@ -324,8 +324,7 @@ export function TemplatesExercisesPanel({ userId, workouts, categories, onEdit, 
         onClick={() => setDeletingCatalogItem(null)}
       >
         <div
-          className="w-full max-w-sm rounded-xl p-6"
-          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+          className="w-full max-w-sm rounded-xl p-6 glass-panel-elevated"
           onClick={(e) => e.stopPropagation()}
         >
           <p className="text-sm" style={{ color: "var(--text-primary)" }}>

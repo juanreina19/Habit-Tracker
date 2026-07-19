@@ -45,11 +45,8 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
 
   return (
     <div
-      className="group relative rounded-md p-2.5 card-border-hover"
-      style={{
-        background: "var(--bg)",
-        border: done ? "1px solid transparent" : "1px solid var(--border)",
-      }}
+      className="group relative rounded-md p-2.5 card-border-hover glass-panel"
+      style={done ? { border: "1px solid transparent" } : undefined}
     >
       {/* Priority dot — top right with neon pulse; swaps with pencil on hover */}
       {!done && (

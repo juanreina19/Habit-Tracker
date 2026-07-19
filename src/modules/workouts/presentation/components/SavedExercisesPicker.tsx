@@ -89,9 +89,9 @@ export function SavedExercisesPicker({ searchCatalog, onSelect }: Props) {
               type="button"
               onClick={() => { onSelect(item); setQuery(""); }}
               className="flex items-center gap-2.5 w-full px-3 py-2 rounded-md text-sm text-left transition-colors"
-              style={{ background: "var(--bg)", color: "var(--text-primary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--bg)")}
+              style={{ background: "transparent", color: "var(--text-primary)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--glass-hover)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <span
                 className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center"

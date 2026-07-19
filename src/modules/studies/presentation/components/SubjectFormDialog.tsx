@@ -57,8 +57,7 @@ export function SubjectFormDialog({ open, onClose, subject, onSave }: Props) {
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none p-6"
-          style={{ background: "var(--surface)" }}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none p-6 glass-panel-elevated"
         >
           <Dialog.Title className="text-lg font-semibold mb-5" style={{ color: "var(--text-primary)" }}>
             {subject ? t("edit_subject") : t("add_subject")}

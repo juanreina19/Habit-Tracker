@@ -73,8 +73,7 @@ export function EisenhowerTab({ userId, tasks, onToggleTask, onEditTask, onDelet
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25, delay: i * 0.05 }}
-          className="rounded-lg"
-          style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+          className="rounded-lg glass-panel"
         >
           <div className="p-3">
             <div className="flex items-center justify-between mb-2.5">

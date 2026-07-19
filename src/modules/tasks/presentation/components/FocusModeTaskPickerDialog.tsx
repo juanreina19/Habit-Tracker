@@ -54,8 +54,8 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden [animation:dialog-in_0.22s_cubic-bezier(0.16,1,0.3,1)]"
-          style={{ background: "var(--bg)", maxHeight: "90dvh" }}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden [animation:dialog-in_0.22s_cubic-bezier(0.16,1,0.3,1)] glass-panel-elevated"
+          style={{ maxHeight: "90dvh" }}
         >
           <div className="overflow-y-auto p-6 flex flex-col gap-4" style={{ maxHeight: "90dvh" }}>
             {/* Header */}
@@ -92,11 +92,8 @@ export function FocusModeTaskPickerDialog({ open, onClose, userId, onStart }: Pr
                       key={task.id}
                       type="button"
                       onClick={() => toggle(task.id)}
-                      className="flex items-center gap-3 rounded-lg p-4 text-left transition-opacity active:opacity-70"
-                      style={{
-                        background: "var(--surface)",
-                        border: `1.5px solid ${checked ? "var(--accent)" : "transparent"}`,
-                      }}
+                      className="flex items-center gap-3 rounded-lg p-4 text-left transition-opacity active:opacity-70 glass-panel"
+                      style={checked ? { border: "1.5px solid var(--accent)" } : undefined}
                     >
                       <TaskCheckbox done={checked} size={TASK_CHECKBOX_SIZE.card} variant="focus" />
                       <span

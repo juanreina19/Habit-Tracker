@@ -129,10 +129,8 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, us
       } : undefined}
       whileTap={!compact ? { scale: 0.98 } : {}}
       transition={{ type: "spring", stiffness: 500, damping: 35 }}
-      className="group flex flex-col gap-2 rounded-lg p-3 select-none card-border-hover"
+      className="group flex flex-col gap-2 rounded-lg p-3 select-none card-border-hover glass-panel"
       style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
         opacity: done ? 0.65 : 1,
         cursor: "default",
         userSelect: "none",
@@ -242,8 +240,7 @@ export function TaskCard({ task, onToggle, onEdit, onDelete, compact = false, us
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
             <DropdownMenu.Content
-              className="z-50 min-w-[148px] rounded-lg p-1.5 shadow-xl outline-none"
-              style={{ background: "var(--surface-elevated)", border: "1px solid var(--border)" }}
+              className="z-50 min-w-[148px] rounded-lg p-1.5 shadow-xl outline-none glass-panel-elevated"
               align="end"
               sideOffset={4}
             >

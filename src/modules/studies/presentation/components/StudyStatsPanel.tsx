@@ -98,7 +98,7 @@ export function StudyStatsPanel({ stats, sessions, subjects }: Props) {
       </div>
 
       {/* Activity heatmap */}
-      <div className="rounded-lg p-4" style={{ background: "var(--surface)" }}>
+      <div className="rounded-lg p-4 glass-panel">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("activity")}
         </p>
@@ -126,7 +126,7 @@ export function StudyStatsPanel({ stats, sessions, subjects }: Props) {
       </div>
 
       {/* Recent sessions */}
-      <div className="rounded-lg p-4" style={{ background: "var(--surface)" }}>
+      <div className="rounded-lg p-4 glass-panel">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] mb-3" style={{ color: "var(--text-secondary)" }}>
           {t("recent_sessions")}
         </p>

@@ -25,8 +25,8 @@ export function IconPickerDialog({ open, onClose, value, onChange, allowNone, no
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
-          style={{ background: "var(--surface)", maxHeight: "85dvh" }}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden glass-panel-elevated"
+          style={{ maxHeight: "85dvh" }}
         >
           <div className="overflow-y-auto p-6" style={{ maxHeight: "85dvh" }}>
             <div className="flex items-center justify-between mb-5">

@@ -172,7 +172,7 @@ export function WorkoutStatsPanel({ stats }: Props) {
         ) : (
           <div className="flex flex-col gap-2 mt-2">
             {stats.recentCompletions.map((c, idx) => (
-              <div key={`${c.workoutId}-${c.completedAt}-${idx}`} className="flex items-center gap-3 px-3 py-2 rounded-md" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+              <div key={`${c.workoutId}-${c.completedAt}-${idx}`} className="flex items-center gap-3 px-3 py-2 rounded-md glass-panel">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate" style={{ color: "var(--text-primary)" }}>{c.workoutName}</p>
                 </div>

@@ -19,7 +19,7 @@ export default async function DashboardLayout({
 
   return (
     <ToastProvider>
-      <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+      <div className="min-h-screen">
         <Sidebar />
         <main
           className="lg:ml-[var(--sidebar-width)] hide-scrollbar"

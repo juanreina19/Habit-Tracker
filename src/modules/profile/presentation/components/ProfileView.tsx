@@ -75,8 +75,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
 
       {/* Avatar + name */}
       <motion.div
-        className="rounded-xl p-6 mb-5 flex items-center gap-4"
-        style={{ background: "var(--surface)" }}
+        className="rounded-xl p-6 mb-5 flex items-center gap-4 glass-panel"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0 * 0.05, ease: "easeOut" }}
@@ -122,8 +121,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
 
       {/* Actions */}
       <motion.div
-        className="rounded-xl overflow-hidden mb-4"
-        style={{ background: "var(--surface)" }}
+        className="rounded-xl overflow-hidden mb-4 glass-panel"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 2 * 0.05, ease: "easeOut" }}
@@ -141,8 +139,7 @@ export default function ProfileView({ userId, email, fullName, avatarUrl }: Prop
       </motion.div>
 
       <motion.div
-        className="rounded-xl overflow-hidden"
-        style={{ background: "var(--surface)" }}
+        className="rounded-xl overflow-hidden glass-panel"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 3 * 0.05, ease: "easeOut" }}
@@ -187,7 +184,7 @@ function StatCard({ label, value, unit, highlight = false }: {
   label: string; value: string; unit: string; highlight?: boolean;
 }) {
   return (
-    <div className="rounded-lg p-3 flex flex-col gap-1" style={{ background: "var(--surface)" }}>
+    <div className="rounded-lg p-3 flex flex-col gap-1 glass-panel">
       <p className="text-[10px] font-medium" style={{ color: "var(--text-secondary)" }}>{label}</p>
       <p className="text-xl font-medium leading-none" style={{ color: highlight ? "var(--accent)" : "var(--text-primary)" }}>
         {value}

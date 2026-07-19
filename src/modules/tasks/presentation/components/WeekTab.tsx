@@ -111,7 +111,7 @@ export function WeekTab({ userId, tasks }: Props) {
       {isLoading || !data ? (
         <WeekSkeleton />
       ) : data.entries.length === 0 ? (
-        <div className="rounded-lg py-10 text-center text-sm" style={{ background: "var(--surface)", color: "var(--text-secondary)" }}>
+        <div className="rounded-lg py-10 text-center text-sm glass-panel" style={{ color: "var(--text-secondary)" }}>
           {t("week_empty")}
         </div>
       ) : (
@@ -140,7 +140,7 @@ export function WeekTab({ userId, tasks }: Props) {
                       vacío (mismo patrón que Google/Notion Calendar para semanas). */}
                   <div className="flex flex-col gap-2 overflow-y-auto pr-0.5" style={{ maxHeight: "min(620px, 60vh)" }}>
                     {dayEntries.length === 0 ? (
-                      <div className="rounded-md py-4 text-center text-xs" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
+                      <div className="rounded-md py-4 text-center text-xs glass-panel" style={{ color: "var(--text-muted)" }}>
                         —
                       </div>
                     ) : (
@@ -178,7 +178,7 @@ export function WeekTab({ userId, tasks }: Props) {
                   </div>
                   <div className="flex flex-col gap-2">
                     {dayEntries.length === 0 ? (
-                      <div className="rounded-lg py-8 text-center text-sm" style={{ background: "var(--surface)", color: "var(--text-muted)" }}>
+                      <div className="rounded-lg py-8 text-center text-sm glass-panel" style={{ color: "var(--text-muted)" }}>
                         —
                       </div>
                     ) : (
@@ -228,12 +228,8 @@ function WeekDayCard({ task, status, dateISO, onViewDetail }: { task: Task; stat
       // fila 1 sola ≈ 24px padding + 28px (botón ojo, w-7/h-7) = 52px; fila 1 + fila 2
       // (horario) ≈ 52px + 6px gap + 16px (text-xs/Clock) = 74px. 76px deja que la
       // variante de 1 fila crezca hasta igualar visualmente a la de 2 filas.
-      className="flex flex-col gap-1.5 rounded-lg px-3.5 py-3 min-h-[76px] justify-center"
-      style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-        opacity: muted ? 0.55 : 1,
-      }}
+      className="flex flex-col gap-1.5 rounded-lg px-3.5 py-3 min-h-[76px] justify-center glass-panel"
+      style={{ opacity: muted ? 0.55 : 1 }}
     >
       {/* Fila 1 — prioridad (izq) + badge "Atrasada" (der) */}
       <div className="flex items-center justify-between gap-2">

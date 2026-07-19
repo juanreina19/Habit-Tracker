@@ -92,8 +92,7 @@ export default function MonthlyView({ userId, userCreatedAt, embedded = false }:
         /* Summary banner — shown when no day is selected */
         !isLoading && data && (
           <div
-            className="rounded-xl px-5 py-4 mb-5 flex items-center justify-between"
-            style={{ background: "var(--surface)" }}
+            className="rounded-xl px-5 py-4 mb-5 flex items-center justify-between glass-panel"
           >
             <div>
               <p className="text-2xl font-semibold" style={{ color: "var(--text-primary)" }}>
@@ -186,7 +185,7 @@ function CalendarGrid({
   }
 
   return (
-    <div className="rounded-xl p-4" style={{ background: "var(--surface)" }}>
+    <div className="rounded-xl p-4 glass-panel">
       {/* Day-of-week labels */}
       <div className="grid grid-cols-7 mb-2">
         {weekDays.map((d, i) => (
@@ -314,8 +313,7 @@ function DayDetail({ day, userCreatedAt, onClose, t, dateFnsLocale }: {
 
   return (
     <div
-      className="rounded-xl px-5 py-4 mb-5 flex items-center justify-between"
-      style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+      className="rounded-xl px-5 py-4 mb-5 flex items-center justify-between glass-panel"
     >
       <div>
         <p className="text-xs font-medium mb-0.5" style={{ color: "var(--text-secondary)" }}>{title}</p>

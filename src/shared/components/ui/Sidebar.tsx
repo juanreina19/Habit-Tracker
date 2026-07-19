@@ -37,7 +37,12 @@ export default function Sidebar() {
     <TooltipProvider>
       <aside
         className="hidden lg:flex flex-col fixed inset-y-0 left-0 w-[var(--sidebar-width)] z-40"
-        style={{ background: "var(--sidebar-bg)" }}
+        style={{
+          background: "var(--nav-bg)",
+          backdropFilter: "blur(48px) saturate(200%) brightness(1.1)",
+          WebkitBackdropFilter: "blur(48px) saturate(200%) brightness(1.1)",
+          borderRight: "1px solid var(--nav-border)",
+        }}
       >
         {/* Logo */}
         <div className="flex items-center justify-center py-6">
@@ -145,10 +150,7 @@ export default function Sidebar() {
                 className="fixed inset-0 z-50 flex items-center justify-center p-6"
                 style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)" }}
               >
-                <div
-                  className="w-full max-w-sm rounded-xl p-6"
-                  style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
-                >
+                <div className="w-full max-w-sm rounded-xl p-6 glass-panel-elevated">
                   <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                     {ts("sign_out_confirm")}
                   </p>

@@ -41,15 +41,15 @@ export function FloatingActions() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.95 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed z-40 right-5 lg:right-8 min-w-[180px] rounded-md p-1.5"
-            style={{ background: "var(--bg)", border: "1px solid var(--border)", bottom: "var(--floating-menu-offset)" }}
+            className="fixed z-40 right-5 lg:right-8 min-w-[180px] rounded-md p-1.5 glass-panel-elevated"
+            style={{ bottom: "var(--floating-menu-offset)" }}
           >
             <button
               type="button"
               onClick={() => handleSelect("task")}
               className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-normal transition-colors"
               style={{ color: "var(--text-primary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--glass-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--surface-elevated)" }}>
@@ -62,7 +62,7 @@ export function FloatingActions() {
               onClick={() => handleSelect("habit")}
               className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-normal transition-colors"
               style={{ color: "var(--text-primary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--glass-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--surface-elevated)" }}>
@@ -75,7 +75,7 @@ export function FloatingActions() {
               onClick={() => handleSelect("workout")}
               className="flex items-center gap-3 w-full px-3 py-2.5 rounded-md text-sm font-normal transition-colors"
               style={{ color: "var(--text-primary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--surface-hover)")}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--glass-hover)")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             >
               <span className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "var(--surface-elevated)" }}>
