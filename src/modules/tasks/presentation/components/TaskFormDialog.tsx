@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import { Plus, X, Trash2, ChevronRight, Star, Save, CornerDownLeft } from "lucide-react";
 import { formatTaskTime } from "../../domain/entities/Task";
 import { today } from "@/shared/lib/utils/dates";
-import { to12h, from12h } from "@/shared/lib/utils/time12h";
 import type { Task, CreateTaskInput, UpdateTaskInput, TaskPriority } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 import { PRIORITY_COLORS } from "../constants/taskColors";
@@ -15,7 +14,6 @@ import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { IconPickerDialog } from "@/shared/components/ui/IconPickerDialog";
 import { TaskCheckbox, TASK_CHECKBOX_SIZE } from "./TaskCheckbox";
 import { DatePickerPopover } from "./DatePickerPopover";
-import { TimePickerPopover } from "@/modules/workouts/presentation/components/TimePickerPopover";
 import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
 import { useSubtasks } from "../hooks/useSubtasks";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
@@ -548,7 +546,7 @@ export function TaskFormDialog({
                     </div>
 
                     {/* Time pill — abre popover con hora inicio + fin (opcional),
-                        mismo patrón (TimePickerPopover) que WorkoutFormDialog. */}
+                        inputs nativos estilizados. */}
                     <div className="relative">
                       <button
                         type="button"
@@ -570,50 +568,24 @@ export function TaskFormDialog({
                             <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                               {t("start_time_label")}
                             </span>
-                            <div className="hidden lg:block">
-                              {(() => {
-                                const { hour, minute, period } = to12h(startTime);
-                                return (
-                                  <TimePickerPopover
-                                    hour={hour} minute={minute} period={period}
-                                    onChangeHour={(h) => { setStartTime(from12h(h, minute || "00", period)); setTimeError(""); }}
-                                    onChangeMinute={(m) => { setStartTime(from12h(hour || "12", m, period)); setTimeError(""); }}
-                                    onChangePeriod={(p) => { setStartTime(from12h(hour || "12", minute || "00", p)); setTimeError(""); }}
-                                  />
-                                );
-                              })()}
-                            </div>
                             <input
                               type="time"
                               value={startTime}
                               onChange={(e) => { setStartTime(e.target.value); setTimeError(""); }}
-                              className="lg:hidden rounded-md px-2 py-1.5 text-sm outline-none"
-                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                              className="rounded-md px-2 py-1.5 text-sm outline-none"
+                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark" }}
                             />
                           </div>
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
                               {t("end_time_label")}
                             </span>
-                            <div className="hidden lg:block">
-                              {(() => {
-                                const { hour, minute, period } = to12h(endTime);
-                                return (
-                                  <TimePickerPopover
-                                    hour={hour} minute={minute} period={period}
-                                    onChangeHour={(h) => { setEndTime(from12h(h, minute || "00", period)); setTimeError(""); }}
-                                    onChangeMinute={(m) => { setEndTime(from12h(hour || "12", m, period)); setTimeError(""); }}
-                                    onChangePeriod={(p) => { setEndTime(from12h(hour || "12", minute || "00", p)); setTimeError(""); }}
-                                  />
-                                );
-                              })()}
-                            </div>
                             <input
                               type="time"
                               value={endTime}
                               onChange={(e) => { setEndTime(e.target.value); setTimeError(""); }}
-                              className="lg:hidden rounded-md px-2 py-1.5 text-sm outline-none"
-                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                              className="rounded-md px-2 py-1.5 text-sm outline-none"
+                              style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark" }}
                             />
                           </div>
                           {timeError && <p className="text-xs" style={{ color: "var(--danger)" }}>{timeError}</p>}

@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ChevronLeft, ChevronRight, Info, X, Trash2, Save, Ban } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { X, Trash2, Save, CornerDownLeft, Info } from "lucide-react";
 import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
 import { HABIT_EMOJIS } from "@/shared/components/ui/EmojiPicker";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
@@ -14,20 +14,15 @@ import type { Habit } from "../../../domain/entities/Habit";
 import type { CreateHabitInput, UpdateHabitInput } from "../../../domain/repositories/IHabitRepository";
 import type { Category } from "@/modules/categories/domain/entities/Category";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
+type IconTab = "emoji" | "svg";
+type TFunc = ReturnType<typeof useTranslations>;
 
 function calcEndTime(start: string, minutes: number): string {
   const [h, m] = start.split(":").map(Number);
   const total = h * 60 + m + minutes;
   return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
-
-const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type Scene = "step0" | "step1" | "step2" | "color" | "icon" | "edit" | "edit_days";
-type IconTab = "emoji" | "svg";
 
 interface Props {
   open: boolean;
@@ -38,128 +33,120 @@ interface Props {
   onDelete?: () => Promise<void>;
 }
 
-// ─── Slide animation ──────────────────────────────────────────────────────────
-
-const slideVariants = {
-  enter: (dir: number) => ({ x: dir > 0 ? "55%" : "-55%", opacity: 0, scale: 0.98 }),
-  center: { x: 0, opacity: 1, scale: 1 },
-  exit: (dir: number) => ({ x: dir < 0 ? "55%" : "-55%", opacity: 0, scale: 0.98 }),
-};
-const slideTransition = { type: "spring", stiffness: 380, damping: 36, mass: 0.8 } as const;
-
-// ─── Main component ───────────────────────────────────────────────────────────
-
+/**
+ * Formulario plano de una sola pantalla — mismo patrón que TaskFormDialog.tsx
+ * y WorkoutFormDialog.tsx (pills + popovers, background var(--bg), acciones
+ * abajo con border-top). Reemplaza el wizard de 3 pasos + sub-sheets a
+ * pantalla completa que tenía antes.
+ */
 export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDelete }: Props) {
   const t = useTranslations("habitForm");
   const tDays = useTranslations("dayLabels");
   const tCat = useTranslations("iconCategories");
-  const [scene, setScene] = useState<Scene>("step0");
-  const [slideDir, setSlideDir] = useState(1);
-  const [iconTab, setIconTab] = useState<IconTab>("emoji");
+  const isEdit = !!habit;
 
-  const [name, setName]                         = useState("");
-  const [icon, setIcon]                         = useState<string | null>(null);
-  const [color, setColor]                       = useState<string | null>(null);
-  const [categoryId, setCategoryId]             = useState<string | null>(null);
-  const [activeDays, setActiveDays]             = useState<number[]>([1, 2, 3, 4, 5, 6, 7]);
-  const [timeEnabled, setTimeEnabled]           = useState(false);
-  const [startTime, setStartTime]               = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [icon, setIcon] = useState<string | null>(null);
+  const [color, setColor] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [activeDays, setActiveDays] = useState<number[]>([]);
+  const [startTime, setStartTime] = useState("");
   const [estimatedMinutes, setEstimatedMinutes] = useState("");
-  const [isSaving, setIsSaving]                 = useState(false);
-  const [confirmingDelete, setConfirmingDelete] = useState(false);
-  const [isDeleting, setIsDeleting]             = useState(false);
-  const [nameError, setNameError]               = useState("");
-  const [daysError, setDaysError]               = useState("");
+
+  const [nameError, setNameError] = useState("");
+  const [daysError, setDaysError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const [catOpen, setCatOpen] = useState(false);
+  const [daysOpen, setDaysOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [colorOpen, setColorOpen] = useState(false);
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setScene(habit ? "edit" : "step0");
-      setSlideDir(1);
-      setIconTab("emoji");
       setName(habit?.name ?? "");
+      setDescription(habit?.description ?? "");
       setIcon(habit?.icon ?? null);
       setColor(habit?.color ?? null);
       setCategoryId(habit?.categoryId ?? null);
       setActiveDays(habit?.activeDays ?? [1, 2, 3, 4, 5, 6, 7]);
-      setTimeEnabled(!!(habit?.startTime));
-      setStartTime(habit?.startTime ?? "");
+      setStartTime(habit?.startTime?.slice(0, 5) ?? "");
       setEstimatedMinutes(habit?.estimatedMinutes?.toString() ?? "");
       setNameError("");
       setDaysError("");
+      setIsSaving(false);
+      setIsDeleting(false);
+      setConfirmDelete(false);
+      setCatOpen(false);
+      setDaysOpen(false);
+      setTimeOpen(false);
+      setColorOpen(false);
+      setIconPickerOpen(false);
     }
   }, [open, habit]);
 
-  const navigate = (to: Scene, dir: number) => { setSlideDir(dir); setScene(to); };
-
-  // "home" scene = where color/icon sub-sheets return to
-  const homeScene = (): Scene => (habit ? "edit" : "step2");
+  useEffect(() => {
+    if (!catOpen && !daysOpen && !timeOpen && !colorOpen) return;
+    const handler = () => { setCatOpen(false); setDaysOpen(false); setTimeOpen(false); setColorOpen(false); };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
+  }, [catOpen, daysOpen, timeOpen, colorOpen]);
 
   const toggleDay = (day: number) => {
-    setActiveDays((p) => p.includes(day) ? p.filter((d) => d !== day) : [...p, day].sort((a, b) => a - b));
+    setActiveDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort((a, b) => a - b)));
     setDaysError("");
   };
 
-  const goNext = () => {
-    if (scene === "step0") {
-      if (!name.trim()) { setNameError(t("name_error")); return; }
-      setNameError("");
-      navigate("step1", 1);
-    } else if (scene === "step1") {
-      if (activeDays.length === 0) { setDaysError(t("days_error")); return; }
-      setDaysError("");
-      navigate("step2", 1);
-    }
-  };
-
-  const goBack = () => {
-    if (scene === "edit_days") navigate("edit", -1);
-    else if (scene === "color" || scene === "icon") navigate(homeScene(), -1);
-    else if (scene === "step2") navigate("step1", -1);
-    else if (scene === "step1") navigate("step0", -1);
-  };
+  const endTime = startTime && estimatedMinutes && !isNaN(parseInt(estimatedMinutes, 10))
+    ? calcEndTime(startTime, parseInt(estimatedMinutes, 10))
+    : null;
 
   const handleSave = async () => {
-    if (!name.trim()) {
-      if (!habit) navigate("step0", -1);
-      setNameError(t("name_error"));
-      return;
-    }
-    if (activeDays.length === 0) {
-      if (!habit) navigate("step1", -1);
-      setDaysError(t("days_error"));
-      return;
-    }
+    const trimmed = name.trim();
+    if (!trimmed) { setNameError(t("name_error")); return; }
+    if (activeDays.length === 0) { setDaysError(t("days_error")); return; }
+
     const minutes = estimatedMinutes ? parseInt(estimatedMinutes, 10) : undefined;
     setIsSaving(true);
     try {
       await onSave({
-        name: name.trim(),
+        name: trimmed,
+        description: description.trim() || undefined,
         icon: icon ?? undefined,
         color: color ?? undefined,
         categoryId,
         activeDays,
         estimatedMinutes: minutes && !isNaN(minutes) ? minutes : undefined,
-        startTime: timeEnabled ? (startTime || null) : null,
+        startTime: startTime || null,
       });
       onClose();
     } catch (err) {
-      if (!habit) navigate("step0", -1);
       setNameError(err instanceof Error ? err.message : t("save_error"));
     } finally {
       setIsSaving(false);
     }
   };
 
-  const endTime = timeEnabled && startTime && estimatedMinutes && !isNaN(parseInt(estimatedMinutes, 10))
-    ? calcEndTime(startTime, parseInt(estimatedMinutes, 10))
-    : null;
+  const handleDelete = async () => {
+    if (!onDelete) return;
+    setIsDeleting(true);
+    try {
+      await onDelete();
+      onClose();
+    } catch {
+      setIsDeleting(false);
+      setConfirmDelete(false);
+    }
+  };
 
-  const isWizardScene = scene === "step0" || scene === "step1" || scene === "step2";
-  const isSubSheet = scene === "color" || scene === "icon" || scene === "edit_days";
-  const stepIndex = scene === "step0" ? 0 : scene === "step1" ? 1 : 2;
+  const daysLabel = activeDays.length > 0 ? activeDays.map((d) => DAY_LETTERS[d - 1]).join(" ") : "—";
 
   return (
-    <Dialog.Root open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay
           className="fixed inset-0 z-40"
@@ -167,379 +154,320 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden [animation:dialog-in_0.25s_cubic-bezier(0.16,1,0.3,1)]"
-          style={{ background: "var(--surface)", maxHeight: "85dvh" }}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
+          style={{ background: "var(--bg)", maxHeight: "90dvh" }}
         >
-          <div className="overflow-y-auto hide-scrollbar" style={{ maxHeight: "85dvh" }}>
-            <AnimatePresence mode="wait" custom={slideDir}>
-              <motion.div
-                key={scene}
-                custom={slideDir}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={slideTransition}
-                className="p-5"
-              >
+          <div className="overflow-y-auto px-6 pt-3 pb-6" style={{ maxHeight: "90dvh" }}>
+            <div className="flex items-center justify-end mb-0.5 -mr-3">
+              <Dialog.Title className="sr-only">
+                {isEdit ? t("edit_title") : t("new_title")}
+              </Dialog.Title>
+              <Dialog.Close asChild>
+                <button type="button" className="p-1 rounded-md transition-opacity active:opacity-70" style={{ color: "var(--text-muted)" }}>
+                  <X size={16} />
+                </button>
+              </Dialog.Close>
+            </div>
 
-                {/* ── Wizard header (create mode, steps 0-2) ──── */}
-                {isWizardScene && (
-                  <div className="flex items-center justify-between mb-6">
-                    <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {t("new_title")}
-                    </Dialog.Title>
-                    <div className="flex items-center gap-1.5">
-                      {[0, 1, 2].map((i) => (
-                        <div
-                          key={i}
-                          className="rounded-full transition-all duration-300"
-                          style={{
-                            width: i === stepIndex ? 20 : 6,
-                            height: 6,
-                            background: i === stepIndex ? "var(--btn-primary-bg)" : "var(--border)",
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* ── Edit flat-view header ────────────────────── */}
-                {scene === "edit" && (
-                  <div className="flex items-center justify-between mb-4">
-                    <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {t("edit_title")}
-                    </Dialog.Title>
-                    <Dialog.Close asChild>
-                      <button type="button" className="p-1.5 rounded-md transition-opacity active:opacity-70" style={{ color: "var(--text-muted)" }}>
-                        <X size={16} />
-                      </button>
-                    </Dialog.Close>
-                  </div>
-                )}
-
-                {/* ── Sub-sheet header (back + title) ──────────── */}
-                {isSubSheet && (
-                  <div className="flex items-center gap-3 mb-5">
-                    <button
-                      type="button"
-                      onClick={goBack}
-                      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: "var(--surface-elevated)" }}
-                    >
-                      <ChevronLeft size={16} />
+            <AnimatePresence mode="wait">
+              {confirmDelete ? (
+                <motion.div key="confirm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-4">
+                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{t("delete_confirm")}</p>
+                  <div className="flex gap-3">
+                    <button onClick={() => setConfirmDelete(false)}
+                      className="flex-1 py-3 rounded-md text-sm font-medium transition-opacity active:opacity-70"
+                      style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}>
+                      {t("cancel")}
                     </button>
-                    <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {scene === "color" ? t("color_label") : scene === "icon" ? t("icon_label") : t("edit_days_title")}
-                    </Dialog.Title>
+                    <button onClick={handleDelete} disabled={isDeleting}
+                      className="flex-1 py-3 rounded-md text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-50"
+                      style={{ background: "var(--danger)", color: "#ffffff" }}>
+                      {isDeleting ? "…" : t("delete")}
+                    </button>
                   </div>
-                )}
-
-                {/* ── Step 0: Basic (create) ─────────────────────── */}
-                {scene === "step0" && (
-                  <div className="flex flex-col gap-5">
-                    <NameField name={name} setName={setName} nameError={nameError} setNameError={setNameError} t={t} />
-                    <CategoryField categories={categories} categoryId={categoryId} setCategoryId={setCategoryId} t={t} />
-                  </div>
-                )}
-
-                {/* ── Step 1: Schedule (create) ──────────────────── */}
-                {scene === "step1" && (
-                  <div className="flex flex-col gap-5">
-                    <DaysGrid activeDays={activeDays} toggleDay={toggleDay} daysError={daysError} tDays={tDays} t={t} />
-                    <ScheduleSection
-                      timeEnabled={timeEnabled} setTimeEnabled={setTimeEnabled}
-                      startTime={startTime} setStartTime={setStartTime}
-                      estimatedMinutes={estimatedMinutes} setEstimatedMinutes={setEstimatedMinutes}
-                      endTime={endTime} t={t}
-                    />
-                  </div>
-                )}
-
-                {/* ── Step 2: Appearance (create) ────────────────── */}
-                {scene === "step2" && (
-                  <AppearanceRows color={color} icon={icon} navigate={navigate} homeScene={homeScene} t={t} />
-                )}
-
-                {/* ── Edit flat view (edit mode) ─────────────────── */}
-                {scene === "edit" && (
-                  <div className="flex flex-col gap-3">
-                    <NameField name={name} setName={setName} nameError={nameError} setNameError={setNameError} t={t} />
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <CategoryField categories={categories} categoryId={categoryId} setCategoryId={setCategoryId} t={t} />
-
-                      {/* Days button */}
-                      <button
-                        type="button"
-                        onClick={() => navigate("edit_days", 1)}
-                        className="w-full flex items-center justify-between px-3 py-3 rounded-lg transition-opacity active:opacity-70"
-                        style={{ background: "var(--surface-elevated)" }}
-                      >
-                        <div className="text-left min-w-0">
-                          <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("days_label")}</p>
-                          <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-secondary)" }}>
-                            {activeDays.length === 7
-                              ? "L M X J V S D"
-                              : activeDays.map((d) => DAY_LETTERS[d - 1]).join(" ")}
-                          </p>
-                        </div>
-                        <ChevronRight size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
-                      </button>
-                    </div>
-
-                    <ScheduleSection
-                      timeEnabled={timeEnabled} setTimeEnabled={setTimeEnabled}
-                      startTime={startTime} setStartTime={setStartTime}
-                      estimatedMinutes={estimatedMinutes} setEstimatedMinutes={setEstimatedMinutes}
-                      endTime={endTime} t={t}
-                    />
-
-                    {/* Color + Icon side by side */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => navigate("color", 1)}
-                        className="flex items-center justify-between px-3 py-3 rounded-lg transition-opacity active:opacity-70"
-                        style={{ background: "var(--surface-elevated)" }}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div
-                            className="w-7 h-7 rounded-full flex-shrink-0 border-2"
-                            style={{
-                              background: color ?? "var(--border)",
-                              borderColor: color ? color + "60" : "var(--border)",
-                            }}
-                          />
-                          <div className="text-left min-w-0">
-                            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("color_label")}</p>
-                            <p className="text-xs mt-0.5 truncate" style={{ color: color ?? "var(--text-secondary)" }}>
-                              {color ?? t("no_color")}
-                            </p>
-                          </div>
-                        </div>
-                        <ChevronRight size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => navigate("icon", 1)}
-                        className="flex items-center justify-between px-3 py-3 rounded-lg transition-opacity active:opacity-70"
-                        style={{ background: "var(--surface-elevated)" }}
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div
-                            className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
-                            style={{ background: icon ? (color ?? "#4CAF82") + "25" : "var(--border)" }}
-                          >
-                            {icon
-                              ? <HabitIcon icon={icon} size={16} color={color ?? "var(--text-primary)"} />
-                              : <span className="text-sm" style={{ color: "var(--text-muted)" }}>—</span>
-                            }
-                          </div>
-                          <div className="text-left min-w-0">
-                            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("icon_label")}</p>
-                            <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-secondary)" }}>
-                              {icon ? (icon.startsWith("lucide:") ? icon.slice(7) : icon) : t("no_icon")}
-                            </p>
-                          </div>
-                        </div>
-                        <ChevronRight size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
-                      </button>
-                    </div>
-
-                    {/* Edit footer — delete + save */}
-                    <div className="flex items-center gap-3 mt-1">
-                      {onDelete && !confirmingDelete && (
-                        <button
-                          type="button"
-                          onClick={() => setConfirmingDelete(true)}
-                          className="p-2.5 rounded-md transition-opacity active:opacity-70"
-                          style={{ color: "var(--danger)" }}
-                          aria-label={t("delete")}
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      )}
-                      {confirmingDelete && (
-                        <>
-                          <button
-                            type="button"
-                            onClick={() => setConfirmingDelete(false)}
-                            className="text-sm px-3 py-2 rounded-md transition-opacity active:opacity-70"
-                            style={{ color: "var(--text-muted)", background: "var(--surface-elevated)" }}
-                          >
-                            {t("cancel")}
-                          </button>
-                          <button
-                            type="button"
-                            disabled={isDeleting}
-                            onClick={async () => { setIsDeleting(true); await onDelete?.(); }}
-                            className="text-sm px-3 py-2 rounded-md font-medium transition-opacity active:opacity-70 disabled:opacity-50"
-                            style={{ color: "#fff", background: "var(--danger)" }}
-                          >
-                            {isDeleting ? "…" : t("delete")}
-                          </button>
-                        </>
-                      )}
-                      <div className="ml-auto">
-                        <button
-                          type="button"
-                          onClick={handleSave}
-                          disabled={isSaving}
-                          className="flex items-center gap-1.5 px-5 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
-                          style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-                        >
-                          {isSaving ? t("saving") : <><Save size={14} />{t("save")}</>}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* ── Edit days sub-sheet ──────────────────────────── */}
-                {scene === "edit_days" && (
-                  <div className="flex flex-col gap-5">
-                    <DaysGrid activeDays={activeDays} toggleDay={toggleDay} daysError={daysError} tDays={tDays} t={t} />
-                  </div>
-                )}
-
-                {/* ── Color sub-sheet ──────────────────────────────── */}
-                {scene === "color" && (
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col gap-5"
+                >
+                  {/* Nombre */}
                   <div>
-                    <div className="grid grid-cols-6 gap-3">
-                      {PRESET_COLORS.map((c) => (
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => { setName(e.target.value); setNameError(""); }}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !isEdit && name.trim()) { e.preventDefault(); handleSave(); } }}
+                      placeholder={t("name_placeholder")}
+                      maxLength={60}
+                      autoFocus
+                      className="w-full text-2xl font-normal outline-none bg-transparent"
+                      style={{ color: "var(--text-primary)", borderBottom: nameError ? "2px solid var(--danger)" : "none" }}
+                    />
+                    {nameError && <p className="text-xs mt-1" style={{ color: "var(--danger)" }}>{nameError}</p>}
+                  </div>
+
+                  {/* Descripción */}
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder={t("description_placeholder")}
+                    rows={2}
+                    className="w-full text-sm outline-none resize-none bg-transparent"
+                    style={{ color: "var(--text-secondary)" }}
+                  />
+
+                  {/* Metadata pills row */}
+                  <div className="flex flex-wrap gap-1.5 py-2" style={{ borderTop: "1px solid var(--border)" }}>
+                    {/* Categoría */}
+                    {categories.length > 0 && (
+                      <div className="relative">
                         <button
-                          key={c}
                           type="button"
-                          onClick={() => { setColor(c === color ? null : c); navigate(homeScene(), -1); }}
-                          className="aspect-square rounded-full flex items-center justify-center transition-transform active:scale-90"
-                          style={{
-                            background: c,
-                            outline: color === c ? `3px solid ${c}` : "none",
-                            outlineOffset: "3px",
-                          }}
+                          onClick={(e) => { e.stopPropagation(); setCatOpen((p) => !p); setDaysOpen(false); setTimeOpen(false); setColorOpen(false); }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
+                          style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                         >
-                          {color === c && (
-                            <svg width="14" height="11" viewBox="0 0 12 10" fill="none">
-                              <path d="M1 5l3.5 3.5L11 1" stroke="white" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: categories.find((c) => c.id === categoryId)?.color ?? "var(--text-muted)" }} />
+                          <span style={{ color: "var(--text-muted)" }}>{t("category_label").toUpperCase()}</span>
+                          {categories.find((c) => c.id === categoryId)?.name ?? t("no_category")}
+                        </button>
+                        {catOpen && (
+                          <div
+                            className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-1 min-w-[140px]"
+                            style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button type="button" onClick={() => { setCategoryId(null); setCatOpen(false); }}
+                              className="w-full text-left px-3 py-1.5 rounded-md text-xs transition-colors"
+                              style={{ color: !categoryId ? "var(--text-primary)" : "var(--text-secondary)" }}>
+                              {t("no_category")}
+                            </button>
+                            {categories.map((cat) => (
+                              <button key={cat.id} type="button" onClick={() => { setCategoryId(cat.id); setCatOpen(false); }}
+                                className="w-full text-left px-3 py-1.5 rounded-md text-xs flex items-center gap-2 transition-colors"
+                                style={{ color: categoryId === cat.id ? "var(--text-primary)" : "var(--text-secondary)" }}>
+                                {cat.color && <span className="w-1.5 h-1.5 rounded-full" style={{ background: cat.color }} />}
+                                {cat.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Días activos */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setDaysOpen((p) => !p); setCatOpen(false); setTimeOpen(false); setColorOpen(false); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
+                        style={{ background: "transparent", border: `1px solid ${daysError ? "var(--danger)" : "var(--border)"}`, color: "var(--text-primary)" }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: activeDays.length > 0 ? "var(--info)" : "var(--text-muted)" }} />
+                        <span style={{ color: "var(--text-muted)" }}>{t("days_label").toUpperCase()}</span>
+                        {daysLabel}
+                      </button>
+                      {daysOpen && (
+                        <div
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex gap-1"
+                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {ALL_DAYS.map((day) => {
+                            const on = activeDays.includes(day);
+                            return (
+                              <button key={day} type="button" onClick={() => toggleDay(day)}
+                                className="w-8 h-8 rounded-full text-xs transition-colors"
+                                style={{
+                                  background: on ? "var(--text-primary)" : "transparent",
+                                  color: on ? "var(--bg)" : "var(--text-secondary)",
+                                  border: "1px solid var(--border)",
+                                }}>
+                                {tDays(`d${day}` as Parameters<typeof tDays>[0])}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    {daysError && <p className="w-full text-xs" style={{ color: "var(--danger)" }}>{daysError}</p>}
+
+                    {/* Horario — hora inicio + duración estimada (opcional) */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setTimeOpen((p) => !p); setCatOpen(false); setDaysOpen(false); setColorOpen(false); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
+                        style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: startTime ? "var(--purple)" : "var(--text-muted)" }} />
+                        <span style={{ color: "var(--text-muted)" }}>{t("start_label").toUpperCase()}</span>
+                        {startTime || t("no_schedule")}
+                      </button>
+                      {timeOpen && (
+                        <div
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-2 flex flex-col gap-3 w-64"
+                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                                {t("start_label")}
+                              </span>
+                              <input
+                                type="time"
+                                value={startTime}
+                                onChange={(e) => setStartTime(e.target.value)}
+                                className="rounded-md px-2 py-1.5 text-sm outline-none"
+                                style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark" }}
+                              />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
+                                {t("duration_label")}
+                              </span>
+                              <input
+                                type="number"
+                                value={estimatedMinutes}
+                                onChange={(e) => setEstimatedMinutes(e.target.value)}
+                                placeholder="30"
+                                min={1}
+                                max={480}
+                                className="rounded-md px-2 py-1.5 text-sm outline-none w-full"
+                                style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                              />
+                            </div>
+                          </div>
+                          {endTime && (
+                            <p className="text-xs font-medium" style={{ color: "#4CAF82" }}>{t("ends_at", { time: endTime })}</p>
                           )}
-                        </button>
-                      ))}
-                    </div>
-                    {color && (
-                      <button
-                        type="button"
-                        onClick={() => { setColor(null); navigate(homeScene(), -1); }}
-                        className="mt-4 text-xs font-medium transition-opacity active:opacity-60"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        {t("remove_color")}
-                      </button>
-                    )}
-                  </div>
-                )}
-
-                {/* ── Icon sub-sheet ───────────────────────────────── */}
-                {scene === "icon" && (
-                  <div>
-                    <div className="flex rounded-md p-1 mb-4" style={{ background: "var(--surface-elevated)" }}>
-                      {(["emoji", "svg"] as IconTab[]).map((tabType) => (
-                        <button
-                          key={tabType}
-                          type="button"
-                          onClick={() => setIconTab(tabType)}
-                          className="flex-1 py-2 rounded-sm text-xs font-medium transition-colors"
-                          style={{
-                            background: iconTab === tabType ? "var(--surface)" : "transparent",
-                            color: iconTab === tabType ? "var(--text-primary)" : "var(--text-secondary)",
-                          }}
-                        >
-                          {tabType === "emoji" ? t("tab_emoji") : t("tab_svg")}
-                        </button>
-                      ))}
-                    </div>
-
-                    {iconTab === "emoji" && (
-                      <div className="flex flex-wrap gap-2 pb-2">
-                        {HABIT_EMOJIS.map((emoji) => (
+                          {startTime && (
+                            <div className="flex items-start gap-2 rounded-md px-2.5 py-2" style={{ background: "rgba(100,160,255,0.08)", border: "1px solid rgba(100,160,255,0.15)" }}>
+                              <Info size={12} className="flex-shrink-0 mt-0.5" color="#88AAFF" />
+                              <p className="text-[11px] leading-relaxed" style={{ color: "#88AAFF" }}>{t("lock_tooltip")}</p>
+                            </div>
+                          )}
                           <button
-                            key={emoji}
                             type="button"
-                            onClick={() => { setIcon(icon === emoji ? null : emoji); navigate(homeScene(), -1); }}
-                            className="w-12 h-12 rounded-md flex items-center justify-center text-2xl transition-transform active:scale-90"
-                            style={{
-                              background: icon === emoji ? "var(--surface-elevated)" : "transparent",
-                              border: `1.5px solid ${icon === emoji ? "var(--btn-primary-bg)" : "var(--border)"}`,
-                            }}
+                            onClick={() => setTimeOpen(false)}
+                            className="self-start flex items-center justify-center gap-1.5 rounded-sm px-4 py-1.5 text-xs"
+                            style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                           >
-                            {emoji}
+                            {t("confirm_time")}
+                            <CornerDownLeft size={12} strokeWidth={2} />
                           </button>
-                        ))}
-                      </div>
-                    )}
+                        </div>
+                      )}
+                    </div>
 
-                    {iconTab === "svg" && (
-                      <div className="pb-4">
-                        <IconPicker
-                          value={icon}
-                          onChange={(next) => { setIcon(next); navigate(homeScene(), -1); }}
-                          categoryLabel={(key) => tCat(key as Parameters<typeof tCat>[0])}
-                        />
-                      </div>
-                    )}
+                    {/* Color */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setColorOpen((p) => !p); setCatOpen(false); setDaysOpen(false); setTimeOpen(false); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
+                        style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: color ?? "var(--text-muted)" }} />
+                        <span style={{ color: "var(--text-muted)" }}>{t("color_label").toUpperCase()}</span>
+                        {color ?? t("no_color")}
+                      </button>
+                      {colorOpen && (
+                        <div
+                          className="absolute left-0 bottom-full mb-1 z-10 rounded-2xl p-3"
+                          style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="grid grid-cols-6 gap-2">
+                            {PRESET_COLORS.map((c) => (
+                              <button
+                                key={c}
+                                type="button"
+                                onClick={() => { setColor(c === color ? null : c); setColorOpen(false); }}
+                                className="w-6 h-6 rounded-full flex items-center justify-center transition-transform active:scale-90"
+                                style={{ background: c, outline: color === c ? `2px solid ${c}` : "none", outlineOffset: "2px" }}
+                              >
+                                {color === c && (
+                                  <svg width="10" height="8" viewBox="0 0 12 10" fill="none">
+                                    <path d="M1 5l3.5 3.5L11 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                  </svg>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                          {color && (
+                            <button type="button" onClick={() => { setColor(null); setColorOpen(false); }}
+                              className="mt-2 text-[11px] font-medium transition-opacity active:opacity-60"
+                              style={{ color: "var(--text-secondary)" }}>
+                              {t("remove_color")}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
 
-                {/* ── Wizard nav buttons (create mode only) ─────────── */}
-                {isWizardScene && (
-                  <div className="flex gap-3 mt-6">
-                    {scene === "step0" ? (
-                      <button
-                        type="button"
-                        onClick={onClose}
-                        className="flex-1 py-3 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
-                        style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-                      >
-                        {t("cancel")}
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={goBack}
-                        className="flex items-center justify-center gap-1 px-5 py-3 rounded-lg text-sm font-medium transition-opacity active:opacity-70"
-                        style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
-                      >
-                        <ChevronLeft size={15} /> {t("previous")}
+                  {/* Ícono — compact row, igual patrón que Tasks */}
+                  <button
+                    type="button"
+                    onClick={() => setIconPickerOpen(true)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-opacity active:opacity-70 w-full"
+                    style={{ background: "var(--surface-elevated)" }}
+                  >
+                    <div
+                      className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+                      style={{ background: icon ? (color ?? "#4CAF82") + "25" : "var(--border)" }}
+                    >
+                      {icon ? (
+                        <HabitIcon icon={icon} size={16} color={color ?? "var(--text-primary)"} />
+                      ) : (
+                        <span className="text-xs" style={{ color: "var(--text-muted)" }}>—</span>
+                      )}
+                    </div>
+                    <span className="text-sm font-medium flex-1 text-left" style={{ color: "var(--text-primary)" }}>
+                      {icon ? (icon.startsWith("lucide:") ? icon.slice(7) : icon) : t("no_icon")}
+                    </span>
+                  </button>
+                  <HabitIconPickerDialog
+                    open={iconPickerOpen}
+                    onClose={() => setIconPickerOpen(false)}
+                    value={icon}
+                    onChange={setIcon}
+                    categoryLabel={(key) => tCat(key as Parameters<typeof tCat>[0])}
+                    t={t}
+                  />
+
+                  {/* Acciones */}
+                  <div className="flex items-center gap-3 mt-1 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
+                    {isEdit && onDelete && (
+                      <button onClick={() => setConfirmDelete(true)} className="p-2.5 rounded-md transition-opacity active:opacity-70"
+                        style={{ color: "var(--danger)" }} aria-label={t("delete")}>
+                        <Trash2 size={18} />
                       </button>
                     )}
-
-                    {scene !== "step2" ? (
+                    {!isEdit && (
+                      <p className="flex-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                        {t("save_hint_prefix")}{" "}<span style={{ color: "var(--text-primary)" }}>Enter</span>{" "}{t("save_hint_suffix")}
+                      </p>
+                    )}
+                    <div className="ml-auto">
                       <button
-                        type="button"
-                        onClick={goNext}
-                        className="flex-1 flex items-center justify-center gap-1 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70"
-                        style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
-                      >
-                        {t("next")} <ChevronRight size={15} />
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
                         onClick={handleSave}
-                        disabled={isSaving}
-                        className="flex-1 py-3 rounded-lg text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
+                        disabled={isSaving || !name.trim()}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-30"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
-                        {isSaving ? t("saving") : t("save")}
+                        {isSaving ? t("saving") : <>{isEdit && <Save size={14} />}{t("save")}</>}
                       </button>
-                    )}
+                    </div>
                   </div>
-                )}
-
-              </motion.div>
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
         </Dialog.Content>
@@ -548,272 +476,81 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
   );
 }
 
-// ─── Shared sub-components ────────────────────────────────────────────────────
+// ─── Icon picker (emoji + svg tabs) — mismo shell que IconPickerDialog.tsx,
+// con las 2 pestañas que ya tenía Habit (Tasks no las necesita, solo svg). ──
 
-type TFunc = ReturnType<typeof useTranslations>;
-
-function NameField({ name, setName, nameError, setNameError, t }: {
-  name: string;
-  setName: (v: string) => void;
-  nameError: string;
-  setNameError: (v: string) => void;
+function HabitIconPickerDialog({ open, onClose, value, onChange, categoryLabel, t }: {
+  open: boolean;
+  onClose: () => void;
+  value: string | null;
+  onChange: (icon: string | null) => void;
+  categoryLabel: (key: string) => string;
   t: TFunc;
 }) {
-  return (
-    <div>
-      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-        {t("name_label")}
-      </label>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => { setName(e.target.value); setNameError(""); }}
-        placeholder={t("name_placeholder")}
-        maxLength={60}
-        className="w-full rounded-md px-4 py-3 text-sm outline-none"
-        style={{
-          background: "var(--surface-elevated)",
-          color: "var(--text-primary)",
-          border: nameError ? "1.5px solid var(--danger)" : "1.5px solid transparent",
-        }}
-      />
-      {nameError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{nameError}</p>}
-    </div>
-  );
-}
+  const [tab, setTab] = useState<IconTab>("emoji");
 
-function CategoryField({ categories, categoryId, setCategoryId, t }: {
-  categories: Category[];
-  categoryId: string | null;
-  setCategoryId: (v: string | null) => void;
-  t: TFunc;
-}) {
-  if (categories.length === 0) return null;
+  useEffect(() => { if (open) setTab("emoji"); }, [open]);
+
   return (
-    <div>
-      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-        {t("category_label")}
-      </label>
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setCategoryId(null)}
-          className="px-3 py-2 rounded-md text-xs font-medium flex items-center justify-center transition-colors active:scale-95"
-          style={{
-            background: categoryId === null ? "var(--surface-elevated)" : "transparent",
-            color: categoryId === null ? "var(--text-primary)" : "var(--text-secondary)",
-            border: `1.5px solid ${categoryId === null ? "rgba(255,255,255,0.15)" : "var(--surface-elevated)"}`,
-          }}
+    <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-40" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} />
+        <Dialog.Content
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden"
+          style={{ background: "var(--surface)", maxHeight: "85dvh" }}
         >
-          <Ban size={14} strokeWidth={2} />
-        </button>
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            type="button"
-            onClick={() => setCategoryId(cat.id)}
-            className="px-3 py-2 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors active:scale-95"
-            style={{
-              background: categoryId === cat.id ? (cat.color ?? "#4CAF82") + "25" : "transparent",
-              color: categoryId === cat.id ? (cat.color ?? "#4CAF82") : "var(--text-secondary)",
-              border: `1.5px solid ${categoryId === cat.id ? (cat.color ?? "#4CAF82") + "60" : "var(--surface-elevated)"}`,
-            }}
-          >
-            {cat.icon && <span>{cat.icon}</span>}
-            {cat.name}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function DaysGrid({ activeDays, toggleDay, daysError, tDays, t }: {
-  activeDays: number[];
-  toggleDay: (d: number) => void;
-  daysError: string;
-  tDays: ReturnType<typeof useTranslations>;
-  t: TFunc;
-}) {
-  return (
-    <div>
-      <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-        {t("days_label")}
-      </label>
-      <div className="flex gap-2">
-        {ALL_DAYS.map((day) => {
-          const on = activeDays.includes(day);
-          return (
-            <button
-              key={day}
-              type="button"
-              onClick={() => toggleDay(day)}
-              className="flex-1 py-2.5 rounded-md text-xs font-semibold transition-colors active:scale-95"
-              style={{
-                background: on ? "var(--btn-primary-bg)" : "var(--surface-elevated)",
-                color: on ? "var(--btn-primary-text)" : "var(--text-secondary)",
-              }}
-            >
-              {tDays(`d${day}` as Parameters<typeof tDays>[0])}
-            </button>
-          );
-        })}
-      </div>
-      {daysError && <p className="text-xs mt-1.5" style={{ color: "var(--danger)" }}>{daysError}</p>}
-    </div>
-  );
-}
-
-function ScheduleSection({ timeEnabled, setTimeEnabled, startTime, setStartTime, estimatedMinutes, setEstimatedMinutes, endTime, t }: {
-  timeEnabled: boolean;
-  setTimeEnabled: (v: boolean | ((p: boolean) => boolean)) => void;
-  startTime: string;
-  setStartTime: (v: string) => void;
-  estimatedMinutes: string;
-  setEstimatedMinutes: (v: string) => void;
-  endTime: string | null;
-  t: TFunc;
-}) {
-  return (
-    <div className="flex flex-col gap-3">
-      <div
-        className="flex items-center justify-between px-4 py-3 rounded-md"
-        style={{ background: "var(--surface-elevated)" }}
-      >
-        <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-          {t("schedule_toggle")}
-        </span>
-        <button
-          type="button"
-          onClick={() => setTimeEnabled((v) => !v)}
-          className="w-11 h-6 rounded-full relative transition-colors flex-shrink-0"
-          style={{ background: timeEnabled ? "#4CAF82" : "var(--border)" }}
-        >
-          <span
-            className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all"
-            style={{ left: timeEnabled ? "calc(100% - 22px)" : "2px" }}
-          />
-        </button>
-      </div>
-
-      {timeEnabled && (
-        <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                {t("start_label")}
-              </label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                className="w-full rounded-md px-3 py-3 text-sm outline-none"
-                style={{
-                  background: "var(--surface-elevated)",
-                  color: "var(--text-primary)",
-                  border: "1.5px solid transparent",
-                  colorScheme: "dark",
-                }}
-              />
+          <div className="overflow-y-auto p-6" style={{ maxHeight: "85dvh" }}>
+            <div className="flex items-center justify-between mb-5">
+              <Dialog.Title className="text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                {t("icon_label")}
+              </Dialog.Title>
+              <button type="button" onClick={onClose} aria-label="close"
+                className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-opacity active:opacity-70"
+                style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}>
+                <X size={16} />
+              </button>
             </div>
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-wider mb-1.5 block" style={{ color: "var(--text-secondary)" }}>
-                {t("duration_label")}
-              </label>
-              <input
-                type="number"
-                value={estimatedMinutes}
-                onChange={(e) => setEstimatedMinutes(e.target.value)}
-                placeholder="30"
-                min={1}
-                max={480}
-                className="w-full rounded-md px-3 py-3 text-sm outline-none"
-                style={{
-                  background: "var(--surface-elevated)",
-                  color: "var(--text-primary)",
-                  border: "1.5px solid transparent",
-                }}
-              />
+
+            <div className="flex rounded-md p-1 mb-4" style={{ background: "var(--surface-elevated)" }}>
+              {(["emoji", "svg"] as IconTab[]).map((tabType) => (
+                <button key={tabType} type="button" onClick={() => setTab(tabType)}
+                  className="flex-1 py-2 rounded-sm text-xs font-medium transition-colors"
+                  style={{ background: tab === tabType ? "var(--surface)" : "transparent", color: tab === tabType ? "var(--text-primary)" : "var(--text-secondary)" }}>
+                  {tabType === "emoji" ? t("tab_emoji") : t("tab_svg")}
+                </button>
+              ))}
             </div>
-          </div>
-          {endTime && (
-            <p className="text-xs font-medium" style={{ color: "#4CAF82" }}>
-              {t("ends_at", { time: endTime })}
-            </p>
-          )}
-          <div
-            className="flex items-start gap-2.5 rounded-md px-3.5 py-3"
-            style={{ background: "rgba(100,160,255,0.08)", border: "1px solid rgba(100,160,255,0.15)" }}
-          >
-            <Info size={14} className="flex-shrink-0 mt-0.5" color="#88AAFF" />
-            <p className="text-xs leading-relaxed" style={{ color: "#88AAFF" }}>
-              {t("lock_tooltip")}
-            </p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
-function AppearanceRows({ color, icon, navigate, homeScene, t }: {
-  color: string | null;
-  icon: string | null;
-  navigate: (to: Scene, dir: number) => void;
-  homeScene: () => Scene;
-  t: TFunc;
-}) {
-  return (
-    <div className="flex flex-col gap-3">
-      <button
-        type="button"
-        onClick={() => navigate("color", 1)}
-        className="w-full flex items-center justify-between px-4 py-4 rounded-lg transition-opacity active:opacity-70"
-        style={{ background: "var(--surface-elevated)" }}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-full flex-shrink-0 border-2"
-            style={{
-              background: color ?? "var(--border)",
-              borderColor: color ? color + "60" : "var(--border)",
-            }}
-          />
-          <div className="text-left">
-            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("color_label")}</p>
-            <p className="text-xs mt-0.5" style={{ color: color ?? "var(--text-secondary)" }}>
-              {color ?? t("no_color")}
-            </p>
+            {tab === "emoji" ? (
+              <div className="flex flex-wrap gap-2 pb-2">
+                <button type="button" onClick={() => { onChange(null); onClose(); }}
+                  className="w-12 h-12 rounded-md flex items-center justify-center text-xs transition-transform active:scale-90"
+                  style={{ background: !value ? "var(--surface-elevated)" : "transparent", border: `1.5px solid ${!value ? "var(--btn-primary-bg)" : "var(--border)"}`, color: "var(--text-muted)" }}>
+                  {t("no_icon")}
+                </button>
+                {HABIT_EMOJIS.map((emoji) => (
+                  <button key={emoji} type="button" onClick={() => { onChange(value === emoji ? null : emoji); onClose(); }}
+                    className="w-12 h-12 rounded-md flex items-center justify-center text-2xl transition-transform active:scale-90"
+                    style={{ background: value === emoji ? "var(--surface-elevated)" : "transparent", border: `1.5px solid ${value === emoji ? "var(--btn-primary-bg)" : "var(--border)"}` }}>
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="pb-4">
+                <IconPicker
+                  value={value}
+                  onChange={(next) => { onChange(next); onClose(); }}
+                  allowNone
+                  noneLabel={t("no_icon")}
+                  categoryLabel={categoryLabel}
+                />
+              </div>
+            )}
           </div>
-        </div>
-        <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
-      </button>
-
-      <button
-        type="button"
-        onClick={() => navigate("icon", 1)}
-        className="w-full flex items-center justify-between px-4 py-4 rounded-lg transition-opacity active:opacity-70"
-        style={{ background: "var(--surface-elevated)" }}
-      >
-        <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0"
-            style={{ background: icon ? (color ?? "#4CAF82") + "25" : "var(--border)" }}
-          >
-            {icon
-              ? <HabitIcon icon={icon} size={20} color={color ?? "var(--text-primary)"} />
-              : <span className="text-sm" style={{ color: "var(--text-muted)" }}>—</span>
-            }
-          </div>
-          <div className="text-left">
-            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("icon_label")}</p>
-            <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-              {icon ? (icon.startsWith("lucide:") ? icon.slice(7) : icon) : t("no_icon")}
-            </p>
-          </div>
-        </div>
-        <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
-      </button>
-    </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

@@ -181,19 +181,21 @@ export function EnfoqueTab({
     localStorage.setItem(storageKey, JSON.stringify(next.map(i => i.id)));
   };
 
-  const allDone = useMemo(
-    () => orderedItems.length > 0 && orderedItems.every(i => i.completed),
-    [orderedItems],
-  );
+  // "Todo completado" se calcula directo desde timedItems/untimedItems (la
+  // fuente fresca de este mismo render), NO desde orderedItems — orderedItems
+  // es state sincronizado por el useEffect de arriba con un render de
+  // retraso, así que leerlo acá podía dar un falso "todo completado" justo en
+  // el render donde useWorkouts termina de cargar (dayWorkouts ya trae el
+  // entrenamiento incompleto, pero orderedItems todavía no). orderedItems
+  // sigue existiendo solo para el drag-reorder y su persistencia en
+  // localStorage.
+  const allDone = useMemo(() => {
+    const all = [...timedItems, ...untimedItems];
+    return all.length > 0 && all.every(i => i.completed);
+  }, [timedItems, untimedItems]);
   const [showConfetti, setShowConfetti] = useState(false);
   const prevAllDone = useRef(false);
   useEffect(() => {
-    // workoutsHook carga por su cuenta (fetch propio, no atado a useDashboard)
-    // — mientras está cargando, dayWorkouts está vacío y "allDone" puede dar
-    // true de forma prematura (con solo tasks/habits) antes de que el
-    // entrenamiento del día entre a orderedItems. Se espera a que termine de
-    // cargar antes de evaluar la transición, para no disparar el confetti de
-    // más con un entrenamiento del día aún sin marcar.
     if (workoutsHook.isLoading) return;
     if (!prevAllDone.current && allDone) setShowConfetti(true);
     prevAllDone.current = allDone;

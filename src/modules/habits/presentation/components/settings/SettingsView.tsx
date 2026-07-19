@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Bell, BellOff, User, Sun, Moon, Languages, BarChart2, Clock } from "lucide-react";
+import { Bell, BellOff, User, Sun, Moon, BarChart2, ChevronDown } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 import { useTimeFormat, type TimeFormat } from "@/shared/components/TimeFormatProvider";
 import { useLocale, type Locale } from "@/shared/i18n/useLocale";
@@ -107,7 +107,7 @@ export default function SettingsView({ userId }: Props) {
         <NotificationsSection />
       </motion.div>
 
-      {/* Language */}
+      {/* Preferencias — idioma y formato de hora como filas simples (label + select) */}
       <motion.div
         className="mt-8"
         initial={{ opacity: 0, y: 16 }}
@@ -115,71 +115,40 @@ export default function SettingsView({ userId }: Props) {
         transition={{ duration: 0.3, delay: 1 * 0.05, ease: "easeOut" }}
       >
         <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
-          {t("language")}
+          {t("preferences")}
         </p>
         <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)" }}>
-          {(["es", "en"] as Locale[]).map((l, idx) => (
-            <div key={l}>
-              {idx > 0 && <div style={{ height: 1, background: "var(--border)" }} />}
-              <button
-                onClick={() => setLocale(l)}
-                className="w-full px-5 py-4 flex items-center gap-4 transition-opacity active:opacity-60"
+          <div className="flex items-center justify-between px-5 py-4">
+            <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("language")}</span>
+            <div className="relative">
+              <select
+                value={locale}
+                onChange={(e) => setLocale(e.target.value as Locale)}
+                className="rounded-md pl-3 pr-8 py-1.5 text-sm outline-none appearance-none"
+                style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
               >
-                <div
-                  className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
-                  style={{ background: locale === l ? "rgba(76,207,130,0.15)" : "var(--surface-elevated)" }}
-                >
-                  <Languages size={16} color={locale === l ? "#4CAF82" : "var(--text-muted)"} />
-                </div>
-                <span className="flex-1 text-sm font-medium text-left" style={{ color: "var(--text-primary)" }}>
-                  {l === "es" ? "Español" : "English"}
-                </span>
-                {locale === l && (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8l3.5 3.5L13 4" stroke="#4CAF82" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-              </button>
+                <option value="es">Español</option>
+                <option value="en">English</option>
+              </select>
+              <ChevronDown size={14} strokeWidth={2} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--text-muted)" }} />
             </div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Time format */}
-      <motion.div
-        className="mt-8"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 1.5 * 0.05, ease: "easeOut" }}
-      >
-        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--text-secondary)" }}>
-          {t("time_format")}
-        </p>
-        <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)" }}>
-          {(["12h", "24h"] as TimeFormat[]).map((f, idx) => (
-            <div key={f}>
-              {idx > 0 && <div style={{ height: 1, background: "var(--border)" }} />}
-              <button
-                onClick={() => setTimeFormat(f)}
-                className="w-full px-5 py-4 flex items-center gap-4 transition-opacity active:opacity-60"
+          </div>
+          <div style={{ height: 1, background: "var(--border)" }} />
+          <div className="flex items-center justify-between px-5 py-4">
+            <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("time_format")}</span>
+            <div className="relative">
+              <select
+                value={timeFormat}
+                onChange={(e) => setTimeFormat(e.target.value as TimeFormat)}
+                className="rounded-md pl-3 pr-8 py-1.5 text-sm outline-none appearance-none"
+                style={{ background: "var(--surface-elevated)", color: "var(--text-primary)" }}
               >
-                <div
-                  className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
-                  style={{ background: timeFormat === f ? "rgba(76,207,130,0.15)" : "var(--surface-elevated)" }}
-                >
-                  <Clock size={16} color={timeFormat === f ? "#4CAF82" : "var(--text-muted)"} />
-                </div>
-                <span className="flex-1 text-sm font-medium text-left" style={{ color: "var(--text-primary)" }}>
-                  {f === "12h" ? t("time_format_12h") : t("time_format_24h")}
-                </span>
-                {timeFormat === f && (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8l3.5 3.5L13 4" stroke="#4CAF82" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-              </button>
+                <option value="12h">{t("time_format_12h")}</option>
+                <option value="24h">{t("time_format_24h")}</option>
+              </select>
+              <ChevronDown size={14} strokeWidth={2} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--text-muted)" }} />
             </div>
-          ))}
+          </div>
         </div>
       </motion.div>
 
