@@ -155,7 +155,13 @@
   --btn-primary-bg:   #1c1c1e;
   --btn-primary-text: #ffffff;
 
-  --nav-bg:     rgba(245, 245, 247, 0.80);
+  /* 0.80 → 0.94: con el grid+glow de fondo ahora también activo en claro
+     (antes solo existía en oscuro), ese poco de transparencia dejaba pasar
+     las líneas finas del grid justo detrás de las pills — blur(48px) las
+     esparce en un halo visible detrás de los íconos, leyéndose como
+     "iconos borrosos". Subir la opacidad casi al máximo corta ese sangrado
+     sin perder del todo el aire del glass. */
+  --nav-bg:     rgba(245, 245, 247, 0.94);
   --nav-border: rgba(0,0,0,0.08);
 
   --sidebar-active-bg:    rgba(0, 0, 0, 0.06);

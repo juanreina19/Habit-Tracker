@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
+import * as Popover from "@radix-ui/react-popover";
 import { useTranslations } from "next-intl";
 import { X, Trash2, Save, CornerDownLeft } from "lucide-react";
 import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
 import { HabitIcon } from "@/shared/components/ui/HabitIcon";
 import { IconPickerDialog } from "@/shared/components/ui/IconPickerDialog";
+import { useTheme } from "@/shared/components/ThemeProvider";
 import { DAY_LETTERS } from "@/shared/constants/dayLabels";
 import type { Habit } from "../../../domain/entities/Habit";
 import type { CreateHabitInput, UpdateHabitInput } from "../../../domain/repositories/IHabitRepository";
@@ -41,6 +42,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
   const t = useTranslations("habitForm");
   const tDays = useTranslations("dayLabels");
   const tCat = useTranslations("iconCategories");
+  const { theme } = useTheme();
   const isEdit = !!habit;
 
   const [name, setName] = useState("");
@@ -60,19 +62,17 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
 
   const [catOpen, setCatOpen] = useState(false);
   const [daysOpen, setDaysOpen] = useState(false);
+  // El popover de horario usa Radix Popover (no un div absolute casero): al
+  // estar anidado dentro de un Radix Dialog, un popover "a mano" portado a
+  // document.body queda fuera del layer-stack que Radix gestiona para el
+  // Dialog — el FocusScope del Dialog le quita el foco a cualquier click
+  // dentro de él, dejándolo no-interactivo. Radix Popover coordina esto
+  // correctamente vía su propio contexto de layers, y de paso trae
+  // colision-detection (collisionPadding) que evita que se recorte contra
+  // los bordes del viewport, sin necesitar cálculos manuales de posición.
   const [timeOpen, setTimeOpen] = useState(false);
   const [colorOpen, setColorOpen] = useState(false);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
-
-  // El popover de horario vive dentro del contenedor con scroll del modal
-  // (overflow-y-auto) — si se abre hacia arriba con position:absolute y no
-  // hay suficiente aire encima del botón, el navegador lo recorta contra el
-  // borde superior del contenedor y no hay forma de hacer scroll para
-  // alcanzarlo (el scroll no llega a lo que se sale "hacia atrás"). Se
-  // renderiza vía portal a document.body con position:fixed, calculado
-  // desde el botón, para escapar por completo de ese recorte.
-  const timeButtonRef = useRef<HTMLButtonElement>(null);
-  const [timePos, setTimePos] = useState<{ left: number; bottom: number } | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -98,11 +98,11 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
   }, [open, habit]);
 
   useEffect(() => {
-    if (!catOpen && !daysOpen && !timeOpen && !colorOpen) return;
-    const handler = () => { setCatOpen(false); setDaysOpen(false); setTimeOpen(false); setColorOpen(false); };
+    if (!catOpen && !daysOpen && !colorOpen) return;
+    const handler = () => { setCatOpen(false); setDaysOpen(false); setColorOpen(false); };
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
-  }, [catOpen, daysOpen, timeOpen, colorOpen]);
+  }, [catOpen, daysOpen, colorOpen]);
 
   const toggleDay = (day: number) => {
     setActiveDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort((a, b) => a - b)));
@@ -303,34 +303,32 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                     {daysError && <p className="w-full text-xs" style={{ color: "var(--danger)" }}>{daysError}</p>}
 
                     {/* Horario — hora inicio + duración estimada (opcional) */}
-                    <div className="relative">
-                      <button
-                        ref={timeButtonRef}
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCatOpen(false); setDaysOpen(false); setColorOpen(false);
-                          setTimeOpen((p) => {
-                            const next = !p;
-                            if (next && timeButtonRef.current) {
-                              const rect = timeButtonRef.current.getBoundingClientRect();
-                              setTimePos({ left: rect.left, bottom: window.innerHeight - rect.top + 4 });
-                            }
-                            return next;
-                          });
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
-                        style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: startTime ? "var(--purple)" : "var(--text-muted)" }} />
-                        <span style={{ color: "var(--text-muted)" }}>{t("start_label").toUpperCase()}</span>
-                        {startTime || t("no_schedule")}
-                      </button>
-                      {timeOpen && timePos && createPortal(
-                        <div
-                          className="fixed z-[100] rounded-2xl p-2 flex flex-col gap-2 glass-panel-elevated"
-                          style={{ left: timePos.left, bottom: timePos.bottom }}
-                          onClick={(e) => e.stopPropagation()}
+                    <Popover.Root
+                      open={timeOpen}
+                      onOpenChange={(o) => {
+                        setTimeOpen(o);
+                        if (o) { setCatOpen(false); setDaysOpen(false); setColorOpen(false); }
+                      }}
+                    >
+                      <Popover.Trigger asChild>
+                        <button
+                          type="button"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium transition-colors"
+                          style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: startTime ? "var(--purple)" : "var(--text-muted)" }} />
+                          <span style={{ color: "var(--text-muted)" }}>{t("start_label").toUpperCase()}</span>
+                          {startTime || t("no_schedule")}
+                        </button>
+                      </Popover.Trigger>
+                      <Popover.Portal>
+                        <Popover.Content
+                          side="top"
+                          align="start"
+                          sideOffset={4}
+                          collisionPadding={12}
+                          onOpenAutoFocus={(e) => e.preventDefault()}
+                          className="z-[60] rounded-2xl p-2 flex flex-col gap-2 glass-panel-elevated outline-none"
                         >
                           <div className="flex flex-col gap-1">
                             <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
@@ -341,7 +339,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                               value={startTime}
                               onChange={(e) => setStartTime(e.target.value)}
                               className="rounded-md px-2 py-1.5 text-sm outline-none glass-panel"
-                              style={{ color: "var(--text-primary)", colorScheme: "dark", accentColor: "var(--text-primary)" }}
+                              style={{ color: "var(--text-primary)", colorScheme: theme, accentColor: "var(--text-primary)" }}
                             />
                           </div>
                           <div className="flex flex-col gap-1">
@@ -371,10 +369,9 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                             {t("confirm_time")}
                             <CornerDownLeft size={12} strokeWidth={2} />
                           </button>
-                        </div>,
-                        document.body
-                      )}
-                    </div>
+                        </Popover.Content>
+                      </Popover.Portal>
+                    </Popover.Root>
 
                     {/* Color */}
                     <div className="relative">
@@ -473,7 +470,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                         className="flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-30"
                         style={{ background: "var(--btn-primary-bg)", color: "var(--btn-primary-text)" }}
                       >
-                        {isSaving ? t("saving") : isEdit ? <><Save size={14} />{t("save")}</> : t("add_habit")}
+                        {isSaving ? t("saving") : isEdit ? <>{t("save")}<Save size={14} /></> : t("add_habit")}
                         {!isEdit && <span>→</span>}
                       </button>
                     </div>
