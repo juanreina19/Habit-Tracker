@@ -57,7 +57,7 @@ export function WeeklyScheduleStrip({ workouts, selectedDay, onSelectDay }: Prop
               <span
                 className="w-2 h-2 rounded-full"
                 style={{
-                  background: isToday ? "var(--btn-primary-bg)" : hasWorkout ? "var(--text-secondary)" : "var(--text-muted-darker)",
+                  background: isToday ? "var(--btn-primary-bg)" : hasWorkout ? "var(--text-secondary)" : "var(--text-disabled)",
                 }}
               />
               <span

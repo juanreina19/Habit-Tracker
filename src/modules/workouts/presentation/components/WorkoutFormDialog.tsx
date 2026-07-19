@@ -9,9 +9,7 @@ import { useWorkoutExercises } from "../hooks/useWorkoutExercises";
 import { useCategories } from "@/modules/categories/presentation/hooks/useCategories";
 import { ExerciseReorderItem, type ExerciseDraft } from "./ExerciseReorderItem";
 import { SavedExercisesPicker } from "./SavedExercisesPicker";
-import { TimePickerPopover } from "./TimePickerPopover";
 import { DAY_LETTERS } from "@/shared/constants/dayLabels";
-import { to12h, from12h } from "@/shared/lib/utils/time12h";
 import type { Workout, CreateWorkoutInput, UpdateWorkoutInput } from "../../domain/entities/Workout";
 import type { ExerciseType } from "../../domain/entities/WorkoutExercise";
 import type { UUID } from "@/shared/types/database.types";
@@ -377,31 +375,12 @@ export function WorkoutFormDialog({ open, onClose, workout, userId, onCreate, on
                           style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {/* Desktop: picker custom de 3 columnas (hora 12h / minuto / AM-PM),
-                              estilo oscuro de la app en toda la lista, no solo el control
-                              cerrado — móvil mantiene el input nativo, cuyo picker de SO ya
-                              es buena UX. */}
-                          <div className="hidden lg:block">
-                            {(() => {
-                              const { hour, minute, period } = to12h(startTime);
-                              return (
-                                <TimePickerPopover
-                                  hour={hour}
-                                  minute={minute}
-                                  period={period}
-                                  onChangeHour={(h) => setStartTime(from12h(h, minute || "00", period))}
-                                  onChangeMinute={(m) => setStartTime(from12h(hour || "12", m, period))}
-                                  onChangePeriod={(p) => setStartTime(from12h(hour || "12", minute || "00", p))}
-                                />
-                              );
-                            })()}
-                          </div>
                           <input
                             type="time"
                             value={startTime}
                             onChange={(e) => setStartTime(e.target.value)}
-                            className="lg:hidden rounded-md px-2 py-1.5 text-sm outline-none"
-                            style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                            className="rounded-md px-2 py-1.5 text-sm outline-none"
+                            style={{ background: "var(--surface-elevated)", color: "var(--text-primary)", border: "1px solid var(--border)", colorScheme: "dark" }}
                           />
                           <button
                             type="button"

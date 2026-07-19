@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 
 const COLORS = ["#4CAF82", "#FFFFFF", "#F5A623", "#A3CF8A", "#FFCC44", "#FF8A65"];
 
@@ -95,11 +96,16 @@ export function Confetti({ onDone, compact }: Props) {
     return () => cancelAnimationFrame(animId);
   }, [compact, durationFrames, fadeStart, particleCount]);
 
-  return (
+  // Portal a document.body — nunca debe quedar anidado dentro de un
+  // motion.div en animación (ej. el AnimatePresence de cambio de tab en
+  // LifeDashboardView.tsx), o su `position: fixed` queda contenido por el
+  // transform del padre en vez de cubrir el viewport real.
+  return createPortal(
     <canvas
       ref={canvasRef}
       className="fixed inset-0 z-[200] pointer-events-none"
       aria-hidden="true"
-    />
+    />,
+    document.body
   );
 }
