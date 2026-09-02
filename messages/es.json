@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "Inicio",
-    "planner": "Planificador",
     "habits": "Hábitos",
     "studies": "Estudios",
     "workouts": "Entrenamientos",
@@ -343,15 +342,10 @@
     "motivational_workouts_count": "{count, plural, =1 {1 entrenamiento} other {{count} entrenamientos}}",
     "tab_focus": "Enfoque",
     "tab_board": "Tablero",
-    "tab_eisenhower": "Eisenhower",
     "tab_kanban": "Kanban",
     "filter_label": "Filtrar",
     "filter_timed": "Con hora",
     "filter_urgent": "Urgente",
-    "eisenhower_do": "Hacer primero",
-    "eisenhower_schedule": "Programar",
-    "eisenhower_delegate": "Delegar",
-    "eisenhower_eliminate": "Eliminar",
     "kanban_todo": "Por hacer",
     "kanban_in_progress": "En progreso",
     "kanban_done": "Hecho",
@@ -370,19 +364,6 @@
     "new_habit": "Hábito",
     "new_study": "Sesión de estudio",
     "new_workout": "Entrenamiento"
-  },
-  "planner": {
-    "title": "Planificador",
-    "subtitle": "Organiza tu día asignando horarios a tus tareas",
-    "pending": "Pendientes",
-    "no_pending": "¡Todas las tareas programadas!",
-    "drop_hint": "Arrastra tareas aquí para programarlas",
-    "today": "Hoy",
-    "new_task": "Nueva tarea",
-    "assign_time": "Asignar hora",
-    "unschedule": "Quitar hora",
-    "scheduled": "Programadas",
-    "no_tasks": "Sin tareas para este día"
   },
   "studies": {
     "title": "Estudios",

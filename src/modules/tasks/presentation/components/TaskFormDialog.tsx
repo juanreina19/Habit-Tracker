@@ -662,7 +662,7 @@ export function TaskFormDialog({
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-opacity active:opacity-70 w-full glass-panel"
                   >
                     <div
-                      className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+                      className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 glass-panel"
                       style={{ background: "var(--border)" }}
                     >
                       {icon ? (

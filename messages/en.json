@@ -1,7 +1,6 @@
 {
   "nav": {
     "home": "Home",
-    "planner": "Planner",
     "habits": "Habits",
     "studies": "Studies",
     "workouts": "Workouts",
@@ -343,15 +342,10 @@
     "motivational_workouts_count": "{count, plural, =1 {1 workout} other {{count} workouts}}",
     "tab_focus": "Focus",
     "tab_board": "Board",
-    "tab_eisenhower": "Eisenhower",
     "tab_kanban": "Kanban",
     "filter_label": "Filter",
     "filter_timed": "Timed",
     "filter_urgent": "Urgent",
-    "eisenhower_do": "Do First",
-    "eisenhower_schedule": "Schedule",
-    "eisenhower_delegate": "Delegate",
-    "eisenhower_eliminate": "Eliminate",
     "kanban_todo": "To Do",
     "kanban_in_progress": "In Progress",
     "kanban_done": "Done",
@@ -370,19 +364,6 @@
     "new_habit": "Habit",
     "new_study": "Study session",
     "new_workout": "Workout"
-  },
-  "planner": {
-    "title": "Planner",
-    "subtitle": "Organize your day by assigning times to your tasks",
-    "pending": "Pending",
-    "no_pending": "All tasks scheduled!",
-    "drop_hint": "Drag tasks here to schedule",
-    "today": "Today",
-    "new_task": "New task",
-    "assign_time": "Assign time",
-    "unschedule": "Remove time",
-    "scheduled": "Scheduled",
-    "no_tasks": "No tasks for this day"
   },
   "studies": {
     "title": "Studies",

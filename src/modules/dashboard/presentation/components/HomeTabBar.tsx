@@ -3,14 +3,13 @@
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 
-export type HomeTab = "focus" | "board" | "eisenhower" | "kanban";
+export type HomeTab = "focus" | "board" | "kanban";
 
-const TABS: HomeTab[] = ["focus", "board", "eisenhower", "kanban"];
+const TABS: HomeTab[] = ["focus", "board", "kanban"];
 
 const TAB_KEYS: Record<HomeTab, string> = {
   focus: "tab_focus",
   board: "tab_board",
-  eisenhower: "tab_eisenhower",
   kanban: "tab_kanban",
 };
 
@@ -23,7 +22,7 @@ export function HomeTabBar({ active, onChange }: Props) {
   const t = useTranslations("dashboard");
 
   return (
-    <div className="flex items-center justify-center gap-1">
+    <div className="flex items-center justify-center gap-1 overflow-x-auto hide-scrollbar">
       {TABS.map((tab) => {
         const isActive = tab === active;
         return (
@@ -31,7 +30,7 @@ export function HomeTabBar({ active, onChange }: Props) {
             key={tab}
             type="button"
             onClick={() => onChange(tab)}
-            className="relative px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] transition-colors"
+            className="relative px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.15em] transition-colors whitespace-nowrap flex-shrink-0"
             style={{ color: isActive ? "var(--text-primary)" : "var(--text-muted)" }}
           >
             {t(TAB_KEYS[tab] as Parameters<typeof t>[0])}

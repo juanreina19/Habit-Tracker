@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
@@ -180,7 +180,7 @@ export function WorkoutStatsPanel({ stats }: Props) {
                   <span className="text-xs flex-shrink-0" style={{ color: "var(--text-secondary)" }}>{c.durationMin} min</span>
                 )}
                 <span className="text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-                  {format(new Date(c.completedAt), "dd/MM")}
+                  {format(parseISO(c.completedAt), "dd/MM")}
                 </span>
               </div>
             ))}

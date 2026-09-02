@@ -277,8 +277,14 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                 )}
 
                 {/* ── Icon sub-sheet ─────────────────────────── */}
+                {/* Grid horizontal de filas fijas + scroll lateral — mismo
+                    mecanismo que IconPicker.tsx (shared/components/ui), sin
+                    tabs de categoría porque HABIT_EMOJIS es una lista plana. */}
                 {scene === "icon" && (
-                  <div className="flex flex-wrap gap-2 pb-2">
+                  <div
+                    className="grid overflow-x-auto hide-scrollbar pb-2"
+                    style={{ gridTemplateRows: "repeat(3, 48px)", gridAutoFlow: "column", gap: 8 }}
+                  >
                     {HABIT_EMOJIS.map((emoji) => (
                       <button
                         key={emoji}
@@ -397,7 +403,7 @@ function AppearanceRows({ color, icon, navigate, t }: {
       >
         <div className="flex items-center gap-3">
           <div
-            className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0 text-2xl"
+            className="w-9 h-9 rounded-md flex items-center justify-center flex-shrink-0 text-2xl glass-panel"
             style={{ background: icon ? (color ?? "#4CAF82") + "25" : "var(--border)" }}
           >
             {icon ?? <span className="text-sm" style={{ color: "var(--text-muted)" }}>—</span>}
