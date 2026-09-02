@@ -404,7 +404,7 @@ function CategoryReorderItem({
         <GripVertical size={18} />
       </div>
       <div
-        className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0 text-lg"
+        className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0 text-lg glass-panel"
         style={{ background: (cat.color ?? "#8888AA") + "25" }}
       >
         {cat.icon ?? "📁"}

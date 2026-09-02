@@ -426,7 +426,7 @@ export function HabitFormDialog({ open, onClose, habit, categories, onSave, onDe
                     className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-opacity active:opacity-70 w-full glass-panel"
                   >
                     <div
-                      className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+                      className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 glass-panel"
                       style={{ background: icon ? (color ?? "#4CAF82") + "25" : "var(--border)" }}
                     >
                       {icon ? (

@@ -5,14 +5,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { Home, CalendarRange, Repeat, BookOpen, Dumbbell, Settings2, Sun, Moon, LogOut, MoreVertical } from "lucide-react";
+import { Home, Repeat, BookOpen, Dumbbell, Settings2, Sun, Moon, LogOut, MoreVertical } from "lucide-react";
 import { useTheme } from "@/shared/components/ThemeProvider";
 import { Tooltip, TooltipProvider } from "@/shared/components/ui/Tooltip";
 import { createClient } from "@/shared/lib/supabase/client";
 
 const NAV_ROUTES = [
   { href: "/",         key: "home",     Icon: Home },
-  { href: "/planner",  key: "planner",  Icon: CalendarRange },
   { href: "/habits",   key: "habits",   Icon: Repeat },
   { href: "/studies",  key: "studies",  Icon: BookOpen },
   { href: "/workouts", key: "workouts", Icon: Dumbbell },

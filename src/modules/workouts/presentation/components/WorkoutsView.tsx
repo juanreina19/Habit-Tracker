@@ -98,6 +98,7 @@ export default function WorkoutsView({ userId }: Props) {
                     <div key={w.id} className="rounded-lg p-3 glass-panel-strong">
                       <WorkoutCard
                         workout={w}
+                        onToggleComplete={() => workoutsHook.toggleWorkoutCompletion(w)}
                         onEdit={() => openEdit(w)}
                         onDelete={() => requestDelete(w)}
                       />

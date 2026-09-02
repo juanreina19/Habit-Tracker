@@ -9,7 +9,6 @@ import { MotivationalHeader } from "./MotivationalHeader";
 import { HomeTabBar, type HomeTab } from "./HomeTabBar";
 import { EnfoqueTab } from "./EnfoqueTab";
 import { TableroTab } from "./TableroTab";
-import { EisenhowerTab } from "./EisenhowerTab";
 import { KanbanTab } from "./KanbanTab";
 import { TaskFormDialog } from "@/modules/tasks/presentation/components/TaskFormDialog";
 import { HabitFormDialog } from "@/modules/habits/presentation/components/settings/HabitFormDialog";
@@ -133,16 +132,6 @@ export default function LifeDashboardView({ userId }: Props) {
                 onAddTask={openCreate}
                 onCompleteHabit={dashboard.completeHabit}
                 onUncheckHabit={dashboard.uncheckHabit}
-              />
-            )}
-
-            {activeTab === "eisenhower" && (
-              <EisenhowerTab
-                userId={userId}
-                tasks={dashboard.tasks}
-                onToggleTask={dashboard.toggleTask}
-                onEditTask={openEdit}
-                onDeleteTask={openDelete}
               />
             )}
 
