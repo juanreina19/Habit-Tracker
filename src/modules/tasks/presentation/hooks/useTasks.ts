@@ -14,6 +14,7 @@ import { isRecurring } from "../../domain/entities/Task";
 import type { Task, TaskWithStatus, CreateTaskInput, UpdateTaskInput } from "../../domain/entities/Task";
 import type { UUID } from "@/shared/types/database.types";
 import { today } from "@/shared/lib/utils/dates";
+import { withSilentRetry } from "@/shared/lib/utils/retry";
 
 export function useTasks(userId: UUID) {
   const [tasks, setTasks] = useState<TaskWithStatus[]>([]);
@@ -41,8 +42,11 @@ export function useTasks(userId: UUID) {
     const generation = ++fetchGeneration.current;
     setError(null);
     try {
-      const data = await new GetTasksUseCase(getRepo()).execute(userId, today());
-      const counts = await new GetSubtaskCountsUseCase(getSubtaskRepo()).execute(data.map((t) => t.id));
+      const { data, counts } = await withSilentRetry(async () => {
+        const data = await new GetTasksUseCase(getRepo()).execute(userId, today());
+        const counts = await new GetSubtaskCountsUseCase(getSubtaskRepo()).execute(data.map((t) => t.id));
+        return { data, counts };
+      });
       if (fetchGeneration.current !== generation) return;
       if (pendingToggles.current.size > 0) return;
       setTasks(data.map((t) => {
@@ -137,5 +141,5 @@ export function useTasks(userId: UUID) {
     }
   }, [getRepo, tasks]);
 
-  return { tasks, isLoading, error, createTask, updateTask, toggleTask, deleteTask };
+  return { tasks, isLoading, error, refetch: fetch, createTask, updateTask, toggleTask, deleteTask };
 }

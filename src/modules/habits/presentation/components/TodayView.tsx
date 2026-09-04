@@ -69,7 +69,7 @@ export default function TodayView({ userId }: Props) {
   } = useHabits(userId);
 
   const { showToast } = useToast();
-  const { create: createHabit, update: updateHabit } = useSettingsHabits(userId);
+  const { create: createHabit, update: updateHabit } = useSettingsHabits(userId, { skipInitialFetch: true });
   const { categories } = useCategories(userId);
   const [createOpen, setCreateOpen] = useState(false);
   const [editHabit, setEditHabit] = useState<HabitWithStatus | null>(null);

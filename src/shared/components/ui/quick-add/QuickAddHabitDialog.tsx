@@ -13,7 +13,7 @@ interface Props {
 
 /** Solo sabe crear hábitos desde el FAB global — no edita ni elimina. */
 export function QuickAddHabitDialog({ userId }: Props) {
-  const { create } = useSettingsHabits(userId);
+  const { create } = useSettingsHabits(userId, { skipInitialFetch: true });
   const { categories } = useCategories(userId);
   const dialog = useQuickAddStore((s) => s.dialog);
   const close = useQuickAddStore((s) => s.close);

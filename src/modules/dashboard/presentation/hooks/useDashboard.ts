@@ -21,10 +21,10 @@ export function useDashboard(userId: UUID, viewDate?: Date) {
 
   const dateStr = viewDate ? format(viewDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd");
 
-  const { tasks, isLoading: tasksLoading, toggleTask, createTask, updateTask, deleteTask } = useTasks(userId);
+  const { tasks, isLoading: tasksLoading, error: tasksError, refetch: retryTasks, toggleTask, createTask, updateTask, deleteTask } = useTasks(userId);
   const { tasks: todayTasks, toggleTask: toggleTodayTask, refetch: refetchTodayTasks } = useTodayTasks(userId, dateStr);
-  const { habits, completedCount, totalCount, completeHabit, uncheckHabit } = useHabits(userId, dateStr);
-  const { categories, isLoading: categoriesLoading } = useCategories(userId);
+  const { habits, isLoading: habitsLoading, completedCount, totalCount, completeHabit, uncheckHabit } = useHabits(userId, dateStr);
+  const { categories, isLoading: categoriesLoading, error: categoriesError, refetch: retryCategories } = useCategories(userId);
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
 
@@ -44,10 +44,14 @@ export function useDashboard(userId: UUID, viewDate?: Date) {
       t => !t.categoryId && !overdueIds.has(t.id)
     );
 
+    // Unión de tasksByCategory + uncategorized — única fuente para la tabla
+    // consolidada de tareas de Board (evita recomponerla en el componente).
+    const allPendingTasks = pending.filter(t => !overdueIds.has(t.id));
+
     // "De hoy" excluye las atrasadas que useTodayTasks mezcla junto con las de hoy.
     const todayCount = todayTasks.filter(t => !overdueIds.has(t.id)).length;
 
-    return { overdue, tasksByCategory, uncategorized, todayCount };
+    return { overdue, tasksByCategory, uncategorized, allPendingTasks, todayCount };
   }, [tasks, categories, todayStr, todayTasks]);
 
   const updateTaskStatus = (taskId: UUID, status: TaskStatus) => {
@@ -76,7 +80,11 @@ export function useDashboard(userId: UUID, viewDate?: Date) {
     habits,
     todayTasks,
     tasks,
-    isLoading: tasksLoading || categoriesLoading,
+    isLoading: tasksLoading || categoriesLoading || habitsLoading,
+    tasksError,
+    categoriesError,
+    retryTasks,
+    retryCategories,
     habitsProgress: { completed: completedCount, total: totalCount },
     isToday: dateStr === format(new Date(), "yyyy-MM-dd"),
     toggleTask,

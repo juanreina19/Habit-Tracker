@@ -21,7 +21,7 @@ export function DashboardColumn({
   const [collapsed, setCollapsed] = useState(defaultCollapsed);
 
   return (
-    <div className="flex flex-col min-w-0 w-full lg:w-[300px] lg:min-w-[280px] lg:flex-shrink-0">
+    <div className="flex flex-col min-w-0 w-full">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         {color && (
