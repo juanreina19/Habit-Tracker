@@ -7,7 +7,7 @@ import type { Habit } from "../../domain/entities/Habit";
 import type { CreateHabitInput, UpdateHabitInput } from "../../domain/repositories/IHabitRepository";
 import type { UUID } from "@/shared/types/database.types";
 
-export function useSettingsHabits(userId: UUID) {
+export function useSettingsHabits(userId: UUID, options?: { skipInitialFetch?: boolean }) {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,9 +64,11 @@ export function useSettingsHabits(userId: UUID) {
     [getRepo]
   );
 
+  const skipInitialFetch = options?.skipInitialFetch ?? false;
   useEffect(() => {
+    if (skipInitialFetch) { setIsLoading(false); return; }
     fetch();
-  }, [fetch]);
+  }, [fetch, skipInitialFetch]);
 
   return { habits, isLoading, error, refetch: fetch, create, update, deactivate, reorder };
 }

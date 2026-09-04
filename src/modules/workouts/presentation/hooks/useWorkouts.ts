@@ -11,6 +11,7 @@ import { CompleteWorkoutUseCase } from "../../domain/use-cases/CompleteWorkoutUs
 import { UncompleteWorkoutUseCase } from "../../domain/use-cases/UncompleteWorkoutUseCase";
 import { calculateWorkoutConsistency } from "../../domain/use-cases/lib/calculateWorkoutConsistency";
 import { dayOfWeek, today as getToday } from "@/shared/lib/utils/dates";
+import { withSilentRetry } from "@/shared/lib/utils/retry";
 import type { Workout, WorkoutWithStatus, CreateWorkoutInput, UpdateWorkoutInput } from "../../domain/entities/Workout";
 import type { WorkoutCompletion } from "../../domain/entities/WorkoutCompletion";
 import type { UUID, ISODate } from "@/shared/types/database.types";
@@ -36,10 +37,10 @@ export function useWorkouts(userId: UUID) {
     setError(null);
     try {
       const todayStr = getToday();
-      const [workoutsData, completionsData] = await Promise.all([
+      const [workoutsData, completionsData] = await withSilentRetry(() => Promise.all([
         getRepo().findAllByUser(userId, todayStr),
         getRepo().findCompletionsByUser(userId),
-      ]);
+      ]));
       setWorkouts(workoutsData);
       setCompletions(completionsData);
     } catch (err) {

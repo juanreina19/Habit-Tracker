@@ -20,12 +20,12 @@ export function IconPickerDialog({ open, onClose, value, onChange, allowNone, no
     <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay
-          className="fixed inset-0 z-40"
-          style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+          className="fixed inset-0 z-[60] animate-fade-in"
+          style={{ background: "rgba(0,0,0,0.3)", backdropFilter: "blur(10px)" }}
         />
         <Dialog.Content
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="fixed z-50 left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden glass-panel-elevated"
+          className="fixed z-[70] left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl outline-none overflow-hidden glass-panel-elevated"
           style={{ maxHeight: "85dvh" }}
         >
           <div className="overflow-y-auto hide-scrollbar p-6" style={{ maxHeight: "85dvh" }}>

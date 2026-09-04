@@ -24,9 +24,11 @@ interface Props {
   showDueDate?: boolean;
   typeLabel?: string;
   userId?: UUID;
+  categoryColor?: string | null;
+  categoryLabel?: string | null;
 }
 
-export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescription, showDueDate, typeLabel, userId }: Props) {
+export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescription, showDueDate, typeLabel, userId, categoryColor, categoryLabel }: Props) {
   const [subtasksOpen, setSubtasksOpen] = useState(true);
   const [liveCompleted, setLiveCompleted] = useState<number | null>(null);
   const t = useTranslations("tasks");
@@ -99,6 +101,18 @@ export function TaskCardDashboard({ task, onToggle, onEdit, overdue, showDescrip
           )}
 
         </div>
+
+        {/* Category chip — solo en vistas que consolidan varias categorías
+            (tabla de tareas de Board); en columnas ya agrupadas por categoría
+            (Focus/Kanban/por-categoría) no se pasa, así no se duplica. */}
+        {categoryLabel && !done && (
+          <span
+            className="text-[10px] font-medium px-1.5 py-0.5 rounded-sm flex-shrink-0 whitespace-nowrap"
+            style={{ background: (categoryColor ?? "#8888AA") + "22", color: categoryColor ?? "#8888AA" }}
+          >
+            {categoryLabel}
+          </span>
+        )}
 
         {/* Importance star */}
         {task.isImportant && !done && (

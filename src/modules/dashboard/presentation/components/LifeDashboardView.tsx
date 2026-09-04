@@ -1,15 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDashboard } from "../hooks/useDashboard";
 import { useWorkouts } from "@/modules/workouts/presentation/hooks/useWorkouts";
 import { dayOfWeek } from "@/shared/lib/utils/dates";
+import { useTranslations } from "next-intl";
+import { useToast } from "@/shared/components/ui/Toast";
 import { MotivationalHeader } from "./MotivationalHeader";
 import { HomeTabBar, type HomeTab } from "./HomeTabBar";
 import { EnfoqueTab } from "./EnfoqueTab";
 import { TableroTab } from "./TableroTab";
 import { KanbanTab } from "./KanbanTab";
+import { DataErrorBanner } from "./DataErrorBanner";
 import { TaskFormDialog } from "@/modules/tasks/presentation/components/TaskFormDialog";
 import { HabitFormDialog } from "@/modules/habits/presentation/components/settings/HabitFormDialog";
 import { useSettingsHabits } from "@/modules/habits/presentation/hooks/useSettingsHabits";
@@ -23,7 +26,9 @@ interface Props {
 }
 
 export default function LifeDashboardView({ userId }: Props) {
-  const { create: createHabit, update: updateHabit, deactivate: deleteHabit } = useSettingsHabits(userId);
+  const t = useTranslations("dashboard");
+  const { showToast } = useToast();
+  const { create: createHabit, update: updateHabit, deactivate: deleteHabit } = useSettingsHabits(userId, { skipInitialFetch: true });
 
   const [activeTab, setActiveTab] = useState<HomeTab>("focus");
   const [viewDate, setViewDate] = useState(() => new Date());
@@ -31,10 +36,23 @@ export default function LifeDashboardView({ userId }: Props) {
   const dashboard = useDashboard(userId, viewDate);
   const workoutsHook = useWorkouts(userId);
   const viewDow = dayOfWeek(viewDate);
-  const workoutsCount = useMemo(
-    () => workoutsHook.workouts.filter((w) => w.isActive && w.dayOfWeek.includes(viewDow)).length,
+
+  const dataError = dashboard.tasksError ?? dashboard.categoriesError;
+  const retryData = () => {
+    dashboard.retryTasks();
+    dashboard.retryCategories();
+  };
+
+  // Errores de carga silenciosos (ya reintentados una vez dentro de cada
+  // hook): se avisan acá en vez de dejar Board/Kanban vacíos sin explicación.
+  useEffect(() => {
+    if (dataError) showToast({ message: t("data_error"), actionLabel: t("retry"), onAction: retryData, duration: 5000 });
+  }, [dataError]);
+  const dayWorkouts = useMemo(
+    () => workoutsHook.workouts.filter((w) => w.isActive && w.dayOfWeek.includes(viewDow)),
     [workoutsHook.workouts, viewDow]
   );
+  const workoutsCount = dayWorkouts.length;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskWithStatus | null>(null);
@@ -73,7 +91,7 @@ export default function LifeDashboardView({ userId }: Props) {
   // (montado en el layout, escucha quickAddStore) — este componente conserva
   // sus propios TaskFormDialog/HabitFormDialog solo para editar/eliminar.
 
-  if (dashboard.isLoading) return <DashboardSkeleton />;
+  if (dashboard.isLoading || workoutsHook.isLoading) return <DashboardSkeleton />;
 
   return (
     <>
@@ -87,6 +105,8 @@ export default function LifeDashboardView({ userId }: Props) {
         />
 
         <HomeTabBar active={activeTab} onChange={setActiveTab} />
+
+        {dataError && <DataErrorBanner onRetry={retryData} />}
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -104,6 +124,9 @@ export default function LifeDashboardView({ userId }: Props) {
                 habits={dashboard.habits}
                 overdue={dashboard.overdue}
                 isToday={dashboard.isToday}
+                dayWorkouts={dayWorkouts}
+                workoutsLoading={workoutsHook.isLoading}
+                onToggleWorkout={workoutsHook.toggleWorkoutCompletion}
                 onToggleTask={dashboard.toggleTodayTask}
                 onToggleOverdueTask={dashboard.toggleTask}
                 onEditTask={openEdit}
@@ -122,16 +145,16 @@ export default function LifeDashboardView({ userId }: Props) {
               <TableroTab
                 userId={userId}
                 categories={dashboard.categories}
-                tasksByCategory={dashboard.tasksByCategory}
-                uncategorized={dashboard.uncategorized}
-                overdue={dashboard.overdue}
+                allPendingTasks={dashboard.allPendingTasks}
                 habits={dashboard.habits}
+                workouts={dayWorkouts}
                 onToggleTask={dashboard.toggleTask}
                 onEditTask={openEdit}
                 onDeleteTask={openDelete}
                 onAddTask={openCreate}
                 onCompleteHabit={dashboard.completeHabit}
                 onUncheckHabit={dashboard.uncheckHabit}
+                onToggleWorkout={dashboard.isToday ? workoutsHook.toggleWorkoutCompletion : () => {}}
               />
             )}
 

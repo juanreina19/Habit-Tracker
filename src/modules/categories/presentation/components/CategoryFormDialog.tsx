@@ -7,6 +7,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PRESET_COLORS } from "@/shared/components/ui/ColorPicker";
 import { HABIT_EMOJIS } from "@/shared/components/ui/EmojiPicker";
+import { scrollHorizontallyOnWheel } from "@/shared/lib/utils/scroll";
 import type { Category } from "../../domain/entities/Category";
 import type { CreateCategoryInput, UpdateCategoryInput } from "../../domain/repositories/ICategoryRepository";
 
@@ -284,6 +285,7 @@ export function CategoryFormDialog({ open, onClose, category, onSave }: Props) {
                   <div
                     className="grid overflow-x-auto hide-scrollbar pb-2"
                     style={{ gridTemplateRows: "repeat(3, 48px)", gridAutoFlow: "column", gap: 8 }}
+                    onWheel={scrollHorizontallyOnWheel}
                   >
                     {HABIT_EMOJIS.map((emoji) => (
                       <button

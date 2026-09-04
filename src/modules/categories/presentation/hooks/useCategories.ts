@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/shared/lib/supabase/client";
 import { CategorySupabaseRepository } from "../../infrastructure/supabase/CategorySupabaseRepository";
+import { withSilentRetry } from "@/shared/lib/utils/retry";
 import type { Category } from "../../domain/entities/Category";
 import type { CreateCategoryInput, UpdateCategoryInput } from "../../domain/repositories/ICategoryRepository";
 import type { UUID } from "@/shared/types/database.types";
@@ -21,7 +22,7 @@ export function useCategories(userId: UUID) {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await getRepo().findAllByUser(userId);
+      const result = await withSilentRetry(() => getRepo().findAllByUser(userId));
       setCategories(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al cargar categorías");

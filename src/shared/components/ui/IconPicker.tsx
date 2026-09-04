@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { LUCIDE_ICON_MAP, LUCIDE_CATEGORIES } from "./HabitIcon";
+import { scrollHorizontallyOnWheel } from "@/shared/lib/utils/scroll";
 
 interface Props {
   value: string | null;
@@ -33,14 +34,14 @@ export function IconPicker({ value, onChange, allowNone = false, noneLabel = "�
     <div className="flex flex-col gap-3">
       {/* Tabs de categoría — saltan el scroll horizontal a esa sección,
           mismo rol que la barra de categorías del teclado de emojis de iOS. */}
-      <div className="flex gap-1.5 overflow-x-auto hide-scrollbar">
+      <div className="flex gap-1.5 overflow-x-auto hide-scrollbar" onWheel={scrollHorizontallyOnWheel}>
         {LUCIDE_CATEGORIES.map(({ label }) => (
           <button
             key={label}
             type="button"
             onClick={() => scrollToCategory(label)}
-            className="flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors"
-            style={{ background: "var(--surface-elevated)", color: "var(--text-secondary)" }}
+            className="flex-shrink-0 px-3 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors glass-panel"
+            style={{ color: "var(--text-secondary)" }}
           >
             {categoryLabel(label)}
           </button>
@@ -54,6 +55,7 @@ export function IconPicker({ value, onChange, allowNone = false, noneLabel = "�
         ref={scrollRef}
         className="flex overflow-x-auto overflow-y-hidden hide-scrollbar gap-5"
         style={{ height: GRID_HEIGHT }}
+        onWheel={scrollHorizontallyOnWheel}
       >
         {allowNone && (
           <div

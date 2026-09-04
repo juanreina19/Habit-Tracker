@@ -13,8 +13,7 @@ import { SectionHeader } from "@/shared/components/ui/SectionHeader";
 import { Confetti } from "@/shared/components/ui/Confetti";
 import { isTaskDone, formatTaskTime } from "@/modules/tasks/domain/entities/Task";
 import { useTimeFormat } from "@/shared/components/TimeFormatProvider";
-import { today as getToday, isTimePast, dayOfWeek } from "@/shared/lib/utils/dates";
-import { useWorkouts } from "@/modules/workouts/presentation/hooks/useWorkouts";
+import { today as getToday, isTimePast } from "@/shared/lib/utils/dates";
 import type { TaskWithStatus } from "@/modules/tasks/domain/entities/Task";
 import type { HabitWithStatus } from "@/modules/habits/domain/entities/Habit";
 import type { WorkoutWithStatus } from "@/modules/workouts/domain/entities/Workout";
@@ -27,6 +26,9 @@ interface Props {
   habits: HabitWithStatus[];
   overdue: TaskWithStatus[];
   isToday?: boolean;
+  dayWorkouts: WorkoutWithStatus[];
+  workoutsLoading: boolean;
+  onToggleWorkout: (workout: WorkoutWithStatus) => void;
   onToggleTask: (task: TaskWithStatus) => void;
   onToggleOverdueTask?: (task: TaskWithStatus) => void;
   onEditTask: (task: TaskWithStatus) => void;
@@ -50,6 +52,7 @@ interface AgendaItem {
 
 export function EnfoqueTab({
   userId, viewDate, todayTasks, habits, overdue, isToday = true,
+  dayWorkouts, workoutsLoading, onToggleWorkout,
   onToggleTask, onToggleOverdueTask, onEditTask, onDeleteTask, onCreateTask,
   onCompleteHabit, onUncheckHabit, onEditHabit,
 }: Props) {
@@ -61,22 +64,12 @@ export function EnfoqueTab({
   const [typeFilter, setTypeFilter] = useState<"task" | "habit" | "workout" | null>(null);
   const anyFilterActive = urgencyFilter || timeFilter || typeFilter !== null;
 
-  // Workouts tiene su propio hook (fetch + Realtime propios), igual que
-  // useWorkoutExercises respecto al modal — no se acopla a useDashboard,
-  // que es específico de tasks/categories.
-  const workoutsHook = useWorkouts(userId);
-  const viewDow = dayOfWeek(viewDate ?? new Date());
-  const dayWorkouts = useMemo(
-    () => workoutsHook.workouts.filter((w) => w.isActive && w.dayOfWeek.includes(viewDow)),
-    [workoutsHook.workouts, viewDow],
-  );
-
   const guardedToggleTask    = isToday ? onToggleTask    : () => {};
   const guardedToggleOverdue = isToday ? toggleOverdue   : () => {};
   const guardedCompleteHabit = isToday ? onCompleteHabit : () => {};
   const guardedUncheckHabit  = isToday ? onUncheckHabit  : () => {};
   const guardedToggleWorkout = isToday
-    ? (w: WorkoutWithStatus) => workoutsHook.toggleWorkoutCompletion(w)
+    ? (w: WorkoutWithStatus) => onToggleWorkout(w)
     : () => {};
 
   const storageKey = useMemo(
@@ -196,10 +189,10 @@ export function EnfoqueTab({
   const [showConfetti, setShowConfetti] = useState(false);
   const prevAllDone = useRef(false);
   useEffect(() => {
-    if (workoutsHook.isLoading) return;
+    if (workoutsLoading) return;
     if (!prevAllDone.current && allDone) setShowConfetti(true);
     prevAllDone.current = allDone;
-  }, [allDone, workoutsHook.isLoading]);
+  }, [allDone, workoutsLoading]);
 
   return (
     <>
